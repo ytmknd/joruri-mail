@@ -1,0 +1,145 @@
+<% mailbox_type = @mailbox.name.downcase.gsub(/(.*)\.(.*)/, '\1') %>
+<% mailbox_type = "rootFolder" if mailbox_type == "folder" && @mailbox.name.index('.').nil? %>
+
+<div class="mailboxTitle">
+  <%#=raw mailbox_mobile_image_tag(mailbox_type, :blue => true) %>
+  <%= link_to @mailbox.title, url_for(:action => :index, :mailbox => @mailbox.name, :mobile => :list, :page => 1), :class => "link" %>
+</div>
+<div class="header">
+<div class="headerTitle">
+  <%= @item.subject %>
+  <% if @item.has_attachments? %>
+  <img src="/_common/themes/admin/gw/webmail/mobile/images/clip-lightblue.jpg" alt="[有]">
+  <% end %>
+  <% star_image = @item.starred? ? "/_common/themes/admin/gw/images/mailoption/star_on.gif" : "/_common/themes/admin/gw/images/mailoption/star_off.gif" %>
+  <%= link_to image_tag(star_image), star_gw_webmail_mails_path(@s_params.merge(:mailbox => @mailbox.name, :id => @item.uid, :from => :show)) %>
+</div>
+<div class="showItem">
+  <font class="field">送信者</font>
+  <font class="value"><%= mail_text_wrap(omit_from_address_in_mail_list(@item.friendly_from_addr)[0], 1000) %></font>
+</div>
+<div class="showItem">
+  <font class="field"><%= @item.draft? ? "保存日時" : "送信日時" %></font>
+  <font class="value"><%= @item.date %></font>
+</div>
+<div class="showItem">
+  <font class="field">宛先</font>
+  <font class="value"><%=raw omit_from_addresses_in_mail_list(@item.friendly_to_addrs, :auto_link => true) %></font>
+</div>
+<% if !@item.friendly_cc_addrs.blank? %>
+<div class="showItem">
+  <font class="field">Cc</font>
+  <font class="value"><%=raw omit_from_addresses_in_mail_list(@item.friendly_cc_addrs, :auto_link => true) %></font>
+</div>
+<% end %>
+<% if !@item.friendly_bcc_addrs.blank? %>
+<div class="showItem">
+  <font class="field">Bcc</font>
+  <font class="value"><%=raw omit_from_addresses_in_mail_list(@item.friendly_bcc_addrs, :auto_link => true) %></font>
+</div>
+<% end %>
+</div>
+
+<% if @item.disposition_notification_mail? %>
+<div class="mdn">
+<div class="message">このメールは <%= @item.friendly_from_addr %> により送信された開封確認のメールです。</div>
+</div>
+<% end %>
+
+<div class="body">
+  <div id="inlineContents">
+  <% @item.inline_contents.each_with_index do |inline, idx| %>
+    <%
+    cls = idx > 0 ? "inlineContent" : ""
+    %>
+    <div id="inlineContent_<%= inline.seqno %>" class="<%= cls %>">
+      <% if @html_mail_view == 'html' && (inline.alternative? || inline.content_type == "text/html") %>
+        <div id="htmlPreview_<%= inline.seqno %>"><%=raw inline.html_body %></div>
+      <% else %>
+        <div id="textBody_<%= inline.seqno %>" class="autoWrap mailBodyText"><%= mail_text_wrap(inline.text_body, 1000, :auto_link => true) %></div>
+      <% end %>
+    </div>
+  <% end %>
+  </div>
+  <%
+    if @mailbox.draft_box?(:all) || @mailbox.sent_box?(:all)
+      sent_mdn = @item.has_disposition_notification_to?
+    else
+      sent_mdn = @item.has_disposition_notification_to?# && @item.notified?
+    end
+  %>
+  <% if sent_mdn %>
+    <div id="mdnSent" class="recipientConfirm">[開封確認メッセージを送信]</div>
+  <% end %>
+</div>
+
+<% if @item.has_attachments? %>
+<div class="attachmentFile">
+<div class="title"><img src="/_common/themes/admin/gw/webmail/mobile/images/clip-glay.jpg" alt="[有]">添付ファイル</div>
+<div class="attention">
+  <% if attachment_file_downloadable? %>
+    <%=raw Joruri.config.application['webmail.download_allow_message'] %>
+  <% else %>
+    <%=raw Joruri.config.application['webmail.download_deny_message'] %>
+  <% end %>
+</div>
+<div class="files">
+<% @item.attachments.each do |at| %>
+  <div class="file"><%= link_to_if attachment_file_downloadable?, h("#{at.name}"), url_for(:download => at.seqno, :size => at.size),
+    :target => (at.image? ? '_blank' : nil), :class => at.css_class %> (<%= h("#{at.eng_unit.gsub(/Bytes/,'B')}") %>)</div>
+<% end %>
+</div>
+</div>
+<% end %>
+
+<% if !@mdnRequest.blank? && @mdnRequest == :manual && !@item.draft? && @mailbox.name !~ /Sent(\.|$)/ %>
+<div class="mdnMenu">
+<div class="title">開封確認</div>
+<div class="message">メール送信者は開封確認を要求しています。開封確認のメールを送信しますか？</div>
+<%= form_for :item, :url => send_mdn_gw_webmail_mail_path(@mailbox.name, @item.uid), :html => {:id => "mail", :name => "mdnForm", :class => "mdnForm"} do |f| %>
+  <%= hidden_field_tag :mobile, 1 %>
+  <%= hidden_field_tag :send_mode, 'manual' %>
+  <%= submit_tag '送信', :name => 'send', :class => 'menuItem' %>
+<% end %>
+</div>
+<% end %>
+
+<div class="replyMenu">
+<div class="title"><img src="/_common/themes/admin/gw/webmail/mobile/images/reply-menu-lightblue.jpg" alt="返信メニュー"/>返信メニュー</div>
+<div class="menuItem"><%= link_to '送信者に返信', answer_gw_webmail_mail_path(@mailbox.name, @item.uid), :class => 'menuItemLink', :accesskey => '1' %></div>
+<!--
+<div class="menuItem"><%= link_to '送信者に返信（引用有り）', answer_gw_webmail_mail_path(@mailbox.name, @item.uid, :qt => 1), :class => 'menuItemLink', :accesskey => '2' %></div>
+-->
+<div class="menuItem"><%= link_to '全員に返信', answer_gw_webmail_mail_path(@mailbox.name, @item.uid, :all => 1), :class => 'menuItemLink', :accesskey => '3' %></div>
+<!--
+<div class="menuItem"><%= link_to '全員に返信（引用有り）', answer_gw_webmail_mail_path(@mailbox.name, @item.uid, :all => 1, :qt => 1), :class => 'menuItemLink', :accesskey => '4' %></div>
+-->
+<div class="menuItem"><%= link_to '転送', forward_gw_webmail_mail_path(@mailbox.name, @item.uid), :class => 'menuItemLink', :accesskey => '5' %></div>
+</div>
+
+<div class="managementMenu">
+<div class="title"><img src="/_common/themes/admin/gw/webmail/mobile/images/manage-menu-lightblue.jpg" alt="管理メニュー"/>管理メニュー</div>
+<%= form_for :item, :url => mobile_manage_gw_webmail_mails_path(@mailbox.name, :id => @item.uid), :html => {:id => 'managementForm', :name => 'managementForm', :class => 'managementForm'} do |f| %>
+<input type="hidden" name="item[ids][<%= @item.uid %>]" value="1" />
+<% if @item.draft? %>
+  <%= submit_tag '編集', :name => 'mobile_edit', :class => 'menuItem' %>
+	<%= submit_tag '削除', :name => 'mobile_delete', :class => 'menuItem' %>
+<% else %>
+  <%= submit_tag '編集', :name => 'mobile_resend', :class => 'menuItem' if @mailbox.name =~ /^Sent(\.|$)/ %>
+  <%= submit_tag '移動', :name => 'mobile_move', :class => 'menuItem' %>
+  <%= submit_tag 'コピー', :name => 'mobile_copy', :class => 'menuItem' %>
+  <%= submit_tag '削除', :name => 'mobile_delete', :class => 'menuItem' %>
+<% end %>
+<% end %>
+</div>
+
+<div class="pagination">
+  <% if @pagination[:prev_uid] %><%= link_to "<<*前へ", gw_webmail_mail_path(@s_params.merge(:mailbox => @mailbox.name, :id => @pagination[:prev_uid])), :accesskey => '*' %>
+  <% else %>&lt;&lt;*前へ<% end %>
+  <span class="separator"> | </span> 
+  <% if @pagination[:next_uid] %><%= link_to "次へ#>>", gw_webmail_mail_path(@s_params.merge(:mailbox => @mailbox.name, :id => @pagination[:next_uid])), :accesskey => '#' %>
+  <% else %>次へ#&gt;&gt;<% end %>
+  <br />
+</div>
+
+<div class="link"><%= link_to '一覧へ戻る', url_for(@s_params.merge(:action => :index, :mailbox => @mailbox.name, :mobile => :list)), :class => 'link' %></div>

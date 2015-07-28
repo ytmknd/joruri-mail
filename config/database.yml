@@ -1,0 +1,27 @@
+development:
+  adapter : mysql
+  database: jorurimail
+  username: joruri
+  password: pass
+  timeout : 5000
+  encoding: utf8
+  host: 127.0.0.1
+
+test:
+  adapter :
+  database:
+  username:
+  password:
+  timeout :
+  encoding:
+  host:
+
+production:
+  adapter :
+  database:
+  username:
+  password:
+  timeout :
+  encoding:
+  host:
+

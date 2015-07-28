@@ -1,0 +1,13 @@
+ja: 
+  activerecord: 
+    models: 
+    attributes: 
+  errors:
+    template:
+      header:
+        #one: "%{model}にエラーが発生しました。"
+        one: "入力もれがあります。"
+        #other: "%{model}に%{count}つのエラーが発生しました。"
+        other: "%{count}個の入力もれがあります。"
+      # The variable :count is also available
+      body: "次の項目を確認してください。"

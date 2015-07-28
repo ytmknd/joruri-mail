@@ -1,0 +1,38 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="ja" lang="ja">
+<head>
+<meta http-equiv="content-type" content="text/html;charset=<%= request.mobile.default_charset %>" />
+<meta http-equiv="content-style-type" content="text/css" />
+<meta content="width=device-width,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no" name="viewport" />
+<title><%= Core.title %></title>
+<%= stylesheet_link_tag '/_common/themes/admin/gw/webmail/mobile/style', :media => 'all' %>
+</head>
+<body>
+
+<div id="smartPhoneContainer">
+
+<div class="login">
+  <h1><img src="/_common/themes/admin/gw/webmail/mobile/images/header-logo.jpg" alt="Joruri Mail"/></h1>
+  <div class="notice"><%= flash[:notice] %></div>
+  <%= form_tag do %>
+  <%= hidden_field_tag :uri, h(@uri.gsub(/(\?|&)mobile=top/, "").concat(($1?$1:"?")+"mobile=top")) %>
+  <div class="fields">
+    <font class="head">ユーザID</font><br/>
+    <%= text_field_tag 'account', '', :class => "inputItem", :istyle => "3", :format => "*m", :mode => "alphabet" %><br/>
+    <font class="head">パスワード</font><br/>
+    <%= password_field_tag 'password', '', :class => "inputItem", :istyle => "3", :format => "*m", :mode => "alphabet", :autocomplete => "off" %><br/>
+    <font class="head">モバイルパスワード</font><br/>
+    <%= password_field_tag 'mobile_password', '', :class => "inputItem", :istyle => "3", :format => "*m", :mode => "alphabet", :autocomplete => "off" %><br/>
+  </div>
+  <div class="submitters">
+    <input class="login" type="submit" name="commit" value="ログイン" />
+  </div>
+  <% end %>
+</div>
+
+<%=raw Joruri.config.application['sys.mobile_footer'] %>
+
+</div>
+
+</body>
+</html>

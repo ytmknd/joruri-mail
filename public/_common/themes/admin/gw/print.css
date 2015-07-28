@@ -1,0 +1,55 @@
+@charset "UTF-8";
+
+/* =========================================================
+   print.css
+========================================================= */
+* {
+  border: none !important;
+}
+#header, #contentHeader, #webmailMenu, #footer, #maintenanceMessage,
+#webmailContent .menu, td.autoWrap a.addAddress,
+#mailContent table.mail td.subject a.attachmentMark,
+#mailContent table.mailAttention,
+#mailContent .mailBody .mailViewSelector {
+  display: none;
+}
+body, #container, #main,
+#content, #contentContainer, #contentBody,
+#webmailContainer, #webmailContent {
+  min-width: 0px;
+  margin: 0px;
+  padding: 0px;
+}
+
+#mailContent table.mail,
+#mailContent table.mail th, 
+#mailContent table.mail td {
+  border: 1px solid #000 !important;
+}
+#mailContent .mailBody {
+  padding: 0px 5px;
+  padding-top: 15px;
+  font-size: 110%;
+}
+#mailContent .mailBody .inlineContent {
+  border-top: 1px solid #777 !important;
+}
+#mailContent table.mail th {
+  width: 60px;
+  background-color: #FFF;
+  font-weight: bold;
+}
+#mailContent table.attachments {
+  border: none !important;
+  border-top: 1px solid #777 !important;
+}
+#mailContent table.attachments th,
+#mailContent table.attachments td {
+  width: auto;
+  padding: 5px 5px;
+  border: none !important;
+}
+#mailContent table.attachments th {
+  padding-top: 10px;
+}
+

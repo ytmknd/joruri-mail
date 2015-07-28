@@ -1,0 +1,14 @@
+<div id="settingContent">
+<%= render :partial => 'menu' %>
+
+<%= form_for :item, :url => {:action => :update}, :html => {:method => :put, :multipart => true, :id => 'itemForm'} do |f| %>
+  
+<%= f.error_messages %>
+
+<%= render :partial => 'form', :locals => {:f => f} %>
+
+<%= raw submit(:register) %>
+
+<% end %>
+
+</div>

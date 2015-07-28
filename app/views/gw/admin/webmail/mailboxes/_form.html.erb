@@ -1,0 +1,18 @@
+<%
+
+path_options = []
+@mailboxes.each do |box|
+  next if box.name =~ /^(Drafts|Trash|Star)(\.|$)/
+  path_options << [box.slashed_title, "#{box.name}."]
+end
+
+%><table class="show">
+  <tr>
+    <th>親フォルダ</th>
+    <td><%= f.select :path, path_options, :include_blank => "（ルート階層）" %></td>
+  </tr>
+  <tr>
+    <th>フォルダ名</th>
+    <td><%= f.text_field :title %></td>
+  </tr>
+</table>

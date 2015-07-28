@@ -1,0 +1,16 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<items>
+  <group>
+    <id><%= @group.id %></id>
+    <name><%= @group.name %></name>
+  </group>
+  <% @users.each do |u| %>
+  <item>
+    <id><%= u.id %></id>
+    <account><%= u.account %></account>
+    <name><%= u.name %></name>
+    <email><%= u.email %></email>
+    <kana><%= u.kana %></kana>
+  </item>
+  <% end %>
+</items>

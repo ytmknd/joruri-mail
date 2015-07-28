@@ -1,0 +1,17 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<items>
+  <% @groups.each do |g| %>
+  <group>
+    <id><%= g.id %></id>
+    <name><%= g.name %></name>
+    <has_children><%= g.children.count > 0 || g.addresses.count > 0 ? 1 : 0 %></has_children>
+  </group>  
+  <% end %>
+  <% @items.each do |item| %>
+  <item>
+    <id><%= item.id %></id>
+    <name><%= item.name %></name>
+    <email><%= item.email %></email>
+  </item>  
+  <% end %>
+</items>

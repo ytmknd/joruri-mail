@@ -1,0 +1,1040 @@
+@charset "UTF-8";
+@import "../style.css";
+@import "../../file_icon.css";
+@import "mail_list.css";
+@import "mail_form.css";
+@import "addresses.css";
+@import "mail_setting.css";
+
+/* =========================================================
+   Webmail
+========================================================= */
+
+/* Common
+--------------------------------------------------------- */
+.autoWrap wbr {
+}
+.mailBodyText {
+  font-family: "MS Gothic";
+  word-break: break-all;
+  word-wrap: break-word;
+  line-height: 1.20;
+}
+.mailBodyText pre {
+  overflow: auto;
+  white-space: pre-wrap;
+  word-break: break-all;
+  word-wrap: break-word;
+}
+
+/* Content
+--------------------------------------------------------- */
+#content {
+  margin: 0px 10px 20px 10px;
+}
+#contentHeader {
+  background-image: url(../images/title/title_re.gif);
+  background-repeat:repeat-x;
+}
+#contentTitle {
+  height: 29px;
+  padding: 0px 10px;
+  background-image: url(../images/title/title_mailer.gif);
+  background-repeat: no-repeat;
+  color: #fff;
+}
+#contentTitle:after {
+  content: ".";
+  display: block;
+  visibility: hidden;
+  height: 0.1px;
+  font-size: 0.1em;
+  line-height: 0;
+  clear: both;
+}
+* html #contentTitle {
+  zoom: 1; 
+} /* IE6 */  
+*:first-child+html #contentTitle {
+  zoom: 1; 
+} /* IE7 */ 
+#contentTitle span{
+  display: inline-block;
+  line-height: 29px;
+}
+#contentTitle .title {
+  float: left;
+  margin-left: 25px;
+}
+#contentTitle .email {
+  float: right;
+}
+#contentHeader .menu {
+  padding:0 7px 0 0;
+  border-left: 1px solid #238;
+  border-right: 1px solid #238;
+  background-color: #eee;
+  background-image: url(../images/other/menuBottomBorder.gif);
+  background-position: 0 bottom;
+  background-repeat: repeat-x;
+}
+#contentHeader .menu .leftMenu {
+  float: left;
+}
+#contentHeader .menu .leftMenu a {
+  display: inline-block;
+  line-height: 2.4;
+  padding: 0 9px;
+  background: none;
+  background-position: 0 50px;
+  background-repeat: no-repeat;
+  color: #08f;
+  font-weight: bold;
+  text-decoration: none;
+}
+#contentContainer #contentHeader .menu .leftMenu a.current {
+  padding-left: 25px;
+  background-position: 10px center;
+  color: #000;
+}
+#contentContainer #contentHeader .menu .leftMenu a:hover {
+  background-color: #FFEC8D;
+}
+#contentHeader .menu .leftMenu a.mail {
+  padding-left: 20px;
+  background-image: url(../images/mailoption/mail-notopen.gif);
+}
+#contentHeader .menu .leftMenu a.mailbox {
+  background-image: url(../images/other/floder_m.gif);
+}
+#contentHeader .menu .leftMenu a.sys_address {
+  background-image: url(../images/other/adress_m.gif);
+}
+#contentHeader .menu .leftMenu a.address {
+  background-image: url(../images/other/adress_m.gif);
+}
+#contentHeader .menu .leftMenu a.filter {
+  background-image: url(../images/other/filter.gif);
+}
+#contentHeader .menu .leftMenu a.template {
+  background-image: url(../images/other/sign.gif);
+}
+#contentHeader .menu .leftMenu a.sign {
+  background-image: url(../images/other/sign.gif);
+}
+#contentHeader .menu .leftMenu a.memo {
+  background-image: url(../images/other/sign.gif);
+}
+#contentHeader .menu .leftMenu a.tool {
+  background-image: url(../images/other/custuom.gif);
+}
+#contentHeader .menu .leftMenu a.setting {
+  background-image: url(../images/other/custuom.gif);
+}
+#contentHeader .menu .leftMenu a.doc {
+  background-image: url(../images/other/sign.gif);
+}
+#contentHeader .menu .rightMenu {
+  float: right;
+  margin-top:2px;
+  margin-bottom: 3px;
+}
+#contentHeader .menu:after {
+  content: ".";
+  display: block;
+  visibility: hidden;
+  height: 0.1px;
+  font-size: 0.1em;
+  line-height: 0;
+  clear: both;
+}
+* html #contentHeader .menu {
+  zoom: 1; 
+} /* IE6 */  
+*:first-child+html #contentHeader .menu {
+  zoom: 1; 
+} /* IE7 */  
+#contentHeader .rightMenu a {
+  display: inline-block;
+  height: 0;
+  padding: 27px 0 0;
+  background-repeat: no-repeat;
+  vertical-align: -8px;
+  overflow: hidden;
+}
+* html #contentHeader .rightMenu a {
+  vertical-align: -6px;
+}
+*:first-child+html #contentHeader .rightMenu a {
+  vertical-align: -6px;
+}
+a#fontNormal {
+  width: 21px;
+  background-image: url(../images/bt/text_s.gif);
+}
+a#fontLarge {
+  width: 20px;
+  background-image: url(../images/bt/text_m.gif);
+}
+a#fontExtraLarge {
+  width: 20px;
+  background-image: url(../images/bt/text_l.gif);
+}
+#contentHeader .rightMenu a:hover {
+  background-position: 0 -27px;
+}
+#contentBody {
+  border: 1px solid #238;
+  border-top: 1px solid #ccc;
+  border-top: none;
+}
+
+/* Mail
+--------------------------------------------------------- */
+#webmailContainer {
+  width: 100%;
+  table-layout: fixed;
+}
+#webmailMenu {
+  width: 200px;
+  border-right: 1px solid #ccc;
+  background-color: #f0f7ff;
+  vertical-align: top;
+  font-size: 12px;
+}
+#webmailMenuContainer {
+  padding: 10px;
+}
+#webmailMenu .menu {
+  margin-bottom: 10px;
+}
+#webmailMenu .menu a {
+  display: inline-block;
+  overflow: hidden;
+  height: 0;
+  padding-top: 27px;
+  background-repeat: no-repeat;
+}
+#webmailMenu .menu a:hover {
+  background-position: 0 -27px;
+}
+#webmailMenu .menu a.index {
+  width: 88px;
+  background-image: url(../images/bt/bt_l_receiver.gif);
+}
+#webmailMenu .menu a.newMail {
+  width: 88px;
+  background-image: url(../images/bt/bt_l_newmail.gif);
+}
+#webmailMenu .menu a.newMailbox {
+  width: 93px;
+  background-image: url(../images/bt/bt_l_newfolder.gif);
+}
+#webmailMenu .menu a.new_address {
+  width: 88px;
+  background-image: url(../images/bt/bt_l_newaddoress.gif);
+}
+#webmailMenu .menu a.new_group {
+  width: 88px;
+  background-image: url(../images/bt/bt_l_newgloup.gif);
+}
+#webmailMenu .accounts select.account {
+  width: 180px;
+  margin-bottom: 10px;
+}
+#webmailContent {
+  padding: 10px 0px 20px 0px;
+  vertical-align: top;
+}
+
+/* search form
+------------------------------------- */
+form.search {
+  margin: 0px 0px 10px 0px;
+  padding: 10px 8px;
+  border: 1px solid #ccc;
+  background-color: #f4f4f4;
+  font-size: 12px;
+}
+form.search th {
+  padding: 0px 10px 0px 5px;
+}
+form.search td {
+  padding-right: 10px;
+}
+form.search td input.keyword {
+  width: 300px;
+}
+form.search td input.name {
+  width: 120px;
+}
+form.search td input.email {
+  width: 120px;
+  ime-mode: disabled;
+}
+
+/* mailbox list
+------------------------------------- */
+#webmailMenu .mailbox {
+}
+#webmailMenu .mailbox ul {
+  margin: 0px;
+  padding: 0px;
+}
+#webmailMenu .mailbox li {
+  xposition: relative;
+  margin: 0px;
+  padding: 0px;
+}
+#webmailMenu .mailbox ul.root {
+}
+#webmailMenu .mailbox ul.children {
+  margin-left: 0px;
+}
+#webmailMenu .mailbox ul.children li {
+  margin-left: 17px;
+}
+#webmailMenu .mailbox li a {
+  display: inline-block;
+  margin: 0px;
+  margin-bottom: 0px;
+  padding: 1px 4px 0px 22px;
+  background-image: none;
+  background-repeat: no-repeat;
+  background-position: 3px 0.35em;
+  color: #000;
+  text-decoration: none;
+  line-height: 1.8;
+}
+#webmailMenu .mailbox li a:hover {
+  background-color: #bdf;
+  color: #00f;
+}
+#webmailMenu .mailbox li a.ui-active {
+  background-color: #bdf;
+  color: #00f;
+}
+#webmailMenu .mailbox li a.ui-hover {
+  background-color: #fdb;
+  color: #f00;
+}
+#webmailMenu .mailbox li.inbox a {
+  background-image: url(../images/tree/transmit.gif);
+}
+#webmailMenu .mailbox li.inbox.current a {
+  background-image: url(../images/tree/transmit_open.gif);
+}
+#webmailMenu .mailbox li.sent a {
+  background-image: url(../images/tree/mailbox.gif);
+}
+#webmailMenu .mailbox li.sent.current a {
+  background-image: url(../images/tree/mailbox_open.gif);
+}
+#webmailMenu .mailbox li.drafts a {
+  background-image: url(../images/tree/draft.gif);
+}
+#webmailMenu .mailbox li.archives a {
+  background-image: url(../images/tree/archive.gif);
+}
+#webmailMenu .mailbox li.trash a {
+  background-image: url(../images/tree/dustbox.gif);
+}
+#webmailMenu .mailbox li.star a {
+  background-image: url(../images/mailoption/star_on.gif);
+  background-position: 5px 5px;
+}
+#webmailMenu .mailbox li.folder a {
+  background-image: url(../images/tree/folder_close.gif);
+}
+#webmailMenu .mailbox li a.unseen {
+  color: #00f;
+  font-weight: bold;
+}
+#webmailMenu .mailbox li a.current {
+  margin-right: 3px;
+  background-color: #36d;
+  color: #fff;
+  font-weight:normal;
+}
+#webmailMenu .mailbox li a.current:hover {
+  background-color: #36d;
+  color: #fff;
+}
+#webmailMenu .mailbox li span.unseenNum {
+  display: inline-block;
+  margin-left: 1px;
+  color: #f00;
+  font-size: 12px;
+  font-family: "MS Gothic";
+  vertical-align: middle;
+}
+#webmailMenu .mailbox li span.unseenNum .num {
+  font-weight: bold;
+}
+#webmailMenu .mailbox li a.empty {
+  display: inline-block;
+  margin: 0px 0px 0px 0px;
+  padding: 0px 3px;
+  background-image: none;
+  color: #00b;
+  vertical-align: middle;
+}
+#webmailMenu .mailbox li a.empty:hover {
+  color: #00d;
+  background-color: #bdf;
+}
+#webmailMenu .mailbox li a.editGroup { /* address */
+  display: inline-block;
+  overflow: hidden;
+  width: 13px;
+  height: 0;
+  margin: 0px 0px 0px 5px;
+  padding: 14px 0px 0px 0px;
+  background-image: url(../images/bt/bt_addr_edit.png);
+  background-position: 0 0;
+  font-size: 0;
+  line-height: normal;
+}
+
+#webmailMenu .addressTree li a {
+  xposition: relative;
+  margin-left: 13px;
+}
+#webmailMenu .mailbox li button.deleteGroup { /* address */
+  display: none;
+}
+#webmailMenu .mailbox li.folder a.toggleGroups { /* sys_address */
+  display: inline-block;
+  position: absolute;
+  xtop: 6px;
+  overflow: hidden;
+  width: 11px;
+  height: 11px;
+  margin: 5px 0 0 0;
+  padding: 0;
+  background-position: 0 0;
+  font-size: 0px;
+}
+#webmailMenu .mailbox li.folder a.toggleGroupsClose { /* sys_address */
+  background-image: url(../images/tree/plus.gif);
+}
+#webmailMenu .mailbox li.folder a.toggleGroupsOpen { /* sys_address */
+  background-image: url(../images/tree/minus.gif);
+}
+
+/* mail adderss history
+------------------------------------- */
+#webmailMenu .addressHistory {
+  margin: 10px -10px;
+}
+#webmailMenu .addressHistory span.title {
+  display: block;
+  padding: 6px 4px;
+  padding-left: 30px;
+  background-image: url(../images/other/adress_m.gif);
+  background-repeat: no-repeat;
+  background-position: 10px center;
+  background-color: #BDF;
+  background-color: #039;
+  color: #fff;
+}
+#webmailMenu .addressHistory .reset {
+  text-align: right;
+}
+#webmailMenu .addressHistory .reset a {
+  display: inline-block;
+  padding: 3px 4px;
+  color: #00b;
+  text-decoration: none;
+}
+#webmailMenu .addressHistory .reset a:hover {
+  background-color: #bdf;
+  color: #00d;
+}
+#webmailMenu .addressHistory ul {
+  border-bottom: 1px solid #fff;
+}
+#webmailMenu .addressHistory li {
+  margin-left: 0px;
+  border-bottom: 1px solid #ccc;
+}
+#webmailMenu .addressHistory ul li a {
+  display: block;
+  padding: 4px 5px;
+  border-top: 1px solid #fff;
+  color: #000;
+  text-decoration: none;
+  word-break: break-all;
+  word-wrap: break-word;
+}
+#webmailMenu .addressHistory ul li a:hover {
+  border-top: 1px solid #def;
+  background-color: #BDF;
+  color: #00f;
+}
+
+/* mail index/show
+------------------------------------- */
+#webmailContent .menu {
+  margin: 0px 10px 10px 10px;
+  height: 27px;
+  font-size: 12px;
+}
+#webmailContent .menu .leftMenu {
+  float: left;
+}
+#webmailContent .menu .rightMenu {
+  float: right;
+  margin-top: 7px;
+  font-size: 14px;
+}
+#webmailContent .pageLimitSelector span { /* to delete */
+  _display: inline-block;
+  padding: 0px 3px;
+  line-height: 1.3;
+}
+#webmailContent .pageLimitSelector select { /* to delete */
+  display: inline-block;
+  font-size: 12px;
+  vertical-align: middle;
+}
+#webmailContent .simplePagination {
+  float: right;
+  margin: 7px 0px 0px 5px;
+  font-size: 15px;
+}
+#webmailContent .simplePagination span {
+  padding: 0px 2px;
+}
+#webmailContent .simplePagination span b {
+  padding: 0px 2px;
+  color: #444;
+}
+#webmailContent .menu a {
+  margin: 0px 1px;
+  text-decoration: none;
+}
+#webmailContent .menu a.edit,
+#webmailContent .menu a.delete,
+#webmailContent .menu a.move,
+#webmailContent .menu a.copy,
+#webmailContent .menu a.answer,
+#webmailContent .menu a.answerAll,
+#webmailContent .menu a.forward,
+#webmailContent .menu a.etc,
+#webmailContent .menu a.print,
+#webmailContent .menu a.seen,
+#webmailContent .menu a.unseen,
+#webmailContent .menu a.spam,
+#webmailContent .menu a.label,
+#webmailContent .menu a.search {
+  display: inline-block;
+  overflow: hidden;
+  height: 0;
+  padding: 27px 0px 0px 0px;
+  background-repeat: no-repeat;
+  background-position: 0 0;
+  font-size: 0px;
+}
+#webmailContent .menu a.index {
+  display: inline-block;
+  padding-top: 7px;
+  color: #666;
+  text-decoration: none;
+  vertical-align: top;
+}
+#webmailContent .menu a.index:hover {
+  background-position: 0 0;
+}
+#webmailContent .menu a.edit {
+  width: 52px;
+  background-image: url(../images/bt/bt_m_edit.gif);
+}
+#webmailContent .menu a.delete {
+  width: 52px;
+  background-image: url(../images/bt/bt_m_del.gif);
+}
+#webmailContent .menu a.move {
+  width: 52px;
+  background-image: url(../images/bt/bt_m_move.gif);
+}
+#webmailContent .menu a.copy {
+  width: 57px;
+  background-image: url(../images/bt/bt_m_copy.gif);
+}
+#webmailContent .menu a.seen {
+  width: 87px;
+  background-image: url(../images/bt/bt_m_read.gif);
+}
+#webmailContent .menu a.unseen {
+  width: 87px;
+  background-image: url(../images/bt/bt_m_notread.gif);
+}
+#webmailContent .menu a.spam {
+  width: 87px;
+  background-image: url(../images/bt/bt_l_newfilter.gif);
+}
+#webmailContent .menu a.answer {
+  width: 61px;
+  background-image: url(../images/bt/bt_m_answer.gif);
+}
+#webmailContent .menu a.answerAll {
+  width: 84px;
+  background-image: url(../images/bt/bt_m_alltransmit.gif);
+}
+#webmailContent .menu a.forward {
+  width: 52px;
+  background-image: url(../images/bt/bt_m_forward.gif);
+}
+#webmailContent .menu a.label {
+  width: 61px;
+  background-image: url(../images/bt/bt_m_label.gif);
+}
+#webmailContent .menu a.etc {
+  width: 61px;
+  background-image: url(../images/bt/bt_m_etc.gif);
+}
+#webmailContent .menu a.print {
+  width: 39px;
+  background-image: url(../images/bt/bt_m_print.gif);
+}
+#webmailContent .menu a.search {
+  width: 52px;
+  background-image: url(../images/bt/bt_m_search.gif);
+}
+#webmailContent .menu a:hover {
+  background-position: 0 -27px;
+  color: #d00;
+}
+#webmailContent #mailContent .addAddress {
+  float: right;
+  margin-top: -1px;
+  _margin-top: 1px;
+  background-image: url("../images/other/adress_m.gif");
+  background-repeat: no-repeat;
+  background-position: left center;
+  padding-left: 15px;
+}
+#webmailContent #mailContent .submitters:after {
+  content: ".";
+  display: block;
+  visibility: hidden;
+  height: 0.1px;
+  font-size: 0.1em;
+  line-height: 0;
+  clear: both;
+}
+* html #webmailContent #mailContent .submitters {
+  zoom: 1;
+}
+*:first-child+html #webmailContent #mailContent .submitters {
+  zoom: 1;
+}
+#webmailContent #mailContent .submitters .send,
+#webmailContent #mailContent .submitters .draft,
+#webmailContent #mailContent .submitters .destroy {
+  float: left;
+  display: block;
+  height: 27px;
+  line-height: 0;
+  background-repeat: no-repeat;
+  background-position: 0 0;
+  border: 0;
+  overflow: hidden;
+  text-indent: -9999px;
+  font-size: 0px;
+}
+#webmailContent #mailContent .submitters .send:hover,
+#webmailContent #mailContent .submitters .draft:hover,
+#webmailContent #mailContent .submitters .destroy:hover {
+  background-position: 0 -27px;
+}
+#webmailContent #mailContent .submitters .send {
+  width: 88px;
+  background-image: url(../images/bt/bt_l_outgoing.gif);
+}
+#webmailContent #mailContent .submitters .draft {
+  width: 85px;
+  background-image: url(../images/bt/bt_m_draft.gif);
+}
+#webmailContent #mailContent .submitters .destroy {
+  width: 65px;
+  background-image: url(../images/bt/bt_m_destroy.gif);
+}
+/* popup menu
+------------------------------------- */
+#webmailContent .popupMenu {
+  padding: 2px 4px 2px 2px;
+  border: 1px solid #888;
+  background-color: #F8F8F8;
+}
+#webmailContent .popupMenu .menuItem a {
+  display: inline-block;
+  width: 100%;
+  margin: 0;
+  padding: 0 0 0 2px;
+  color: #000;
+  text-decoration: none;
+  line-height: 1.8;
+}
+#webmailContent .popupMenu .menuItem a:hover {
+  background-color: #36D;
+  color: #FFF;
+}
+/*
+#webmailContent .menu a.print {
+  display: inline-block;
+  width: 52px;
+  line-height: 25px;
+  background-image: url("../images/bt/bg-link_check.jpg");
+  background-repeat: repeat-x;
+  border-top: solid 1px #CCC;
+  border-left: solid 1px #CCC;
+  border-right: solid 1px #888;
+  border-bottom: solid 1px #888;
+  text-align: center;
+  text-decoration: none;
+  color: #000;
+}
+#webmailContent .menu a.print:hover {
+  color: #444;
+}*/
+
+/* mail detail
+------------------------------------- */
+#mailContent table.mail {
+  clear: both;
+  width: 100%;
+  border: 1px solid #8bd;
+  border-bottom-width: 0px;
+}
+#mailContent table.mail th {
+  width: 100px;
+  padding: 5px 10px;
+  border-bottom: 1px solid #8bd;
+  background-color: #def;
+}
+#mailContent table.mail td {
+  padding: 5px 10px;
+  border-bottom: 1px solid #8bd;
+  word-break: break-all;
+}
+#mailContent table.mail td.subject {
+  font-weight: bold;
+}
+#mailContent table.mail td.subject span.subject {
+  margin-right: 5px;
+}
+#mailContent table.mail td.subject span.attachmentMark {
+  margin-right: 5px;
+}
+#mailContent table.mail td.subject a.attachmentMark {
+  display: inline-block;
+  height: 0;
+  width: 18px;
+  margin-left: 5px;
+  padding-top: 17px;
+  background-image: url(../images/mailoption/clip_02.gif);
+  background-repeat: no-repeat;
+  overflow: hidden;
+  vertical-align: middle;
+}
+#mailContent table.mail td.subject .starOn {
+  background-image: url(../images/mailoption/star_on.gif);
+  background-repeat: no-repeat;
+  background-position: center center;
+  width: 16px;
+  height: 16px;
+  float: right;
+  cursor: pointer;
+}
+#mailContent table.mail td.subject .starOff {
+  background-image: url(../images/mailoption/star_off.gif);
+  background-repeat: no-repeat;
+  background-position: center center;
+  width: 16px;
+  height: 16px;
+  float: right;
+  cursor: pointer;
+}
+#mailContent table.mail td.subject .loading {
+  background-image: url(../images/other/loading_16.gif);
+  background-repeat: no-repeat;
+  background-position: center center;
+  width: 16px;
+  height: 16px;
+}
+#mailContent table.mail td.subject .star-loading {
+  float: right;
+}
+#mailContent table.mail td.subject .labels {
+  float: right;
+  margin-right: 5px;
+}
+#mailContent table.mail td.subject .labels .label {
+  margin: 0 1px;
+  padding: 0 1px;
+  color: #fff;
+  height: 1.65em;
+  font-weight: lighter;
+  font-size: 0.8em;
+}
+#mailContent table.mail td.subject .label-loading {
+  float: right;
+  margin-right: 5px;
+}
+
+#mailContent table.mail td.thumbnailArea span.thumbnail {
+  display: inline-block;
+  margin-top: 5px;
+  margin-right: 10px;
+  margin-bottom: 10px;
+}
+#mailContent table.mail td.thumbnailArea span.box {
+  display: inline-block;
+  padding: 1px;
+  border: 1px solid #acf;
+  vertical-align: middle;
+}
+#mailContent table.mail td.thumbnailArea span.box:hover {
+  border: 1px solid #e00;
+}
+#mailContent table.mail td.thumbnailArea span.box a {
+  display: table-cell;
+  min-width: 60px;
+  height: 96px;
+  text-align: center;
+  vertical-align: middle;
+}
+#mailContent table.mail td.thumbnailArea span.box a span {
+  display: table-cell;
+}
+#mailContent table.mail td.thumbnailArea span.remarks {
+  display: block;
+}
+
+#mailContent .mailBody {
+  padding: 10px;
+  border: 1px solid #8bd;
+  border-width: 0px 1px 1px 1px;
+}
+#mailContent .mailBody .inlineContent {
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px solid #8bd;
+  font-family: "MS Gothic";
+  word-break: break-all;
+  line-height: 1.20;
+}
+#mailContent #inlineContents ul {
+  list-style-type: disc;
+  margin: 12px 0 12px 0;
+}
+#mailContent #inlineContents ol {
+  margin: 12px 0 12px 0;
+}
+#mailContent #inlineContents li {
+  margin-left: 40px;
+  line-height: 1.2;
+}
+#mailContent .mailBody .recipientConfirm {
+  margin: 10px 0 0 0;
+  font-weight: bold;
+  text-align: right;
+}
+#mailContent .mailBody .scheduleMenu {
+  margin: 10px 0 0 0;
+  text-align: right;
+}
+#mailContent .mailBody .scheduleMenu a {
+  background-image: url("../images/ic-month.gif");
+  background-repeat: no-repeat;
+  background-position: left center;
+  padding-left: 15px;
+}
+#mailContent .mailViewSelector {
+  text-align: right;
+}
+#mailContent .mailViewSelector a {
+  display:inline-block;
+  width: 60px;
+  border: 1px solid #aaa;
+  background-color: #fff;
+  background-image: url(../images/bt/bg-link_check.jpg);
+  background-repeat: no-repeat;
+  color: #000;
+  text-align: center;
+  text-decoration: none;
+  line-height: 1.2;
+}
+#mailContent .mailViewSelector a:hover {
+  background-image: none;
+  color: #05c;
+}
+#mailContent .mailAttention {
+  width: 100%;
+  border: 1px solid #8bd;
+  border-width: 0px 1px 1px 1px;
+  background-color: #ffffe7;
+}
+#mailContent .mailAttention .message {
+  padding: 10px;
+}
+#mailContent .mailAttention .actions {
+  padding: 5px 10px 5px 0px;
+  text-align: right;
+}
+#mailContent .mailAttention .actions a {
+  display: inline-block;
+  width: 60px;
+  padding: 4px 0px;
+  border: 1px solid #aaa;
+  background-color: #fff;
+  background-image: url(/_common/themes/admin/gw/images/bt/bg-link_check.jpg);
+  color: #000;
+  font-size: 12px;
+  text-decoration: none;
+  text-align: center;
+  line-height: 1.2;  
+}
+#mailContent .mailAttention .actions a:hover {
+  background-image: none;
+  color: #444;
+}
+#mailContent .attachmentDownloader {
+  width: 100%;
+  border: 1px solid #8bd;
+  border-width: 1px 1px 0px 1px;
+  background-color: #ddeeff;
+}
+#mailContent .attachmentDownloader .title {
+  padding: 5px 0px 5px 10px;
+}
+#mailContent .attachmentDownloader .actions {
+  padding: 3px 10px 3px 0px;
+  text-align: right;
+}
+#mailContent .attachmentDownloader .actions a {
+  display: inline-block;
+  width: 140px;
+  padding: 2px 0px;
+  border: 1px solid #aaa;
+  background-color: #fff;
+  background-image: url(/_common/themes/admin/gw/images/bt/bg-link_check.jpg);
+  color: #000;
+  text-decoration: none;
+  text-align: center;
+}
+#mailContent .attachmentDownloader .actions a:hover {
+  background-image: none;
+  color: #05c;
+}
+
+/* tool menu
+------------------------------------- */
+#webmailMenu .toolMenu a {
+  display: inline-block;
+  margin: 0px;
+  margin-bottom: 0px;
+  padding: 1px 4px 0px 6px;
+  background-image: none;
+  background-repeat: no-repeat;
+  background-position: 3px 0.35em;
+  line-height: 1.8;
+}
+#webmailMenu .toolMenu a:hover {
+}
+#webmailMenuContainer .toolMenu a.current {
+  margin-right: 3px;
+}
+#webmailMenuContainer .toolMenu a.current:hover {
+}
+
+/* mail content
+------------------------------------- */
+#mailContent {
+  padding: 0px 10px 5px 10px;
+}
+
+/* mailbox content
+------------------------------------- */
+#mailboxContent {
+  padding: 0px 10px 10px 10px;
+}
+
+/* address content
+------------------------------------- */
+#addressContent {
+  padding: 0px 10px 10px 10px;
+}
+
+/* sign content
+------------------------------------- */
+#signContent {
+  padding: 10px 10px 10px 10px;
+}
+
+/* filter content
+------------------------------------- */
+#filterContent {
+  padding: 10px 10px 10px 10px;
+}
+
+/* template content
+------------------------------------- */
+#templateContent {
+  padding: 10px 10px 10px 10px;
+}
+#templateContent table.template td {
+  word-break: break-all;
+}
+
+/* memo content
+------------------------------------- */
+#memoContent {
+  padding: 10px 10px 10px 10px;
+}
+
+/* tool content
+------------------------------------- */
+#toolContent {
+  padding: 10px 10px 10px 10px;
+}
+
+/* setting content
+------------------------------------- */
+#settingContent {
+  padding: 10px 10px 10px 10px;
+}
+
+/* doc content
+------------------------------------- */
+#docContent {
+  padding: 10px 10px 10px 10px;
+}
+#docContent table.show {
+  border: none;
+}
+#docContent table.show td {
+  padding: 0;
+}
+#docContent table.show td.mceBody {
+  padding: 0;
+  border-bottom: none;
+}
+
+/* siteinfo content
+------------------------------------- */
+#siteinfoContent {
+  padding: 10px 10px 10px 10px;
+}
+
+/* separator
+--------------------------------------*/
+span.separator {
+  display: inline-block;
+  margin: 0 0px;
+  vertical-align: middle;
+  color: #fff;
+  font-size:170%;
+}

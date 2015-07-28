@@ -1,0 +1,74 @@
+ja: 
+  language:
+    utf-7: Unicode
+    utf-8: Unicode
+    #西欧
+    iso-8859-1: 西欧
+    iso-8859-15: 西欧
+    ibm-850: 西欧
+    macroman: 西欧
+    windows-1252: 西欧
+    iso-8859-14: ケルト語
+    iso-8859-7: ギリシャ語
+    macgreek: ギリシャ語
+    windows-1253: ギリシャ語
+    macicelandic: アイスランド語
+    iso-8859-10: 北欧
+    iso-8859-3: 南欧
+    #東欧
+    iso-8859-4: バルト語
+    iso-8859-13: バルト語
+    windows-1257: バルト語
+    ibm-852: 中欧
+    iso-8859-2: 中欧
+    macce: 中欧
+    windows-1250: 中欧
+    maccroatian: クロアチア語
+    ibm-855: キリル文字
+    iso-8859-5: キリル文字
+    iso-ir-111: キリル文字
+    koi8-r: キリル文字
+    maccyrillic: キリル文字
+    windows-1251: キリル文字
+    cp-866: キリル文字/ロシア語
+    koi8-u: キリル文字/ウクライナ語
+    iso-8859-16: ルーマニア語
+    macromanian: ルーマニア語
+    #東アジア
+    gb2312: 簡体字中国語
+    gbk: 簡体字中国語
+    gb18030: 簡体字中国語
+    hz: 簡体字中国語
+    iso-2022-cn: 簡体字中国語
+    big5: 簡体字中国語
+    big5-hkscs: 簡体字中国語
+    euc-tw: 簡体字中国語
+    euc-jp: 日本語
+    iso-2022-jp: 日本語
+    shift_jis: 日本語
+    euc-kr: 韓国語
+    johab: 韓国語
+    iso-2022-kr: 韓国語
+    #西南・東南アジア
+    armscii-8: アルメニア語
+    tis-620: タイ語
+    iso-8859-11: タイ語
+    windows-874: タイ語
+    ibm-857: トルコ語
+    iso-8859-9: トルコ語
+    macturkish: トルコ語
+    windows-1254: トルコ語
+    tcvn: ベトナム語
+    viscii: ベトナム語
+    vps: ベトナム語
+    windows-1258: ベトナム語
+    macdevanagari: ヒンディー語
+    macgujarati: グジャラート語
+    macgurmukhi: グルムキ―文字
+    #中近東
+    iso-8859-6: アラビア語
+    windows-1256: アラビア語
+    iso-8859-8-i: ヘブライ語
+    windows-1255: ヘブライ語
+    iso-8859-8: ヘブライ語
+    ibm-862: ヘブライ語

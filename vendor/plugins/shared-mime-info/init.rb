@@ -1,0 +1,1 @@
+require 'shared-mime-info'

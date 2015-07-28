@@ -1,0 +1,21 @@
+<script type="text/javascript">
+//<![CDATA[
+function getSubmitButton() {
+  return $('item_form').commit_register;
+}
+//]]>
+</script>
+<div id="templateContent">
+<%= render :partial => 'menu' %>
+
+<%= form_for :item, :url => {:action => :create}, :html => {:id => "item_form"} do |f| %>
+
+<%= f.error_messages %>
+
+<%= render :partial => 'form', :locals => {:f => f} %>
+
+<%= raw submit(:register) %>
+
+<% end %>
+
+</div>

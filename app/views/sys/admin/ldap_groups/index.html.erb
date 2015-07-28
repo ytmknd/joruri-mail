@@ -1,0 +1,38 @@
+<script type="text/javascript">
+//<![CDATA[
+function showSpec(u) {
+  var spec = $(u.id.replace(/Link$/, "Spec"));
+  if (spec.style.display == "none") spec.show(); else spec.hide();
+  return false;
+}
+//]]>
+</script>
+<div class="crudTree">
+<div class="tree">
+  <p>
+    <%= @parent ? @parent.ou : 'LDAP' %></p>
+  
+  <div class="links">
+      <% @groups.each do |g| %>
+      <%= link_to h(g.ou), url_for(:action => :index, :parent => g.ou) %><br />
+      <% end %>
+      <%= 'no groups' if @groups.size == 0 %>
+  </div>
+</div>
+<div class="content">
+  <table class="index">
+    <tr><th>Users</th></tr>
+    <% @users.each_with_index do |u, idx| %>
+    <tr><td>
+      <a id="uid<%= idx %>Link" href="#" onclick="return showSpec(this);">詳細</a>&nbsp;
+      <%=h u.name %> (<%=h u.uid %>) <%=h u.email %>
+      <div id="uid<%= idx %>Spec" style="display: none;"><hr />
+      <% u.attributes.each do |key, values| %><%= "#{key} : #{values.join(",")}" %><br /><% end %>
+      </div>
+    </td></tr>
+    <% end %>
+    <% if @users.size == 0 %><tr><td>no users<br /></td></tr><% end %>
+  </table>
+</div>
+<div class="footer"></div>
+</div>

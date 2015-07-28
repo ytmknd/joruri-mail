@@ -1,0 +1,27 @@
+<div class="addressHistory">
+<span class="title">クイックアドレス帳</span>
+<ul>
+<% @addr_histories.each do |history| %>
+  <li>
+    <%
+      if history.display_name
+        name = history.display_name
+        address = "#{history.display_name} <#{history.address}>"
+      else
+        name = history.address
+        address = history.address
+      end 
+    %>
+    <%= link_to name, "#", :title => history.address, :onclick => open_mail_form(new_gw_webmail_mail_path('INBOX', :to => address)) %>
+  </li>
+<% end %>
+</ul>
+
+<% if @addr_histories.size > 0 %>
+<div class="reset">
+  <%= link_to '≫履歴をリセットする', reset_address_history_gw_webmail_mails_path(:mailbox => @mailbox.name, :page => params[:page]), :class => 'reset', 
+    :confirm => 'クイックアドレス帳をリセットします。よろしいですか？' %>
+</div>
+<% end %>
+
+</div>

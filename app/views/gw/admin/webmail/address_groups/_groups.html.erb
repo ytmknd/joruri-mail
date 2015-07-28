@@ -1,0 +1,25 @@
+<%
+def search_children(group, html = "", level_no = 0)
+  cls = @parent && group.id == @parent.id ? 'current' : ''
+  html += %Q(<li class="folder">)
+  html += link_to( h(group.name), gw_webmail_address_group_path(group.id), :class => cls )
+  html += link_to(:edit, edit_gw_webmail_address_group_path(group.id), :class => "edit", :title => "編集")
+  html += link_to(:delete, gw_webmail_address_group_path(group.id), :method => :delete, :title => "削除",
+    :confirm => "削除してよろしいですか？", :class => "delete")
+  cond  = {:parent_id => group.id}
+  if (children = Gw::WebmailAddressGroup.find(:all, :conditions => cond, :order => "name, id")).size > 0
+    ccls  = level_no > 0 ? "level#{level_no}" : ""
+    html += %Q(<ul class="children #{ccls}">)
+    children.each {|c| html = search_children(c, html)}
+    html += %Q(</ul>)
+  end
+  html += %Q(</li>)
+  html
+end
+%>
+<div class="mailbox">
+  <ul class="root">
+    <li class="folder"><%= link_to "すべて", gw_webmail_address_groups_path, :class => (@parent ? '' : 'current') %></li>
+    <% @root_groups.each do |g| %><%= raw search_children(g) %><% end %>
+  </ul>
+</div>

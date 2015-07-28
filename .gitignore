@@ -1,0 +1,12 @@
+*.project
+*.thumb
+Gemfile.lock
+/.bundle
+/.poject
+/.idea
+/log/*
+!/log/.keep
+/.rvmrc
+/.rspec
+/tmp/*
+/vendor/bundle

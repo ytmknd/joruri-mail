@@ -1,0 +1,122 @@
+@charset "UTF-8";
+/* @import "style.css"; */
+
+/* =========================================================
+   Login.
+========================================================= */
+
+html {
+  margin: 0px;
+  padding: 0px;
+  height: 100%;
+}
+body {
+  height: 100%;
+  font-size: 90%;
+  margin: 0px auto;
+  padding: 0px;
+  background-image: url(./images/bg-login.gif);
+}
+input {
+  font-size: 90%;
+  font-family: verdana;
+}
+.form input {
+  width: 150px;
+}
+
+.header {
+  background: transparent;
+  width: 100%;
+  height: 25%;
+}
+.box {
+  width: 460px;
+  padding-top: 20px;
+  background-color: #ffffff;
+  text-align: center;
+  margin: 0px auto;
+}
+.box p {
+  padding: 12px 0px 0px 15px;
+  color: #666;
+  font-size: 100%;
+  font-weight: lighter;
+  text-align: left;
+  font-family: verdana;
+}
+h1 {
+  overflow: hidden;
+  width: 415px;
+  height: 0px !important;
+  height /**/:117px;
+  margin: 0px auto 0px auto;
+  text-align: center;
+  padding-top: 117px;
+  background-image: url(./images/logo-joruri.gif);
+  background-repeat: no-repeat;
+  outline: 0;
+}
+.notice {
+  display: inline;
+  height: 0px;
+  margin: 0px;
+  color: #f00;
+  font-weight: bold;
+}
+.fields {
+  width: 350px;
+  text-align: left;
+  margin: 0px 0px 0px 100px;
+  padding: 20px 0px　0px;
+  color: #000;
+}
+.fields span.head {
+  display: inline-block;
+  width: 75px;
+}
+#account {
+  width: 170px;
+  ime-mode:disabled;
+}
+#password {
+  width: 170px;
+}
+.submitters {
+  height: 120px;
+  padding: 10px 25px 0px 25px;
+}
+.submitters .login {
+  width: 106px;
+  height: 37px;
+  border: none;
+  margin: 0px;
+  padding: 0;
+  background-image: url(./images/bt-login.gif);
+  background-repeat: no-repeat;
+}
+.submitters .department {
+    height: 30px;
+    margin-top: 20px;
+    padding-left: 40px;
+    background-image: url("/_common/themes/admin/images/login-tokushimakenlogo_.gif");
+    background-position: 45% 50%;
+    background-repeat: no-repeat;
+    line-height: 2;
+}
+.submitters .changePass {
+  margin-top: 10px;
+  text-align: right;
+}
+.submitters .changePass a {
+  color: #939;
+  text-decoration: none;
+}
+.submitters .changePass a:hover {
+  text-decoration: underline;
+}
+.copyright {
+  padding: 20px 0px;
+  color: #ffffff;
+  text-align: center;
+}

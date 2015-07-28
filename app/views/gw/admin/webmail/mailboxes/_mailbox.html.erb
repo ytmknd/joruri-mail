@@ -1,0 +1,31 @@
+<%
+tree = ""
+plv  = 0
+
+@mailboxes.each_with_index do |box, idx|
+  clv       = box.parents_count
+  idt       = "  " * clv
+  li_class  = []
+  li_class << (box.name =~ /^(INBOX|Drafts|Sent|Archives|Trash|Star)$/ ? box.name.downcase : "folder")
+  li_class  = %Q(class="#{li_class.join(' ')}")
+  nm_class  = ["name"]
+  nm_class << "current" if box.name == @mailbox.name
+  nm_class = nm_class.join(' ')
+
+  tree += "</li></ul>" * (plv - clv) if clv < plv
+  if clv > plv
+    plv.upto(clv - 1) {|i| tree += %Q(<ul class="children level#{(i + 1)}">\n#{idt}<li class="folder">) }
+  elsif idx > 0
+    tree += %Q(</li>\n#{idt}<li #{li_class}>)
+  else
+    tree += %Q(\n#{idt}<li #{li_class}>)
+  end
+  
+  tree += link_to(h(box.title), url_for(:action => :index, :mailbox => box.name), :class => nm_class)
+  tree += %Q(</li>) if @mailboxes.size == idx + 1
+
+  plv = clv
+end
+tree = %Q(<ul class="root">#{tree}</ul>) if !tree.blank?
+
+%><div class="mailbox"><%= raw tree %></div>

@@ -1,0 +1,233 @@
+@charset "UTF-8";
+
+/* =========================================================
+   Mail List
+========================================================= */
+
+/* mails table
+--------------------------------------------------------- */
+#webmailContent table.mails {
+  width: 100%;
+}
+#webmailContent table.mails tr {
+}
+#webmailContent table.mails th {
+  padding: 5px 4px;
+  border-left: 1px solid #fff;
+  background-color: #bdf;
+  text-align: left;
+}
+#webmailContent table.mails th.drag    { width: 4px; }
+#webmailContent table.mails th.check   { width: 26px; padding: 0px; border: none; text-align: center; }
+#webmailContent table.mails th.starOn  { width: 20px; text-align: center; }
+#webmailContent table.mails th.starOff { width: 20px; text-align: center; }
+#webmailContent table.mails th.attach  { width: 20px; padding: 0px 2px; text-align: center; }
+#webmailContent table.mails th.subject { width: ; }
+#webmailContent table.mails th.mailbox { width: 60px; border: none; }
+#webmailContent table.mails th.from    { width: 30%; }
+#webmailContent table.mails th.fromOmitAddress { width: 20%; }
+#webmailContent table.mails th.date    { width: 9em; }
+#webmailContent table.mails th.size    { width: 4.5em; text-align: right; }
+#webmailContent table.mails th.attach {
+  background-image: url(../images/mailoption/clip.gif);
+  background-repeat: no-repeat;
+  background-position: center center;
+  text-indent: -9999px;
+}
+#webmailContent table.mails th.from .caption ,
+#webmailContent table.mails th.fromOmitAddress .caption {
+  float: left;
+}
+#webmailContent table.mails th.from a.cancelFromSearch ,
+#webmailContent table.mails th.fromOmitAddress a.cancelFromSearch {
+  float: right;
+  color: #00B;
+  text-decoration: none;
+}
+#webmailContent table.mails a.sorter {
+  color: #000;
+  text-decoration: none;
+}
+#webmailContent table.mails a.sorter:hover {
+  color: #00f;
+}
+
+#webmailContent table.mails td {
+  height: 1.6em;
+  padding: 0px 0px 0px 4px;
+  border-bottom: 1px solid #ddd;
+  background-color: #fff;
+  word-break: break-all;
+  line-height: 1.6;
+}
+#webmailContent table.mails td.autoWrap {
+  height: auto;
+}
+#webmailContent table.mails td span.overflowHidden {
+  display: block;
+  overflow: hidden;
+  height: 1.65em;
+}
+#webmailContent table.mails td span.autoWrap {
+  height: 100%;
+}
+#webmailContent table.mails tr.unseen td {
+  background-color: #ffb;
+}
+#webmailContent table.mails tr.unseen td.subject {
+  font-weight: bold;
+}
+#webmailContent table.mails td.check   { padding: 0px; text-align: center; }
+#webmailContent table.mails td.starOn  { color: #f70; text-align: center; }
+#webmailContent table.mails td.starOff { color: #f70; text-align: center; }
+#webmailContent table.mails td.attach {
+  color: #0b0;
+  text-align: center;
+}
+#webmailContent table.mails td.attach {
+  padding: 0px 2px;
+} 
+#webmailContent table.mails td.attach span.attach {
+  display: inline-block;
+  width: 12px;
+  height: 0;
+  padding-top: 12px;
+  background-image: url(../images/mailoption/clip.gif);
+  background-repeat: no-repeat;
+  overflow: hidden;
+}
+#webmailContent table.mails th.starOn,
+#webmailContent table.mails td.starOn {
+  background-image: url(../images/mailoption/star_on.gif);
+  background-repeat: no-repeat;
+  background-position: center center;
+  text-indent: -9999px;
+  cursor: pointer;
+}
+#webmailContent table.mails th.starOn:hover {
+  background-image: url(../images/mailoption/star_off.gif);
+}
+#webmailContent table.mails th.starOff,
+#webmailContent table.mails td.starOff {
+  background-image: url(../images/mailoption/star_off.gif);
+  background-repeat: no-repeat;
+  background-position: center center;
+  text-indent: -9999px;
+  cursor: pointer;
+}
+#webmailContent table.mails th.starOff:hover {
+  background-image: url(../images/mailoption/star_on.gif);
+}
+#webmailContent table.mails td.loading {
+  background-image: url(../images/other/loading_16.gif);
+  background-repeat: no-repeat;
+  background-position: center center;
+}
+#webmailContent table.mails td.subject {
+  cursor: pointer;
+}
+#webmailContent table.mails td.mailbox {
+  cursor: pointer;
+}
+#webmailContent table.mails td.from {
+  padding-right: 5px;
+  cursor: pointer;
+}
+#webmailContent table.mails td.date {
+  cursor: pointer;
+}
+#webmailContent table.mails td.size {
+  padding-right: 3px;
+  text-align: right;
+  cursor: pointer;
+}
+#webmailContent table.mails td.subject .labels {
+  height: 1.65em;
+  overflow: hidden;
+}
+#webmailContent table.mails td.subject .labels .label {
+  margin: 0 1px;
+  padding: 0 1px;
+  color: #fff;
+  font-weight: lighter;
+  font-size: 0.8em;
+}
+#webmailContent table.mails td.subject .loading {
+  background-image: url(../images/other/loading_16.gif);
+  background-repeat: no-repeat;
+  background-position: center center;
+  width: 16px;
+  height: 1.65em;
+  float: left;
+  margin-right: 2px;
+}
+#webmailContent table.mails tr:hover td {
+  background-color: #ffb;
+}
+
+#webmailContent table.mails td a {
+  display: inline-block;
+  background-position: 0 3px;
+  color: #000;
+  text-decoration: none;
+}
+#webmailContent table.mails td a:hover {
+  color: #00f;
+}
+#webmailContent table.mails tr td.subject a {
+  padding-left: 15px;
+  background-image: url(../images/mailoption/mail-open.gif);
+  background-repeat: no-repeat;
+  background-position: 0 0.35em;
+}
+#webmailContent table.mails tr td.answered a {
+  background-image: url(../images/mailoption/finish_forward.gif);
+  background-repeat: no-repeat;
+}
+#webmailContent table.mails tr td.forwarded a {
+  background-image: url(../images/mailoption/finish_reply.gif);
+  background-repeat: no-repeat;
+}
+#webmailContent table.mails tr td.answeredforwarded a {
+  background-image: url(../images/mailoption/replytransmit.gif);
+  background-repeat: no-repeat;
+}
+#webmailContent table.mails tr.unseen td.subject a {
+  background-image: url(../images/mailoption/mail-notopen.gif);
+  background-position: 0 0.5em;
+}
+#webmailContent table.mails tr.unseen td.mdnRequest a {
+  background-image: url(../images/mailoption/mdn_request.gif);
+  background-position: 0 0.2em;
+}
+#webmailContent table.mails td.drag {
+  cursor: move;
+  background-image: url(../images/ic_mail_drag.gif);
+  background-repeat: no-repeat;
+  background-position: center center;
+}
+#webmailContent table.mails td.ui-draggable-dragging {
+  height: auto;
+  padding: 0px 0px 0px 4px;
+  border-bottom: 1px solid #ddd;
+  background-color: #fff;
+  line-height: auto;
+}
+#webmailContent table.mails td.ui-draggable-dragging span {
+  display: block;
+  overflow: hidden;
+  height: 1.65em;
+  background-color: #fff;
+}
+#webmailContent .quota {
+  margin-top: 15px;
+  color: #070;
+  font-weight: bold;
+  text-align: center;
+}
+#webmailContent .quotaAlert {
+  margin: 10px 0;
+  color: #f00;
+  font-weight: bold;
+  text-align: center;
+}

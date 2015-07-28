@@ -1,0 +1,15 @@
+<table id="webmailContainer"><tr><td id="webmailContent"><div id="addressContent">
+
+<div class="actionMenu">
+<%= link_to :index, gw_webmail_address_groups_path %>
+</div>
+
+<p class="form"><%=h @item.name %></p>
+
+<%= form_for :item, :url => {:action => :update}, :html => {:method => :put} do |f| %>
+<%= f.error_messages %>
+<%= render :partial => 'form', :locals => {:f => f} %>
+<%= raw submit(:edit) %>
+<% end %>
+
+</div><!-- end #webmailContainer --></td></table>

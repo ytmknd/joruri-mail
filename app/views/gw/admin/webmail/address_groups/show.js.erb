@@ -1,0 +1,33 @@
+<%
+
+if @item.id
+  @groups = @item.children
+  
+  ghtml = (@groups.size == 0 ? "" : "")
+  @groups.each do |g|
+    ghtml += %Q(<div id="priAddressGroup#{g.id}" class="group"><a href="#" onclick="return selectPriGroup('#{g.id}');">#{h(g.name)}</a></div>)
+    ghtml += %Q(<div id="priAddressGroups#{g.id}" class="childGroups" style="display: none;"></div>)
+  end
+  
+  %>
+  var group_elm = $("priAddressGroups<%= @item.id %>");
+  <%= "group_elm.show();" if @groups.size > 0 %>
+  group_elm.update("<%= raw ghtml.gsub('"', '\"') %>");
+  <%
+end
+
+uhtml = %Q(<div class="selectedGroup">#{h(@item.name)}</div>)
+uhtml += (@items.size == 0 ? "&nbsp;" : "")
+@items.each do |u|
+  addr = u.email.blank? ? "" : %Q(#{u.name} <#{u.email}>)
+  addr = h(escape_javascript(addr))
+  uhtml += %Q(<div>)
+  uhtml += %Q(<a href="#" class="to" onclick="return addTo('#{addr}');">宛先</a> )
+  uhtml += %Q(<a href="#" class="cc" onclick="return addCc('#{addr}');">CC</a> )
+  uhtml += %Q(<a href="#" class="bcc" onclick="return addBcc('#{addr}');">BCC</a> )
+  uhtml += %Q(#{h(u.name)} &lt;#{(u.email.blank? ? "アドレス未設定" : h(u.email))}&gt;</div>)
+end
+
+%>
+var user_elm = $("priAddressUsers");
+user_elm.update("<%= raw escape_javascript(uhtml) %>");

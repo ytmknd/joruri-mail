@@ -1,0 +1,131 @@
+<%
+
+mailboxes = []
+Gw::WebmailMailbox.load_mailboxes.each do |box|
+  next if box.name =~ /^INBOX$/
+  next if box.name =~ /^(Drafts|Sent|Trash|Star)(\.|$)/
+  mailboxes << [box.slashed_title, "#{box.name}"]
+end
+
+conditions_count = @item.in_columns.count > 5 ? @item.in_columns.count : 5
+
+%><script type="text/javascript">
+//<![CDATA[
+function reset_condition(idx) {
+  $('item_in_columns_' + idx).selectedIndex    = 0;
+  $('item_in_inclusions_' + idx).selectedIndex = 0;
+  $('item_in_values_' + idx).value             = '';
+  return false;
+}
+var next_idx = <%= conditions_count %>;
+window.onload = function() {
+  check_condition_count();
+}
+function check_condition_count() {
+  var filter_condition_max_count = <%= Joruri.config.application['webmail.filter_condition_max_count'] %>
+  if (next_idx >= filter_condition_max_count) {
+    $('addition_link').style.display = 'none';
+  }
+}
+function add_condition() {
+  var column_labels = eval("(" + "<%=escape_javascript raw @item.condition_column_labels.to_json %>" + ")");
+  var inclusion_labels = eval("(" + "<%=escape_javascript raw @item.condition_inclusion_labels.to_json %>" + ")");
+  
+  var root = document.createElement("div");
+  root.style.cssText = "margin: 5px 0px;";
+  
+  var select = document.createElement("select");
+  select.id = "item_in_columns_" + next_idx;
+  select.name = "item[in_columns][" + next_idx + "]";
+  select.options[0] = new Option("", "");
+  for (var i=0; i<column_labels.size(); i++) {
+    select.options[i+1] = new Option(column_labels[i][0], column_labels[i][1]); 
+  }
+  
+  root.appendChild(select);
+  
+  var select = document.createElement("select");
+  select.id = "item_in_inclusions_" + next_idx;
+  select.name = "item[in_inclusions][" + next_idx + "]";
+  select.options[0] = new Option("", "");
+  for (var i=0; i<inclusion_labels.size(); i++) {
+    select.options[i+1] = new Option(inclusion_labels[i][0], inclusion_labels[i][1]); 
+  }
+  
+  root.appendChild(document.createTextNode(" "));
+  root.appendChild(select);
+  
+  var input = document.createElement("input");
+  input.id = "item_in_values_" + next_idx;
+  input.name = "item[in_values][" + next_idx + "]";
+  input.className = "name";
+  input.setAttribute("type", "text");
+  
+  root.appendChild(document.createTextNode(" "));
+  root.appendChild(input);
+  
+  var atag = document.createElement("a");
+  atag.innerHTML = "クリア";
+  atag.onclick = new Function("return reset_condition(" + next_idx +  ");")
+  atag.setAttribute("href", "#");
+  
+  root.appendChild(document.createTextNode(" "));
+  root.appendChild(atag);
+  
+  $('filter_conditions').appendChild(root);
+  
+  ++next_idx;
+  
+  check_condition_count();
+  
+  return false;
+}
+//]]>
+</script>
+
+<table class="show">
+  <tr>
+    <th><%= @item.locale :name %></th>
+    <td><%= @item.name !~ /^[*]/ ? f.text_field(:name, :class => 'name') : @item.name %></td>
+  </tr><tr>
+    <th><%= @item.locale :state %></th>
+    <td><%= f.radio_buttons(:state, @item.states, :class => 'states') %></td>
+  </tr><tr>
+    <th><%= @item.locale :sort_no %></th>
+    <td><%= f.text_field(:sort_no, :class => 'number') %></td>
+  </tr>
+</table>
+
+<br /><p class="form">条件</p>
+<table class="show">
+  <tr>
+    <th><%= @item.locale :conditions_chain %></th>
+    <td><%= f.radio_buttons :conditions_chain, @item.conditions_chain_labels, :class => 'states' %></td>
+  </tr><tr>
+    <th>条件</th>
+    <td>
+      <div id="filter_conditions" <%= %Q(style="padding: 1px 6px; border: 1px solid #f00;") if @item.errors[:in_conditions].any? %>>
+        <% conditions_count.times do |i| %>
+        <div style="margin: 5px 0px;">
+        <%= f.array_select "in_columns[#{i}]", @item.condition_column_labels, :include_blank => true %>
+        <%= f.array_select "in_inclusions[#{i}]", @item.condition_inclusion_labels, :include_blank => true %>
+        <%= f.array_text_field "in_values[#{i}]", :class => "name"  %>
+        <%= link_to "クリア", "#", :onclick => "return reset_condition(#{i});" %>
+        </div>
+        <% end %>
+      </div>
+      <%= link_to "追加", "#", :id => 'addition_link', :onclick => "return add_condition();" %>
+    </td>
+  </tr>
+</table>
+
+<br /><p class="form">動作</p>
+<table class="show">
+  <tr>
+    <th><%= @item.locale :action %></th>
+    <td><%= f.select(:action, @item.action_labels, :include_blank => true) %></td>
+  </tr><tr>
+    <th><%= @item.locale :mailbox %></th>
+    <td><%= f.select(:mailbox, mailboxes, :include_blank => true) %></td>
+  </tr>
+</table>

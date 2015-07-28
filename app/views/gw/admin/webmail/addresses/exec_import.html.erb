@@ -1,0 +1,72 @@
+<script type="text/javascript">
+//<![CDATA[
+function toggleResult(result) {
+  switch (result) {
+  case 'success':
+    $('successAddresses').style.display = 'block';
+	$('errorAddresses').style.display = 'none';
+ 	break;
+  case 'error':
+    $('successAddresses').style.display = 'none';
+	$('errorAddresses').style.display = 'block';
+	break;
+  }
+}
+//]]>
+</script>
+<table id="webmailContainer"><tr><td id="webmailMenu">
+<div id="webmailMenuContainer">
+<%= render :partial => "upper_menu" %>
+<%= render :partial => "lower_menu" %>
+</div>
+</td><td id="webmailContent"><div id="addressContent">
+	
+<table class="show countAddresses">
+  <tr>
+    <th>インポートに成功したアドレス</th>
+	<td><%= @success_items.size %> 件</td>
+  </tr>
+  <tr>
+    <th>インポートに失敗したアドレス</th>  
+    <td><%= @error_items.size %> 件</td>
+  </tr>
+</table>
+<div class="actionMenu">
+  <%= link_to 'インポートに成功したアドレスを表示', '#', :onclick => "toggleResult('success');return false;"%>
+  <%= link_to 'インポートに失敗したアドレスを表示', '#', :onclick => "toggleResult('error');return false;"%>
+</div>
+<div id="successAddresses">
+	
+<p class="form">インポートに成功したアドレス</p>
+<table class="index">
+  <tr>
+    <th style="width: 30%;">名前</th>
+    <th>メールアドレス</th>
+  </tr>
+  <% @success_items.each do |item| %>
+  <tr <%= cycle '', 'class="cycle"' %>>
+    <td><%= item[:name] %></td>
+    <td><%= item[:email] %></td>
+  </tr>
+  <% end %>
+</table>
+
+</div><!-- end #successAddresses -->
+<div id="errorAddresses" style="display:none">
+
+<p class="form">インポートに失敗したアドレス</p>
+<table class="index">
+  <tr>
+    <th style="width: 30%;">名前</th>
+    <th>メールアドレス</th>
+  </tr>
+  <% @error_items.each do |item| %>
+  <tr <%= cycle '', 'class="cycle"' %>>
+    <td><%= item[:name] %></td>
+    <td><%= item[:email] %></td>
+  </tr>
+  <% end %>
+</table>
+
+</div><!-- end #errorAddresses -->
+</div><!-- end #webmailContainer --></td></table>

@@ -1,0 +1,115 @@
+<style type="text/css">
+  #addresses ul {
+    margin: 4px 0px 0px 0px;
+    padding: 4px 0px 0px 0px;
+    border-top: 1px solid #ccc;
+  }
+  #addresses ul li {
+    margin: 0px 0px 0px 10px;
+  }
+  #addresses .noAddress {
+    margin: 4px 0px 0px 0px;
+    padding: 4px 0px 0px 10px;
+    border-top: 1px solid #ccc;
+  }
+</style>
+
+<script type="text/javascript" src="/_common/js/dump.js"></script>
+<script type="text/javascript">
+//<![CDATA[
+  function addEmailParam(field, email){
+    var field = $(field);
+    if (field.value.indexOf(email) == -1) {
+      if (field.value != "") field.value += ", ";
+      field.value += email;
+    }
+    return false;
+  }
+  function addTo(email) {
+    return addEmailParam('item_to', email);
+  }
+  function addCc(email) {
+    return addEmailParam('item_cc', email);
+  }
+  function addBcc(email) {
+    return addEmailParam('item_bcc', email);
+  }
+  
+  function onClickGroup(group_id){
+    var view   = $("addresses" + group_id);
+    if (view.innerHTML != "") {
+      view.style.display = "none";
+      view.innerHTML     = "";
+      return false;
+    }
+    
+    var url = "<%= gw_webmail_addresses_path(:format => 'xml') %>";
+    var myAjax = new Ajax.Request(url, {
+      method: 'get',
+      parameters: "group_id=" + group_id,
+      onComplete: showAddresses
+    });
+    return false;
+  }
+  
+  function showAddresses(request) {
+    var html  = "";
+    var items = request.responseXML.getElementsByTagName("item");
+    for (var i = 0; i < items.length; i++) {
+      var item = items[i];
+      var name = getNodeValue(item, 'name');
+      var email = getNodeValue(item, 'email');
+      var addr = '&quot;' + name + '&quot; &lt;' + email + '&gt;';
+      html += "<li>" + name;
+      html += ' <a href="#void" class="to" onclick="return addTo(\'' + addr + '\');">To</a>';
+      html += ' <a href="#void" class="cc" onclick="return addCc(\'' + addr + '\');">Cc</a>';
+      html += ' <a href="#void" class="bcc" onclick="return addBcc(\'' + addr + '\');">Bcc</a>';
+      html += "</li>";
+    }
+    if (html != "") {
+      html = "<ul>" + html + "</ul>";
+    } else {
+      html = '<div class="noAddress">連絡先がありません</span>';
+    }
+    var view = $("addresses" + request.request.parameters.group_id);
+    view.innerHTML     = html;
+    view.style.display = "block";
+  }
+  
+  function hideAddresses() {
+    var views  = $('addressesContainer').getElementsByTagName('div');
+    for (var i = 0; i < views.length; i++) {
+      if (views[i].id.match(/^addresses[0-9]+/)) {
+        views[i].style.display = "none";
+        views[i].innerHTML     = "";
+      }
+    }
+  }
+  
+  function getNodeValue(node, name) {
+    var elem = node.getElementsByTagName(name);
+    if (elem.length > 0) {
+      return elem[0].firstChild.nodeValue;
+    }
+    return null;
+  }
+//]]>
+</script>
+
+<table id="addresses" class="index">
+  
+  <tr><th>アドレス帳</th></tr>
+  
+  <tr><td>
+    <div class="group"><a href="#void" onclick="return onClickGroup(0);">すべて</a></div>
+    <div class="addresses" id="addresses0"></div>
+  </td></tr>
+
+  <% Gw::WebmailAddressGroup.user_groups.each do |g| %>
+  <tr><td>
+    <div class="group"><a href="#void" onclick="return onClickGroup(<%= g.id %>);"><%=h g.name %></a></div>
+    <div class="addresses" id="addresses<%= g.id %>"></div>
+  </td></tr>
+  <% end %>
+  
+</table>

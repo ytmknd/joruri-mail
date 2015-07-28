@@ -1,0 +1,57 @@
+<table class="show">
+  <tr>
+    <th><%= @item.locale(:in_group_id) %></th>
+    <td><%= safe{@item.group.name} %></td>
+  </tr><tr>
+    <th><%= @item.locale(:account) %></th>
+    <td><%=h @item.account %></td>
+  </tr><tr>
+    <th><%= @item.locale(:name) %></th>
+    <td><%=h @item.name %></td>
+  </tr><tr>
+    <th><%= @item.locale(:kana) %></th>
+    <td><%=h @item.kana %></td>
+  </tr><tr>
+    <th><%= @item.locale(:name_en) %></th>
+    <td><%=h @item.name_en %></td>
+  </tr><tr>
+    <th><%= @item.locale(:email) %></th>
+    <td><%=h @item.email %></td>
+  </tr><tr>
+    <th><%= @item.locale(:sort_no) %></th>
+    <td><%=h @item.sort_no %></td>
+  </tr><tr>
+    <th><%= @item.locale(:official_position) %></th>
+    <td><%=h @item.official_position %></td>
+  </tr><tr>
+    <th><%= @item.locale(:assigned_job) %></th>
+    <td><%=h @item.assigned_job %></td>
+  </tr><tr>
+    <th><%= @item.locale(:state) %></th>
+    <td><%=h @item.status.name %></td>
+  </tr><tr>
+    <th><%= @item.locale(:auth_no) %></th>
+    <td><%=h @item.auth_name %></td>
+  </tr><% if false %><tr>
+    <th><%= @item.locale(:role_name) %></th>
+    <td><%=h @item.role_names.collect{|r| r.title}.join('，') %></td>
+  </tr><% end %>
+</table>
+
+<br />
+
+<table class="show">
+  <tr>
+    <th><%= @item.locale(:ldap) %></th>
+    <td><%=h @item.ldap_label %></td>
+  </tr><tr>
+    <th><%= @item.locale(:password) %></th>
+    <td><%=h @item.password %></td>
+  <tr>
+    <th><%= @item.locale(:mobile_access) %></th>
+    <td><%=h @item.mobile_access_label %></td>
+  </tr><tr>
+    <th><%= @item.locale(:mobile_password) %></th>
+    <td><%=h @item.mobile_password %></td>
+  </tr>
+</table>

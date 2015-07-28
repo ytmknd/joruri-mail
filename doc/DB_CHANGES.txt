@@ -1,0 +1,33 @@
+1.3.1
+  ALTER TABLE `sys_users_groups` ADD `id` INT NOT NULL AUTO_INCREMENT PRIMARY KEY FIRST;
+
+1.2.0
+  ALTER TABLE `sys_users` ADD `group_s_name` VARCHAR( 255 ) NULL;
+  ALTER TABLE `sys_groups` ADD `group_s_name` VARCHAR( 255 ) NULL;
+  ALTER TABLE `sys_ldap_synchros` ADD `group_s_name` VARCHAR( 255 ) NULL;
+
+1.1.0
+  CREATE TABLE IF NOT EXISTS `gw_webmail_docs` (
+    `id` int(11) NOT NULL AUTO_INCREMENT,
+    `state` varchar(15) DEFAULT NULL,
+    `sort_no` int(11) DEFAULT NULL,
+    `created_at` datetime DEFAULT NULL,
+    `updated_at` datetime DEFAULT NULL,
+    `published_at` datetime DEFAULT NULL,
+    `title` text,
+    `body` text,
+    PRIMARY KEY (`id`)
+  );
+  CREATE TABLE IF NOT EXISTS `gw_webmail_mail_address_histories` (
+    `id` int(11) NOT NULL AUTO_INCREMENT,
+    `user_id` int(11) DEFAULT NULL,
+    `created_at` datetime DEFAULT NULL,
+    `updated_at` datetime DEFAULT NULL,
+    `address` varchar(255) DEFAULT NULL,
+    `friendly_address` varchar(255) DEFAULT NULL,
+    PRIMARY KEY (`id`),
+    KEY `user_id` (`user_id`)
+  );
+  ALTER TABLE `gw_webmail_mail_nodes` ADD `ref_uid` INT NULL;
+  ALTER TABLE `gw_webmail_mail_nodes` ADD `ref_mailbox` TEXT NULL;
+  ALTER TABLE `sys_users` CHANGE `air_login_id` `air_login_id` TEXT;

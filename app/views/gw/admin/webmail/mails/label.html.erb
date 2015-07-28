@@ -1,0 +1,5 @@
+<% @item.labels.each do |label| %>
+  <% if label_conf = @label_confs.find{|conf| conf[:id] == label} %>
+    <% concat raw %Q(<span class="label" style="background-color:#{label_conf[:color]};">#{label_conf[:name]}</span>) %>
+  <% end %>
+<% end %>

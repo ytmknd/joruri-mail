@@ -1,0 +1,40 @@
+<%
+mailboxes = []
+Gw::WebmailMailbox.load_mailboxes.each do |box|
+  next if box.name == @mailbox.name && params[:copy].blank?
+  #next if box.name =~ /^(Drafts|Sent|Trash)(\.|$)/
+  next if box.name =~ /^(Drafts|Trash|Star)(\.|$)/
+  mailboxes << [box.slashed_title, "#{box.name}"]
+end
+
+action_label = params[:copy].blank? ? '移動' : 'コピー'
+%>
+
+<div class="mailboxTitle">
+  <%#=raw mailbox_mobile_image_tag(mailbox_type, :blue => true) %>
+  <%= link_to @mailbox.title, gw_webmail_mails_path(:mailbox => @mailbox.name, :mobile => :list, :page => 1), :class => "link" %>
+</div>
+
+<div class="moveMenu">
+<div class="title"><%= action_label %>するメール</div>
+<div class="mails">
+<% @items.each do |item| %>
+  <div class="mail">・<%= mail_text_wrap(item.subject, 1000) %></div>
+<% end %>
+</div>
+<%= form_for :item, :url => move_gw_webmail_mails_path(@mailbox.name), :html => {:id => "moveForm", :name => "moveForm"} do |f| %>
+  <%= hidden_field_tag 'copy', params[:copy] %>
+  <% params[:item][:ids].each do |id, key| %>
+    <%= hidden_field_tag "item[ids][#{id}]", 1 %>
+  <% end %>
+  <div class="title"><%= action_label %>先フォルダ</div>
+  <div class="folder"><%= f.select :mailbox, mailboxes, :selected => 'Archives', :class => 'selectUI' %></div>
+  <% if mailboxes.size > 0 %>
+    <%= raw submit(["#{action_label}する"]) %>
+  <% end %>
+<% end %>
+</div>
+
+<div class="link">
+  <%= link_to '<戻る', gw_webmail_mails_path(:mailbox => @mailbox.name, :mobile => :list), :class => "link" %>
+</div>

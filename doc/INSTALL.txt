@@ -1,0 +1,285 @@
+## Joruri Mail v1.3.1 インストールマニュアル                2015.7.10
+
+**********************************************************************
+ 1 想定環境
+**********************************************************************
+
+[システム]
+OS         : CentOS 6.2
+Webサーバ  : Apache 2.2
+DBシステム : MySQL 5
+Ruby       : 1.9.2
+Rails      : 3.0.0
+Mailサーバ : SMTP, IMAP4
+
+[設定]
+IPアドレス : 192.168.0.2
+ドメイン   : 192.168.0.2
+
+**********************************************************************
+ 2 CentOS のインストール
+**********************************************************************
+
+CentOSをインストールします。
+
+※インストール完了後、ご利用になられる環境に合わせて適切なセキュリティ設定をお願いします。CentOSに関するセキュリティ設定については、本マニュアルの範囲外となります。
+
+rootユーザに変更します。
+
+  $ su -
+
+**********************************************************************
+ 3 事前準備
+**********************************************************************
+
+必要なパッケージをインストールします。
+
+  # yum -y install \
+  #   wget make gcc-c++ \
+  #   libxslt libxslt-devel libxml2-devel \
+  #   libjpeg-devel libpng-devel \
+  #   librsvg2-devel ghostscript-devel \
+  #   ImageMagick ImageMagick-devel \
+  #   curl-devel \
+  #   shared-mime-info \
+  #   httpd httpd-devel \
+  #   mysql-server mysql-devel
+
+必要なパッケージをダウンロードします。
+
+  # cd /usr/local/src
+  # wget http://joruri.org/download/jorurimail/jorurimail-1.3.1.tar.gz
+  # wget ftp://ftp.ruby-lang.org/pub/ruby/1.9/ruby-1.9.2-p290.tar.gz
+
+Joruriユーザを作成します。
+
+  # useradd joruri
+  # passwd joruri
+
+Joruriソースコードを設置します。
+
+  # mkdir /var/share
+  # tar xvzf jorurimail-1.3.1.tar.gz -C /var/share
+  # chown -R joruri:joruri /var/share/jorurimail
+
+**********************************************************************
+ 4 Apache の設定
+**********************************************************************
+
+設定ファイルを編集します。
+
+  # vi /etc/httpd/conf/httpd.conf
+  - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+  ServerName 192.168.0.2    #変更
+  - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+
+設定ファイルにエラーがないことを確認し、Apacheを起動します。
+
+  # /sbin/service httpd configtest
+  # /sbin/service httpd start
+
+自動起動に設定します。
+
+  # /sbin/chkconfig httpd on
+
+**********************************************************************
+ 5 MySQL の設定
+**********************************************************************
+
+文字エンコーディングの標準を UTF-8 に設定します。
+
+  # vi /etc/my.cnf
+  - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+  [mysqld]
+  default-character-set=utf8    #追加
+  
+  [client]                      #追加（末尾に追加）
+  default-character-set=utf8    #追加
+  - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+
+MySQLを起動します。
+
+  # /usr/bin/mysql_install_db --user=mysql
+  # /sbin/service mysqld start
+
+自動起動に設定します。
+
+  # /sbin/chkconfig mysqld on
+  
+rootユーザのパスワードを設定します。
+
+  # /usr/bin/mysqladmin -u root password "pass"
+
+joruriユーザを作成します。
+
+  # /usr/bin/mysql -u root -ppass \
+  #   -e "grant all on *.* to joruri@localhost IDENTIFIED BY 'pass'"
+
+**********************************************************************
+ 6 Ruby on Rails のインストール
+**********************************************************************
+
+======================================================================
+ 6.1 Ruby, RubyGems のインストール
+======================================================================
+
+Rubyをインストールします。
+
+  # cd /usr/local/src
+  # tar xvzf ruby-1.9.2-p290.tar.gz
+  # cd ruby-1.9.2-p290
+  # ./configure
+  # make && make install
+
+  ※コンパイル時に下記のエラーが発生した場合はパッチの適用をお試しください。
+
+  ---
+  ossl_pkey_ec.c: In function ‘ossl_ec_group_initialize’:
+  ossl_pkey_ec.c:765: 警告: assignment makes pointer from integer without a cast
+  ossl_pkey_ec.c:819: error: ‘EC_GROUP_new_curve_GF2m’ undeclared (first use in this function)
+  ossl_pkey_ec.c:819: error: (Each undeclared identifier is reported only once
+  ossl_pkey_ec.c:819: error: for each function it appears in.)
+  ossl_pkey_ec.c: In function ‘ossl_ec_group_set_seed’:
+  ossl_pkey_ec.c:1114: 警告: 符合付きと符合無しの整数式同士の比較です
+  make[1]: *** [ossl_pkey_ec.o] エラー 1
+  ---
+
+  # yum install patch
+  # cd /usr/local/src/ruby-1.9.2-p290/ext/openssl/
+  # wget http://joruri.org/download/jorurimail/ruby1.9.2-p290-ossl_pkey_ec.patch
+  # patch < ruby1.9.2-p290-ossl_pkey_ec.patch
+
+RubyGemsをインストールします。
+
+  # gem install rubygems-update -v 1.6.2
+  # update_rubygems
+
+======================================================================
+ 6.2 gemライブラリ のインストール
+======================================================================
+
+Ruby on Rails をインストールします。
+
+  # gem install rails -v 3.0.0
+  
+必要ライブラリをインストールします。
+
+  # cd /var/share/jorurimail
+  # bundle install
+
+======================================================================
+ 6.3 Phusion Passenger のインストール
+======================================================================
+
+Phusion Passengerをインストールします。
+
+  # gem install passenger -v 3.0.9
+  # passenger-install-apache2-module
+  
+  ( 画面の内容を確認して Enterキーを押してください。 )
+
+Apacheに設定を追加します。
+
+  # cp /var/share/jorurimail/config/samples/passenger.conf \
+  #   /etc/httpd/conf.d/
+
+**********************************************************************
+  7 Joruri のインストール
+**********************************************************************
+
+Joruriユーザに変更します。
+
+  # su - joruri
+  $ cd /var/share/jorurimail
+
+======================================================================
+ 8.1 設定ファイル
+======================================================================
+
+環境に応じて設定ファイルを編集します。
+
+Joruri Mail 基本設定
+
+  $ vi config/core.yml
+  - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+  title  : Joruri Mail
+  uri    : http://192.168.0.2/
+  proxy  : ※プロキシ
+  - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+  
+  ※プロキシ
+  プロキシサーバが導入されている場合は
+  http://example:8080/ の様に記述してください。
+
+DB接続情報
+
+  $ vi config/database.yml
+
+SMTP, IMAPサーバ設定
+
+  $ vi config/environments/development.rb
+
+VirtualHost設定
+
+  $ vi config/virtual-hosts/jorurimail.conf
+
+======================================================================
+ 8.2 データベースの作成
+======================================================================
+
+データベースを作成します。
+
+  $ /usr/bin/mysql -u root -ppass -e "create database jorurimail"
+
+テーブルを作成します。
+
+  $ rake db:schema:load RAILS_ENV=development
+
+初期データを登録します。
+
+  $ rake db:seed RAILS_ENV=development
+
+サンプルデータを登録します。
+
+  $ rake db:seed:demo RAILS_ENV=development
+
+======================================================================
+ 8.3 VirtualHost の反映
+======================================================================
+
+Apacheに設定を追加します。
+
+  $ su -
+  # cp /var/share/jorurimail/config/samples/jorurimail.conf \
+  #   /etc/httpd/conf.d/
+
+Apache を再起動します。
+
+  # /sbin/service httpd configtest
+  # /sbin/service httpd restart
+
+
+ここまでの手順で Joruri Mail にアクセスすることができます。
+
+  メーラ画面 : http://192.168.0.2/
+
+次のユーザが登録されています。
+
+    管理者（システム管理者）
+      ユーザID   : admin
+      パスワード : admin
+
+    一般ユーザ（徳島　太郎）
+      ユーザID   : user1
+      パスワード : user1
+
+    一般ユーザ（阿波　花子）
+      ユーザID   : user2
+      パスワード : user2
+
+    一般ユーザ（吉野　三郎）
+      ユーザID   : user3
+      パスワード : user3
+
+**********************************************************************
+

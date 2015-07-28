@@ -1,0 +1,59 @@
+<%
+
+mailboxes = []
+Gw::WebmailMailbox.load_mailboxes.each do |box|
+  next if box.name == @mailbox.name && params[:copy].blank?
+  #next if box.name =~ /^(Drafts|Sent|Trash)(\.|$)/
+  next if box.name =~ /^(Drafts|Trash|Star)(\.|$)/
+  mailboxes << [box.slashed_title, "#{box.name}"]
+end
+
+action_label = params[:copy].blank? ? '移動' : 'コピー'
+
+%>
+<%= javascript_include_tag "/_common/js/mail_form.js" %>
+<table id="webmailContainer"><tr>
+<% unless @new_window %>
+<td id="webmailMenu"><div id="webmailMenuContainer">
+
+<div class="menu">
+  <%= link_to 'メールの受信', gw_webmail_mails_path(@mailbox.name), :class => 'index', :title => "メールの受信" %>
+  <%= link_to 'メールの作成', new_gw_webmail_mail_path('INBOX'), :class => 'newMail', :title => "メールの作成", :target => '_blank',
+    :onclick => open_mail_form(new_gw_webmail_mail_path('INBOX')) %>
+</div>
+
+<%= render :partial => 'gw/admin/webmail/base/account' %>
+<%= render :partial => 'mailbox' %>
+<%= render :partial => 'mail_address_history' if @mail_address_history != 0 %>
+
+</div></td>
+<% end %>
+<td id="webmailContent"><div id="mailContent">
+
+<%= form_for :item, :url => '', :html => {:id => "mails", :name => "mails"} do |f| %>
+<%= hidden_field_tag 'copy', params[:copy] %>
+<%= hidden_field_tag 'new_window', @new_window %>
+<% params[:item][:ids].each do |id, key| %>
+<%= hidden_field_tag "item[ids][#{id}]", 1 %>
+<% end %>
+
+<table class="index">
+  <tr><th><%= action_label %>するメール</th></tr>
+  <% @items.each do |item| %>
+  <tr><td class="autoWrap" style="word-break:break-all;"><%= mail_text_wrap(item.subject) %></td></tr>
+  <% end %>
+</table>
+<br />
+
+<table class="index">
+  <tr>
+    <th style="width: 120px;"><%= action_label %>先フォルダ</th>
+    <td><%= f.select :mailbox, mailboxes, :selected => 'Archives' %></td>
+  </tr>
+</table>
+
+<% if mailboxes.size > 0 %><%= raw submit(["#{action_label}する"]) %><% end %>
+
+<% end %>
+
+</div><!-- end #webmailContainer --></td></table>

@@ -1,0 +1,10 @@
+<%
+case params[:mobile].to_s
+when 'top'
+  concat render :partial => 'index_smart_phone_top'
+when 'maintenance'
+  concat render :partial => 'index_smart_phone_maintenance'
+else
+  concat render :partial => 'index_smart_phone_list'
+end  
+%>

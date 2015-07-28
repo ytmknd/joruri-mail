@@ -1,0 +1,15 @@
+<table id="webmailContainer"><tr><td id="webmailContent"><div id="addressContent">
+
+<div class="actionMenu">
+<%= link_to :index, gw_webmail_address_groups_path %>
+<%= link_to :show, gw_webmail_address_path(@item.id) %>
+<%= link_to submission_label(:edit), '#' , :onclick => "$('addressForm').submit();return false;" %>
+</div>
+
+<%= form_for :item, :url => {:action => :update}, :html => {:method => :put, :id => 'addressForm'} do |f| %>
+  <%= f.error_messages %>
+  <%= render :partial => 'form', :locals => {:f => f} %>
+  <%= raw submit(:edit) %>
+<% end %>
+
+</div><!-- end #webmailContainer --></td></table>

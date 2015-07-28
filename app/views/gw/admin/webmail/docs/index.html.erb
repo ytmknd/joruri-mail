@@ -1,0 +1,19 @@
+<div id="docContent">
+<%= render :partial => 'menu' %>
+
+<table class="index">
+  <tr>
+    <th style="width: ;"><%= Gw::WebmailDoc.new.locale(:title) %></th>
+    <th style="width: 120px; text-align: center;"><%= Gw::WebmailDoc.new.locale(:created_at) %></th>
+  </tr>
+  <% for item in @items %>
+  <tr <%= cycle '', 'class="cycle"' %>>
+    <td><%= link_to item.title, url_for(:action => :show, :id => item) %></td>
+    <td style="text-align: center;"><%= safe{item.created_at.strftime('%Y-%m-%d %H:%M')} %></td>
+  </tr>
+  <% end %>
+</table>
+
+<%= paginate @items %>
+
+</div>

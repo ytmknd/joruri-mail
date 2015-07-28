@@ -1,0 +1,59 @@
+<script type="text/javascript">
+//<![CDATA[
+
+function createMail() {
+  var frm = document.users;
+  var len = frm.elements.length;
+  var chk = false;
+  for ( var i = 0; i < len; i++) {
+    if(frm.elements[i].name.match(/^item\[ids\]/)) {
+      if (frm.elements[i].checked == true) {
+        chk = true;
+        break;
+      }
+    }
+  }
+  if (chk == false) {
+     alert("連絡先を選択してください。");
+     return false;
+  }
+  frm.submit();
+  return false;
+}
+
+//]]>
+</script>
+
+<%= form_for :item, :url => url_for(:action => :create_mail), :html => {:id => 'users', :name => 'users', :target => '_blank'} do |f| %>
+
+<div class="actionMenu">
+  <a href="#" onclick="return createMail();" class="create" title="メール作成">メール作成</a>
+</div>
+
+<table class="index">
+  
+  <tr>
+    <th style="width: 20px; text-align: center;"><br /></th>
+    <th style="width: 30%;">名前</th>
+    <th style="width: ;">メールアドレス</th>
+  </tr>
+  
+  <% for item in @items %>
+  <tr <%= cycle '', 'class="cycle"' %>>
+    <td style="padding: 0px; text-align: center;">
+      <%= %Q(<input type="checkbox" name="item[ids][#{item.id}]" value="1" />).html_safe if !item.email.blank? %>
+    </td>
+    <td><%= link_to h(item.name), gw_webmail_address_path(item.id) %></td>
+    <td><%=h item.email %></td>
+  </tr>
+  <% end %>
+
+</table>
+
+<div class="actionMenu lowerActionMenu">
+  <a href="#" onclick="return createMail();" class="create" title="メール作成">メール作成</a>
+</div>
+
+<% end %>
+
+<%= paginate @items %>

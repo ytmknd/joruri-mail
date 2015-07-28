@@ -1,0 +1,12 @@
+<%=raw init_tiny_mce :readonly => true %>
+
+<div id="docContent">
+<%= render :partial => 'menu' %>
+
+<table class="show">
+  <tr>
+    <td class="mceBody"><%= text_area_tag 'body', @item.body, :class => 'mceEditor' %></td>
+  </tr>
+</table>
+
+</div>

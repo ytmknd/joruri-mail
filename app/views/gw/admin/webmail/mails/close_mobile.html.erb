@@ -1,0 +1,35 @@
+<%
+def mailto(to = "", cc = "", bcc = "", subject, body)
+  to = extract_addresses_from_mail_list(to).uniq.map{|to| "to=#{to}"}
+  cc = extract_addresses_from_mail_list(cc).uniq.map{|cc| "cc=#{cc}"}
+  bcc = extract_addresses_from_mail_list(bcc).uniq.map{|bcc| "bcc=#{bcc}"}
+  "mailto:?#{(to+cc+bcc).join('&')}&subject=#{subject}&body=#{body}"
+end
+
+subject = "添付: #{flash[:in_subject]}"
+body = "添付ファイルを送信します。"
+
+if request.mobile.docomo?
+  subject = URI.escape(Jpmobile::Util.utf8_to_sjis(subject))
+  body = URI.escape(Jpmobile::Util.utf8_to_sjis(body))
+else
+  subject = URI.escape(request.mobile.to_external(subject, nil, nil).first)
+  body = URI.escape(request.mobile.to_external(body, nil, nil).first)
+end
+%>
+
+<% unless flash[:notice] || flash[:error] %>
+<div class="notice">メールの処理が完了しました。</div>
+
+<% if false %>
+<% if flash[:commit_send] %>
+<div class="attachmentSendMenu">
+<div class="title"><img src="/_common/themes/admin/gw/webmail/mobile/images/reply-menu-lightblue.jpg" alt="添付ファイル送信"/>添付ファイル送信</div>
+<div class="attention">※パケット定額サービスに入っていない場合、高額の通信料が発生する場合があります。<br/></div>
+<div class="menuItem"><a href="<%= mailto(flash[:in_to], subject, body) %>">Toの宛先に送信</a></div>
+<div class="menuItem"><a href="<%= mailto(flash[:in_to], flash[:in_cc], subject, body) %>">To,Ccの宛先に送信</a></div>
+<div class="menuItem"><a href="<%= mailto(flash[:in_to], flash[:in_cc], flash[:in_bcc], subject, body) %>">全員に送信</a></div>
+</div>
+<% end %>
+<% end %>
+<% end %>

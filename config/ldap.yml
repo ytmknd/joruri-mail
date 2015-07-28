@@ -1,0 +1,15 @@
+development:
+  host: 192.168.0.3
+  port: 389
+  base: dc=www,dc=joruri,dc=org
+
+test:
+  host:
+  port:
+  base:
+
+production:
+  host:
+  port:
+  base:
+

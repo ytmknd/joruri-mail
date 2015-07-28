@@ -1,0 +1,47 @@
+<%
+
+kopts = [["件名（Subject）","subject"],["差出人（From）","from"],["宛先（To）","to"],["本文（Body）","body"],["全文","text"]]
+sopts = [["すべて",""],["未読のみ","unseen"],["既読のみ","seen"]]
+
+fromto = @mailbox.name =~ /^(Sent|Drafts)(\.|$)/ ? ["受信者","to"] : ["差出人","from"]
+skopts = [["件名","subject"],fromto,["送信日時","date"],["サイズ","size"]]
+soopts = [["昇順",""],["降順","reverse"]]
+ssopts = [["",""],["スター付き優先","1"]]
+slopts = [["すべて",""]] + @label_confs.map{|conf| [conf[:name], conf[:id]]}
+
+disp  = params[:search] ? "block" : "none"
+
+%><%= form_tag '', :method => :get, :id => "searchForm", :class => 'search',
+  :style => "display: #{disp}; margin: 0px 10px 10px 10px;" do %>
+<%= hidden_field_tag :search, 1 %>
+<%= hidden_field_tag :s_from, params[:s_from] if params[:s_from] %>
+<table>
+  <tr>
+    <th>検索</th>
+    <td>
+      <%= text_field_tag 's_keyword', params[:s_keyword], :class => 'keyword' %>
+      <%= select_tag('s_column', options_for_select(kopts, params[:s_column])) %>
+    </td>
+    <th>状態</th>
+    <td>
+      <%= select_tag('s_status', options_for_select(sopts, params[:s_status])) %>
+    </td>
+    <td class="formSubmitters">
+      <%= submit_tag '検索', :name => :search %><%= submit_tag 'リセット', :name => :reset %>
+    </td>
+  </tr>
+  <tr>
+    <th>並び順</th>
+    <td>
+      <%= select_tag('sort_key', options_for_select(skopts, params[:sort_key])) %>
+      <%= select_tag('sort_order', options_for_select(soopts, params[:sort_order])) %>
+      <%= select_tag('sort_starred', options_for_select(ssopts, params[:sort_starred])) %>
+    </td>
+    <th>ラベル</th>
+    <td>
+      <%= select_tag('s_label', options_for_select(slopts, params[:s_label])) %>
+    </td>
+  </tr>
+</table>
+
+<!-- end .search --><% end %>

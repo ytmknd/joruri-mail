@@ -1,0 +1,438 @@
+﻿@charset "UTF-8";
+@import "./base/style.css";
+@import "./base/col-1.css";
+
+/* =========================================================
+   Webメール / 携帯
+========================================================= */
+/* base */
+img{
+  border:none;
+}
+#container{
+  font-size: 80%;
+}
+select{
+  font-size:100%;
+}
+.mailItem input{
+  margin-right:2px;
+}
+
+/* mainMenu-style */
+#content #contentBody {
+  margin-bottom:15px;
+}
+.mailbox {
+  margin-bottom:15px;
+}
+#headerBody{
+  border-top:5px solid #00257F;
+}
+.joruriMail{
+  padding-left:5px;
+  margin-top:8px;
+  margin-bottom:5px;
+  padding-bottom:5px;
+  border-bottom:solid 1px #00257F;
+}
+h1 a{
+  border:none;
+}
+h1 img{
+  border:none;
+}
+h1 a:hover {
+  background-color:transparent;
+}
+h1 a:visited:hover {
+  background-color:transparent;
+}
+.user{
+  text-align:right;
+  font-size:80%;
+}
+#maintenance {
+  text-align:center;
+  padding:5px;
+  margin:5px;
+  border-top:dashed 1px #3F8BE1;;
+  border-bottom:dashed 1px #3F8BE1;;
+}
+#maintenance a {
+  background-color:#FFFF6D;
+  display:block;
+  line-height:1.4;
+  color:red;
+  padding:2px;
+}
+.menu{
+  padding-left:15px;
+  text-align:left;
+}
+.menus{
+  line-height:20px;
+}
+#container .mailbox,
+#container .sendMenu .menus,
+#container .linkMenu .menus{
+  margin-left:15px;
+}
+.children{
+  margin-left:7px;
+}
+/* ログイン画面 */
+.login h1{
+  width:auto;
+  margin-top:0px;
+  margin-bottom:10px;
+  padding-top:7px;
+  padding-left:5px;
+  padding-bottom:5px;
+  border-top:5px solid #00257F;
+  border-bottom:1px solid #00257F;
+}
+#account ,
+#password ,
+#mobile_password {
+ width:160px;
+}
+.submitters{
+  margin-top:5px;
+  text-align:center;
+}
+
+/* list-style */
+.mailbox ul {
+  list-style-position:outside;
+  list-style-type:none;
+}
+
+/* line-style */
+
+#footer{
+  border-top:double 3px #00257F;
+  color:#00257F;
+}
+
+/* folder-style */
+.folderTitle {
+  background-color:#E8F5FF;
+  background-position:5px center;
+  background-repeat:no-repeat;
+  margin-bottom:2px;
+  margin-top:5px;
+  padding:3px 5px;
+}
+.sendMenu .title,
+.linkMenu .title{
+  background-color:#E8F5FF;
+  margin-bottom:5px;
+  margin-top:5px;
+  padding:3px 5px;
+}
+#footer .link{
+  margin-left:5px;
+}
+.copyright{
+  background-color:#00257F;
+  color:#ffffff;
+  font-size:70%;
+  line-height: 14px;
+  text-align:center;
+  margin-top:5px;
+  padding-top:3px;
+}
+/* =========================================================
+   Webメール / 受信ボックス
+========================================================= */
+.mailboxTitle {
+  background-color:#3F8AE0;
+  background-position:5px 5px;
+  background-repeat:no-repeat;
+  margin-top:5px;
+  padding:3px 5px;
+  color:#ffffff;
+}
+.mailboxTitle .link {
+  color: #ffffff;
+  text-decoration: none;
+}
+.attach{
+  background-repeat: no-repeat;
+  background-position:right center;
+  width: 13px;
+  height: 14px;
+  display:inline-block;
+  text-indent: -9999px;
+  overflow:hidden;
+  text-decoration: none;
+}
+.mailItems{
+  padding:5px;
+  text-align:left;
+}
+.mailItem{
+  border-bottom-color:#CCCCCC;
+  border-bottom-style:dotted;
+  border-bottom-width:1px;
+}
+.mailItems .mailItem .date {
+  margin-left:9px;
+}
+.mailItems .mailItem .mailbox {
+  margin-left:9px;
+}
+.mailItems .mailItem .unseen .subject {
+  font-weight: bold;
+}
+.pagination .pagination {
+  padding-left:5px;
+  text-align:center;
+}
+.unseenNum{
+  color:red;
+}
+/* =========================================================
+   Webメール / メール本文
+========================================================= */
+#inlineContents{
+  margin:5px;
+}
+h2{
+}
+h2 a{
+  width: 65px;
+  height: 11px;
+  border:none;
+  text-decoration: none;
+}
+h2 img {
+  border:none;
+}
+h2 a:hover {
+  background-color:transparent;
+}
+h2 a:visited:hover {
+  background-color:transparent;
+}
+.headerTitle,
+.moveMenu .title{
+  background-color:#E8F5FF;
+  padding-bottom:3px;
+  padding-left:5px;
+  padding-top:3px;
+}
+.showItem{
+  padding-left:5px;
+  padding-top:3px;
+}
+.field{
+  background-color:#3F8AE0;
+  color:#ffffff;
+}
+.attachmentFile,
+.mdnMenu{
+  margin-left:5px;
+  margin-right:5px;
+}
+.attachmentFile .title,
+.mdnMenu .title{
+  background-color:#E5E5E5;
+  background-position:3px center;
+  background-repeat:no-repeat;
+}
+.attachmentFile .attention,
+.attachmentSendMenu .attention,
+.replyMenu .attention{
+  color:#FF3333;
+}
+.attachmentFile ul{
+  padding-left:20px;
+}
+.newMail .title ,
+.groups,
+.memo .title {
+  background-color:#3F8AE0;
+  background-position:8px center;
+  background-repeat:no-repeat;
+  margin-bottom:5px;
+  margin-top:5px;
+  padding-bottom:3px;
+  padding-left:5px;
+  padding-top:3px;
+  color:#FFFFFF;
+}
+.replyMenu .title ,
+.managementMenu .title ,
+.searchMenu .title ,
+.group,
+.selectedTitle {
+  background-color:#E8F5FF;
+  background-position:8px center;
+  background-repeat:no-repeat;
+  margin-bottom:5px;
+  margin-top:15px;
+  padding-bottom:3px;
+  padding-left:5px;
+  padding-top:3px;
+  text-align:left;
+}
+.attachmentSendMenu .title {
+  background-color:#E8F5FF;
+  background-position:8px center;
+  background-repeat:no-repeat;
+  margin-bottom:5px;
+  margin-top:5px;
+  padding-bottom:3px;
+  padding-left:5px;
+  padding-top:3px;
+  text-align:left;
+}
+.replyMenu .title a ,
+.attachmentSendMenu .title a ,
+.managementMenu .title a,
+.sendMenu .title a {
+  color:#000000;
+  text-decoration:none;
+}
+.replyMenu .title a:hover ,
+.attachmentSendMenu .title a:hover ,
+.managementMenu .title a:hover ,
+.sendMenu .title a:hover {
+  background-color:transparent;
+  color:#000000;
+  text-decoration:none;
+}
+.replyMenu .title a:visited:hover ,
+.attachmentSendMenu .title a:visited:hover ,
+.managementMenu .title a:visited:hover ,
+.sendMenu .title a:visited:hover {
+  background-color:transparent;
+  color:#000000;
+  text-decoration:none;
+}
+.replyMenu .menuItem,
+.attachmentSendMenu .menuItem {
+  margin-left:10px;
+}
+.managementForm{
+  margin-left:7px;
+}
+.link{
+  margin-top:5px;
+  margin-left:5px;
+}
+.pagination{
+  margin-top:10px;
+  padding-left:0px;
+}
+/* =========================================================
+   Webメール / メール作成
+========================================================= */
+#item_form{
+  padding-left:5px;
+}
+#item_in_to ,
+#item_in_cc ,
+#item_in_bcc ,
+#item_in_subject ,
+#item_in_body,
+#memo_body {
+  width:160px;
+  font-size: 100%;
+}
+#item_in_to{
+  height:2.4em;
+}
+.submitters .send ,
+.submitters .draft {
+}
+.addressMenus {
+  margin-bottom: 10px;
+  text-align: center;
+}
+/* Form-style */
+#mailForm a{
+}
+/* maintenance */
+#maintenance .showItem{
+  text-align:left;
+}
+#maintenance .showItem .title,
+.priUser .showItem .title,
+.sysUser .showItem .title{
+  background-color:#3F8AE0;
+  color:#FFFFFF;
+}
+/* address */
+.addressItems,
+.selectedAddresses,
+.groupForm{
+  padding:5px 5px 0;
+}
+#mailForm {
+  text-align:center;
+}
+#memoForm {
+  text-align:center;
+  padding-left:5px;
+}
+#mailForm .menuItem {
+  margin-top:5px;
+  margin-left:5px;
+}
+.addressItems,
+.selectedAddresses{
+  text-align:left;
+  display:block;
+}
+/* エラーメッセージ */
+.notice {
+  color:green;
+}
+.error {
+  color:red;
+}
+
+/* smartPhone */
+#smartPhoneContainer {
+text-align:center;
+}
+#smartPhoneContainer #header .joruriMail,
+#smartPhoneContainer #contentBody {
+text-align:left;
+}
+#smartPhoneContainer .mailbox,
+#smartPhoneContainer .menus,
+#smartPhoneContainer .mailItems,
+#smartPhoneContainer .addressItems,
+#smartPhoneContainer .selectedAddresses,
+#smartPhoneContainer .menu,
+#smartPhoneContainer .mailbox,
+#smartPhoneContainer .memo .body,
+#smartPhoneContainer #maintenance .showItem
+{
+  text-align:left;
+  width:250px;
+  margin:auto;
+}
+#smartPhoneContainer .sendMenu {
+  width:100%;
+}
+#smartPhoneContainer .sendMenu .menuItem {
+text-align:center;
+}
+
+/* smartPhoneLogin */
+#smartPhoneContainer form{
+  width:100%;
+}
+#smartPhoneContainer .login h1{
+  text-align:left;
+}
+#smartPhoneContainer .login .fields{
+  text-align:left;
+  width:250px;
+  margin:auto;
+}

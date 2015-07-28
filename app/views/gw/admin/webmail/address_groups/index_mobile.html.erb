@@ -1,0 +1,101 @@
+<%
+def name_with_prefix(group)
+  "　"*(group.level_no-1) + group.name
+end
+def group_selection(group)
+  array = []
+  array << [name_with_prefix(group), group.id]
+  group.children.each do |g|
+    array += group_selection(g)
+  end
+  array
+end
+
+def group_selection_root(groups)
+  array = []
+  array << ['すべて', 0]
+  groups.each do |group|
+    array << [group.name, group.id]
+    group.children.each do |g|
+      array += group_selection(g)
+    end
+  end
+  array 
+end
+
+def enum_selected_address
+  num = 0
+  [:to, :cc, :bcc].each do |t|
+    num += session[:mobile][t].length if session[:mobile][t]
+  end if session[:mobile]
+  num
+end
+
+def get_order
+  order = Gw::WebmailSetting.user_config_value(:address_order)
+  order = order.blank? ? 'email' : order
+  order << ', id'
+end
+
+params[:group_id] = nil if params[:clear]
+
+@group = Gw::WebmailAddressGroup.new(:id => 0, :name => 'すべて')
+unless params[:group_id].blank?
+  gid = params[:group_id].to_i
+  if gid != 0
+    @group = Gw::WebmailAddressGroup.find(params[:group_id])
+    @items = @group.addresses.find(:all, :order => get_order)
+  end
+end
+
+%>
+
+<div class="groups"><%= Joruri.config.application['webmail.address_group_menu'] %></div>
+<%= form_tag gw_webmail_address_groups_path, {:id => 'groupForm', :name => 'groupForm', :class => 'groupForm', :method => :get } do |f| %>
+  <%= select_tag :group_id, options_for_select(group_selection_root(@root_groups), @group.id), :class => 'selectUI' %><br/>
+  <%= submit_tag '検索', :class => 'menuItem', :name => 'select', :accesskey => '1' %>
+  <%= submit_tag 'リセット', :class => 'menuItem', :name => 'clear', :accesskey => '2' %>
+<% end %>
+
+<div class="group"><%= @group.name%></div>
+<%= form_for :item, :url => mobile_manage_gw_webmail_address_groups_path, :html => {:id => 'mailForm', :name => 'mailForm', :class => 'mailForm'} do |f| %>
+  <% if @items.blank? %>
+  <div class="notice">登録アドレスはありません。</div>
+  <% else %>
+  <div class="addressItems">
+    <div class="captions">
+      <font class="to">To</font>
+      <font class="cc">Cc</font>
+      <font class="bcc">Bcc</font>
+    </div>
+    <% @items.each do |u| %>
+    <div class="addressItem">
+      <input type="checkbox" name="to[<%= u.id %>]" value="1" />
+      <input type="checkbox" name="cc[<%= u.id %>]" value="1" />
+      <input type="checkbox" name="bcc[<%= u.id %>]" value="1" />
+      <%= link_to "#{u.name} <#{u.email}>", gw_webmail_address_path(u.id, :group_id => @group.id), :class => 'nameLink' %><br/>
+    </div>
+    <% end %>
+  </div>
+  <%= submit_tag 'アドレス選択', :class => 'menuItem', :name => 'selectAddress', :accesskey => '3' %>
+  <% end %>
+  <% if enum_selected_address != 0 %>
+  <div class="selectedTitle">選択済みアドレス</div>
+  <div class="selectedAddresses">
+  <% [:to, :cc, :bcc].each do |t| %>
+    <% if !session[:mobile][t].blank? %>
+    <div class="addresses">
+      <font class="type"><%= t.capitalize %></font>
+      <% session[:mobile][t].each_with_index do |u,idx| %>
+      <div class="address"><%= submit_tag '削除', :class => 'deleteItem', :name => "deleteAddress=#{t}_#{idx}" %><%= u %></div>
+      <% end %>
+    </div>
+    <% end %>
+  <% end %>
+  </div>
+  <% end %>
+  <%= hidden_field_tag :group_id, params[:group_id] %>
+  <% if enum_selected_address != 0 || !@items.blank? %>
+  <%= submit_tag 'メール作成', :class => 'menuItem', :name => 'createMail' %>
+  <% end %>
+<% end %>

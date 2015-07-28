@@ -1,0 +1,21 @@
+<%=raw init_tiny_mce %>
+
+<table class="show">
+  <tr>
+    <th><%= @item.locale(:state) %></th>
+    <td><%= f.radio_buttons :state, @item.states, :class => 'status' %></td>
+  </tr><tr>
+    <th><%= @item.locale(:published_at) %></th>
+    <td><%= f.text_field :published_at, :value => @item.published_at.strftime('%Y-%m-%d %H:%M'), :class => 'datetime pulished_at' %></td>
+  </tr><tr>
+    <th><%= @item.locale(:sort_no) %></th>
+    <td><%= f.text_field :sort_no, :class => 'sort_no' %></td>
+  </tr><tr>
+    <th><%= @item.locale(:title) %></th>
+    <td><%= f.text_field :title, :class => 'string title' %></td>
+  </tr><tr>
+    <th colspan="2"><%= @item.locale(:body) %></th>
+  </tr><tr>
+    <td colspan="2"><%= f.text_area :body, :class => 'string body mceEditor' %></td>
+  </tr>
+</table>

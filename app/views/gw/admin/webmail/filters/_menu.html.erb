@@ -1,0 +1,10 @@
+<div class="actionMenu">
+<%= action_menu :new %>
+<%= action_menu :index %>
+<%= action_menu :show %>
+<%= action_menu :edit    if safe{@item.editable?} %>
+<%= action_menu :destroy if safe{@item.deletable?} %>
+<% if @item && @item.id %>
+<%= link_to "適用", apply_gw_webmail_filter_path(@item.id) if params[:action] == "show" %>
+<% end %>
+</div>

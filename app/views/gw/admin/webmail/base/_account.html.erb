@@ -1,0 +1,5 @@
+<% if Core.switch_users.count > 1 %>
+  <%= form_tag url_for(:action => :index, :mailbox => 'INBOX'), :method => :get, :class => 'accounts' do %>
+    <%= select_tag :current_account, options_for_select(Core.switch_users.map{|u| [u.email, u.account]}, Core.current_user.account), :class => 'account', :onchange => 'this.form.submit();' %>
+  <% end %>
+<% end %>

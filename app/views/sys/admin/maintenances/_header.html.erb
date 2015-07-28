@@ -1,0 +1,19 @@
+<% if false %>
+<%
+unless defined?(current)
+  current = :maintenance 
+end
+%>
+
+<div class="mainMenu">
+<%= link_to "メンテナンス", sys_maintenances_path, :class => (current == :maintenance ? 'current' : '') %>
+<%= link_to "お知らせ"  , sys_messages_path, :class => (current == :message ? 'current' : '') %>
+</div>
+<% end %>
+
+<div class="mainMenu">
+<%= render :partial => 'layouts/admin/sys/menu', :locals => {:current => :maintenance} %>
+</div>
+
+<div class="contentMenu">
+</div>

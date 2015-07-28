@@ -1,0 +1,9 @@
+<div class="newMail">
+<div class="title"><img alt="メール作成" src="/_common/themes/admin/gw/webmail/mobile/images/send-menu-blue.jpg" />メール作成</div>
+<%= error_messages_for "item" %>
+<%= form_for :item, :url => mobile_send_gw_webmail_mail_path(params[:mailbox], params[:id].to_i),
+  :html => {:id => "item_form", :class => "newForm", :name => "newForm"} do |f| %>
+  <%= render :partial => 'form_mobile', :locals => {:f => f} %>
+  <%=raw submit([["送信する", "send"],["下書き保存", "draft"]]) %>
+<% end %>
+</div>

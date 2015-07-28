@@ -1,0 +1,207 @@
+<%
+assert = "このメールは携帯端末から送信しています。"
+if @item.in_format == Gw::WebmailMail::FORMAT_HTML
+  if @item.in_html_body !~ /^#{assert}/
+    @item.in_html_body = "#{@item.in_html_body}\n\n-------\n#{assert}\n\n\n"
+  end
+else
+  if @item.in_body !~ /^#{assert}/
+    @item.in_body = "#{@item.in_body}\n\n-------\n#{assert}\n\n\n"
+  end
+end
+%>
+
+<script type="text/javascript">
+//<![CDATA[
+function toggleAddressInput() {
+  toggleAddressInputFor('cc');
+  toggleAddressInputFor('bcc');
+  var buttonElm = $('toggleButton');
+  if (buttonElm && buttonElm.visible()) buttonElm.hide();
+  return false;
+}
+function toggleAddressInputFor(type) {
+  var containerElm = $(type + 'Container');
+  if (containerElm && !containerElm.visible()) containerElm.show();
+}
+
+window.onload = function() {
+<% if (@item.in_cc && @item.in_cc != '') || (@item.in_bcc && @item.in_bcc != '') %>
+  toggleAddressInput();
+<% end %>
+}
+//]]>
+</script>
+
+<%= hidden_field_tag "mobile[action]", params[:mobile] && params[:mobile][:action] ? params[:mobile][:action] : params[:action] %>
+<%= hidden_field_tag "mobile[form_action]", @form_action %>
+<%= hidden_field_tag "mobile[mailbox]", @mailbox.name %>
+<%= hidden_field_tag "mobile[uid]", params[:id] if params[:id] %>
+<%= hidden_field_tag "mobile[qt]", params[:qt] %>
+<%= hidden_field_tag :id, params[:id] %>
+
+<div class="addressMenu">
+  <div class="menus">
+    <%= submit_tag Joruri.config.application['webmail.sys_address_menu'], :class => 'sysAddress', :name => 'addSysAddress' %>
+    <%= submit_tag Joruri.config.application['webmail.address_group_menu'], :class => 'priAddress', :name => 'addPriAddress' %>
+  </div>
+</div>
+
+<div id="mailAddressesForm" class="mailForm">
+<table id="mailAddresses" class="mailAttributes">
+  <tr>
+    <th>宛先：</th>
+    <td><%= f.text_area :in_to, :rows => 1, :cols => 30 %></td>
+  </tr><tr id="ccContainer" style="display:none;">
+    <th>CC：</th>
+    <td><%= f.text_area :in_cc, :rows => 1, :cols => 30 %></td>
+  </tr><tr id="bccContainer" style="display:none;">
+    <th>BCC：</th>
+    <td><%= f.text_area :in_bcc, :rows => 1, :cols => 30 %></td>
+  </tr>
+  <tr>
+    <th></th>
+    <td style="padding-bottom:0"><div class="addressToggleButtons">
+      <%= link_to 'CC/BCCを追加', '#', :id => "toggleButton", :onclick => "return toggleAddressInput();" %>
+    </div></td>
+  </tr>
+  <tr>
+    <th>件名：</th>
+    <td><%= f.text_area :in_subject, :class => 'subject', :rows => 1, :cols => 30 %></td>
+  </tr>
+  <tr>
+    <th colspan="2">本文：</th>
+  </tr>
+  <tr>
+    <td colspan="2">
+      <div id="textFormatEditor" class="textFormatEditor">
+        <%= f.text_area :in_body, :class => 'body', :rows => 10, :cols => 36 %>
+      </div>
+    </td>
+  </tr>
+</table>
+
+<%
+attachment_file_max_size = Joruri.config.application['webmail.attachment_file_max_size']
+%>
+<script type="text/javascript">
+//<![CDATA[
+$('item_form').onsubmit = function() {
+  return true;
+}
+function uploadAttachmentFile() {
+  var elm = $('item_in_files');
+  var maxsize = <%= attachment_file_max_size %>*1024*1024;
+  if (elm.value == '') { return; }
+  if (elm.files) {
+    if (elm.files[0].size > maxsize) {
+      alert("ファイルサイズが容量制限（<%= attachment_file_max_size %>MB）を超えています。");
+      return;
+    }
+  }
+  $("defaultUploaderProgressName").innerHTML = elm.value;
+  $("defaultUploaderProgress").style.display = "block";
+  $("commit_file").click();
+}
+function deleteUploadedFile(id) {
+  var elm = $('uploadedFile' + id);
+  var uri = "<%= gw_webmail_attachments_path %>/" + id + '.xml';
+  var myAjax = new Ajax.Request(uri, {
+    method: 'post',
+    parameters: "_method=delete&authenticity_token=<%= form_authenticity_token %>&tmp_id=<%= @item.tmp_id %>",
+    onComplete: deletedUploadedFile,
+    onFailure: function(request) { alert('送信に失敗しました。'); }
+  });
+  return false;
+}
+function deletedUploadedFile(request) {
+  var id  = request.responseText.replace(/^OK /, '');
+  var elm = $('uploadedFile' + id);
+  if (elm) { elm.remove(); }
+  var field = $('uploadedFiles');
+}
+function hasFileUploadSupport(){
+  var hasSupport = true;
+  try{
+    var testFileInput = document.createElement('input');
+    testFileInput.type = 'file';
+    testFileInput.style.display = 'none';
+    document.getElementsByTagName('body')[0].appendChild(testFileInput);
+    if(testFileInput.disabled){
+      hasSupport = false;
+    }
+  } catch(ex){
+     hasSupport = false;
+  } finally {
+    if(testFileInput){
+      testFileInput.parentNode.removeChild(testFileInput);
+    }
+  }
+  return hasSupport;
+}
+if (!hasFileUploadSupport()) {
+  $('table.fileUploader').style.display = "none";
+}
+//]]>
+</script>
+
+<table id="mailAddresses" class="mailAttributes fileUploader" style="margin-bottom: 5px;">
+  <tr>
+    <th>添付ファイル：</th>
+  </tr>
+</table>
+
+<% if Joruri.config.application['webmail.attachment_file_upload_from_smart_phone'] == 1 %>
+<table id="mailAddresses" class="mailAttributes fileUploader" style="margin-bottom: 5px;">
+  <tr>
+    <td>
+      <div id="defaultUploader">
+        <%= f.file_field :in_files, :name => 'item[in_files][]', :size => 90, :class => 'file', :onchange => 'uploadAttachmentFile();' %><br />
+        <%= tag :input, :type => 'button', :value => "選択したファイルを添付", :id => "commit_file", :name => "commit_file", :onclick => "checkServerStatus(this); return false;", :style => 'display: none;' %>
+      </div>
+      <div id="defaultUploaderProgress" style="display:none;">
+        <div class="progressWrapper">
+          <div class="progressContainer red">
+            <div id="defaultUploaderProgressName" class="progressName"></div>
+            <div class="progressBarStatus">uploading...</div>
+          </div>
+        </div>
+      </div>
+    </td>
+  </tr>
+</table>
+<% end %>
+
+<% unless @item.tmp_attachments.blank? %>
+<table class="index" bgcolor="white">
+  <tr>
+    <td class="attention" colspan="2">
+      <% if attachment_file_downloadable? %>
+        <%=raw Joruri.config.application['webmail.download_allow_message'] %>
+      <% else %>
+        <%=raw Joruri.config.application['webmail.download_deny_message'] %>
+      <% end %>
+    </td>
+  </tr>
+  <% @item.tmp_attachments.each do |at| %>
+  <tr id="uploadedFile<%= at.id %>" class="uploadedFile">
+    <td>
+      <%= link_to_if attachment_file_downloadable?, mail_text_wrap("#{at.name}(#{at.eng_unit})"), "#", :class => "#{at.css_class}", :onclick => 'return false;' %>
+      <input type="hidden" name="item[tmp_attachment_ids][]" value="<%= at.id %>" />
+    </td>
+    <td>
+      <%= link_to '削除', '#', :title => "削除", :onclick => "return deleteUploadedFile('#{at.id}')", :class => "deleteUploadedFile" %>
+    </td>
+  </tr>
+  <% end %>
+</table>
+<% end %>
+
+<%= f.hidden_field :in_format %>
+<%= f.hidden_field :tmp_id %>
+
+<div class="recipientConfirm">
+  <%= f.check_box :request_mdn %>開封確認メッセージを要求する
+</div>
+
+<!-- end #mailForm --></div>

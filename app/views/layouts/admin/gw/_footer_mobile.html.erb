@@ -1,0 +1,9 @@
+<div class="link">
+<% if params[:mobile].blank? || params[:mobile] != 'top' %>
+<%= link_to 'トップページへ', gw_webmail_mails_path(:mailbox => 'INBOX', :mobile => :top), :accesskey => "0" %>&nbsp;
+<% end %>
+<%= link_to 'ログアウト', _admin_logout_path, :class => 'logout' %>
+</div>
+<br />
+<br />
+<%=raw Joruri.config.application['sys.mobile_footer'] %>

@@ -1,0 +1,18 @@
+<div class="navi">
+<% tree = @parent.parents_tree; tree.each_with_index do |c, k| %>
+<%= link_to h(c.name), sys_groups_path(c) %>
+<% if tree.size != k + 1 %>&gt;<% end %>
+<% end %>
+</div>
+
+<%= javascript_include_tag :defaults %>
+
+<div class="actionMenu">
+<%= action_menu :new, ['新規グループ', new_sys_group_path] %>
+<%= action_menu :new, ['新規ユーザ', new_sys_group_user_path] %>
+<%= action_menu :assign_sort_no, ['並び順採番', assign_sort_no_sys_groups_path], :confirm => '並び順を採番してよろしいですか？' %>
+<%= action_menu :index %>
+<%= action_menu :show %>
+<%= action_menu :edit    if safe{@item.editable?} %>
+<%= action_menu :destroy if safe{@item.deletable?} %>
+</div>

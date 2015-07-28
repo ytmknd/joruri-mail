@@ -1,0 +1,17 @@
+<% if !params[:mobile].blank? && params[:mobile] == 'top' %>
+<h1 class="joruriMail">
+  <img src="/_common/themes/admin/gw/webmail/mobile/images/header-logo.jpg" alt="Joruri Mail"/>
+</h1>
+<% else %>
+<h2 class="joruriMail">
+  <img src="/_common/themes/admin/gw/webmail/mobile/images/header-logo-s.jpg" alt="Joruri Mail"/>
+</h2>
+<% end %>
+<div class="user"><%=h safe{Core.user.name_with_account} %></div>
+
+<div class="link">
+<% if params[:mobile].blank? || params[:mobile] != 'top' %>
+<%= link_to 'トップページへ', gw_webmail_mails_path(:mailbox => 'INBOX', :mobile => :top), :accesskey => "0" %>&nbsp;
+<% end %>
+<%= link_to 'ログアウト', _admin_logout_path, :class => 'logout' %>
+</div>

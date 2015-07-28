@@ -1,0 +1,10 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<groups>
+  <% @groups.each do |g| %>
+  <group>
+    <id><%= g.id %></id>
+    <name><%= g.name %></name>
+    <has_children><%= g.enabled_children.count > 0 ? 1 : 0 %></has_children>
+  </group>  
+  <% end %>
+</groups>

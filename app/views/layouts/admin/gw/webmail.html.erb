@@ -1,0 +1,117 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+       "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="ja" lang="ja">
+<head>
+<meta http-equiv="content-type" content="text/html;charset=UTF-8" />
+<meta http-equiv="Content-Style-Type" content="text/css" />
+<meta http-equiv="Content-Script-Type" content="text/javascript" />
+<link rel="shortcut icon" href="/_common/themes/admin/gw/images/other/favicon.ico">
+<title><%=h Core.title %></title>
+<%= javascript_include_tag :defaults %>
+<%= javascript_include_tag '/_common/js/cookiemanager.js' %>
+<%= javascript_include_tag '/_common/js/navigation.js' %>
+<%= javascript_include_tag '/_common/js/jquery/jquery.min.js' %>
+<%= javascript_include_tag '/_common/js/jquery/jquery-ui.min.js' %>
+<%= csrf_meta_tag %>
+<%#= javascript_include_tag '/_common/js/prototype' %>
+<%#= stylesheet_link_tag '/_common/themes/admin/style', :media => 'all' %>
+<%= stylesheet_link_tag '/_common/js/jquery/jquery-ui.css' %>
+<%= stylesheet_link_tag '/_common/themes/admin/gw/webmail/style', :media => 'all' %>
+<%= stylesheet_link_tag '/_common/themes/admin/gw/print', :media => 'print' %>
+<%= yield :header %>
+<script type="text/javascript">
+//<![CDATA[
+jQuery.noConflict();
+//]]>
+</script>
+</head>
+<body><a id="top" name="top"></a>
+
+<div id="container">
+
+<div id="header">
+<div id="headerContainer">
+  
+  <h1><a href="/_admin/gw">Joruri Mail</a></h1>
+  <div class="menu">
+    <span class="user"><%= safe{Core.user_group.name} %>　<%=h safe{Core.user.name_with_account} %></span>
+    <span class="link">
+      <a class="logout" href="/_admin/logout">ログアウト</a>
+    </span>
+    <% if safe{Core.user.has_auth?(:manager)} %>
+      <span class="sysLink"><a href="/_admin/sys" target="_blank">管理画面</a></span>
+    <% end %>
+    <span class="previousLogin">
+      前回ログイン日時　<%= safe{Core.user.previous_login_date} ? safe{Core.user.previous_login_date.strftime('%Y-%m-%d %H:%M')} : '---'%>
+    </span>
+  </div>
+
+<!-- /#headerContainer --></div>
+<!-- /#header --></div>
+
+<div id="banner">
+<div id="bannerContainer">
+
+<!-- /#bannerContainer --></div>
+<!-- /#banner --></div>
+
+<div id="navi">
+<div id="naviContainer">
+
+<!-- /#navigationContainer --></div>
+<!-- /#navigation --></div>
+
+<div id="main">
+
+<%= render :partial => 'layouts/admin/gw/maintenance' %>
+<%= render :partial => 'layouts/admin/gw/notice' %>
+<%= render :partial => 'layouts/admin/gw/error' %>
+
+<div id="content">
+<div id="contentContainer">
+
+<div id="contentHeader">
+  <div id="contentTitle">
+    <span class="title">メール</span>
+    <span class="email"><%=h safe{Core.user.email} %></span>
+  </div>
+  <%= render :partial => controller.controller_path + '/header' %>
+</div>
+
+<div id="contentBody">
+<%= yield  %>
+</div>
+
+<div id="contentFooter"></div>
+
+<!-- /#contentContainer --></div>
+<!-- /#content --></div>
+
+<div id="menu">
+<div id="menuContainer">
+
+<!-- /#menuContainer --></div>
+<!-- /#menu --></div>
+
+<!-- /#main --></div>
+
+<div id="footer">
+<div id="footerContainer">
+
+<!--<%#= :footer %>-->
+
+<div id="footerHeader"></div>
+<div id="footerBody">
+<div class="copyright">
+  <a href="http://joruri.org" target="_blank"><img src="/_common/themes/admin/gw/images/bt/powered.gif"></a>
+  <%= link_to "接続情報", "/_admin/gw/siteinfo", :target => "_blank", :class => "siteinfo" %></div>
+</div>
+<div id="footerFooter"></div>
+
+<!-- /#footerContainer --></div>
+<!-- /#footer --></div>
+
+<!-- /#container --></div>
+
+</body>
+</html>

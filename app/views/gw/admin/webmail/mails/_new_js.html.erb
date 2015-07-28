@@ -1,0 +1,70 @@
+<script type="text/javascript">
+//<![CDATA[
+function getRequestStatus(xml) {
+  var statusNodes = xml.getElementsByTagName('status');
+  if (statusNodes.length > 0 && statusNodes[0].firstChild) {
+    return statusNodes[0].firstChild.nodeValue;
+  }
+  var errorNodes = xml.getElementsByTagName('error');
+  if (errorNodes.length > 0 && errorNodes[0].firstChild) {
+    return errorNodes[0].firstChild.nodeValue;
+  }
+  return '';
+}
+function clickSubmitButton(button) {
+  var elm = document.createElement('input');
+  elm.name = button.name;
+  elm.value = button.value;
+  elm.setAttribute('type', 'hidden');
+  $('item_form').appendChild(elm);
+  if (button.form.onsubmit()) {
+    button.form.submit();
+  }
+}
+function showServerResponseError() {
+  alert('サーバーの応答がありません。しばらく時間をおいて送信して下さい。');
+}
+function showTokenError() {
+  alert('ログイン状態がリセットされました。画面を閉じて再度ログインしてから送信して下さい。');
+}
+function getAuthenticityToken() {
+  var tokenNodes = $$('input[name="authenticity_token"]');
+  if (tokenNodes.length > 0) {
+    return tokenNodes[0].value;
+  }
+  return '';
+}
+function checkServerStatus(button) {
+  var uri = "<%=raw status_gw_webmail_mails_path %>.xml";
+  var token = getAuthenticityToken();
+  var myAjax = new Ajax.Request(uri, {
+    method: 'post',
+    parameters: {
+      authenticity_token: token
+    },
+    onSuccess: function(request) {
+      if (request.responseXML) {
+        var status = getRequestStatus(request.responseXML);
+        switch (status) {
+          case 'OK':
+            clickSubmitButton(button);
+            break;
+          case 'NG TokenError':
+          case '500 This is a secure page.':
+            showTokenError();
+            break;
+          default:
+            showServerResponseError();
+            break;
+        }
+      } else {
+        showServerResponseError();
+      }
+    },
+    onFailure: function(request) {
+      showServerResponseError();
+    }
+  });
+}
+//]]>
+</script>

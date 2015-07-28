@@ -1,0 +1,174 @@
+@charset "UTF-8";
+
+/* =========================================================
+   AddressGroups / Selector
+========================================================= */
+#addressGroups .group {
+  padding: 2px 0px;
+}
+#addressGroups .group a {
+  padding: 1px 2px;
+  color: #00f;
+}
+#addressGroups .group a.current {
+  background-color: #08e;
+  color: #fff;
+  text-decoration: none;
+}
+#addressGroups .actions {
+  padding-bottom: 2px;
+  text-align: right;
+}
+#addressGroups .actions a {
+  color: #00f;
+}
+#addressGroups .allGroups {
+  margin-bottom: 5px;
+}
+#addressGroups .allGroups a {
+  color: #666;
+  text-decoration: none;
+}
+#addressLowerMenu {
+  margin-top: 10px;
+}
+#addressUpperMenu a,
+#addressLowerMenu a {
+  padding: 1px 2px;
+  color: #666;
+  text-decoration: none;
+}
+
+/* =========================================================
+   AddressContent
+========================================================= */
+#addressContent .actionMenu .create {
+  width: 58px;
+}
+#addressContent .actionMenu .leftMenu {
+  float: left;
+}
+#addressContent .actionMenu .rightMenu {
+  float: right;
+}
+#addressContent #addresses table {
+  margin: 0px 0px 10px 0px;
+}
+#addressContent #addresses table th.checkUI {
+  width: 32px;
+  padding: 0px;
+  text-align: center;
+}
+#addressContent #addresses table th.checkUI a {
+  display: block;
+  width: 100%;
+  padding: 7px 0px;
+  color: #00d;
+  font-size: 12px;
+  font-family: "MS Gothic";
+  font-weight: bold;
+}
+#addressContent #addresses table th.checkUI a:hover {
+  background-color: #adf;
+}
+#addressContent #addresses table td.checkUI {
+  padding: 0px;
+  text-align: center;
+}
+#addressContent #addresses table .email {
+  float: left;
+}
+#addressContent #addresses table .sortNo {
+  color: #777;
+  float: right;
+}
+#addressContent #addresses table a.sorter {
+  /*color: #000;*/
+  text-decoration: underline;
+}
+#addressContent #addresses table a.sorter:hover {
+  /*color: #00f;*/
+}
+#addressContent #addresses .limitedMessage {
+  float: right;
+}
+#addressContent #addresses .addAddressRemarks {
+  float:right;
+  background-image: url("../images/other/adress_m.gif");
+  background-repeat: no-repeat;
+  background-position: left center;
+  padding-left: 15px;
+  margin: 7px 5px 0 0;
+}
+#addressContent #addresses .addAddress {
+  float:right;
+  background-image: url("../images/other/adress_m.gif");
+  background-repeat: no-repeat;
+  background-position: 1px 2px;
+  text-decoration: none;
+  width: 15px;
+  height: 0px;
+  overflow: hidden;
+  padding-top: 15px;
+}
+#addressContent #addresses .condition {
+  display: inline-block;
+  width: 7em;
+}
+
+/* SysAddresses
+--------------------------------------------------------- */
+#sysAddressGroups .group {
+  padding: 2px 0px;
+}
+#sysAddressGroups .group a {
+  padding: 1px 2px;
+  color: #00f;
+}
+#sysAddressGroups .group a.current {
+  background-color: #08e;
+  color: #fff;
+  text-decoration: none;
+}
+#sysAddressGroups .groupTop {
+  margin-bottom: 5px;
+}
+#sysAddressGroups .groupTop a {
+  color: #666;
+  text-decoration: none;
+}
+#sysAddressGroups .childGroups {
+  padding-left: 10px;
+}
+
+/* PriAddress
+--------------------------------------------------------- */
+#addressContent table.addressInfo {
+  margin-bottom: 0px;
+}
+#addressContent table.addressInfo th {
+  width: 105px;
+  vertical-align: top;
+  line-height: 1.1;
+}
+#addressContent table.addressInfo td {
+  line-height: 1.1;
+}
+#addressContent table.addressInfo input,
+#addressContent table.addressInfo textarea {
+  width: 98%;
+}
+#addressContent table.addressInfo a.toggleGroups {
+  display: inline-block;
+  width: 60px;
+  background-color: #FFFFFF;
+  background-image: url("../images/bt/bg-link_check.jpg");
+  background-repeat: no-repeat;
+  border: 1px solid #AAAAAA;
+  color: #000000;
+  text-decoration: none;
+  text-align: center;
+}
+#addressContent table.countAddresses {
+  margin-bottom: 10px;
+}

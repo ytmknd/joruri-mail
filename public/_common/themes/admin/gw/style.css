@@ -1,0 +1,108 @@
+@charset "UTF-8";
+@import "../init.css";
+@import "common.css";
+/* @import "webmail/style.css"; */
+
+/* =========================================================
+   Gw
+========================================================= */
+
+/* Header
+--------------------------------------------------------- */
+#header {
+  height: 41px;
+  padding: 0px;
+  background-image: url(./images/header/header-re.gif);
+  background-position: left top;
+  background-repeat: repeat-x;
+}
+#headerContainer {
+  height: 41px;
+  background-image: url(./images/header/header-right.gif);
+  background-position: right top;
+  background-repeat: no-repeat;
+}
+#header h1 {
+  float: left;
+  width: 200px;
+/*  background-image: url(../images/header.jpg); */
+  background-position: left top;
+  background-repeat: no-repeat;*/
+  line-height: 41px;
+}
+#header h1 a {
+  display: block;
+  width: 200px;
+  height: 41px;
+  background-image: url(./images/header/header-mail_left.gif);
+  background-repeat: no-repeat;
+  background-position: top left;
+  text-decoration: none;
+  text-indent: -9999px;
+}
+#header .menu {
+  padding-top: 12px;
+}
+*html #header .menu {
+  padding-top: 14px;
+}
+#header .menu * {
+  margin: 0px 14px 0px 0px;
+  color: #fff;
+  text-decoration: none;
+}
+#header .menu .jorurigw input {
+  margin: 0;
+}
+#header .menu .jorurigw a {
+  display:inline-block;
+  width: 79px;
+  height: 0;
+  margin: 0;
+  padding-top: 18px;
+  background-image: url(./images/header/bt_link-gw.gif);
+  background-repeat: no-repeat;
+  overflow: hidden;
+}
+#header .menu a: hover {
+  color: #FFCC00;
+}
+#header .menu .user {
+  float: left;
+}
+#header .menu .link {
+  float: right;
+}
+#header .menu .link a {
+  margin-right:10px;
+}
+#header .menu .sysLink {
+  float: right;
+}
+#header .menu .sysLink a {
+  margin-right:0px;
+}
+#header .menu .previousLogin {
+  float: right;
+}
+#header .menu .jorurigw {
+  float: right;
+}
+
+/* Banner
+--------------------------------------------------------- */
+#banner {
+}
+
+/* Navi
+--------------------------------------------------------- */
+#navi {
+  clear: both;
+}
+
+/* Main
+--------------------------------------------------------- */
+#main {
+  margin-top: 15px;
+}
+

@@ -1,0 +1,12 @@
+<table class="show">
+  <tr>
+    <th><%= @item.locale :name %></th>
+    <td><%= f.text_field :name, :class => 'title' %></td>
+  </tr><tr>
+    <th><%= @item.locale :body %></th>
+    <td><%= f.text_area :body, :class => 'body' %></td>
+  </tr><tr>
+    <th><%= @item.locale :default_flag %></th>
+    <td><%= f.radio_buttons :default_flag, [['設定する',1],['設定しない',0]], :class => 'states' %></td>
+  </tr>
+</table>

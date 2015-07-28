@@ -1,0 +1,1179 @@
+﻿@charset "UTF-8";
+
+/* =========================================================
+   Webメール / 携帯
+========================================================= */
+
+/* base
+----------------------------------------------- */
+* {
+  margin: 0;
+  padding: 0;
+  font-size: 1em;
+  font-style: normal;
+  background-repeat: no-repeat;
+}
+input, textarea {
+  font-size: 110%;
+  font-family: "ＭＳ ゴシック", "MS Gothic", Osaka, Terminal, sans-serif;
+}
+blockquote {
+  margin: 10px 20px;
+}
+h1, h2, h3, h4, h5 {
+  font-size: 120%;
+  font-family: verdana;
+}
+img {
+  border-style: none;
+  text-decoration: none;
+}
+pre {
+  font-family: monospace, "ＭＳ ゴシック", "ヒラギノ角ゴ ProN W3", sans-serif;
+}
+ul {
+  list-style-position: outside;
+  list-style-type: none;
+}
+a {
+  text-decoration: none;
+  cursor: pointer;
+}
+a:link {
+  color: #00345C;
+}
+a:visited {
+  color: #993399;
+}
+a:hover {
+  text-decoration: none;
+}
+.nobr {
+  white-space: nowrap;
+}
+strong,
+b {
+  font-weight: bold;
+}
+em,
+i {
+  font-style: oblique;
+}
+body {
+  font-family: ArialMT, "Hiragino Kaku Gothic ProN", "ヒラギノ角ゴ ProN W3", "MS PGothic", "ＭＳ　Ｐゴシック", sans-serif;
+  font-size: 80%;
+}
+
+/* common
+----------------------------------------*/
+table {
+  width: 100%;
+  margin-bottom: 10px;
+  border-collapse: collapse;
+  border-spacing: 0;
+  empty-cells: show;
+}
+table th,
+table td {
+  padding: 7px 7px;
+  border: solid 1px #D9D9D9;
+  border-right: none;
+  border-left: none;
+}
+table th {
+  background-color: #BBDDFF;
+  text-align: left;
+  font-weight: normal;
+}
+div.title,
+div.title span {
+  display: block;
+  line-height: 30px;
+  margin-bottom: 10px;
+}
+.back {
+  display: inline-block;
+  margin: 10px 0;
+}
+.notice {
+ margin: 5px;
+ padding: 5px 10px;
+ border: 1px solid #8da;
+ background-color: #f0fff4;
+ color: #073;
+}
+.error {
+ margin: 5px;
+ padding: 5px 10px;
+ border: 1px solid #e00;
+ background-color: #ffe9ef;
+ color: #e00;
+}
+.attention {
+  color:#FF3333;
+}
+.nowLoading {
+    color: #FF0000;
+    font-size: 130%;
+    margin: 5px 0px 10px 5px;
+    width: 100%;
+}
+
+/* Error.
+----------------------------------------------- */
+.railsException {
+  padding: 20px 20px;
+  color: #b00;
+}
+#errorExplanation {
+  margin: 0px;
+  border: 2px solid #f00;
+}
+#errorExplanation h2 {
+  margin: 0px !important;
+  padding: 5px 10px !important;
+  background-color: #c00 !important;
+  color: #fff !important;
+}
+#errorExplanation p {
+  padding: 5px 10px;
+  color: #333;
+  font-weight: bold;
+}
+#errorExplanation ul {
+  padding: 0px 0px 10px 0px;
+  list-style-type: square;
+}
+#errorExplanation ul li {
+  margin-left: 30px;
+  padding-left: 0px;
+  font-size: 12px;
+}
+.fieldWithErrors {
+  margin: 1px;
+  padding: 1px;
+  border: 1px solid #f00;
+  display: inline-block;
+  /display: inline;
+}
+
+/* icon */
+.iconFile {
+  display: inline-block;
+  background-image: url("/_common/images/icons/default.png");
+  background-position: 0 0.1em;
+  background-repeat: no-repeat;
+  margin-top: 5px;
+  padding-left: 30px;
+  line-height: 2;
+}
+.iconBmp { 
+  background-image: url(/_common/images/icons/bmp.png); 
+}
+.iconCsv {
+  background-image: url(/_common/images/icons/csv.png); 
+}
+.iconDoc, .iconDocx, .iconDocm, 
+.iconDotx, .iconDotm {
+  background-image: url(/_common/images/icons/doc.png); 
+}
+.iconGif { 
+  background-image: url(/_common/images/icons/gif.png); 
+}
+.iconJpg { 
+  background-image: url(/_common/images/icons/jpg.png); 
+}
+.iconJpe {
+  background-image: url(/_common/images/icons/jpg.png); 
+}
+.iconJpeg { 
+  background-image: url(/_common/images/icons/jpg.png);
+}
+.iconJtd {
+  background-image: url(/_common/images/icons/jtd.png); 
+}
+.iconLzh { 
+  background-image: url(/_common/images/icons/lzh.png);
+}
+.iconPdf { 
+  background-image: url(/_common/images/icons/pdf.png); 
+}
+.iconPng {
+  background-image: url(/_common/images/icons/png.png);
+}
+.iconPpt, .iconPptx, .iconPptm, 
+.iconPotx, .iconPotm, .iconPpam, 
+.iconPpsx, .iconPpsm { 
+  background-image: url(/_common/images/icons/ppt.png);
+}
+.iconTxt {
+  background-image: url(/_common/images/icons/txt.png); 
+}
+.iconXls, .iconXlsx, .iconXlsm,
+.iconXltx, .iconXltm, .iconXlam {
+  background-image: url(/_common/images/icons/xls.png); 
+}
+.iconZip {
+  background-image: url(/_common/images/icons/zip.png); 
+}
+.iconVbs {
+  background-image: url(/_common/images/icons/vbs.png); 
+}
+.iconExe { 
+  background-image: url(/_common/images/icons/exe.png);
+}
+.iconOdb { 
+  background-image: url(/_common/images/icons/odb.gif); 
+}
+.iconOdf { 
+  background-image: url(/_common/images/icons/odf.gif); 
+}
+.iconOdg, .iconOtg { 
+  background-image: url(/_common/images/icons/odg.gif); 
+}
+.iconOdp, .iconOtp { 
+  background-image: url(/_common/images/icons/odp.gif); 
+}
+.iconOds, .iconOts { 
+  background-image: url(/_common/images/icons/ods.gif); 
+}
+.iconOdt, .iconOtt { 
+  background-image: url(/_common/images/icons/odt.gif); 
+}
+.iconMap { 
+  background-image: url(/_common/images/icons/map.png); 
+}
+
+/* header
+---------------------------------------*/
+#header {
+  width: auto;
+  margin: 5px;
+}
+#header h1 {
+  float: left;
+  width: 126px;
+  margin: 0 5px 5px 0;
+}
+#header .department {
+  display: block;
+}
+#header .menu {
+  clear: both;
+}
+#header h1 a {
+  background-image: url("/_common/themes/admin/gw/webmail/mobile/images/smartphone/bg/bg-headerlogo.gif");
+  background-repeat: no-repeat;
+  overflow: hidden;
+  display: inline-block;
+  height: 0px;
+  margin-right: 10px;
+  overflow: hidden;
+  text-indent: -9999px;
+  width: 126px;
+  padding-top: 36px;
+}
+
+/* content
+---------------------------------------*/
+#content {
+  clear: both;
+  width: auto;
+  margin: 5px;
+}
+
+/* folder
+---------------------------------------*/
+#maintenance {
+  margin-bottom: 10px;
+  padding: 5px;
+  background-color: #FFFF6D;
+  color: #F00;
+}
+#maintenance a {
+  display: block;
+  color: #F00;
+}
+.folderTitle {
+  line-height: 30px;
+  padding-left: 27px;
+  background-image: url("/_common/themes/admin/gw/webmail/mobile/images/smartphone/title/ic-05.gif");
+  background-position: 7px center;
+  background-repeat: no-repeat;
+  background-color: #267BDC;
+  color: #FFF;
+}
+.folderTitle span {
+  line-height: 30px;
+}
+table.root tr.cursor {
+  background-image: url("/_common/themes/admin/gw/webmail/mobile/images/smartphone/ic/ic-cursor.gif");
+  background-position: 99% center;
+}
+table.root td {
+  padding: 0;
+}
+table.root td a {
+  display: block;
+  padding: 15px 7px 15px 30px;
+  background-repeat: no-repeat;
+  background-position: 8px 15px;
+}
+table.root .inbox td a {
+  background-image: url("/_common/themes/admin/gw/images/tree/transmit.gif");
+}
+table.root .star td a {
+  background-image: url("/_common/themes/admin/gw/images/mailoption/star_on.gif");
+}
+table.root .folder td a {
+  background-image: url("/_common/themes/admin/gw/images/tree/folder_close.gif");
+}
+table.root tr.level1 td a {
+  padding-left: 45px;
+  background-position: 25px 15px;
+}
+table.root tr.level2 td a {
+  padding-left: 60px;
+  background-position: 40px 15px;
+}
+table.root tr.level3 td a {
+  padding-left: 75px;
+  background-position: 55px 15px;
+}
+table.root tr.level4 td a {
+  padding-left: 90px;
+  background-position: 70px 15px;
+}
+table.root tr.level5 td a {
+  padding-left: 105px;
+  background-position: 85px 15px;
+}
+.unseenNum {
+  color: red;
+}
+table.root .drafts td a {
+  background-image: url("/_common/themes/admin/gw/images/tree/draft.gif");
+}
+table.root .sent td a {
+  background-image: url("/_common/themes/admin/gw/images/tree/mailbox.gif");
+}
+table.root .archives td a {
+  background-image: url("/_common/themes/admin/gw/images/tree/archive.gif");
+}
+table.root .trash td {
+  /*line-height: 30px;*/
+}
+table.root .trash td div {
+  position: relative;
+}
+table.root .trash td a {
+  vertical-align: middle;
+}
+table.root .trash td a.name {
+  background-image: url("/_common/themes/admin/gw/images/tree/dustbox.gif");
+  background-position: 8px center;
+}
+table.root .trash a.empty {
+  position: absolute;
+  top: 6px;
+  right: 0;
+  display: inline-block;
+  height: 0;
+  width: 69px;
+  padding-top: 35px;
+  padding-bottom: 0px;
+  padding-left: 0;
+  background-image: url("/_common/themes/admin/gw/webmail/mobile/images/smartphone/btn/bt_m_dust.gif");
+  background-position: 0;
+  overflow: hidden;
+}
+
+/* sendmenu
+---------------------------------------*/
+.sendMenu .title {
+  padding-left: 27px;
+  background-image: url("/_common/themes/admin/gw/webmail/mobile/images/smartphone/title/ic-01.gif");
+  background-position: 7px center;
+  background-repeat: no-repeat;
+  background-color: #BBDDFF;
+}
+
+/* linkMenu
+---------------------------------------*/
+.linkMenu {
+
+}
+.linkMenu .title {
+  padding-left: 10px;
+  background-color: #BBDDFF;
+}
+
+/* mailbox
+---------------------------------------*/
+.mailboxTitle {
+  line-height: 30px;
+  padding-left: 10px;
+  background-color: #267BDC;
+}
+.mailboxTitle a {
+  line-height: 30px;
+  color: #FFF;
+}
+table.mails a {
+  display: block;
+  padding: 10px 7px;
+}
+table.mails th {
+  background-color: #BDF;
+  padding: 0px 0px;
+}
+table.mails td {
+  padding: 0px 0px;
+}
+table.mails th.check {
+  border-right: solid 1px #FFF;
+}
+table.mails td.check {
+  border-right: none;
+  border-left: none;
+  padding: 0px 5px;
+}
+table.mails th.attach {
+  border-right: solid 1px #FFF;
+  border-left: solid 1px #FFF;
+}
+table.mails td.attach {
+  border-right: none;
+  border-left: none;
+}
+table.mails th.attach
+{
+  vertical-align: middle;
+  width: 10px;
+  background-image: url("/_common/themes/admin/gw/images/mailoption/clip.gif");
+  background-position: center center;
+  background-repeat: no-repeat;
+  text-indent: -9999px;
+  overflow: hidden;
+}
+table.mails td.attach span.attach
+{
+  display: inline-block;
+  width: 12px;
+  height: 0;
+  padding-top: 12px;
+  background-image: url("/_common/themes/admin/gw/images/mailoption/clip.gif");
+  background-repeat: no-repeat;
+  overflow: hidden;
+}
+table.mails th.subject {
+  border-right: solid 1px #FFF;
+  border-left: solid 1px #FFF;
+}
+table.mails td.subject {
+  border-right: none;
+  border-left: none;
+}
+table.mails td.subject span.subject {
+  margin-right: -7px;
+  margin-bottom: -10px;
+  padding-left: 15px;
+  padding-right: 7px;
+  padding-bottom: 10px;
+  background-image: url("/_common/themes/admin/gw/images/mailoption/mail-open.gif");
+  background-position: 0 0.1em;
+  background-repeat: no-repeat;
+}
+table.mails td.subject .labels {
+  margin-right: 2px;
+}
+table.mails td.subject .labels .label {
+  margin: 0 1px;
+  padding: 0 1px;
+  color: #fff;
+  font-weight: lighter;
+  font-size: 0.8em;
+}
+table.mails td.subject span.mailbox {
+  float: right;
+  color: #000;
+}
+table.mails .unseen td {
+  background-color: #FFB;
+}
+table.mails .unseen td.subject span.subject {
+  background-image: url("/_common/themes/admin/gw/images/mailoption/mail-notopen.gif");
+}
+table.mails th.from {
+  border-left: solid 1px #FFF;
+}
+table.mails td.from {
+  border-left: none;
+}
+table.mails td.from span.from {
+  color: #000;
+}
+table.mails td.date span.date {
+  float: right;
+  color: #888888;
+  padding-left: 10px;
+}
+table.mails th.starOn,
+table.mails td.starOn {
+  background-image: url(/_common/themes/admin/gw/images/mailoption/star_on.gif);
+  background-repeat: no-repeat;
+  background-position: center center;
+  width: 20px;
+  text-indent: -9999px;
+  cursor: pointer;
+}
+table.mails th.starOn:hover {
+  background-image: url(/_common/themes/admin/gw/images/mailoption/star_off.gif);
+}
+table.mails th.starOff,
+table.mails td.starOff {
+  background-image: url(/_common/themes/admin/gw/images/mailoption/star_off.gif);
+  background-repeat: no-repeat;
+  background-position: center center;
+  width: 20px;
+  text-indent: -9999px;
+  cursor: pointer;
+}
+table.mails th.starOff:hover {
+  background-image: url(/_common/themes/admin/gw/images/mailoption/star_on.gif);
+}
+table.mails td.loading {
+  background-image: url(/_common/themes/admin/gw/images/other/loading_16.gif);
+  background-repeat: no-repeat;
+  background-position: center center;
+  width: 20px;
+  text-indent: -9999px;
+}
+.pagination {
+  margin-bottom: 10px;
+  text-align: center;
+}
+.pagination span.disabled {
+  color: #888888;
+}
+.pagination a, 
+.pagination span.current, 
+.pagination em, 
+.pagination span.disabled {
+  display: inline-block;
+  line-height: 2.8;
+  vertical-align: middle;
+  padding: 0 15px;
+  background-color: #DDEEFF;
+  text-decoration: none;
+  font-size: 100%;
+}
+.pagination span.current, 
+.pagination em {
+  background-color: #99CCFF;
+  font-style: normal;
+  font-weight: bold;
+  color: #FFFFFF;
+}
+.pagination a:hover {
+  background-color: #99CCFF;
+  color: #008;
+}
+.pagination span.separator {
+  display: inline-block;
+  visibility: hidden;
+  width: 5px;
+  font-size: 1px;
+}
+.managementMenu .title {
+  line-height: 30px;
+  background-color: #BDF;
+}
+.searchMenu .title {
+  line-height: 30px;
+  padding-left: 25px;
+  background-image: url("/_common/themes/admin/gw/webmail/mobile/images/smartphone/title/ic-02.gif");
+  background-position: 5px center;
+  background-repeat: no-repeat;
+  background-color: #BDF;
+}
+#searchForm table th {
+  width: 70px;
+  padding-top: 12px;
+  background-color: #FFF;
+  border: none;
+  vertical-align: top;
+}
+#searchForm table td {
+  padding: 11px 0;
+  border: none;
+  vertical-align: top;
+}
+.menus input#s_keyword {
+  margin: 0;
+}
+
+/* new
+--------------------------------------*/
+.newMailTitle {
+  line-height: 30px;
+  padding-left: 25px;
+  background-image: url("/_common/themes/admin/gw/webmail/mobile/images/smartphone/title/ic-01.gif");
+  background-position: 5px center;
+  background-repeat: no-repeat;
+  background-color: #267BDC;
+  color: #FFF;
+}
+.newMailTitle span {
+  line-height: 30px;
+}
+form#item_form {
+  padding: 5px;
+  background-color: #BDF;
+}
+table#mailAddresses {
+  margin-bottom: 0;
+}
+table#mailAddresses #ccContainer th {
+  width: 50px;
+}
+table#mailAddresses th,
+table#mailAddresses td {
+  background-color: #BDF;
+  border: none;
+  padding: 2px 2px;
+}
+table#mailAddresses .addressToggleButtons {
+  font-size: 12px;
+}
+table#mailAddresses .addressToggleButtons a {
+  display:inline-block;
+  width: 100%;
+  border: 1px solid #aaa;
+  background-color: #fff;
+  color: #000;
+  text-align: center;
+  text-decoration: none;
+  line-height: 35px;
+}
+table#mailAddresses .addressToggleButtons a:hover {
+  background-image: none;
+  color: #444;
+}
+.addressMenu .menus {
+  text-align: right;
+}
+#mailAddressesForm .recipientConfirm {
+  margin-bottom: 10px;
+}
+textarea {
+  width: 100%;
+}
+
+/* syousai
+---------------------------------------*/
+.replyMenu .title,
+.managementMenu .title {
+  padding-left: 25px;
+  background-position: 5px center;
+  background-repeat: no-repeat;
+  background-color: #BBDDFF;
+}
+.replyMenu .title {
+  background-image: url("/_common/themes/admin/gw/webmail/mobile/images/smartphone/title/ic-04.gif");
+}
+.managementMenu .title {
+  background-image: url("/_common/themes/admin/gw/webmail/mobile/images/smartphone/title/ic-03.gif");
+}
+table.mail {
+  margin-bottom: 0;
+  border-top: solid 1px #D9D9D9;
+}
+table.mail th {
+  width: 64px;
+  border-top: dashed 1px #D9D9D9;
+  border-bottom: dashed 1px #D9D9D9;
+  padding: 7px 7px;
+}
+table.mail td {
+  border-top: dashed 1px #D9D9D9;
+  border-bottom: dashed 1px #D9D9D9;
+  padding: 7px 7px;
+}
+table.mail td a {
+  display: block;
+}
+table.mail td.to a {
+  display: inline;
+}
+table.mail td.subject a.attachmentMark {
+  display: inline-block;
+  height: 0;
+  width: 18px;
+  margin-left: 5px;
+  padding-top: 12px;
+  background-image: url(/_common/themes/admin/gw/images/mailoption/clip.gif);
+  background-repeat: no-repeat;
+  overflow: hidden;
+  vertical-align: middle;
+}
+table.mail td.subject a.starOn {
+  background-image: url(/_common/themes/admin/gw/images/mailoption/star_on.gif);
+  background-repeat: no-repeat;
+  background-position: center center;
+  width: 16px;
+  height: 16px;
+  float: right;
+  cursor: pointer;
+}
+table.mail td.subject .starOff {
+  background-image: url(/_common/themes/admin/gw/images/mailoption/star_off.gif);
+  background-repeat: no-repeat;
+  background-position: center center;
+  width: 16px;
+  height: 16px;
+  float: right;
+  cursor: pointer;
+}
+table.mail td.subject .loading {
+  background-image: url(/_common/themes/admin/gw/images/other/loading_16.gif);
+  background-repeat: no-repeat;
+  background-position: center center;
+  width: 16px;
+  height: 16px;
+  float: right;
+}
+table.mail td.subject .labels {
+  float: right;
+  margin-right: 3px;
+}
+table.mail td.subject .labels .label {
+  margin: 0 1px;
+  padding: 0 1px;
+  color: #fff;
+  font-weight: lighter;
+  font-size: 0.8em;
+}
+table.mails tr td.answered span.subject {
+  background-image: url(/_common/themes/admin/gw/images/mailoption/finish_forward.gif);
+  background-repeat: no-repeat;
+}
+table.mails tr td.forwarded span.subject {
+  background-image: url(/_common/themes/admin/gw/images/mailoption/finish_reply.gif);
+  background-repeat: no-repeat;
+}
+table.mails tr td.answeredforwarded span.subject {
+  background-image: url(/_common/themes/admin/gw/images/mailoption/replytransmit.gif);
+  background-repeat: no-repeat;
+}
+#inlineContents ul {
+  list-style-type: disc;
+  margin: 12px 0 12px 0;
+}
+#inlineContents ol {
+  margin: 12px 0 12px 0;
+}
+#inlineContents li {
+  margin-left: 40px;
+  line-height: 1.2;
+}
+table#mdnAlert {
+  margin-bottom: 0;
+  border-top: none;
+}
+table#mdnAlert td {
+  border-top: none;
+  border-bottom: dashed 1px #D9D9D9;
+}
+table#mdnRequest td.message {
+  border-top: none;
+  border-bottom: none;
+}
+table#mdnRequest td.actions {
+  border-top: none;
+  border-bottom: dashed 1px #D9D9D9;
+}
+.mailBody {
+  margin-bottom: 10px;
+  padding: 5px;
+}
+.mailBody .recipientConfirm {
+  margin: 10px 0 0 0;
+  font-weight: bold;
+  text-align: right;
+}
+table .attachmentDownloader {
+  margin-bottom: 0;
+}
+table .attachmentDownloader td {
+  background-color: #BBDDFF;
+  border-bottom: none;
+}
+table.attachments {
+  margin-bottom: 10px;
+}
+table.attachments th,
+table.attachments td {
+  border-top: none;
+  border-bottom: none;
+}
+table.attachments td.attention {
+  border-bottom: dashed 1px #D9D9D9;
+}
+.link {
+  margin-bottom: 10px;
+  text-align: center;
+}
+.link span {
+  display: inline-block;
+  background-color: #DDEEFF;
+}
+.link span.index {
+  line-height: 35px;
+  width: 110px;
+}
+.link span.index a {
+  line-height: 35px;
+}
+.link a.back {
+  margin: 0;
+}
+.link span.previous,
+.link span.next {
+  line-height: 35px;
+  width: 60px;
+}
+.link span.previous a,
+.link span.next a {
+  line-height: 35px;
+}
+.link span a {
+  display: inline-block;
+  height: 100%;
+  width: 100%;
+}
+
+table.labelEdit {
+  margin-bottom: 0px;
+}
+table.labelEdit td {
+  border-top: none;
+  padding: 0;
+  text-align: center;
+}
+table.labelEdit td a {
+  display: block;
+  padding: 10px 7px;
+  text-align: center;
+}
+
+table.labelMenus {
+  border: none;
+  margin-bottom: 0px;
+}
+table.labelMenus td.labelMenu {
+  border-style: none solid solid;
+  border-color: #D9D9D9;
+  border-width: 1px;
+  padding: 0;
+  width: 33%;
+}
+table.labelMenus td.labelMenu a {
+  display: block;
+  padding: 10px 7px;
+  text-align: center;
+}
+
+/* webmail_address
+---------------------------------------*/
+#groupForm .selectUI {
+  margin-bottom: 10px;
+}
+#groupForm input.search,
+#groupForm input.reset {
+  margin-bottom: 10px;
+}
+#groupForm .notice {
+  padding: 10px;
+} 
+.sysAddressTitle,
+.addressGroupTitle {
+  line-height: 30px;
+  margin-bottom: 10px;
+  padding-left: 10px;
+  background-color: #267BDC;
+  color: #FFF;
+}
+.selectedAddressesTitle,
+.groupTitle {
+  line-height: 30px;
+  padding-left: 10px;
+  background-color: #E5E5E5;
+}
+#groupForm table.index td,
+#mailForm table.index td {
+  padding: 0px 0px;
+}
+#groupForm table.index td.checkUI,
+#mailForm table.index td.checkUI {
+  padding: 0px 7px;
+}
+#groupForm table.index a,
+#mailForm table.index a {
+  display: block;
+  padding: 15px 7px;
+}
+
+/* memo
+--------------------------------------*/
+.memo .title {
+  line-height: 30px;
+  margin-bottom: 0;
+  padding-left: 10px;
+  background-color: #267BDC;
+  color: #FFF;
+}
+.memo .body {
+  margin-bottom: 10px;
+  padding: 5px;
+  border-bottom: 1px solid #D9D9D9;
+}
+#memo_body {
+  margin-top: 0;
+  margin-bottom: 10px;
+}
+#memoEditForm {}
+
+/* footer
+---------------------------------------*/
+#footer {
+  width: auto;
+  padding: 10px 5px;
+  background-color: #002787;
+  color: #FFF;
+}
+#footer a {
+  color: #FFF;
+}
+#footerBody:after {
+  content: ".";
+  display: block;
+  visibility: hidden;
+  height: 0.1px;
+  font-size: 0.1em;
+  line-height: 0;
+  clear: both;
+}
+#footer .linkTop {
+  float: left;
+  padding-right: 5px;
+  border-right: 1px solid #2E4E9D;
+  text-align: center;
+}
+/*
+#footer .linkTop a {
+  display: inline-block;
+  height: 0;
+  width: 100%;
+  padding-top: 22px;
+  background-image: url("/_common/themes/admin/gw/webmail/mobile/images/smartphone/ic/ic-top.gif");
+  background-position: center center;
+  background-repeat: no-repeat;
+  text-decoration: none;
+  text-align: center;
+}
+*/
+#footer .personal,
+#footer .logout {
+  text-align: right;
+}
+
+/*  button
+---------------------------------------*/
+.menus a,
+.menus input {
+  margin: 0 5px 15px 0;
+}
+.menu a,
+.menus a {
+  display: inline-block;
+  height: 0;
+  width: 93px;
+  padding-top: 40px;
+  background-repeat: no-repeat;
+  overflow: hidden;
+}
+.menu a.index {
+  background-image: url("/_common/themes/admin/gw/webmail/mobile/images/smartphone/btn/bt_l_receiver.gif");
+}
+.menu a.newMail,
+.menus a.newMail,
+.menus a.createMail {
+  background-image: url("/_common/themes/admin/gw/webmail/mobile/images/smartphone/btn/bt_l_newmail.gif");
+}
+.sendMenu .menus a,
+.addressMenu .menus input {
+  height: 40px;
+  width: 93px;
+  padding-top: 0;
+  line-height: 40px;
+  font-size: 0.9em;
+  color: #000;
+  text-align: center;
+  text-indent: -9999px;
+}
+.sendMenu .menus a:visited,
+.addressMenu .menus a:visited {
+  color: #000;
+}
+.sendMenu .menus .sysAddress,
+.addressMenu .menus .sysAddress {
+  width: 107px;
+  background-image: url("/_common/themes/admin/gw/webmail/mobile/images/smartphone/btn/bt_address-back.gif");
+  text-indent: 0px;
+}
+.sendMenu .menus .addressGroup,
+.addressMenu .menus .priAddress {
+  width: 107px;
+  background-image: url("/_common/themes/admin/gw/webmail/mobile/images/smartphone/btn/bt_address-back.gif");
+  text-indent: 0px;
+}
+.sendMenu .menus a.memo {
+  width: 67px;
+  background-image: url("/_common/themes/admin/gw/webmail/mobile/images/smartphone/btn/bt_memo-back.gif");
+   text-indent: 0px;
+}
+.linkMenu .menus a.gw {
+  height: auto;
+  width: auto;
+  padding-top: 0;
+}
+.answer a {
+  width: 98px;
+  background-image: url("/_common/themes/admin/gw/webmail/mobile/images/smartphone/btn/bt_m_answer.gif");
+}
+.answerToAll a {
+  width: 98px;
+  background-image: url("/_common/themes/admin/gw/webmail/mobile/images/smartphone/btn/bt_m_alltransmit.gif");
+}
+.forward a {
+  width: 65px;
+  background-image: url("/_common/themes/admin/gw/webmail/mobile/images/smartphone/btn/bt_m_forward.gif");
+}
+input.checkUI,
+.submitters input,
+.managementMenu .menus input,
+.addressMenu .menus input,
+#groupForm input,
+#mailForm input,
+.submitters input,
+.memoForm input,
+.memoEditForm input {
+  height: 40px;
+  padding: 0;
+  border: none;
+  background-repeat: no-repeat;
+  text-indent: -9999px;
+  overflow: hidden;
+  cursor: pointer;
+}
+.addressMenu .menus input.sysAddress,
+.addressMenu .menus input.priAddress {
+  margin: 0px 0px 5px 0px;
+}
+input.move {
+  width: 65px;
+  background-image: url("/_common/themes/admin/gw/webmail/mobile/images/smartphone/btn/bt_m_move.gif");
+}
+input.copy {
+  width: 65px;
+  background-image: url("/_common/themes/admin/gw/webmail/mobile/images/smartphone/btn/bt_m_copy.gif");
+}
+input.delete,
+input.deleteAddress {
+  width: 65px;
+  background-image: url("/_common/themes/admin/gw/webmail/mobile/images/smartphone/btn/bt_m_del.gif");
+}
+input.seen {
+  width: 88px;
+  background-image: url("/_common/themes/admin/gw/webmail/mobile/images/smartphone/btn/bt_m_read_01.gif");
+}
+input.unseen {
+  width: 88px;
+  background-image: url("/_common/themes/admin/gw/webmail/mobile/images/smartphone/btn/bt_m_notread.gif");
+}
+input.search {
+  height: 35px;
+  width: 69px;
+  background-image: url("/_common/themes/admin/gw/webmail/mobile/images/smartphone/btn/bt_m_search.gif");
+}
+#groupForm input.reset,
+#searchForm input.reset {
+  height: 35px;
+  width: 69px;
+  background-image: url("/_common/themes/admin/gw/webmail/mobile/images/smartphone/btn/bt_m_reset.gif");
+}
+#mailForm input.selectAddress {
+  height: 35px;
+  width: 84px;
+  margin-bottom: 10px;
+  background-image: url("/_common/themes/admin/gw/webmail/mobile/images/smartphone/btn/bt_m_address.gif");
+}
+input.createMail {
+  width: 93px;
+  margin-bottom: 10px;
+  background-image: url("/_common/themes/admin/gw/webmail/mobile/images/smartphone/btn/bt_l_newmail.gif");
+}
+input.send {
+  width: 88px;
+  margin-right: 10px;
+  background-image: url("/_common/themes/admin/gw/webmail/mobile/images/smartphone/btn/bt_l_outgoing.gif");
+}
+input.draft {
+  width: 88px;
+  background-image: url("/_common/themes/admin/gw/webmail/mobile/images/smartphone/btn/bt_m_draft.gif");
+}
+.menus input.edit {
+  height: 40px;
+  width: 65px;
+  background-image: url("/_common/themes/admin/gw/webmail/mobile/images/smartphone/btn/bt_m_edit_2.gif");
+}
+input.editMemo {
+  height: 35px;
+  width: 69px;
+  background-image: url("/_common/themes/admin/gw/webmail/mobile/images/smartphone/btn/bt_m_edit.gif");
+}
+.submitters {
+  margin-bottom: 10px;
+  text-align: center;
+}
+
+/* file upload / swfupload
+--------------------------- */
+#defaultUploader input.file {
+  height: 40px;
+}
+a.deleteUploadedFile {
+  display: inline-block;
+  width: 65px;
+  height: 40px;
+  background-image: url("/_common/themes/admin/gw/webmail/mobile/images/smartphone/btn/bt_m_del.gif");
+  padding-top: 0;
+  text-indent: -9999px;
+}
+
+.progressContainer {
+  width: 80%;
+  margin: 4px 0px 2px 0px;
+  padding: 3px 6px;
+  border: 1px solid #bbb;
+  background-color: #eee;
+}
+.progressContainer .progressName {
+  color: #000;
+}
+.progressContainer .progressBarStatus {
+  color: #922;
+  white-space: nowrap;
+}
+
