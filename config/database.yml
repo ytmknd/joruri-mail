@@ -1,11 +1,11 @@
 development:
-  adapter : mysql
-  database: jorurimail
-  username: joruri
-  password: pass
-  timeout : 5000
-  encoding: utf8
-  host: 127.0.0.1
+  adapter :
+  database:
+  username:
+  password:
+  timeout :
+  encoding:
+  host:
 
 test:
   adapter :
@@ -17,11 +17,11 @@ test:
   host:
 
 production:
-  adapter :
-  database:
-  username:
-  password:
-  timeout :
-  encoding:
-  host:
+  adapter : mysql
+  database: jorurimail
+  username: joruri
+  password: pass
+  timeout : 5000
+  encoding: utf8
+  host: 127.0.0.1
 

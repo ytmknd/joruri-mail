@@ -1,11 +1,11 @@
-## Joruri Mail v1.3.1 インストールマニュアル                2015.7.10
+## Joruri Mail v1.3.1 インストールマニュアル                2015.08.03
 
 **********************************************************************
  1 想定環境
 **********************************************************************
 
 [システム]
-OS         : CentOS 6.2
+OS         : CentOS 6.6
 Webサーバ  : Apache 2.2
 DBシステム : MySQL 5
 Ruby       : 1.9.2
@@ -48,18 +48,18 @@ rootユーザに変更します。
 必要なパッケージをダウンロードします。
 
   # cd /usr/local/src
-  # wget http://joruri.org/download/jorurimail/jorurimail-1.3.1.tar.gz
+  # wget https://github.com/joruri/joruri-mail/archive/v1.3.1.tar.gz
   # wget ftp://ftp.ruby-lang.org/pub/ruby/1.9/ruby-1.9.2-p290.tar.gz
 
 Joruriユーザを作成します。
 
-  # useradd joruri
-  # passwd joruri
+  # useradd -m joruri
 
 Joruriソースコードを設置します。
 
   # mkdir /var/share
-  # tar xvzf jorurimail-1.3.1.tar.gz -C /var/share
+  # tar xvzf v1.3.1.tar.gz -C /var/share
+  # mv /var/share/joruri-mail-1.3.1 /var/share/jorurimail
   # chown -R joruri:joruri /var/share/jorurimail
 
 **********************************************************************
@@ -217,7 +217,7 @@ DB接続情報
 
 SMTP, IMAPサーバ設定
 
-  $ vi config/environments/development.rb
+  $ vi config/environments/production.rb
 
 VirtualHost設定
 
@@ -233,15 +233,15 @@ VirtualHost設定
 
 テーブルを作成します。
 
-  $ rake db:schema:load RAILS_ENV=development
+  $ rake db:schema:load RAILS_ENV=production
 
 初期データを登録します。
 
-  $ rake db:seed RAILS_ENV=development
+  $ rake db:seed RAILS_ENV=production
 
 サンプルデータを登録します。
 
-  $ rake db:seed:demo RAILS_ENV=development
+  $ rake db:seed:demo RAILS_ENV=production
 
 ======================================================================
  8.3 VirtualHost の反映
