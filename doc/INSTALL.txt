@@ -250,8 +250,7 @@ VirtualHost設定
 Apacheに設定を追加します。
 
   $ su -
-  # cp /var/share/jorurimail/config/samples/jorurimail.conf \
-  #   /etc/httpd/conf.d/
+  # ln -s /var/share/jorurimail/config/virtual-host/jorurimail.conf /etc/httpd/conf.d/jorurimail.conf
 
 Apache を再起動します。
 
