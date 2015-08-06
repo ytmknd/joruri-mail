@@ -22,8 +22,8 @@ centos() {
 
   yum install -y ImageMagick-devel libxml2-devel libxslt-devel mysql-devel openldap-devel
 
-  # git clone https://github.com/joruri/joruri-mail.git /var/share/jorurimail
-  git clone -b develop https://github.com/joruri/joruri-mail.git /var/share/jorurimail
+  git clone https://github.com/joruri/joruri-mail.git /var/share/jorurimail
+  # git clone -b develop https://github.com/joruri/joruri-mail.git /var/share/jorurimail
 
   chown -R joruri:joruri /var/share/jorurimail
   cd /var/share/jorurimail && bundle install --without development test
