@@ -10,7 +10,7 @@
 #  end
 class Mysql
 
-  dir = "/usr/local/lib/ruby/gems/1.9.1/gems/ruby-mysql-2.9.4/lib"
+  dir = (Gem::GemPathSearcher.new).find("mysql").full_gem_path + "/lib"
   require "#{dir}/mysql/constants"
   require "#{dir}/mysql/error"
   require "#{dir}/mysql/charset"
