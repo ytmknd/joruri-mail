@@ -12,6 +12,7 @@ gem "mail", "2.2.6.1"
 gem "hpricot", "0.8.3"
 gem "tamtam", "0.0.3"
 gem "zipruby", "0.3.6"
+gem "mime-types", "2.6.1"
 
 # Bundle edge Rails instead:
 # gem 'rails', :git => 'git://github.com/rails/rails.git'
