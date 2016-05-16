@@ -1,30 +1,30 @@
 <div id="signContent">
-<%= render :partial => 'menu' %>
+<%= render 'menu' %>
 
 <table class="show">
   <tr>
-    <th><%= @item.locale(:name) %></th>
-    <td><%=h @item.name %></td>
+    <th><%= @item.class.human_attribute_name :name %></th>
+    <td><%= @item.name %></td>
   </tr><tr>
-    <th><%= @item.locale(:state) %></th>
-    <td><%=h safe{@item.status.name} %></td>
+    <th><%= @item.class.human_attribute_name :state %></th>
+    <td><%= @item.status.name if @item.status %></td>
   </tr><tr>
-    <th><%= @item.locale(:sort_no) %></th>
-    <td><%=h @item.sort_no %></td>
+    <th><%= @item.class.human_attribute_name :sort_no %></th>
+    <td><%= @item.sort_no %></td>
   </tr>
 </table>
 
 <br /><p class="form">条件</p>
 <table class="show">
   <tr>
-    <th><%= @item.locale(:conditions_chain) %></th>
-    <td><%=h @item.conditions_chain_label %></td>
+    <th><%= @item.class.human_attribute_name :conditions_chain %></th>
+    <td><%= @item.conditions_chain_label %></td>
   </tr><tr>
     <th>条件</th>
     <td>
       <% @item.conditions.each do |c| %>
       <div style="margin: 5px 0px;">
-        <%=h c.column_label %>　<%=h c.inclusion_label %>　<b><%=h c.value %></b></div>
+        <%= c.column_label %>　<%= c.inclusion_label %>　<b><%= c.value %></b></div>
       <% end %>
     </td>
   </tr>
@@ -33,11 +33,11 @@
 <br /><p class="form">動作</p>
 <table class="show">
   <tr>
-    <th><%= @item.locale(:action) %></th>
-    <td><%=h @item.action_label %></td>
+    <th><%= @item.class.human_attribute_name :action %></th>
+    <td><%= @item.action_label %></td>
   </tr><tr>
-    <th><%= @item.locale(:mailbox) %></th>
-    <td><%=h @item.mailbox_name %></td>
+    <th><%= @item.class.human_attribute_name :mailbox %></th>
+    <td><%= @item.mailbox_name %></td>
   </tr>
 </table>
 

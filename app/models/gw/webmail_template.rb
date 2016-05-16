@@ -1,46 +1,35 @@
-# encoding: utf-8
 class Gw::WebmailTemplate < ActiveRecord::Base
   include Sys::Model::Base
   include Sys::Model::Auth::Free
 
-  validates_presence_of :user_id, :name
-  
-  after_save :uniq_default_flag, :if => %Q(default_flag == 1)
+  validates :user_id, :name, presence: true
 
-  def readable
-    self.and :user_id, Core.user.id
-    self
-  end
-  
+  after_save :uniq_default_flag, if: %Q(default_flag == 1)
+
+  scope :readable, ->(user = Core.user) { where(user_id: user.id) }
+
   def editable?
-    return true if Core.user.has_auth?(:manager)
-    user_id == Core.user.id
-  end
-  
-  def deletable?
-    return true if Core.user.has_auth?(:manager)
-    user_id == Core.user.id
-  end
-  
-  def self.default_template
-    cond = {:user_id => Core.user.id, :default_flag => 1}
-    self.find(:first, :conditions => cond)
+    Core.user.has_auth?(:manager) || user_id == Core.user.id
   end
 
-  def self.user_templates()
-    item = self.new.readable
-    item.and :user_id, Core.user.id
-    item.order 'name, id'
-    item.find(:all)
+  def deletable?
+    Core.user.has_auth?(:manager) || user_id == Core.user.id
   end
-  
-protected
+
+  private
+
   def uniq_default_flag
-    cond = Condition.new do |c|
-      c.and :user_id, Core.user.id
-      c.and :id, '!=', id
-    end
-    self.class.update_all('default_flag = 0', cond.where)
+    self.class.where(user_id: Core.user.id).where.not(id: id).update_all(default_flag: 0)
     return true
+  end
+
+  class << self
+    def default_template
+      self.where(user_id: Core.user.id, default_flag: 1).first
+    end
+  
+    def user_templates
+      self.where(user_id: Core.user.id).order(:name, :id)
+    end
   end
 end

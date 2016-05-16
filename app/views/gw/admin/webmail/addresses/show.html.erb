@@ -2,24 +2,24 @@
 <table id="webmailContainer"><tr><td id="webmailContent"><div id="addressContent">
 
 <div class="actionMenu">
-<%= link_to :index, gw_webmail_address_groups_path %>
-<%= action_menu :edit    if safe{@item.editable?} %>
-<%= action_menu :destroy if safe{@item.deletable?} %>
-<%= link_to "メール作成", '#', :onclick => open_mail_form(create_mail_gw_webmail_address_path) %>
+  <%= link_to :index, gw_webmail_address_groups_path %>
+  <%= action_menu :edit    if safe{@item.editable?} %>
+  <%= action_menu :destroy if safe{@item.deletable?} %>
+  <%= link_to "メール作成", '#', onclick: open_mail_form(create_mail_gw_webmail_address_path) %>
 </div>
 
 <table style="width: 100%;"><tr><td style="width: 49%; vertical-align: top;">
 
   <table class="show addressInfo">
     <tr>
-      <th><%= @item.locale(:name) %></th>
-      <td><%=h @item.name %></td>
+      <th><%= @item.class.human_attribute_name :name %></th>
+      <td><%= @item.name %></td>
     </tr><tr>
-      <th><%= @item.locale(:kana) %></th>
-      <td><%=h @item.kana %></td>
+      <th><%= @item.class.human_attribute_name :kana %></th>
+      <td><%= @item.kana %></td>
     </tr>
     <tr>
-      <th><%= @item.locale(:sort_no) %></th>
+      <th><%= @item.class.human_attribute_name :sort_no %></th>
       <td><%= @item.sort_no %></td>
     </tr>
   </table>
@@ -28,82 +28,82 @@
 
   <table class="show addressInfo">
     <tr>
-      <th><%= @item.locale(:group_id) %></th>
-      <td><% if @item.groups.size > 0 %>
-        <% @item.sorted_groups.each do |g| %>
-          <div><% g.parents_tree_names.each_with_index do |name, idx| %>
-            <%= (idx > 0 ? ' > ' : '') + name %>
-          <% end %></div>
+      <th><%= @item.class.human_attribute_name :group_id %></th>
+      <td>
+        <% if @item.groups.size > 0 %>
+          <% @item.sorted_groups.each do |g| %>
+            <div><%= g.ancestors.map(&:name).join(' > ') %></div>
+          <% end %>
+        <% else %>未分類
         <% end %>
-      <% else %>未分類
-      <% end %></td>
+      </td>
     </tr>
   </table>
-  
+
 </td></tr></table>
 
 <br />
 <table style="width: 100%;"><tr><td style="width: 49%; vertical-align: top;">
-  
+
   <table class="show addressInfo">
     <tr>
-      <th><%= @item.locale(:email) %></th>
-      <td><%=h @item.email %></td>
+      <th><%= @item.class.human_attribute_name :email %></th>
+      <td><%= @item.email %></td>
     </tr><tr>
-      <th><%= @item.locale(:mobile_tel) %></th>
-      <td><%=h @item.mobile_tel %></td>
+      <th><%= @item.class.human_attribute_name :mobile_tel %></th>
+      <td><%= @item.mobile_tel %></td>
     </tr><tr>
-      <th><%= @item.locale(:uri) %></th>
-      <td><%=h @item.uri %></td>
+      <th><%= @item.class.human_attribute_name :uri %></th>
+      <td><%= @item.uri %></td>
     </tr><tr>
-      <th><%= @item.locale(:tel) %></th>
-      <td><%=h @item.tel %></td>
+      <th><%= @item.class.human_attribute_name :tel %></th>
+      <td><%= @item.tel %></td>
     </tr><tr>
-      <th><%= @item.locale(:fax) %></th>
-      <td><%=h @item.fax %></td>
+      <th><%= @item.class.human_attribute_name :fax %></th>
+      <td><%= @item.fax %></td>
     </tr><tr>
-      <th><%= @item.locale(:zip_code) %></th>
-      <td><%=h @item.zip_code %></td>
+      <th><%= @item.class.human_attribute_name :zip_code %></th>
+      <td><%= @item.zip_code %></td>
     </tr><tr>
-      <th><%= @item.locale(:address) %></th>
+      <th><%= @item.class.human_attribute_name :address %></th>
       <td><%=hbr @item.address %></td>
     </tr>
   </table>
-  
+
 </td><td style="width: 16px;"></td><td style="vertical-align: top;">
-  
+
   <table class="show addressInfo">
     <tr>
-      <th><%= @item.locale(:company_name) %></th>
-      <td><%=h @item.company_name %></td>
+      <th><%= @item.class.human_attribute_name :company_name %></th>
+      <td><%= @item.company_name %></td>
     </tr><tr>
-      <th><%= @item.locale(:company_kana) %></th>
-      <td><%=h @item.company_kana %></td>
+      <th><%= @item.class.human_attribute_name :company_kana %></th>
+      <td><%= @item.company_kana %></td>
     </tr><tr>
-      <th><%= @item.locale(:official_position) %></th>
-      <td><%=h @item.official_position %></td>
+      <th><%= @item.class.human_attribute_name :official_position %></th>
+      <td><%= @item.official_position %></td>
     </tr><tr>
-      <th><%= @item.locale(:company_tel) %></th>
-      <td><%=h @item.company_tel %></td>
+      <th><%= @item.class.human_attribute_name :company_tel %></th>
+      <td><%= @item.company_tel %></td>
     </tr><tr>
-      <th><%= @item.locale(:company_fax) %></th>
-      <td><%=h @item.company_fax %></td>
+      <th><%= @item.class.human_attribute_name :company_fax %></th>
+      <td><%= @item.company_fax %></td>
     </tr><tr>
-      <th><%= @item.locale(:company_zip_code) %></th>
-      <td><%=h @item.company_zip_code %></td>
+      <th><%= @item.class.human_attribute_name :company_zip_code %></th>
+      <td><%= @item.company_zip_code %></td>
     </tr><tr>
-      <th><%= @item.locale(:company_address) %></th>
+      <th><%= @item.class.human_attribute_name :company_address %></th>
       <td><%=hbr @item.company_address %></td>
     </tr>
   </table>
-  
+
 </td></tr></table>
 
-<% if !@item.memo.blank? %>
+<% if @item.memo.present? %>
 <br />
 <table class="show addressInfo">
   <tr>
-    <th><%= @item.locale(:memo) %></th>
+    <th><%= @item.class.human_attribute_name :memo %></th>
   </tr><tr>
     <td><%=hbr @item.memo %></td>
   </tr>

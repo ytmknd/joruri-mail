@@ -1,7 +1,6 @@
-# encoding: utf-8
 class Gw::Admin::Webmail::ApiController < ApplicationController
   include Sys::Controller::Admin::Auth
-  protect_from_forgery :except => [:unseen, :recent]
+  protect_from_forgery except: [:unseen, :recent]
   
   def unseen
     unseen_and_recent
@@ -19,7 +18,7 @@ class Gw::Admin::Webmail::ApiController < ApplicationController
     end
   end
   
-protected
+  private
   
   def login_temporarily(account, password, mobile_password)
     if request.mobile?

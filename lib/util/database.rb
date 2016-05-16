@@ -1,4 +1,3 @@
-# encoding: utf-8
 class Util::Database
   def self.lock_by_name(name, timeout = 30, &block)
     begin

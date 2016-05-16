@@ -45,45 +45,32 @@ end
 params[:group_id] = nil if params[:clear]
 
 unless params[:group_id].blank?
-  @group = Sys::Group.find_by_id(params[:group_id].to_i) || @root
+  @group = Sys::Group.find_by(id: params[:group_id].to_i) || @root
   @groups = @group.enabled_children
 end
 
 @users = @group.users_having_email(get_order)
-
 %>
-
-<script type="text/javascript">
-//<![CDATA[
-function changeSelection() {
-  //document.body.style.cursor = 'wait';
-  $('nowLoading').style.display = 'block';
-  $('mailForm').style.display = 'none';
-
-  $('groupForm').submit();
-}
-//]]>
-</script>
 
 <div class="sysAddressTitle">
   <%= Joruri.config.application['webmail.sys_address_menu'] %>
 </div>
 
-<%= form_tag gw_webmail_sys_addresses_path, {:id => 'groupForm', :name => 'groupForm', :class => 'groupForm', :method => :get } do |f| %>
-  グループ：<%= select_tag :group_id, options_for_select(group_selection(@group), @group.id), :class => 'selectUI', :onchange => "changeSelection();" %><br/>
+<%= form_tag gw_webmail_sys_addresses_path, { id: 'groupForm', name: 'groupForm', class: 'groupForm', method: :get } do |f| %>
+  グループ：<%= select_tag :group_id, options_for_select(group_selection(@group), @group.id), class: 'selectUI', onchange: "changeSelection();" %><br/>
   <%#= submit_tag "検索", :name => 'select', :class => 'search' %>
-  <%= submit_tag "リセット", :name => 'clear', :class => 'reset' %>
+  <%= submit_tag "リセット", name: 'clear', class: 'reset' %>
 <% end %>
 
 <div id="nowLoading" class="nowLoading" style="display:none;">Now Loading...</div>
 
-<%= form_for :item, :url => mobile_manage_gw_webmail_sys_addresses_path, :html => {:id => 'mailForm', :class => 'mailForm', :name => 'mailForm'} do |f| %>
+<%= form_for :item, url: mobile_manage_gw_webmail_sys_addresses_path, html: { id: 'mailForm', class: 'mailForm', name: 'mailForm' } do |f| %>
   <%= hidden_field_tag :group_id, params[:group_id] %>
-  
+
   <% if @group != @root %>
   <div class="groupTitle"><%= @group.name %></div>
   <% end %>
-  
+
   <% if @users.blank? %>
     <% if @group != @root %>
       <div class="notice">次の階層を選択してください。</div>
@@ -101,22 +88,22 @@ function changeSelection() {
         <td class="checkUI"><input type="checkbox" name="to[<%= u.id %>]" class="checkUI" value="1" /></td>
         <td class="checkUI"><input type="checkbox" name="cc[<%= u.id %>]" class="checkUI" value="1" /></td>
         <td class="checkUI"><input type="checkbox" name="bcc[<%= u.id %>]" class="checkUI" value="1" /></td>
-        <td><%= link_to mail_text_wrap("#{u.name} <#{u.email}>"), gw_webmail_sys_address_path(u.id, :group_id => @group.id), :class => 'address' %></td>
+        <td><%= link_to mail_text_wrap("#{u.name} <#{u.email}>"), gw_webmail_sys_address_path(u.id, group_id: @group.id), class: 'address' %></td>
       </tr>
       <% end %>
     </table>
-    <%= submit_tag 'アドレス選択', :name => 'selectAddress', :class => 'selectAddress' %><br />
+    <%= submit_tag 'アドレス選択', name: 'selectAddress', class: 'selectAddress' %><br />
   <% end %>
-  
+
   <% if enum_selected_address != 0 %>
   <div class="selectedAddressesTitle">選択済みアドレス</div>
   <table class="selectedAddresses">
   <% [:to, :cc, :bcc].each do |t| %>
-    <% if !session[:mobile][t].blank? %>
+    <% if session[:mobile][t].present? %>
       <tr><th colspan="2"><%= t.upcase %></th></tr>
       <% session[:mobile][t].each_with_index do |u,idx| %>
       <tr>
-        <td><%= submit_tag '削除', :class => 'deleteAddress', :name => "deleteAddress=#{t}_#{idx}" %></td>
+        <td><%= submit_tag '削除', class: 'deleteAddress', name: "deleteAddress=#{t}_#{idx}" %></td>
         <td><%= mail_text_wrap u %></td>
       </tr>
       <% end %>
@@ -124,8 +111,20 @@ function changeSelection() {
   <% end %>
   </table>
   <% end %>
-  
-  <% if enum_selected_address != 0 || !@users.blank? %>
-    <%= submit_tag 'メール作成', :name => 'createMail', :class => 'createMail' %>
+
+  <% if enum_selected_address != 0 || @users.present? %>
+    <%= submit_tag 'メール作成', name: 'createMail', class: 'createMail' %>
   <% end %>
 <% end %>
+
+<script type="text/javascript">
+//<![CDATA[
+function changeSelection() {
+  //document.body.style.cursor = 'wait';
+  $('nowLoading').style.display = 'block';
+  $('mailForm').style.display = 'none';
+
+  $('groupForm').submit();
+}
+//]]>
+</script>

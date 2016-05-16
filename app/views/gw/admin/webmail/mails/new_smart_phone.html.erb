@@ -1,15 +1,15 @@
-<%= render :partial => 'new_js' %>
+<%= render 'new_js' %>
 
 <div class="newMailTitle">
   <span>メール作成</span>
 </div>
 
 <%= error_messages_for "item" %>
-<%= form_for :item, :url => mobile_send_gw_webmail_mail_path(params[:mailbox], params[:id].to_i),
-  :html => {:id => "item_form", :class => "newForm", :name => "newForm", :method => :post, :multipart => true} do |f| %>
-  <%= render :partial => 'form_smart_phone', :locals => {:f => f} %>
+<%= form_for :item, url: mobile_send_gw_webmail_mail_path(params[:mailbox], params[:id].to_i),
+  html: { id: "item_form", class: "newForm", name: "newForm", method: :post, multipart: true } do |f| %>
+  <%= render 'form_smart_phone', f: f %>
   <div class="submitters">
-    <%= tag :input, :type => 'button', :value => "送信する", :id => "commit_send1", :name => "commit_send", :class => "send", :onclick => "checkServerStatus(this); return false;" %>
-    <%= tag :input, :type => 'button', :value => "下書き保存", :id => "commit_draft1", :name => "commit_draft", :class => "draft", :onclick => "checkServerStatus(this); return false;" %>
+    <%= tag :input, type: 'button', value: "送信する", id: "commit_send1", name: "commit_send", class: "send", onclick: "checkServerStatus(this); return false;" %>
+    <%= tag :input, type: 'button', value: "下書き保存", id: "commit_draft1", name: "commit_draft", class: "draft", onclick: "checkServerStatus(this); return false;" %>
   </div>
 <% end %>

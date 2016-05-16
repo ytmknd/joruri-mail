@@ -21,13 +21,12 @@ plv  = 0
   
   unseenNum = box.unseen > 0 ? "(#{box.unseen})" : ""
   tree += %Q(<b>) if box.unseen > 0
-  tree += link_to("#{h(box.title)}#{unseenNum}", url_for(:action => :index, :mailbox => box.name), :class => nm_class)
+  tree += link_to("#{h(box.title)}#{unseenNum}", url_for(action: :index, mailbox: box.name), class: nm_class)
   #tree += %Q{<span class="unseenNum">(<span class="num">#{box.unseen}</span>)</span>} if box.unseen > 0
   tree += %Q(</b>) if box.unseen > 0
   
   if box.trash_box? && (box.messages > 0 || box.children.length > 0)
-    tree += link_to("≫空にする", empty_gw_webmail_mails_path(box.name),
-      :class => :empty, :confirm => "空にしてよろしいですか？")
+    tree += link_to("≫空にする", empty_gw_webmail_mails_path(box.name), class: :empty, data: { confirm: "空にしてよろしいですか？" })
   end
   
   tree += %Q(</div>) if box.trash_box?
@@ -36,6 +35,6 @@ plv  = 0
 
   plv = clv
 end
-tree = %Q(<table class="root">#{tree}</table>) if !tree.blank?
+tree = %Q(<table class="root">#{tree}</table>) if tree.present?
 
 %><div class="mailboxes"><%= raw tree %></div>

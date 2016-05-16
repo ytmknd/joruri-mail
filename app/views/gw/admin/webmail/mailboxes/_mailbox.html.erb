@@ -21,11 +21,13 @@ plv  = 0
     tree += %Q(\n#{idt}<li #{li_class}>)
   end
   
-  tree += link_to(h(box.title), url_for(:action => :index, :mailbox => box.name), :class => nm_class)
+  tree += link_to(h(box.title), url_for(action: :index, mailbox: box.name), class: nm_class)
   tree += %Q(</li>) if @mailboxes.size == idx + 1
 
   plv = clv
 end
 tree = %Q(<ul class="root">#{tree}</ul>) if !tree.blank?
 
-%><div class="mailbox"><%= raw tree %></div>
+%>
+
+<div class="mailbox"><%= raw tree %></div>

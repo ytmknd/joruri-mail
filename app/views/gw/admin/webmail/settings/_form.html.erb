@@ -1,79 +1,31 @@
-<%= content_for :header do %>
-  <%= javascript_include_tag '/_common/js/simple_color_picker/jquery.simple-color-picker.js' %>
-  <%= stylesheet_link_tag '/_common/js/simple_color_picker/jquery.simple-color-picker.css', :media => 'all' %>
+<%= f.error_messages %>
+
+<% case @item.input_type %>
+<% when :select, :text_field, :password_field %>
+  <table class="show">
+    <tr>
+      <th>設定名</th>
+      <td><%= @item.config_name %></td>
+    </tr><tr>
+      <th>設定値</th>
+      <td>
+        <% if @item.input_type == :select %>
+          <%= f.select :value, @item.options %>
+        <% elsif @item.input_type == :text_field %>
+          <%= f.text_field :value, style: "width: 300px;" %>
+        <% elsif @item.input_type == :password_field %>
+          <%= f.password_field :value, style: "width: 300px;", value: @item.value %>
+        <% end %>
+        <%=raw @item.message if @item.message %>
+      </td>
+    </tr>
+  </table>
+<% when :account_password_field %>
+  <%= render 'gw/admin/webmail/settings/account_password_field/form' %>
+<% when :label_color_field %>
+  <%= render 'gw/admin/webmail/settings/label_color_field/form' %>
 <% end %>
 
-<%
-case @item.input_type
-when :select
-  value_form = f.select(:value, @item.options)
-when :text_field
-  value_form = f.text_field(:value, :style => "width: 300px;")
-when :password_field
-  value_form = f.password_field(:value, :style => "width: 300px;", :autocomplete => 'off')
-when :account_password_field
-  if @item.value.blank? 
-    value = {:account => '', :password => ''}
-  else
-    value = JSON.parse(@item.value).symbolize_keys!
-    value[:password] = Util::String::Crypt.decrypt_with_mime(value[:password]) || ''
-  end
-  value_form  = %Q(<span style="width:70px; display:inline-block;">アカウント</span>)
-  value_form += text_field_tag(:account, value[:account], :style => "width: 150px;", :autocomplete => 'off')
-  value_form += "<br />"
-  value_form += %Q(<span style="width:70px; display:inline-block;">パスワード</span>)
-  value_form += password_field_tag(:password, value[:password], :style => "width: 150px;", :autocomplete => 'off')
-when :label_color_field
-  if @item.value.blank? 
-    value = @item.options
-  else
-    value = JSON.parse(@item.value).symbolize_keys!
-  end
-  value_form  = ""
-  value_form += hidden_field_tag(:label_id, value[:id])
-  value_form += %Q(<span style="width:40px; display:inline-block;">名前</span>)
-  value_form += text_field_tag(:name, value[:name], :style => "width: 150px;")
-  value_form += "<br />"
-  value_form += %Q(<span style="width:40px; display:inline-block;">色</span>)
-  value_form += text_field_tag(:color, value[:color], :style => "width: 150px; color: #fff;", :id => 'color_picker')
-  value_form += "<br />"
-  value_form += %Q(<span style="width:40px; display:inline-block;">表示</span>)
-  value_form += radio_button_tag(:state, 'enabled', value[:state] == 'enabled') + label_tag(:state_enabled, '表示する') + radio_button_tag(:state, 'disabled', value[:state] == 'disabled') + label_tag(:state_disabled, '表示しない') 
-end
-%>
-
-<% if @item.input_type == :label_color_field %>
-<script type="text/javascript">
-//<![CDATA[
-(function($) {
-  $(function() {
-    $('#color_picker').simpleColorPicker({
-      onChangeColor: function(color) {
-        $('#color_picker').val(color);
-        $('#color_picker').css('background-color', color);
-      }
-    });
-    $('#color_picker').bind('keyup', function(e) {
-      var color = $(this).val();
-      if (color.match(/^\#[a-f0-9]{6}$/)) {
-        $(this).css('background-color', color);
-      }
-    });
-    $('#color_picker').keyup();
-  });
-})(jQuery);
-//]]>
-</script>
-<% end %>
-
-<table class="show">
-  
-  <tr>
-    <th>設定名</th>
-    <td><%=h @item.config_name %></td>
-  </tr><tr>
-    <th>設定値</th>
-    <td><%=raw value_form %><%=raw @item.message if @item.message %></td>
-  </tr>
-
-</table>
+<div class="submitters">
+  <%= f.submit %>
+</div>

@@ -1,5 +1,3 @@
-# encoding: utf-8
-
 truncate_table "gw_webmail_addresses"
 truncate_table "gw_webmail_address_groupings"
 truncate_table "gw_webmail_address_groups"

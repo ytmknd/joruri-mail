@@ -39,46 +39,34 @@ end
 
 params[:group_id] = nil if params[:clear]
 
-@group = Gw::WebmailAddressGroup.new(:id => 0, :name => 'すべて')
-unless params[:group_id].blank?
+@group = Gw::WebmailAddressGroup.new(id: 0, name: 'すべて')
+if params[:group_id].present?
   gid = params[:group_id].to_i
   if gid != 0
     @group = Gw::WebmailAddressGroup.find(params[:group_id])
-    @items = @group.addresses.find(:all, :order => get_order)
+    @items = @group.addresses.order(get_order)
   end
 end
 
 %>
 
-<script type="text/javascript">
-//<![CDATA[
-function changeSelection() {
-  //document.body.style.cursor = 'wait';
-  $('nowLoading').style.display = 'block';
-  $('mailForm').style.display = 'none';
-  
-  $('groupForm').submit();
-}
-//]]>
-</script>
-
 <div class="addressGroupTitle">
   <%= Joruri.config.application['webmail.address_group_menu'] %>
 </div>
 
-<%= form_tag gw_webmail_address_groups_path, {:id => 'groupForm', :name => 'groupForm', :class => 'groupForm', :method => :get } do |f| %>
-  グループ：<%= select_tag :group_id, options_for_select(group_selection_root(@root_groups), @group.id), :class => 'selectUI', :onchange => "changeSelection();" %><br/>
-  <%#= submit_tag '検索', :name => 'select', :class => 'search' %>
-  <%= submit_tag 'リセット', :name => 'clear', :class => 'reset' %>
+<%= form_tag gw_webmail_address_groups_path, { id: 'groupForm', name: 'groupForm', class: 'groupForm', method: :get } do |f| %>
+  グループ：<%= select_tag :group_id, options_for_select(group_selection_root(@root_groups), @group.id), class: 'selectUI', :onchange => "changeSelection();" %><br/>
+  <%#= submit_tag '検索', name: 'select', class: 'search' %>
+  <%= submit_tag 'リセット', name: 'clear', class: 'reset' %>
 <% end %>
 
 <div id="nowLoading" class="nowLoading" style="display:none;">Now Loading...</div>
 
-<%= form_for :item, :url => mobile_manage_gw_webmail_address_groups_path, :html => {:id => 'mailForm', :name => 'mailForm', :class => 'mailForm'} do |f| %>
+<%= form_for :item, url: mobile_manage_gw_webmail_address_groups_path, html: { id: 'mailForm', name: 'mailForm', class: 'mailForm' } do |f| %>
   <%= hidden_field_tag :group_id, params[:group_id] %>
-  
+
   <div class="groupTitle"><%= @group.name%></div>
-  
+
   <% if @items.blank? %>
     <div class="notice">登録アドレスはありません。</div>
   <% else %>
@@ -94,22 +82,22 @@ function changeSelection() {
         <td class="checkUI"><input type="checkbox" name="to[<%= u.id %>]" value="1" class="checkUI" /></td>
         <td class="checkUI"><input type="checkbox" name="cc[<%= u.id %>]" value="1" class="checkUI" /></td>
         <td class="checkUI"><input type="checkbox" name="bcc[<%= u.id %>]" value="1" class="checkUI" /></td>
-        <td><%= link_to mail_text_wrap("#{u.name} <#{u.email}>"), gw_webmail_address_path(u.id, :group_id => @group.id), :class => 'address' %></td>
+        <td><%= link_to mail_text_wrap("#{u.name} <#{u.email}>"), gw_webmail_address_path(u.id, group_id: @group.id), class: 'address' %></td>
       </tr>
       <% end %>
     </table>
-    <%= submit_tag 'アドレス選択', :name => 'selectAddress', :class => 'selectAddress' %><br />
+    <%= submit_tag 'アドレス選択', name: 'selectAddress', class: 'selectAddress' %><br />
   <% end %>
-  
+
   <% if enum_selected_address != 0 %>
     <div class="selectedAddressesTitle">選択済みアドレス</div>
     <table class="selectedAddresses">
     <% [:to, :cc, :bcc].each do |t| %>
-      <% if !session[:mobile][t].blank? %>
+      <% if session[:mobile][t].present? %>
         <tr><th colspan="2"><%= t.upcase %></th></tr>
         <% session[:mobile][t].each_with_index do |u,idx| %>
         <tr>
-          <td><%= submit_tag '削除', :name => "deleteAddress=#{t}_#{idx}", :class => 'deleteAddress' %></td>
+          <td><%= submit_tag '削除', name: "deleteAddress=#{t}_#{idx}", class: 'deleteAddress' %></td>
           <td><%= mail_text_wrap u %></td>
         </tr>
         <% end %>
@@ -117,8 +105,20 @@ function changeSelection() {
     <% end %>
     </table>
   <% end %>
-  
-  <% if enum_selected_address != 0 || !@items.blank? %>
-    <%= submit_tag 'メール作成', :name => 'createMail', :class => 'createMail' %>
+
+  <% if enum_selected_address != 0 || @items.present? %>
+    <%= submit_tag 'メール作成', name: 'createMail', class: 'createMail' %>
   <% end %>
 <% end %>
+
+<script type="text/javascript">
+//<![CDATA[
+function changeSelection() {
+  //document.body.style.cursor = 'wait';
+  $('nowLoading').style.display = 'block';
+  $('mailForm').style.display = 'none';
+  
+  $('groupForm').submit();
+}
+//]]>
+</script>

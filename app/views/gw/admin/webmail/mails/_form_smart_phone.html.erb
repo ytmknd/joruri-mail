@@ -11,29 +11,7 @@ else
 end
 %>
 
-<script type="text/javascript">
-//<![CDATA[
-function toggleAddressInput() {
-  toggleAddressInputFor('cc');
-  toggleAddressInputFor('bcc');
-  var buttonElm = $('toggleButton');
-  if (buttonElm && buttonElm.visible()) buttonElm.hide();
-  return false;
-}
-function toggleAddressInputFor(type) {
-  var containerElm = $(type + 'Container');
-  if (containerElm && !containerElm.visible()) containerElm.show();
-}
-
-window.onload = function() {
-<% if (@item.in_cc && @item.in_cc != '') || (@item.in_bcc && @item.in_bcc != '') %>
-  toggleAddressInput();
-<% end %>
-}
-//]]>
-</script>
-
-<%= hidden_field_tag "mobile[action]", params[:mobile] && params[:mobile][:action] ? params[:mobile][:action] : params[:action] %>
+%= hidden_field_tag "mobile[action]", params[:mobile] && params[:mobile][:action] ? params[:mobile][:action] : params[:action] %>
 <%= hidden_field_tag "mobile[form_action]", @form_action %>
 <%= hidden_field_tag "mobile[mailbox]", @mailbox.name %>
 <%= hidden_field_tag "mobile[uid]", params[:id] if params[:id] %>
@@ -42,8 +20,8 @@ window.onload = function() {
 
 <div class="addressMenu">
   <div class="menus">
-    <%= submit_tag Joruri.config.application['webmail.sys_address_menu'], :class => 'sysAddress', :name => 'addSysAddress' %>
-    <%= submit_tag Joruri.config.application['webmail.address_group_menu'], :class => 'priAddress', :name => 'addPriAddress' %>
+    <%= submit_tag Joruri.config.application['webmail.sys_address_menu'], class: 'sysAddress', name: 'addSysAddress' %>
+    <%= submit_tag Joruri.config.application['webmail.address_group_menu'], class: 'priAddress', name: 'addPriAddress' %>
   </div>
 </div>
 
@@ -51,23 +29,25 @@ window.onload = function() {
 <table id="mailAddresses" class="mailAttributes">
   <tr>
     <th>宛先：</th>
-    <td><%= f.text_area :in_to, :rows => 1, :cols => 30 %></td>
+    <td><%= f.text_area :in_to, rows: 1, cols: 30 %></td>
   </tr><tr id="ccContainer" style="display:none;">
     <th>CC：</th>
-    <td><%= f.text_area :in_cc, :rows => 1, :cols => 30 %></td>
+    <td><%= f.text_area :in_cc, rows: 1, cols: 30 %></td>
   </tr><tr id="bccContainer" style="display:none;">
     <th>BCC：</th>
-    <td><%= f.text_area :in_bcc, :rows => 1, :cols => 30 %></td>
+    <td><%= f.text_area :in_bcc, rows: 1, cols: 30 %></td>
   </tr>
   <tr>
     <th></th>
-    <td style="padding-bottom:0"><div class="addressToggleButtons">
-      <%= link_to 'CC/BCCを追加', '#', :id => "toggleButton", :onclick => "return toggleAddressInput();" %>
-    </div></td>
+    <td style="padding-bottom:0">
+      <div class="addressToggleButtons">
+        <%= link_to 'CC/BCCを追加', '#', id: "toggleButton", onclick: "return toggleAddressInput();" %>
+      </div>
+    </td>
   </tr>
   <tr>
     <th>件名：</th>
-    <td><%= f.text_area :in_subject, :class => 'subject', :rows => 1, :cols => 30 %></td>
+    <td><%= f.text_area :in_subject, class: 'subject', rows: 1, cols: 30 %></td>
   </tr>
   <tr>
     <th colspan="2">本文：</th>
@@ -75,7 +55,7 @@ window.onload = function() {
   <tr>
     <td colspan="2">
       <div id="textFormatEditor" class="textFormatEditor">
-        <%= f.text_area :in_body, :class => 'body', :rows => 10, :cols => 36 %>
+        <%= f.text_area :in_body, class: 'body', rows: 10, cols: 36 %>
       </div>
     </td>
   </tr>
@@ -156,8 +136,8 @@ if (!hasFileUploadSupport()) {
   <tr>
     <td>
       <div id="defaultUploader">
-        <%= f.file_field :in_files, :name => 'item[in_files][]', :size => 90, :class => 'file', :onchange => 'uploadAttachmentFile();' %><br />
-        <%= tag :input, :type => 'button', :value => "選択したファイルを添付", :id => "commit_file", :name => "commit_file", :onclick => "checkServerStatus(this); return false;", :style => 'display: none;' %>
+        <%= f.file_field :in_files, name: 'item[in_files][]', size: 90, class: 'file', onchange: 'uploadAttachmentFile();' %><br />
+        <%= tag :input, type: 'button', value: "選択したファイルを添付", id: "commit_file", name: "commit_file", onclick: "checkServerStatus(this); return false;", style: 'display: none;' %>
       </div>
       <div id="defaultUploaderProgress" style="display:none;">
         <div class="progressWrapper">
@@ -172,7 +152,7 @@ if (!hasFileUploadSupport()) {
 </table>
 <% end %>
 
-<% unless @item.tmp_attachments.blank? %>
+<% if @item.tmp_attachments.present? %>
 <table class="index" bgcolor="white">
   <tr>
     <td class="attention" colspan="2">
@@ -186,11 +166,11 @@ if (!hasFileUploadSupport()) {
   <% @item.tmp_attachments.each do |at| %>
   <tr id="uploadedFile<%= at.id %>" class="uploadedFile">
     <td>
-      <%= link_to_if attachment_file_downloadable?, mail_text_wrap("#{at.name}(#{at.eng_unit})"), "#", :class => "#{at.css_class}", :onclick => 'return false;' %>
+      <%= link_to_if attachment_file_downloadable?, mail_text_wrap("#{at.name}(#{at.eng_unit})"), "#", class: "#{at.css_class}", onclick: 'return false;' %>
       <input type="hidden" name="item[tmp_attachment_ids][]" value="<%= at.id %>" />
     </td>
     <td>
-      <%= link_to '削除', '#', :title => "削除", :onclick => "return deleteUploadedFile('#{at.id}')", :class => "deleteUploadedFile" %>
+      <%= link_to '削除', '#', title: "削除", onclick: "return deleteUploadedFile('#{at.id}')", class: "deleteUploadedFile" %>
     </td>
   </tr>
   <% end %>
@@ -205,3 +185,25 @@ if (!hasFileUploadSupport()) {
 </div>
 
 <!-- end #mailForm --></div>
+
+<script type="text/javascript">
+//<![CDATA[
+function toggleAddressInput() {
+  toggleAddressInputFor('cc');
+  toggleAddressInputFor('bcc');
+  var buttonElm = $('toggleButton');
+  if (buttonElm && buttonElm.visible()) buttonElm.hide();
+  return false;
+}
+function toggleAddressInputFor(type) {
+  var containerElm = $(type + 'Container');
+  if (containerElm && !containerElm.visible()) containerElm.show();
+}
+
+window.onload = function() {
+<% if (@item.in_cc && @item.in_cc != '') || (@item.in_bcc && @item.in_bcc != '') %>
+  toggleAddressInput();
+<% end %>
+}
+//]]>
+</script>

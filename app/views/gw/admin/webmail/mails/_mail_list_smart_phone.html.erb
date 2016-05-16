@@ -15,47 +15,17 @@ def sort_link(key)
   if params[:sort_key] == key.to_s
     order = params[:sort_order] == '' ? 'reverse': ''
   end
-  url_for(@s_params.merge(:sort_key => key.to_s, :sort_order => order))
+  url_for(@s_params.merge(sort_key: key.to_s, sort_order: order))
 end
 %>
-<script type="text/javascript">
-//<![CDATA[
-function starMail(uid) {
-  var starElm = $('mail_star_' + uid);
-  var beforeState = starElm.className;
-  if (beforeState == 'loading') {
-    return false;
-  }
-  starElm.className = 'loading';
-  var ajax = new Ajax.Request('<%=raw star_gw_webmail_mails_path(@mailbox.name) %>', {
-    method: 'get',
-    parameters: {
-      id: uid
-    },
-    onSuccess: function(request) {
-      if (beforeState == 'starOn') {
-        starElm.className = 'starOff';
-      } else {
-        starElm.className = 'starOn';
-      }
-    },
-    onFailure: function(request) {
-      alert('通信に失敗しました。');
-      starElm.className = beforeState;
-    }
-  });
-}
-//]]>
-</script>
-
 <table class="mails">
-  <% for item in items
+  <% items.each do |item|
     flag  = (item.answered?) ? "answered" : ""
     flag += "forwarded" if item.forwarded?
     mdnRequest = item.has_disposition_notification_to? ? 'mdnRequest' : ''
-    uri = url_for(@s_params.merge(:action => :show, :id => item.uid, :new_window => (@mail_open_window.blank? ? nil : 1)))
+    uri = url_for(@s_params.merge(action: :show, id: item.uid, new_window: (@mail_open_window.blank? ? nil : 1)))
     click = ""#%Q[onclick="openMail('#{uri}', #{!@mail_open_window.blank?}); return false;"].html_safe
-    from_tooltip = value = truncate(item.subject, :length => 70)
+    from_tooltip = value = truncate(item.subject, length: 70)
     s_from = from = item.friendly_from_addr
     if @mailbox.name =~ /^(Sent|Drafts)(\.|$)/
       from = item.simple_to_addr
@@ -67,7 +37,7 @@ function starMail(uid) {
     if item.date && match = item.date.match(/(\d{4}-\d{2}-\d{2})\s\d{2}:\d{2}/)
       date = match[1]
     end
-    
+
     star_class = item.starred? ? "starOn" : "starOff"
     star_title = item.starred? ? "スター" : ""
     %>
@@ -98,3 +68,33 @@ function starMail(uid) {
     </tr>
   <% end %>
 </table>
+
+<script type="text/javascript">
+//<![CDATA[
+function starMail(uid) {
+  var starElm = $('mail_star_' + uid);
+  var beforeState = starElm.className;
+  if (beforeState == 'loading') {
+    return false;
+  }
+  starElm.className = 'loading';
+  var ajax = new Ajax.Request('<%=raw star_gw_webmail_mails_path(@mailbox.name) %>', {
+    method: 'get',
+    parameters: {
+      id: uid
+    },
+    onSuccess: function(request) {
+      if (beforeState == 'starOn') {
+        starElm.className = 'starOff';
+      } else {
+        starElm.className = 'starOn';
+      }
+    },
+    onFailure: function(request) {
+      alert('通信に失敗しました。');
+      starElm.className = beforeState;
+    }
+  });
+}
+//]]>
+</script>

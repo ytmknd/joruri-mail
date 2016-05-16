@@ -5,34 +5,34 @@
 <table class="show">
   <tr>
     <th>所属部署</th>
-    <td><%= safe {@item.groups.first.full_name} %></td>
+    <td><%= @item.groups.first.full_name if @item.groups.first %></td>
   </tr>
   <tr>
-    <th><%= @item.locale(:name) %></th>
+    <th><%= @item.class.human_attribute_name :name %></th>
     <td><%= @item.name %></td>
   </tr>
   <tr>
-    <th><%= @item.locale(:kana) %></th>
+    <th><%= @item.class.human_attribute_name :kana %></th>
     <td><%= @item.kana %></td>
   </tr>
   <tr>
-    <th><%= @item.locale(:email) %></th>
+    <th><%= @item.class.human_attribute_name :email %></th>
     <td><%= mail_text_wrap @item.email %></td>
   </tr>
   <tr>
-    <th><%= @item.locale(:official_position) %></th>
+    <th><%= @item.class.human_attribute_name :official_position %></th>
     <td><%= @item.official_position %></td>
   </tr>
   <tr>
-    <th><%= @item.locale(:assigned_job) %></th>
+    <th><%= @item.class.human_attribute_name :assigned_job %></th>
     <td><%= @item.assigned_job %></td>
   </tr>
 </table>
 
-<%= form_tag mobile_manage_gw_webmail_sys_addresses_path, {:id => 'mailForm', :name => 'mailForm', :class => 'mailForm' } do |f| %>
+<%= form_tag mobile_manage_gw_webmail_sys_addresses_path, { id: 'mailForm', name: 'mailForm', class: 'mailForm' } do |f| %>
   <%= hidden_field_tag "to[#{@item.id}]", '1' %>
   <%= hidden_field_tag "group_id", params[:group_id] %>
-  <%= submit_tag 'メール作成', :name => 'createMail', :class => 'createMail' %>
+  <%= submit_tag 'メール作成', name: 'createMail', class: 'createMail' %>
 <% end %>
 
-<%= link_to '<戻る', gw_webmail_sys_addresses_path(:group_id => params[:group_id]), :class => 'back' %>
+<%= link_to '<戻る', gw_webmail_sys_addresses_path(group_id: params[:group_id]), class: 'back' %>

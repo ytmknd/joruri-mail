@@ -15,9 +15,10 @@ def sort_link(key)
   if params[:sort_key] == key.to_s
     order = params[:sort_order] == '' ? 'reverse': ''
   end
-  url_for(@s_params.merge(:sort_key => key.to_s, :sort_order => order))
+  url_for(@s_params.merge(sort_key: key.to_s, sort_order: order))
 end
 %>
+<script type="text/javascript" src="/_common/js/dump.js"></script>
 
 <table class="mails">
   <%
@@ -32,9 +33,9 @@ end
   <tr>
     <th class="drag"></th>
     <th class="check"><input type="checkbox" onclick="checkAll(this.checked)" value="0" /></th>
-    <th class="<%= star_class %>" title="スター" onclick="window.location.href='<%=raw escape_javascript url_for(@s_params.merge(:sort_starred => sort_starred)) %>';"></th>
+    <th class="<%= star_class %>" title="スター" onclick="window.location.href='<%=raw escape_javascript url_for(@s_params.merge(sort_starred: sort_starred)) %>';"></th>
     <th class="attach" title="添付ファイル">添</th>
-    <th class="subject"><%= link_to '件名' + sort_mark(:subject), sort_link(:subject), :class => 'sorter' %></th>
+    <th class="subject"><%= link_to '件名' + sort_mark(:subject), sort_link(:subject), class: 'sorter' %></th>
     <% if @mailbox.name =~ /^(Star)$/ %>
     <th class="mailbox"></th>
     <% end %>
@@ -42,31 +43,29 @@ end
       <span class="caption">
       <% sorter_caption = @mailbox.name =~ /^(Sent|Drafts)(\.|$)/ ? "受信者" + sort_mark(:to) : "差出人" + sort_mark(:from) %>
       <% sorter_link = @mailbox.name =~ /^(Sent|Drafts)(\.|$)/ ? sort_link(:to) : sort_link(:from) %>
-      <%= link_to sorter_caption, sorter_link, :class => 'sorter' %>
+      <%= link_to sorter_caption, sorter_link, class: 'sorter' %>
       </span>
       <% if params[:s_from] %>
-        <%= link_to "≪絞込解除", url_for(@s_params.dup.reject{|k| k == 's_from'}.merge(:page => 1)), :class => "cancelFromSearch" %>
+        <%= link_to "≪絞込解除", url_for(@s_params.dup.reject{|k| k == 's_from'}.merge(page: 1)), class: "cancelFromSearch" %>
       <% end %>
     </th>
-    <th class="date"><%= link_to '送信日時' + sort_mark(:date), sort_link(:date), :class => 'sorter' %></th>
-    <th class="size"><%= link_to 'サイズ' + sort_mark(:size), sort_link(:size), :class => 'sorter' %></th>
+    <th class="date"><%= link_to '送信日時' + sort_mark(:date), sort_link(:date), class: 'sorter' %></th>
+    <th class="size"><%= link_to 'サイズ' + sort_mark(:size), sort_link(:size), class: 'sorter' %></th>
   </tr>
-  
-  <script type="text/javascript" src="/_common/js/dump.js"></script>
-  
-  <% for item in items
+
+  <% items.each do |item|
     flag  = (item.answered?) ? "answered" : ""
     flag += "forwarded" if item.forwarded?
     mdnRequest = item.has_disposition_notification_to? ? 'mdnRequest' : ''
-    uri = url_for(@s_params.merge(:action => :show, :id => item.uid, :new_window => (@mail_open_window.blank? ? nil : 1)))
+    uri = url_for(@s_params.merge(action: :show, id: item.uid, new_window: (@mail_open_window.blank? ? nil : 1)))
     click = %Q[onclick="openMail('#{raw escape_javascript uri}', #{!@mail_open_window.blank?}); return false;"].html_safe
-    from_tooltip = value = truncate(item.subject, :length => 70)
+    from_tooltip = value = truncate(item.subject, length: 70)
     s_from = from = item.friendly_from_addr
     if @mailbox.name =~ /^(Sent|Drafts)(\.|$)/
       from = item.simple_to_addr
       s_from = item.friendly_to_addrs[0] || ''
     end 
-    from, from_tooltip = omit_from_address_in_mail_list(from) unless @mail_list_from_address.blank?
+    from, from_tooltip = omit_from_address_in_mail_list(from) if @mail_list_from_address.present?
     value = ' ' if value.blank?
     star = item.starred? ? "starOn" : "starOff"
     star_title = item.starred? ? "スター" : ""
@@ -78,7 +77,7 @@ end
     <td class="attach"><%=raw %Q(<span class="attach" title="添付ファイル">有</span>) if item.has_attachments? %></td>
     <td class="subject <%= flag %> <%= mdnRequest %> <%= subject_wrap %>" <%= click %>>
       <span class="overflowHidden <%= subject_wrap %>" title="<%= item.subject %>">
-        <a href="<%= url_for(:action => :show, :id => item.uid) %>" style="float:left;">
+        <a href="<%= url_for(action: :show, id: item.uid) %>" style="float:left;">
           <span id="mail_<%= item.uid %>_labels" class="labels" style="<%= 'display:none;' if item.labels.count == 0 %>">
             <% item.labels.each do |label| %>
               <% if label_conf = @label_confs.find{|conf| conf[:id] == label} %>
@@ -96,11 +95,11 @@ end
       <%= safe{@mailboxes.find{|x| x.name == item.node.ref_mailbox}.title} if item.node %></span></td>
     <% end %>
     <td class="from"><span class="overflowHidden" title="<%= from_tooltip %>">
-      <%= link_to mail_text_wrap(from), url_for(@s_params.merge(:s_from => s_from, :page => 1)) %></span></td>
+      <%= link_to mail_text_wrap(from), url_for(@s_params.merge(s_from: s_from, page: 1)) %></span></td>
     <td class="date" <%= click %>>
-      <%=h item.date %></td>
+      <%= item.date %></td>
     <td class="size" <%= click %>>
-      <%=h number_format(item.size) %></td>
+      <%= number_format(item.size) %></td>
   </tr>
   <% end %>
 </table>

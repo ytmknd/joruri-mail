@@ -3,7 +3,7 @@ module Sys::Controller::Admin::Auth
   ACCOUNT_KEY = :sys_user_account
   PASSWD_KEY  = :sys_user_password
   @@current_user = false
-  
+
 protected
   def logged_in?
     if session[:expired_at] && session[:expired_at] < Time.now
@@ -146,7 +146,7 @@ protected
   # cookie and log the user back in if apropriate
   def login_from_cookie
     return unless cookies[:auth_token] && !logged_in?
-    user = Sys::User.find_by_remember_token(cookies[:auth_token])
+    user = Sys::User.find_by(remember_token: cookies[:auth_token])
     if user && user.remember_token?
       user.remember_me
       self.current_user = user

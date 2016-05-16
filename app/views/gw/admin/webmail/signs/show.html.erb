@@ -1,15 +1,15 @@
 <div id="signContent">
-<%= render :partial => 'menu' %>
+<%= render 'menu' %>
 
 <table class="show">
   <tr>
-    <th><%= @item.locale(:name) %></th>
-    <td><%=h @item.name %></td>
+    <th><%= @item.class.human_attribute_name :name %></th>
+    <td><%= @item.name %></td>
   </tr><tr>
-    <th><%= @item.locale(:body) %></th>
+    <th><%= @item.class.human_attribute_name :body %></th>
     <td class="autoWrap mailBodyText"><%=mail_text_wrap @item.body, 10 %></td>
   </tr><tr>
-    <th><%= @item.locale(:default_flag) %></th>
+    <th><%= @item.class.human_attribute_name :default_flag %></th>
     <td><%= @item.default_flag == 1 ? '設定する' : '設定しない' %></td>
   </tr>
 </table>

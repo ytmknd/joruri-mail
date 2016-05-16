@@ -1,4 +1,3 @@
-# encoding: utf-8
 module Gw::Controller::Admin::Mobile::Mail
   
   def mobile_manage

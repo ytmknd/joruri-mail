@@ -24,7 +24,7 @@ class Page
   def self.mobile?
     return true if @@mobile
     return nil unless @@site
-    Core.script_uri =~ /^#{@@site.mobile_full_uri}/ if !@@site.mobile_full_uri.blank?
+    Core.script_uri =~ /^#{@@site.mobile_full_uri}/ if @@site.mobile_full_uri.present?
   end
   
   def self.head_tag

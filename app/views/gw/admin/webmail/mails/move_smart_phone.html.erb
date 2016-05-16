@@ -11,10 +11,10 @@ action_label = params[:copy].blank? ? '移動' : 'コピー'
 %>
 
 <div class="mailboxTitle">
-  <%= link_to @mailbox.title, gw_webmail_mails_path(:mailbox => @mailbox.name, :mobile => :list, :page => 1), :class => "link" %>
+  <%= link_to @mailbox.title, gw_webmail_mails_path(mailbox: @mailbox.name, mobile: :list, page: 1), class "link" %>
 </div>
 
-<%= form_for :item, :url => move_gw_webmail_mails_path(@mailbox.name), :html => {:id => "moveForm", :name => "moveForm"} do |f| %>
+<%= form_for :item, url: move_gw_webmail_mails_path(@mailbox.name), html: { id: "moveForm", name: "moveForm" } do |f| %>
   <%= hidden_field_tag 'copy', params[:copy] %>
   <% params[:item][:ids].each do |id, key| %>
     <%= hidden_field_tag "item[ids][#{id}]", 1 %>
@@ -27,17 +27,17 @@ action_label = params[:copy].blank? ? '移動' : 'コピー'
     <% end %>
     <tr><th><%= action_label %>先フォルダ</th></tr>
     <tr><td>
-      <%= f.select :mailbox, mailboxes, :selected => 'Archives', :class => 'selectUI' %>
+      <%= f.select :mailbox, mailboxes, selected: 'Archives', class: 'selectUI' %>
     </td></tr>
   </table>
   <% if mailboxes.size > 0 %>
     <div class="submitters">
-      <%= submit_tag "#{action_label}する", :class => (params[:copy].blank? ? 'move' : 'copy') %>
+      <%= f.submit "#{action_label}する", class: (params[:copy].blank? ? 'move' : 'copy') %>
     </div>
   <% end %>
 <% end %>
 </div>
 
 <div class="link">
-  <%= link_to '<戻る', gw_webmail_mails_path(:mailbox => @mailbox.name, :mobile => :list), :class => "back" %>
+  <%= link_to '<戻る', gw_webmail_mails_path(mailbox: @mailbox.name, mobile: :list), class: "back" %>
 </div>

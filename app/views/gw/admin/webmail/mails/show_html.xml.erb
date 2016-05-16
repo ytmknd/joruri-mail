@@ -1,7 +1,7 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <items>
 <% limit_size = data_uri_scheme_limit_size %>
-<% @item.inline_contents(:show_image => true, :embed_image => limit_size > 0, :embed_image_size_limit => limit_size).each do |inline| %>
+<% @item.inline_contents(show_image: true, embed_image: limit_size > 0, embed_image_size_limit: limit_size).each do |inline| %>
   <% if inline.alternative? || inline.content_type == "text/html" %>
     <% html_body = inline.html_body ? inline.html_body.gsub(']]>', ']]&gt;') : '' %>
     <item seqno="<%= inline.seqno %>"><![CDATA[<%=raw mail_html_autolink(html_body) %>]]></item>

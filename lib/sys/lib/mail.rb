@@ -1,9 +1,6 @@
-# coding : utf-8
-
 module Sys::Lib::Mail
-  
   @@search_contents_depth = 5
-  
+
   def html_mail?
     #TODO: @mail.html_partで判定してはいけない？
     search_html = Proc.new do |p, lv|
@@ -13,47 +10,48 @@ module Sys::Lib::Mail
     search_html.call(@mail, 0)
     false
   end
-  
+
   def date(format = '%Y-%m-%d %H:%M', nullif = nil)
     @mail.date.blank? ? nullif : @mail.date.in_time_zone.strftime(format)
   end
-  
+
   def from_addr
     extract_address_from_mail_list(friendly_from_addr)
   end
-  
+
   def friendly_from_addr
     field = @mail.header[:from]
-    field.value = correct_shift_jis(field.value)
-    return field.to_s if field.to_s.encoding.name == 'UTF-8' rescue nil ##
-    field.blank? ? 'unknown' : decode(field.value)
+##    field.value = correct_shift_jis(field.value)
+##    return field.to_s if field.to_s.encoding.name == 'UTF-8' rescue nil ##
+##    field.blank? ? 'unknown' : decode(field.value)
+    field ? field.decoded : 'unknown'
   rescue => e
     "#read failed: #{e}" rescue ''
   end
-  
+
   def friendly_to_addrs
     collect_addrs(@mail.header[:to])
   rescue => e
     ["#read failed: #{e}"] rescue []
   end
-  
+
   def simple_to_addr
     addrs = friendly_to_addrs
     "#{addrs.first}#{%Q( 他) if addrs.size > 1}"
   end
-  
+
   def friendly_cc_addrs
     collect_addrs(@mail.header[:cc])
   rescue => e
     ["#read failed: #{e}"] rescue []
   end
-  
+
   def friendly_bcc_addrs
     collect_addrs(@mail.header[:bcc])
   rescue => e
     ["#read failed: #{e}"] rescue []
   end
-  
+
   def friendly_reply_to_addrs(all_members = nil)
     addrs = collect_addrs(@mail.header[:reply_to])
     addrs = [friendly_from_addr] if addrs.blank?
@@ -66,55 +64,78 @@ module Sys::Lib::Mail
   rescue => e
     ["#read failed: #{e}"] rescue []
   end
-  
+
   def sender
     field = @mail.header[:sender]
-    field.blank? ? friendly_from_addr : decode(field.value)
+##    field.blank? ? friendly_from_addr : decode(field.value)
+    field ? field.decoded : friendly_from_addr 
   rescue => e
     "#read failed: #{e}" rescue ''
   end
-  
+
   def subject
     field = @mail.header[:subject]
-    return 'no subject' if field.blank?
-    field.value = correct_shift_jis(field.value)
-    field.value = correct_utf7(field.value)
-    return decode(field.to_s) if field.to_s.encoding.name == 'UTF-8' rescue nil ##
-    encoding = field.value.match(/=\?(.+?)\?B\?/)[1] rescue 'US-ASCII'
-    if valid_encodings.find{|enc| enc == encoding.downcase}
-      decode(field.value)
+##    return decode(field.to_s) if field.to_s.encoding.name == 'UTF-8' rescue nil ##
+##    encoding = field.value.match(/=\?(.+?)\?B\?/)[1] rescue 'US-ASCII'
+##    if valid_encodings.find{|enc| enc == encoding.downcase}
+##      decode(field.value)
+##    else
+##      lang = I18n.t(encoding.downcase, scope: :language)
+##      prefix = "非対応"
+##      prefix << (lang !~ /^translation missing/ ? "/#{lang}(#{encoding})" : "(#{encoding})")
+##      "【#{prefix}】#{decode(field.value)}"
+##    end
+    return 'no subject' unless field
+    if (lang = subject_language) && lang.present?
+      "【#{lang}】#{field.decoded}"
     else
-      lang = I18n.t(encoding.downcase, :scope => :language)
-      prefix = "非対応"
-      prefix << (lang !~ /^translation missing/ ? "/#{lang}(#{encoding})" : "(#{encoding})")
-      "【#{prefix}】#{decode(field.value)}"
+      field.decoded
     end
   rescue => e
     "#read failed: #{e}" rescue ''
   end
-  
+
+  def subject_language
+    field = @mail.header[:subject]
+    encoding = ((mt = field.value.match(/=\?(.+?)\?[QB]\?(.+?)\?=/)) ? mt[1].downcase : '')
+    if encoding.blank? || valid_encoding?(encoding)
+      ''
+    else
+      lang = I18n.t(encoding, scope: :language)
+      lang !~ /^translation missing/ ? "#{lang}/#{encoding}" : "#{encoding}"
+    end
+  end
+
   def has_disposition_notification_to?
-    !@mail.header[:disposition_notification_to].blank?
+    @mail.header[:disposition_notification_to].present?
   end
-  
+
   def disposition_notification_to_addrs
-    field = @mail.header[:disposition_notification_to]
-    return nil if field.blank?
-    value = correct_shift_jis(field.value)
-    begin
-      field.field = Mail::DispositionNotificationToField.new(value)
-      return field.addrs
-    rescue => e
-      error_log(e)
-      return nil
-    end  
+##    field = @mail.header[:disposition_notification_to]
+##    return nil if field.blank?
+##    value = correct_shift_jis(field.value)
+##    begin
+##      field.field = Mail::DispositionNotificationToField.new(value)
+##      return field.addrs
+##    rescue => e
+##      error_log(e)
+##      return nil
+##    end  
+    disposition_notification_to = @mail.header[:disposition_notification_to]
+    if disposition_notification_to && disposition_notification_to.field
+      begin
+        disposition_notification_to.field.addrs
+      rescue => e
+        error_log(e)
+        nil
+      end
+    end
   end
-  
+
   def text_body
     return @text_body if @text_body
 
     inlines = inline_contents
-    
     inlines.each do |content|
       if !content.attachment? && (content.alternative? || content.content_type == "text/plain" || content.content_type == "text/html") 
         @text_body = content.text_body
@@ -123,11 +144,11 @@ module Sys::Lib::Mail
     end
     return @text_body
   end
-  
+
   def html_image_was_omited?
     @html_image_was_omited
   end
-  
+
   def html_body(options = {})
     return @html_body if @html_body
 
@@ -140,16 +161,16 @@ module Sys::Lib::Mail
     end
     @html_body
   end 
-  
+
   def html_body_for_edit
-    decoded = html_body(:replace_cid => true)
+    decoded = html_body(replace_cid: true)
     if decoded =~ /<body(\s+[^>]*)?>(.*)<\/body>/i
       $1
     else
       decoded
     end
   end
-  
+
   def referenced_body(type = :answer)
     body = ""
     if type == :answer
@@ -159,7 +180,7 @@ module Sys::Lib::Mail
     end
     body
   end
-  
+
   def referenced_html_body(type = :answer)
     body = ""
     if type == :answer
@@ -169,7 +190,7 @@ module Sys::Lib::Mail
     end
     body
   end
-  
+
   def has_attachments?
     pattern = /^multipart\/(mixed|related|report)$/
     search_multipart = Proc.new do |p, lv|
@@ -179,9 +200,9 @@ module Sys::Lib::Mail
     search_multipart.call(@mail, 0)
     false
   end
-  
+
   def has_images?
-    pattern = /^image\/(gif|jpeg|png|bmp)$/
+    pattern = /^image\/(gif|jpeg|png|bmp)$/i
     search_multipart = Proc.new do |p, lv|
       return true if p.mime_type =~ pattern
       p.parts.each {|c| search_multipart.call(c, lv + 1)} if p.multipart? && lv < @@search_contents_depth - 1
@@ -189,25 +210,26 @@ module Sys::Lib::Mail
     search_multipart.call(@mail, 0)
     false
   end
-  
+
   def attachments
     return @attachments if @attachments
-    
+
     @attachments = []
-    
+
     attached_files = lambda do |part, level|
-      if part.attachment? && !part.filename.blank?
+      if part.attachment? && part.filename.present?
         seqno = @attachments.size
-        body = part.body.decoded rescue part.body.raw_source
-        body = decode_uuencode(body) if part.content_transfer_encoding =~ /uuencode/i
-        @attachments << Sys::Lib::Mail::Attachment.new({
-          :seqno             => seqno,
-          :content_type      => part.mime_type,
-          :name              => part.filename.strip,
-          :body              => body,
-          :size              => body.bytesize,
-          :transfer_encoding => part.content_transfer_encoding
-        })            
+##        body = part.body.decoded rescue part.body.raw_source
+##        body = decode_uuencode(body) if part.content_transfer_encoding =~ /uuencode/i
+        body = part.decoded
+        @attachments << Sys::Lib::Mail::Attachment.new(
+          seqno:             seqno,
+          content_type:      part.mime_type,
+          name:              part.filename.strip,
+          body:              body,
+          size:              body.bytesize,
+          transfer_encoding: part.content_transfer_encoding
+        )
       elsif part.multipart?
         part.parts.each { |p| attached_files.call(p, level + 1) } if level < @@search_contents_depth
       elsif part.mime_type == 'message/rfc822'
@@ -215,25 +237,25 @@ module Sys::Lib::Mail
         attached_files.call(mail, 0)
       end
     end
-    
-    @mail.parts.each_with_index do |p, i|
-      if @mail.mime_type == "multipart/report" && i > 0
-        p = extend_report_part(p, i + 1)
-      end
-    end
-    
+
+##    @mail.parts.each_with_index do |p, i|
+##      if @mail.mime_type == "multipart/report" && i > 0
+##        p = extend_report_part(p, i + 1)
+##      end
+##    end
+
     attached_files.call(@mail, 0)
-     
+
     @attachments
   end
-  
+
   def disposition_notification_mail?
     return true if @mail.mime_type == "multipart/report" &&
       @mail.content_type_parameters &&
       @mail.content_type_parameters['report-type'] == 'disposition-notification'
     return false
   end
-  
+
   #def inline_contents
   #  inlines = []
   #  search_inline = Proc.new do |p, lv|
@@ -245,19 +267,19 @@ module Sys::Lib::Mail
   #  @mail.parts.each {|p| search_inline.call(p, 1) } if @mail.multipart? 
   #  inlines
   #end
-  
+
   def inline_contents(options = {})
     return @inline_contents if @inline_contents
-    
+
     inlines = []
     alternates = []
-    
+
     collect_text = Proc.new do |parent|
       text = nil
       parent.parts.each do |p|
         if p.mime_type == "text/plain" && !p.attachment?
           text ||= ''
-          text += "\n" unless text.blank? 
+          text += "\n" if text.present? 
           text += decode_text_part(p)
         end
       end
@@ -280,32 +302,32 @@ module Sys::Lib::Mail
         case
         when p.mime_type == "text/plain" 
           inlines << Sys::Lib::Mail::Inline.new(
-            :seqno => inlines.size,
-            :content_type => p.mime_type,
-            :text_body => decode_text_part(p),
-            :attachment => p.attachment?
+            seqno: inlines.size,
+            content_type: p.mime_type,
+            text_body: decode_text_part(p),
+            attachment: p.attachment?
           ) if lv == 0 || p.attachment?
         when p.mime_type == "text/html"
           inlines << Sys::Lib::Mail::Inline.new(
-            :seqno => inlines.size,
-            :content_type => p.mime_type,
-            :html_body => decode_html_part(p, options),
-            :attachment => p.attachment?
+            seqno: inlines.size,
+            content_type: p.mime_type,
+            html_body: decode_html_part(p, options),
+            attachment: p.attachment?
           ) if lv == 0 || p.attachment?
         when p.mime_type =~ /^text\/.+$/
           inlines << Sys::Lib::Mail::Inline.new(
-            :seqno => inlines.size,
-            :content_type => p.mime_type,
-            :text_body => decode_text_part(p),
-            :attachment => p.attachment?)
+            seqno: inlines.size,
+            content_type: p.mime_type,
+            text_body: decode_text_part(p),
+            attachment: p.attachment?)
         when p.mime_type == 'message/rfc822'
           mail = Mail::Message.new(p.body)
           search_inline.call(mail, 0)
         else
           inlines << Sys::Lib::Mail::Inline.new(
-            :seqno => inlines.size,
-            :content_type => "text/plain",
-            :text_body => decode_text_part(p)
+            seqno: inlines.size,
+            content_type: "text/plain",
+            text_body: decode_text_part(p)
           ) if lv == 0 && !p.multipart? && !p.attachment?
         end        
       end
@@ -314,31 +336,31 @@ module Sys::Lib::Mail
         html = collect_html.call(p)
         alt = nil
         if p.mime_type == "multipart/alternative"
-          alt = Sys::Lib::Mail::Inline.new(:seqno => inlines.size, :alternative => true)
-          alt.text_body = text unless text.blank?
-          alt.html_body = html unless html.blank?
+          alt = Sys::Lib::Mail::Inline.new(seqno: inlines.size, alternative: true)
+          alt.text_body = text if text.present?
+          alt.html_body = html if html.present?
           inlines << alt
           alternates << alt
         else
-          unless text.blank?
+          if text.present?
             if alternates[-1] && alternates[-1].text_body.blank?
               alternates[-1].text_body = text
             else
               inlines << Sys::Lib::Mail::Inline.new(
-                :seqno => inlines.size,
-                :content_type => "text/plain",
-                :text_body => text
+                seqno: inlines.size,
+                content_type: "text/plain",
+                text_body: text
               )
             end
           end
-          unless html.blank?
+          if html.present?
             if alternates[-1] && alternates[-1].html_body.blank?
               alternates[-1].html_body = html
             else
               inlines << Sys::Lib::Mail::Inline.new(
-                :seqno => inlines.size,
-                :content_type => "text/html",
-                :html_body => html
+                seqno: inlines.size,
+                content_type: "text/html",
+                html_body: html
               )
             end
           end
@@ -347,46 +369,61 @@ module Sys::Lib::Mail
         alternates.pop if p.mime_type == "multipart/alternative"
       end
     end
-    
+
     search_inline.call(@mail, 0)
-    
+
     inlines.each do |inline|
       if !inline.text_body && inline.html_body
         inline.text_body = convert_html_to_text(inline.html_body)
       end
     end
-    
+
     @inline_contents = inlines
   end
   
-private
+  private
+
   def decode(str, charset = nil)
-    if charset && charset.downcase == 'unicode-1-1-utf-7'
-      str = Net::IMAP.decode_utf7(str.gsub(/\+([\w\+\/]+)-/, '&\1-'))
+##    if charset && charset.downcase == 'unicode-1-1-utf-7'
+##      str = Net::IMAP.decode_utf7(str.gsub(/\+([\w\+\/]+)-/, '&\1-'))
+##    else
+##      ::NKF::nkf('-wx --cp932', str).gsub(/\0/, "")
+##    end
+    if charset
+      case charset.downcase
+      when /^unicode-1-1-utf-7$/
+        return Net::IMAP.decode_utf7(str.gsub(/\+([\w\+\/]+)-/, '&\1-'))
+      when /^utf-8$/, /^iso-2022-jp/, /^shift[_-]jis$/, /^euc-jp$/
+        return NKF::nkf('-wx --cp932', str).gsub(/\0/, "")
+      else
+        return str.force_encoding(charset).encode('utf-8', undef: :replace, invalid: :replace)
+      end
     else
-      ::NKF::nkf('-wx --cp932', str).gsub(/\0/, "")
+      return NKF::nkf('-wx --cp932', str).gsub(/\0/, "")
     end
   end
+
+##  def correct_shift_jis(str)
+##    str = str.gsub(/(=\?)SHIFT-JIS(\?[BQ]\?.+?\?=)/i, '\1' + 'Shift_JIS' +'\2')
+##  end
   
-  def correct_shift_jis(str)
-    str = str.gsub(/(=\?)SHIFT-JIS(\?[BQ]\?.+?\?=)/i, '\1' + 'Shift_JIS' +'\2')
-  end
-  
-  def correct_utf7(str)
-    if match = str.match(/(=\?)unicode-1-1-utf-7(\?[BQ]\?)(.+?)(\?=)/i)
-      str = Net::IMAP.decode_utf7(match[3].gsub(/\+([\w\+\/]+)-/, '&\1-'))
-    end
-    str
-  end
-  
+##  def correct_utf7(str)
+##    if match = str.match(/(=\?)unicode-1-1-utf-7(\?[BQ]\?)(.+?)(\?=)/i)
+##      str = Net::IMAP.decode_utf7(match[3].gsub(/\+([\w\+\/]+)-/, '&\1-'))
+##    end
+##    str
+##  end
+
   def collect_addrs(fields)
     return [] unless fields
-    fields.value = correct_shift_jis(fields.value)
+##    fields.value = correct_shift_jis(fields.value)
     addrs = []
-    fields.each {|f| addrs << (f.name ? "#{decode(f.name)} <#{f.address}>" : f.address) }
+    if fields.respond_to?(:each)
+      fields.each {|f| addrs << (f.name ? "#{decode(f.name)} <#{f.address}>" : f.address) }
+    end
     addrs
   end
-  
+
   def uniq_addrs(addrs)
     new_addrs = {}
     addrs.each do |c|
@@ -395,7 +432,7 @@ private
     end
     new_addrs.values
   end
-  
+
   def referenced_body_for_forward(format = :text)
     om = "----------------------- Original Message -----------------------\n"
     om << " From:    #{friendly_from_addr}\n"
@@ -405,7 +442,7 @@ private
     om << " Subject: #{subject}\n"
     om << "----\n\n"
     ome= "\n--------------------- Original Message Ends --------------------"
-    
+
     if format == :html
       om = Util::String.text_to_html(om)
       ome = Util::String.text_to_html(ome)
@@ -417,20 +454,29 @@ private
   end
 
   def decode_text_part(part)
-    decode(part.body.decoded, part.charset)
+##    decode(part.body.decoded, part.charset)
+    if part.charset.present?
+      part.decoded.force_encoding('utf-8')
+    else
+      decode(part.body.decoded, part.charset)
+    end
   rescue => e
     "# read failed: #{e}"
   end
-  
-  def decode_html_part(part, options = {})
 
-    body = decode(part.body.decoded, part.charset)
+  def decode_html_part(part, options = {})
+##    body = decode(part.body.decoded, part.charset)
+    if part.charset.present?
+      body = part.decoded.force_encoding('utf-8')
+    else
+      body = decode(part.body.decoded, part.charset)
+    end
     body, image_was_omited = secure_html_body(body, options)
     @html_image_was_omited ||= image_was_omited
-    
+
     unless options[:replace_cid] == false
       files = []
-      
+
       search_inline_content = Proc.new do |p, lv|
         if p.mime_type == "multipart/related"
           p.parts.each {|f| files << f if f.header['content-id'] && f.filename }
@@ -442,7 +488,7 @@ private
 
       files.each_with_index do |f, idx|
         cid  = f.header['content-id'].value.gsub(/^<(.*)>$/, '\\1')
-        
+
         if options[:embed_image] && (data = Base64.encode64(f.decoded)) && data.size < options[:embed_image_size_limit]
           body = body.gsub(%Q(src="cid:#{cid}"), %Q(src="data:#{f.mime_type};base64,#{data}"))
         else
@@ -450,12 +496,12 @@ private
         end
       end
     end
-    
+
     body
   rescue => e
     "# read failed: #{e}"
   end
-  
+
   def secure_html_body(html_body, options = {})
     show_image = false
     html_doc = Hpricot(html_body)
@@ -483,7 +529,7 @@ private
       end      
       html_doc = Hpricot(body_text).search('/body').first
     end
-        
+
     html_doc.search('//').each do |elm|
       if elm.doctype? || elm.comment? || elm.class == Hpricot::CData
         remove_elms << elm
@@ -542,92 +588,96 @@ private
     %Q(<blockquote style="margin: 2px 0px 2px 5px; padding: 0px 0px 0px 5px; border-left-style: solid; border-left-width: 2px; border-left-color: silver;">#{html}</blockquote>\n)
   end
 
-  def decode_uuencode(body)
-    if match = body.gsub("\r\n", "\n").match(/^begin.*?\n([ \t].*?\n)*(.*)\n[ `]+\nend/m) 
-      dec = match[2].unpack('u').first
-      body = dec unless dec.blank?        
-    end   
-    body
-  end
-  
-  def extend_report_part(part, number)
-    class << part
-      def _report_part_sequence_number=(val)
-        @_report_part_sequence_number = val
-      end
-      
-      def find_attachment
-        _rslt = super
-        return _rslt if _rslt 
-        return "ReportPart#{@_report_part_sequence_number}.txt" if mime_type =~ /^(text|message)\/.+$/
-        nil
-      end
-    end
-    part._report_part_sequence_number = number
-    part
-  end
+##  def decode_uuencode(body)
+##    if match = body.gsub("\r\n", "\n").match(/^begin.*?\n([ \t].*?\n)*(.*)\n[ `]+\nend/m) 
+##      dec = match[2].unpack('u').first
+##      body = dec if dec.present?
+##    end   
+##    body
+##  end
 
-  def extend_content_type_field(field)
-    class << field
-      def encoded
-        parameters.delete :charset
-        super
-      end
-    end
-    field
-  end
+##  def extend_report_part(part, number)
+##    class << part
+##      def _report_part_sequence_number=(val)
+##        @_report_part_sequence_number = val
+##      end
+##
+##      def find_attachment
+##        _rslt = super
+##        return _rslt if _rslt 
+##        return "ReportPart#{@_report_part_sequence_number}.txt" if mime_type =~ /^(text|message)\/.+$/
+##        nil
+##      end
+##    end
+##    part._report_part_sequence_number = number
+##    part
+##  end
 
-  def extend_bcc_field(field)
-    class << field
-      def encoded
-        do_encode(CAPITALIZED_FIELD)
-      end
-    end
-  end
-  
-  def extend_subject_field(field)
-    class << field
-      def encoded
-        enc = "#{name}: #{value}"
-        enc.gsub!(/^(.+)\r?\n\s*$/m, '\1')
-        "#{enc}\r\n"
-      end
-    end
-  end
+##  def extend_content_type_field(field)
+##    class << field
+##      def encoded
+##        parameters.delete :charset
+##        super
+##      end
+##    end
+##    field
+##  end
 
-  def extend_header_fields(header_fields)
-    #Extend Mail::FieldList
-    class << header_fields
-      def <<(new_field)
-        if new_field.name.downcase == Mail::DispositionNotificationToField::FIELD_NAME
-          new_field.field = Mail::DispositionNotificationToField.new(new_field.value, new_field.charset)
-        end
-        super(new_field)
-      end
-    end    
-  end
+##  def extend_bcc_field(field)
+##    class << field
+##      def encoded
+##        do_encode(CAPITALIZED_FIELD)
+##      end
+##    end
+##  end
   
+##  def extend_subject_field(field)
+##    class << field
+##      def encoded
+##        enc = "#{name}: #{value}"
+##        enc.gsub!(/^(.+)\r?\n\s*$/m, '\1')
+##        "#{enc}\r\n"
+##      end
+##    end
+##  end
+
+##  def extend_header_fields(header_fields)
+##    #Extend Mail::FieldList
+##    class << header_fields
+##      def <<(new_field)
+##        if new_field.name.downcase == Mail::DispositionNotificationToField::FIELD_NAME
+##          new_field.field = Mail::DispositionNotificationToField.new(new_field.value, new_field.charset)
+##        end
+##        super(new_field)
+##      end
+##    end    
+##  end
+
   def convert_html_to_text(html)
     text = html.gsub(/[\r\n]/, "").gsub(/<br\s*\/?>/, "\n").gsub(/<[^>]*>/, "")
     text = CGI.unescapeHTML(text).gsub(/&nbsp;/, " ")
     text
   end
-  
+
   def extract_address_from_mail_list(from)
     if from.match(/<(.+)>/)
       from = $1
     end
     from
   end
-  
+
   def extract_addresses_from_mail_list(froms)
     froms ||= ""
     froms.split(/,/).map do |from|
       extract_address_from_mail_list(from)
     end
   end
-  
-  def valid_encodings
-    ['utf-8','unicode-1-1-utf-7','iso-2022-jp','euc-jp','shift_jis','us-ascii']
+
+  def valid_encoding?(encoding)
+    valid_encoding_regexps.any? {|regexp| regexp =~ encoding }
+  end
+
+  def valid_encoding_regexps
+    [/utf/, /unicode/, /^iso-2022-jp/, /^euc-jp$/, /^shift[-_]jis$/, /^x-sjis$/, /ascii/]
   end
 end

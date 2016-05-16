@@ -1,17 +1,12 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
-       "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="ja" lang="ja">
+<!DOCTYPE html>
+<html lang="ja">
 <head>
-<meta http-equiv="content-type" content="text/html;charset=UTF-8" />
-<meta http-equiv="Content-Style-Type" content="text/css" />
-<meta http-equiv="Content-Script-Type" content="text/javascript" />
+<meta charset="UTF-8" />
 <title><%= Core.title %></title>
-<%= stylesheet_link_tag '/_common/themes/admin/style', :media => 'all' %>
+<%= javascript_include_tag :application %>
+<%= stylesheet_link_tag :application, media: 'all' %>
+<%= stylesheet_link_tag '/_common/themes/admin/style', media: 'all' %>
 <%= javascript_include_tag '/_common/js/prototype' %>
-<%= stylesheet_link_tag '/_common/css/calendar_date_select/default.css' %>
-<%= javascript_include_tag '/_common/js/calendar_date_select/calendar_date_select.js' %>
-<%= javascript_include_tag '/_common/js/calendar_date_select/locale/ja.js' %>
-<%= javascript_include_tag '/_common/js/calendar_date_select/format_iso_date.js' %>
 </head>
 <body>
 
@@ -22,7 +17,7 @@
 
   <h1><a href="/_admin/sys">Joruri</a></h1>
   <div class="menu">
-    <span class="user"><%= safe{Core.user_group.name} %>　<%=h safe{Core.user.name_with_account} %></span>
+    <span class="user"><%= Core.user_group.name if Core.user_group %>　<%= Core.user.name_with_account if Core.user %></span>
     <a class="logout" href="/_admin/logout">ログアウト</a>
   </div>
 
@@ -39,7 +34,7 @@
 <div id="naviContainer">
 
   <table><tr><td class="menu">
-    <%= render :partial => controller.controller_path + '/header' %></td>
+    <%= render controller.controller_path + '/header' %></td>
   </tr></table>
 
 <!-- /#navigationContainer --></div>
@@ -52,7 +47,7 @@
 
 <div id="contentHeader"><% dir = "#{Rails.root}/app/views/#{controller.controller_path}" %>
   <% if FileTest.exist?("#{dir}/_menu.html.erb") %>
-  <%= render :partial => controller.controller_path + '/menu' %>
+  <%= render controller.controller_path + '/menu' %>
   <% end %>
 </div>
 

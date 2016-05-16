@@ -1,4 +1,3 @@
-# encoding: utf-8
 class System::LdapTemporary < System::Database
   include Sys::Model::Base
   include Sys::Model::Base::Config
@@ -11,18 +10,10 @@ class System::LdapTemporary < System::Database
   end
 
   def ldap_children
-    tmp = self.class.new
-    tmp.and :version, version
-    tmp.and :parent_id, id
-    tmp.and :data_type, 'group'
-    return tmp.find(:all,:order=>"code")
+    self.class.where(version: version, parent_id: id, data_type: 'group').order(:code)
   end
 
   def ldap_users
-    tmp = self.class.new
-    tmp.and :version, version
-    tmp.and :parent_id, id
-    tmp.and :data_type, 'user'
-    return tmp.find(:all,:order=>"code")
+    self.class.where(version: version, parent_id: id, data_type: 'user').order(:code)
   end
 end

@@ -1,7 +1,7 @@
 <% if maintenance = recent_maintenance() %>
 <table class="show">
   <tr>
-    <th><%= maintenance.title %> <%= safe{maintenance.published_at.strftime('(%Y-%m-%d %H:%M)')} %></th>
+    <th><%= maintenance.title %> <%=l maintenance.published_at if maintenance.published_at %></th>
   </tr>
   <tr>
     <td><%=raw maintenance.body %></td>
@@ -9,4 +9,4 @@
 </table>
 <% end %>
 
-<%= link_to '<戻る', gw_webmail_mails_path(:mailbox => 'INBOX', :mobile => 'top'), :class => 'back' %>
+<%= link_to '<戻る', gw_webmail_mails_path(mailbox: 'INBOX', mobile: 'top'), class: 'back' %>

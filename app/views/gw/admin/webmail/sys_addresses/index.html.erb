@@ -1,3 +1,60 @@
+<table id="webmailContainer"><tr><td id="webmailMenu" style="width: 25%;">
+<div id="webmailMenuContainer">
+
+<div class="mailbox addressTree">
+  <ul class="root" id="folderRoot">
+    <% @groups.each do |g| %>
+      <li class="folder">
+        <% if g.enabled_children.count > 0 %>
+          <%= link_to '+', '#', id: "toggleGroups#{g.id}", class: "toggleGroups toggleGroupsClose", onclick: "toggleGroups('#{g.id}');return false" %>
+        <% else %>
+          <%= link_to '+', '#', class: "toggleGroups", style: "visibility:hidden;" %>
+        <% end %>
+        <%= link_to g.name, "#top", id: "group#{g.id}", onclick: "return loadAddresses('#{g.id}');" %>
+      </li>
+    <% end %>
+  </ul>
+</div>
+
+</div>
+</td><td id="webmailContent"><div id="addressContent">
+<div id="sysAddresses">
+<%= form_tag gw_webmail_sys_addresses_path, method: :get, id: 'searchForm', class: 'search',
+  onsubmit: "searchAddresses();return false;" do %>
+<table>
+  <tr>
+    <th>名前</th>
+    <td><%= text_field_tag :s_name_or_kana, '', class: "name", style: "width: 120px" %></td>
+    <th>メールアドレス</th>
+    <td><%= text_field_tag :s_email, '', class: "email", style: "width: 200px" %></td>
+    <td class="formSubmitters">
+      <%= submit_tag '検索', name: :search %>
+      <%= submit_tag 'リセット', name: :reset, onclick: "$('searchForm').onsubmit = null;return true;" %>
+    </td>
+  </tr>
+</table>
+<% end %>
+
+<%= form_for :item, url: { action: :index }, html: { id: 'users', name: 'users', target: '_blank' } do |f| %>
+<div id="addresses">
+  <div id="addressesSearch" style="display:none;">
+    <p class="form">検索結果一覧</p>
+    <table class="index">
+      <thead><tr>
+        <th style="width:150px;">検索結果</th>
+        <th>検索条件</th>
+      </tr></thead>
+      <tbody id="searchResultList"></tbody>
+    </table>
+  </div>
+</div>
+<!-- end #sysAddresses --></div>
+<div id="sysAddress" style="display:none;">
+</div>
+<% end %>
+
+<!-- end #addressContent --></div><!-- end #webmailContainer --></td></table>
+
 <%= javascript_include_tag "/_common/js/mail_form.js" %>
 <script type="text/javascript">
 //<![CDATA[
@@ -206,7 +263,7 @@ function returnToAddresses() {
   if (!addressesElm.visible()) addressesElm.show();
 }
 function addAddress(email, name, kana) {
-  var uri = "<%= gw_webmail_addresses_path(:format => 'xml') %>";
+  var uri = "<%= gw_webmail_addresses_path(format: 'xml') %>";
   var myAjax = new Ajax.Request(uri, {
     method: 'post',
     parameters: {
@@ -435,60 +492,3 @@ function sortAddresses(gid, key) {
 }
 //]]>
 </script>
-<table id="webmailContainer"><tr><td id="webmailMenu" style="width: 25%;">
-<div id="webmailMenuContainer">
-
-<div class="mailbox addressTree">
-  <ul class="root" id="folderRoot">
-    <% @groups.each do |g| %>
-      <li class="folder">
-        <% if g.enabled_children.count > 0 %>
-          <%= link_to '+', '#', :id => "toggleGroups#{g.id}", :class => "toggleGroups toggleGroupsClose", :onclick => "toggleGroups('#{g.id}');return false" %>
-        <% else %>
-          <%= link_to '+', '#', :class => "toggleGroups", :style => "visibility:hidden;" %>
-        <% end %>
-        <%= link_to g.name, "#top", :id => "group#{g.id}", :onclick => "return loadAddresses('#{g.id}');" %>
-      </li>
-    <% end %>
-  </ul>
-</div>
-
-</div>
-</td><td id="webmailContent"><div id="addressContent">
-<div id="sysAddresses">
-<%= form_tag gw_webmail_sys_addresses_path, :method => :get, :id => 'searchForm', :class => 'search',
-  :onsubmit => "searchAddresses();return false;" do %>
-<table>
-  <tr>
-    <th>名前</th>
-    <td><%= text_field_tag 's_name_or_kana', '', :class => "name", :style => "width: 120px" %></td>
-    <th>メールアドレス</th>
-    <td><%= text_field_tag 's_email', '', :class => "email", :style => "width: 200px" %></td>
-    <td class="formSubmitters">
-      <%= submit_tag '検索', :name => :search
-      %><%= submit_tag 'リセット', :name => :reset, :onclick => "$('searchForm').onsubmit = null;return true;" %>
-    </td>
-  </tr>
-</table>
-<% end %>
-
-<%= form_for :item, :url => url_for(:action => :index), :html => {:id => 'users', :name => 'users', :target => '_blank'} do |f| %>
-
-<div id="addresses">
-  <div id="addressesSearch" style="display:none;">
-    <p class="form">検索結果一覧</p>
-    <table class="index">
-      <thead><tr>
-        <th style="width:150px;">検索結果</th>
-        <th>検索条件</th>
-      </tr></thead>
-      <tbody id="searchResultList"></tbody>
-    </table>
-  </div>
-</div>
-<!-- end #sysAddresses --></div>
-<div id="sysAddress" style="display:none;">
-</div>
-<% end %>
-
-<!-- end #addressContent --></div><!-- end #webmailContainer --></td></table>

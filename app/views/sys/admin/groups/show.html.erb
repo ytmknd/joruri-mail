@@ -2,44 +2,22 @@
 
 <table class="show">
   <tr>
-    <th><%= @item.locale(:state) %></th>
-    <td><%=h @item.status.name %></td>
+    <th><%= @item.class.human_attribute_name :state %></th>
+    <td><%= @item.status.name if @item.status %></td>
   </tr><tr>
-    <th><%= @item.locale(:code) %></th>
-    <td><%=h @item.code %></td>
+    <th><%= @item.class.human_attribute_name :code %></th>
+    <td><%= @item.code %></td>
   </tr><tr>
-    <th><%= @item.locale(:name) %></th>
-    <td><%=h @item.name %></td>
+    <th><%= @item.class.human_attribute_name :name %></th>
+    <td><%= @item.name %></td>
   </tr><tr>
-    <th><%= @item.locale(:name_en) %></th>
-    <td><%=h @item.name_en %></td>
+    <th><%= @item.class.human_attribute_name :name_en %></th>
+    <td><%= @item.name_en %></td>
   </tr><tr>
-    <th><%= @item.locale(:ldap) %></th>
-    <td><%=h @item.ldap_label %></td>
+    <th><%= @item.class.human_attribute_name :ldap %></th>
+    <td><%= @item.ldap_label %></td>
   </tr><tr>
-    <th><%= @item.locale(:sort_no) %></th>
-    <td><%=h @item.sort_no %></td>
+    <th><%= @item.class.human_attribute_name :sort_no %></th>
+    <td><%= @item.sort_no %></td>
   </tr>
 </table>
-
-<% if false %>
-<br /><p class="form">Web公開</p>
-
-<table class="show">
-  <tr>
-    <th><%= @item.locale(:web_state) %></th>
-    <td><%=h @item.web_status.name %></td>
-  </tr>
-  <%= layout_view @item, :container => :tr %>
-  <tr>
-    <th><%= @item.locale(:email) %></th>
-    <td><%=h @item.email %></td>
-  </tr><tr>
-    <th><%= @item.locale(:tel) %></th>
-    <td><%=h @item.tel %></td>
-  </tr><tr>
-    <th><%= @item.locale(:outline_uri) %></th>
-    <td><%=h @item.outline_uri %></td>
-  </tr>  
-</table>
-<% end %>

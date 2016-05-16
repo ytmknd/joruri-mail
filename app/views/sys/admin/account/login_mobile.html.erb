@@ -4,7 +4,7 @@
 <meta http-equiv="content-type" content="text/html;charset=<%= request.mobile.default_charset %>" />
 <meta http-equiv="content-style-type" content="text/css" />
 <title><%= Core.title %></title>
-<%= stylesheet_link_tag '/_common/themes/admin/gw/webmail/mobile/style', :media => 'all' %>
+<%= stylesheet_link_tag '/_common/themes/admin/gw/webmail/mobile/style', media: 'all' %>
 </head>
 <body>
 
@@ -17,11 +17,11 @@
   <%= hidden_field_tag :uri, h(@uri.gsub(/(\?|&)mobile=top/, "").concat(($1?$1:"?")+"mobile=top")) %>
   <div class="fields">
     <font class="head">ユーザID</font><br/>
-    <%= text_field_tag 'account', '', :class => "inputItem", :istyle => "3", :format => "*m", :mode => "alphabet" %><br/>
+    <%= text_field_tag 'account', '', class: "inputItem", istyle: "3", format: "*m", mode: "alphabet" %><br/>
     <font class="head">パスワード</font><br/>
-    <%= password_field_tag 'password', '', :class => "inputItem", :istyle => "3", :format => "*m", :mode => "alphabet", :autocomplete => "off" %><br/>
+    <%= password_field_tag 'password', '', class: "inputItem", istyle: "3", format: "*m", mode: "alphabet", autocomplete: "off" %><br/>
     <font class="head">モバイルパスワード</font><br/>
-    <%= password_field_tag 'mobile_password', '', :class => "inputItem", :istyle => "3", :format => "*m", :mode => "alphabet", :autocomplete => "off" %><br/>
+    <%= password_field_tag 'mobile_password', '', class: "inputItem", istyle: "3", format: "*m", mode: "alphabet", autocomplete: "off" %><br/>
   </div>
   <div class="submitters">
     <input class="login" type="submit" name="commit" value="ログイン" />

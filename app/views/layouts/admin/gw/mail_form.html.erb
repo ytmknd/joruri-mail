@@ -1,29 +1,21 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
-       "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="ja" lang="ja">
+<!DOCTYPE html>
+<html lang="ja">
 <head>
-<meta http-equiv="content-type" content="text/html;charset=UTF-8" />
-<meta http-equiv="Content-Style-Type" content="text/css" />
-<meta http-equiv="Content-Script-Type" content="text/javascript" />
+<meta charset="UTF-8" />
+<%= csrf_meta_tag %>
 <link rel="shortcut icon" href="/_common/themes/admin/gw/images/other/favicon.ico">
-<title><%=h Core.title %></title>
-<%= javascript_include_tag :defaults %>
+<title><%= Core.title %></title>
+<%= javascript_include_tag :application %>
 <%= javascript_include_tag '/_common/js/cookiemanager.js' %>
 <%= javascript_include_tag '/_common/js/navigation.js' %>
-<%= javascript_include_tag '/_common/js/jquery/jquery.min.js' %>
-<%= javascript_include_tag '/_common/js/jquery/jquery-ui.min.js' %>
-<%= csrf_meta_tag %>
-<%#= javascript_include_tag '/_common/js/prototype' %>
-<%#= stylesheet_link_tag '/_common/themes/admin/style', :media => 'all' %>
-<%= stylesheet_link_tag '/_common/js/jquery/jquery-ui.css' %>
-<%= stylesheet_link_tag '/_common/themes/admin/gw/webmail/style', :media => 'all' %>
-<%= stylesheet_link_tag '/_common/themes/admin/gw/print', :media => 'print' %>
+<%#= javascript_include_tag '/_common/js/jquery/jquery.min.js' %>
+<%#= javascript_include_tag '/_common/js/jquery/jquery-ui.min.js' %>
+<%= javascript_include_tag '/_common/js/prototype' %>
+<%#= stylesheet_link_tag '/_common/themes/admin/style', media: 'all' %>
+<%#= stylesheet_link_tag '/_common/js/jquery/jquery-ui.css' %>
+<%= stylesheet_link_tag '/_common/themes/admin/gw/webmail/style', media: 'all' %>
+<%= stylesheet_link_tag '/_common/themes/admin/gw/print', media: 'print' %>
 <%= yield :header %>
-<script type="text/javascript">
-//<![CDATA[
-jQuery.noConflict();
-//]]>
-</script>
 <%= javascript_tag "new Navigation({});" %>
 </head>
 <body><a id="top" name="top"></a>
@@ -39,8 +31,8 @@ end
 
 <div id="main">
 
-<%= render :partial => 'layouts/admin/gw/notice' %>
-<%= render :partial => 'layouts/admin/gw/error' %>
+<%= render 'layouts/admin/gw/notice' %>
+<%= render 'layouts/admin/gw/error' %>
 
 <div id="content">
 <div id="contentContainer">
@@ -48,7 +40,7 @@ end
 <div id="contentHeader">
   <div id="contentTitle">
     <span class="title">メール</span>
-    <span class="email"><%=h safe{Core.current_user.email} %></span>
+    <span class="email"><%= Core.current_user.email if Core.current_user %></span>
   </div>
 </div>
 

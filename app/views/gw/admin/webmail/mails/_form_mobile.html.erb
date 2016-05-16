@@ -10,10 +10,7 @@ else
   end
 end
 
-cond = Condition.new do |c|
-  c.and :tmp_id, @item.tmp_id
-end
-attachments = Gw::WebmailMailAttachment.find(:all, :conditions => cond.where)
+attachments = Gw::WebmailMailAttachment.where(tmp_id: @item.tmp_id)
 %>
 
 <%= hidden_field_tag "mobile[action]", params[:action] %>
@@ -24,25 +21,25 @@ attachments = Gw::WebmailMailAttachment.find(:all, :conditions => cond.where)
 <%= hidden_field_tag :id, params[:id] %>
 
 <div class="addressMenus">
-<%= submit_tag Joruri.config.application['webmail.sys_address_menu'], :class => 'menuItem', :name => 'addSysAddress' %>
-<%= submit_tag Joruri.config.application['webmail.address_group_menu'], :class => 'menuItem', :name => 'addPriAddress' %>
+<%= submit_tag Joruri.config.application['webmail.sys_address_menu'], class: 'menuItem', name: 'addSysAddress' %>
+<%= submit_tag Joruri.config.application['webmail.address_group_menu'], class: 'menuItem', name: 'addPriAddress' %>
 </div>
 
 <div class="to">宛先</div>
-<%= f.text_area :in_to, :class => 'to', :rows => 2, :istyle => "3", :format => "*m", :mode => "alphabet" %>
+<%= f.text_area :in_to, class: 'to', rows: 2, istyle: "3", format: "*m", mode: "alphabet" %>
 <div class="cc">Cc</div>
-<%= f.text_field :in_cc, :class => 'cc', :istyle => "3", :format => "*m", :mode => "alphabet" %>
+<%= f.text_field :in_cc, class: 'cc', istyle: "3", format: "*m", mode: "alphabet" %>
 <div class="bcc">Bcc</div>
-<%= f.text_field :in_bcc, :class => 'bcc', :istyle => "3", :format => "*m", :mode => "alphabet" %>
+<%= f.text_field :in_bcc, class: 'bcc', istyle: "3", format: "*m", mode: "alphabet" %>
 <div class="subject">件名</div>
-<%= f.text_field :in_subject, :class => 'subject', :istyle => '1', :format => '*M', :mode => 'hiragana' %>
+<%= f.text_field :in_subject, class: 'subject', istyle: '1', format: '*M', mode: 'hiragana' %>
 <div class="body">本文</div>
 <% if @item.in_format == Gw::WebmailMail::FORMAT_HTML %>
-<%= f.text_area :in_html_body, :class => 'html_body', :rows => 10, :istyle => '1', :format => '*M', :mode => 'hiragana' %>
-<%= f.hidden_field :in_body, :class => 'body', :rows => 10, :istyle => '1', :format => '*M', :mode => 'hiragana' %>
+<%= f.text_area :in_html_body, class: 'html_body', rows: 10, istyle: '1', format: '*M', mode: 'hiragana' %>
+<%= f.hidden_field :in_body, class: 'body', rows: 10, istyle: '1', format: '*M', mode: 'hiragana' %>
 <% else %>
-<%= f.text_area :in_body, :class => 'body', :rows => 10, :istyle => '1', :format => '*M', :mode => 'hiragana' %>
-<%= f.hidden_field :in_html_body, :class => 'html_body', :rows => 10, :istyle => '1', :format => '*M', :mode => 'hiragana' %>
+<%= f.text_area :in_body, class: 'body', rows: 10, istyle: '1', format: '*M', mode: 'hiragana' %>
+<%= f.hidden_field :in_html_body, class: 'html_body', rows: 10, istyle: '1', format: '*M', mode: 'hiragana' %>
 <% end %>
 <div class="confirm">
   <%= f.check_box :request_mdn %>開封確認メッセージを要求する
@@ -51,7 +48,7 @@ attachments = Gw::WebmailMailAttachment.find(:all, :conditions => cond.where)
 <%= f.hidden_field :in_format %>
 <%= f.hidden_field :tmp_id %>
 
-<% unless attachments.blank? %>
+<% if attachments.present? %>
 <div class="attachmentFile">
 <div class="title">添付ファイル</div>
 <div class="files">

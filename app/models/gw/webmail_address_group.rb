@@ -1,64 +1,40 @@
-# encoding: utf-8
 class Gw::WebmailAddressGroup < ActiveRecord::Base
   include Sys::Model::Base
   include Sys::Model::Tree
   include Sys::Model::Auth::Free
-  
-  has_many :children, :foreign_key => :parent_id, :class_name => 'Gw::WebmailAddressGroup',
-    :order => 'name, id', :dependent => :destroy
-  
-  has_many :groupings, :foreign_key => :group_id, :class_name => 'Gw::WebmailAddressGrouping',
-    :dependent => :destroy
-  has_many :addresses, :through => :groupings, :order => 'email, id'
-  
-  #has_many :addresses, :foreign_key => :group_id, :class_name => 'Gw::WebmailAddress',
-  #  :order => 'email, id', :dependent => :destroy
-  
+
+  has_many :children, -> { order(:name, :id) },
+    foreign_key: :parent_id, class_name: 'Gw::WebmailAddressGroup', dependent: :destroy
+
+  has_many :groupings, foreign_key: :group_id, class_name: 'Gw::WebmailAddressGrouping', dependent: :destroy
+  has_many :addresses, -> { order(:email, :id) }, through: :groupings
+
   attr_accessor :call_update_child_level_no
   after_save :update_child_level_no
-  
-  validates_presence_of :user_id, :name
-    
+
+  validates :user_id, :name, presence: true
+
+  scope :readable, ->(user = Core.user) { where(user_id: user.id) }
+
   def self.user_root_groups(conditions = {})
-    cond = conditions.merge({:parent_id => 0, :level_no => 1})
+    cond = conditions.merge(parent_id: 0, level_no: 1)
     self.user_groups(cond)
   end
 
   def self.user_groups(conditions = {})
-    cond = conditions.merge({:user_id => Core.user.id})
-    self.find(:all, :conditions => cond, :order => 'name, id')
+    self.where(conditions.merge(user_id: Core.user.id)).order(:name, :id)
   end
-  
+
   def self.user_sorted_groups(conditions = {})
     self.new.sorted_groups(self.user_root_groups(conditions))
   end
-  
-  def readable
-    self.and :user_id, Core.user.id
-    self
-  end
-  
+
   def editable?
-    return true if Core.user.has_auth?(:manager)
-    user_id == Core.user.id
+    Core.user.has_auth?(:manager) || user_id == Core.user.id
   end
-  
+
   def deletable?
-    return true if Core.user.has_auth?(:manager)
-    user_id == Core.user.id
-  end
-  
-  def candidate_parents
-    choices = []
-    sorted_groups(self.class.user_root_groups).each do |g|
-      choices << [('&nbsp;' * (g.level_no - 1) * 4 + CGI.escapeHTML(g.name)).html_safe, g.id]
-    end
-    return choices  
-  end
- 
-  def parents_tree_names
-    return @parents_tree_names if @parents_tree_names
-    @parents_tree_names = self.parents_tree.collect {|g| g.name }
+    Core.user.has_auth?(:manager) || user_id == Core.user.id
   end
 
   def sorted_groups(roots)
@@ -72,13 +48,24 @@ class Gw::WebmailAddressGroup < ActiveRecord::Base
     roots.each {|item| down.call(item)}
     return groups
   end
-  
+
+  def nested_name
+    nested_count = [0, level_no - 1].max
+    "#{'　　'*nested_count}#{name}"
+  end
+
+  def parent_options
+    self.class.user_root_groups.where.not(id: id)
+      .map { |g| g.descendants { |rel| rel.where.not(id: id) } }.flatten
+      .map { |g| [g.nested_name, g.id] }
+  end
+
   def update_child_level_no
     if call_update_child_level_no && level_no_changed?
       children.each do |c|
         c.level_no = level_no + 1
         c.call_update_child_level_no = true
-        c.save(:validate => false)
+        c.save(validate: false)
       end
     end
   end

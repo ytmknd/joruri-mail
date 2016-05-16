@@ -1,3 +1,73 @@
+<table id="webmailContainer"><tr><td id="webmailMenu">
+<div id="webmailMenuContainer">
+
+<div class="menu">
+  <%= link_to 'メールの受信', gw_webmail_mails_path(@mailbox.name), class: 'index', title: "メールの受信" %>
+  <%= link_to 'メールの作成', new_gw_webmail_mail_path('INBOX'), class: 'newMail', title: "メールの作成", target: '_blank',
+    onclick: open_mail_form(new_gw_webmail_mail_path('INBOX')) %>
+</div>
+
+<%= render 'gw/admin/webmail/base/account' %>
+<%= render 'mailbox' %>
+<%= render 'mail_address_history' if @mail_address_history != 0 %>
+
+</div>
+</td><td id="webmailContent">
+
+<div class="menu">
+  <div class="leftMenu" style="position:relative;">
+    <a href="#" onclick="return move_mails();" class="move" title="移動">移動</a
+    ><a href="#" onclick="return copy_mails();" class="copy" title="コピー">コピー</a
+    ><a href="#" onclick="return delete_mails();" class="delete" title="削除">削除</a>
+    <a href="#" onclick="return seen_mails();" class="seen" title="既読にする">既読にする</a
+    ><a href="#" onclick="return unseen_mails();" class="unseen" title="未読にする">未読にする</a
+    ><a href="#" id="labelLink" onclick="return showPopupMenu(this, 'labelMenu');" class="label" title="ラベル">ラベル</a
+    ><% if Core.current_user.id == Core.user.id 
+    %><a href="#" onclick="return register_spam_mails();" class="spam" title="迷惑メール登録">迷惑メール登録</a>
+    <% end %>
+    <a href="#" onclick="return toggleSearchForm();" class="search" title="検索">検索</a>
+    <div id="labelMenu" class="popupMenu" style="display:none;width:100px;">
+      <% @label_confs.each_with_index do |label_conf| %>
+        <div class="menuItem"><%= link_to label_conf[:name], '#', onclick: "labelMails('#{label_conf[:id]}'); return false;" %></div>
+      <% end %>
+      <div class="menuItem"><hr /></div>
+      <div class="menuItem"><%= link_to 'すべてはずす', '#', onclick: "labelMails('0'); return false;" %></div>
+    </div>
+  </div>
+  <div class="simplePagination">
+    <%= link_to "≪前", url_for(@s_params.merge(page: @items.previous_page)) if @items.previous_page
+    %><span><b><%= @items.current_page %></b>/<b><%= @items.total_pages %></b></span
+    ><%= link_to "次≫", url_for(@s_params.merge(page: @items.next_page)) if @items.next_page
+    %><%#= paginate @items, page_links: false, previous_label: "≪前", next_label: "次≫" %>
+  </div>
+</div>
+
+<%= render 'search' %>
+
+<% if @quota && @quota[:usable] %>
+<div class="quotaAlert"><%= "メールボックスの容量が、残り #{@quota[:usable]} です。" %></div>
+<% end %>
+
+<%= form_for :item, url: { action: :index }, html: { id: "mails", name: "mails" } do |f| %>
+  <input type="hidden" name="page" value="<%= params[:page] %>" />
+  <% if params[:sort_starred] == '1' %>
+    <%= render 'mail_list', items: @starred_items + @unstarred_items %>
+  <% else %>
+    <%= render 'mail_list', items: @items %>
+  <% end %>
+<% end %>
+
+<%= paginate @items %>
+
+<% if @quota %>
+<div class="quota"><%= "現在 #{@quota[:total]} 中 #{@quota[:used]} (#{@quota[:usage_rate]}%) 使用しています。" %></div>
+<% if @quota[:mailboxes] && (idx = @quota[:mailboxes].index{|x| x[:name] == @mailbox.name}) %>
+<div class="quota"><%= "#{@mailbox.title} は #{@quota[:mailboxes][idx][:used]} 使用しています。" %></div>
+<% end %>
+<% end %>
+
+<!-- end #webmailContainer --></td></table>
+
 <%= javascript_include_tag "/_common/js/popup_menu.js" %>
 <%= javascript_include_tag "/_common/js/mail_form.js" %>
 <script type="text/javascript">
@@ -26,7 +96,7 @@ function move_mails() {
   return post('<%=raw escape_javascript move_gw_webmail_mails_path(@mailbox.name) %>');
 }
 function copy_mails() {
-  return post('<%=raw escape_javascript move_gw_webmail_mails_path(@mailbox.name, :copy => 1) %>');
+  return post('<%=raw escape_javascript move_gw_webmail_mails_path(@mailbox.name, copy: 1) %>');
 }
 function seen_mails() {
   return post('<%=raw escape_javascript seen_gw_webmail_mails_path(@mailbox.name) %>');
@@ -141,7 +211,7 @@ function removeUnseenClass(mailbox, uid) {
       opacity: 0.8,
       cursor: 'move',
       helper: function(e) {
-        var container = $('<td />');
+        var container = $('<td />').css('width', '50%');
         var target = $(e.currentTarget).parents('table.mails tr.mail');
         $('table.mails tr.mail').each(function() {
           if ($(this).get(0) == target.get(0) || $(this).find('input').is(':checked')) {
@@ -242,72 +312,3 @@ function updateLabels(uid, html) {
 }
 //]]>
 </script>
-<table id="webmailContainer"><tr><td id="webmailMenu">
-<div id="webmailMenuContainer">
-
-<div class="menu">
-  <%= link_to 'メールの受信', gw_webmail_mails_path(@mailbox.name), :class => 'index', :title => "メールの受信" %>
-  <%= link_to 'メールの作成', new_gw_webmail_mail_path('INBOX'), :class => 'newMail', :title => "メールの作成", :target => '_blank',
-    :onclick => open_mail_form(new_gw_webmail_mail_path('INBOX')) %>
-</div>
-
-<%= render :partial => 'gw/admin/webmail/base/account' %>
-<%= render :partial => 'mailbox' %>
-<%= render :partial => 'mail_address_history' if @mail_address_history != 0 %>
-
-</div>
-</td><td id="webmailContent">
-
-<div class="menu">
-  <div class="leftMenu" style="position:relative;">
-    <a href="#" onclick="return move_mails();" class="move" title="移動">移動</a
-    ><a href="#" onclick="return copy_mails();" class="copy" title="コピー">コピー</a
-    ><a href="#" onclick="return delete_mails();" class="delete" title="削除">削除</a>
-    <a href="#" onclick="return seen_mails();" class="seen" title="既読にする">既読にする</a
-    ><a href="#" onclick="return unseen_mails();" class="unseen" title="未読にする">未読にする</a
-    ><a href="#" id="labelLink" onclick="return showPopupMenu(this, 'labelMenu');" class="label" title="ラベル">ラベル</a
-    ><% if Core.current_user.id == Core.user.id 
-    %><a href="#" onclick="return register_spam_mails();" class="spam" title="迷惑メール登録">迷惑メール登録</a>
-    <% end %>
-    <a href="#" onclick="return toggleSearchForm();" class="search" title="検索">検索</a>
-    <div id="labelMenu" class="popupMenu" style="display:none;width:100px;">
-      <% @label_confs.each_with_index do |label_conf| %>
-        <div class="menuItem"><%= link_to label_conf[:name], '#', :onclick => "labelMails('#{label_conf[:id]}'); return false;" %></div>
-      <% end %>
-      <div class="menuItem"><hr /></div>
-      <div class="menuItem"><%= link_to 'すべてはずす', '#', :onclick => "labelMails('0'); return false;" %></div>
-    </div>
-  </div>
-  <div class="simplePagination">
-    <%= link_to "≪前", url_for(@s_params.merge(:page => @items.previous_page)) if @items.previous_page
-    %><span><b><%= @items.current_page %></b>/<b><%= @items.total_pages %></b></span
-    ><%= link_to "次≫", url_for(@s_params.merge(:page => @items.next_page)) if @items.next_page
-    %><%#= paginate @items, :page_links => false, :previous_label => "≪前", :next_label => "次≫" %>
-  </div>
-</div>
-
-<%= render :partial => 'search' %>
-
-<% if @quota && @quota[:usable] %>
-<div class="quotaAlert"><%= "メールボックスの容量が、残り #{@quota[:usable]} です。" %></div>
-<% end %>
-
-<%= form_for :item, :url => '', :html => {:id => "mails", :name => "mails"} do |f| %>
-  <input type="hidden" name="page" value="<%=h params[:page] %>" />
-  <% if params[:sort_starred] == '1' %>
-    <%= render :partial => 'mail_list', :locals => {:items => @starred_items + @unstarred_items} %>
-  <% else %>
-    <%= render :partial => 'mail_list', :locals => {:items => @items} %>
-  <% end %>
-<% end %>
-
-<%= paginate @items %>
-
-<% if @quota %>
-<div class="quota"><%= "現在 #{@quota[:total]} 中 #{@quota[:used]} (#{@quota[:usage_rate]}%) 使用しています。" %></div>
-<% if @quota[:mailboxes] && (idx = @quota[:mailboxes].index{|x| x[:name] == @mailbox.name}) %>
-<div class="quota"><%= "#{@mailbox.title} は #{@quota[:mailboxes][idx][:used]} 使用しています。" %></div>
-<% end %>
-<% end %>
-
-<!-- end #webmailContainer --></td></table>

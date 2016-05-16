@@ -3,7 +3,7 @@ Joruri::Application.routes.draw do
   mod = "sys"
   
   ## script
-  match "/_script/#{mod}/run/*paths" => "#{mod}/script/runner#run"
+  match "/_script/#{mod}/run/*paths" => "#{mod}/script/runner#run", via: :get
   
   scope "_#{scp}" do
     namespace mod do
@@ -30,7 +30,7 @@ Joruri::Application.routes.draw do
             member do
               get :synchronize
               post :synchronize
-              put :synchronize
+              patch :synchronize
               delete :synchronize
             end
           end
@@ -53,7 +53,7 @@ Joruri::Application.routes.draw do
             collection do
               get :export
               post :export
-              put :export
+              patch :export
               delete :export
             end
           end
@@ -63,7 +63,7 @@ Joruri::Application.routes.draw do
             collection do
               get :import
               post :import
-              put :import
+              patch :import
               delete :import
             end
           end
@@ -98,7 +98,7 @@ Joruri::Application.routes.draw do
               post :synchronize
             end
           end
-        match ":parent/inline_files/files/(:name(.:format))" => "inline/files#download"
+        match ":parent/inline_files/files/(:name(.:format))" => "inline/files#download", via: :get
       end
     end
   end

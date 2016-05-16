@@ -3,9 +3,9 @@
 <head>
 <meta http-equiv="content-type" content="text/html;charset=<%= request.mobile.default_charset %>" />
 <meta http-equiv="content-style-type" content="text/css" />
-<title><%=h Core.title %></title>
+<title><%= Core.title %></title>
 <%= csrf_meta_tag %>
-<%= stylesheet_link_tag '/_common/themes/admin/gw/webmail/mobile/style', :media => 'all' %>
+<%= stylesheet_link_tag '/_common/themes/admin/gw/webmail/mobile/style', media: 'all' %>
 </head>
 <body>
 
@@ -15,7 +15,7 @@
 <div id="headerContainer">
 <div id="headerBody">
 
-<%= render :partial => 'layouts/admin/gw/header_mobile' %>
+<%= render 'layouts/admin/gw/header_mobile' %>
 
 <!-- end #headerBody --></div>
 <!-- end #headerContainer --></div>
@@ -28,7 +28,7 @@
 <div id="contentContainer">
 <div id="contentBody">
 
-<%= render :partial => 'show_mobile' %> 
+<%= render 'show_mobile' %> 
 
 <!-- end #contentBody --></div>
 <!-- end #contentContainer --></div>
@@ -38,7 +38,7 @@
 <div id="footerContainer">
 <div id="footerBody">
 
-<%= render :partial => 'layouts/admin/gw/footer_mobile' %>
+<%= render 'layouts/admin/gw/footer_mobile' %>
 
 <!-- end #footerBody --></div>
 <!-- end #footerContainer --></div>

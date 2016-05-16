@@ -26,18 +26,18 @@ plv  = 0
   mailbox_type = "rootFolder" if mailbox_type == "folder" && box.name.index('.').nil?
   
   tree += mailbox_mobile_image_tag(mailbox_type)
-  tree += link_to(h(box.title), url_for(:action => :index, :mailbox => box.name, :mobile => :list), :class => nm_class)
+  tree += link_to(h(box.title), url_for(action: :index, mailbox: box.name, mobile: :list), class: nm_class)
   tree += %Q{<font class="unseenNum">(<font class="num">#{box.unseen}</font>)</font>} if box.unseen > 0
   
   if box.trash_box? && (box.messages > 0 || box.children.length > 0)
     tree += " "
-    tree += link_to("≫空にする", empty_gw_webmail_mails_path(box.name), :class => :empty)
+    tree += link_to("≫空にする", empty_gw_webmail_mails_path(box.name), class: :empty)
   end
   
   tree += %Q(</div>) if @mailboxes.size == idx + 1
 
   plv = clv
 end
-tree = %Q(<div class="root">#{tree}</div>) if !tree.blank?
+tree = %Q(<div class="root">#{tree}</div>) if tree.present?
 
 %><div class="mailbox"><%= raw tree %></div>

@@ -1,31 +1,31 @@
 <div id="templateContent">
-<%= render :partial => 'menu' %>
+<%= render 'menu' %>
 
 <table class="show">
   <tr>
-    <th><%= @item.locale(:name) %></th>
+    <th><%= @item.class.human_attribute_name :name %></th>
     <td><%= @item.name %></td>
   </tr>
 </table><br />
 
 <table class="show template">
   <tr>
-    <th><%= @item.locale(:to) %></th>
+    <th><%= @item.class.human_attribute_name :to %></th>
     <td class="autoWrap"><%= mail_text_wrap @item.to %></td>
   </tr><tr>
-    <th><%= @item.locale(:cc) %></th>
+    <th><%= @item.class.human_attribute_name :cc %></th>
     <td class="autoWrap"><%= mail_text_wrap @item.cc %></td>
   </tr><tr>
-    <th><%= @item.locale(:bcc) %></th>
+    <th><%= @item.class.human_attribute_name :bcc %></th>
     <td class="autoWrap"><%= mail_text_wrap @item.bcc %></td>
   </tr><tr>
-    <th><%= @item.locale(:subject) %></th>
+    <th><%= @item.class.human_attribute_name :subject %></th>
     <td class="autoWrap"><%= mail_text_wrap @item.subject %></td>
   </tr><tr>
-    <th><%= @item.locale(:body) %></th>
+    <th><%= @item.class.human_attribute_name :body %></th>
     <td class="autoWrap mailBodyText"><%= mail_text_wrap @item.body, 10 %></td>
   </tr><tr>
-    <th><%= @item.locale(:default_flag) %></th>
+    <th><%= @item.class.human_attribute_name :default_flag %></th>
     <td><%= @item.default_flag? ? '設定する' : '設定しない' %></td>
   </tr>
 </table>

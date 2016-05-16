@@ -1,52 +1,64 @@
-# encoding: utf-8
 class Sys::Group < Sys::ManageDatabase
   include Sys::Model::Base
   include Sys::Model::Base::Config
   include Sys::Model::Tree
   include Sys::Model::Auth::Manager
-  
-  belongs_to :status    , :foreign_key => :state    , :class_name => 'Sys::Base::Status'
-  belongs_to :web_status, :foreign_key => :web_state, :class_name => 'Sys::Base::Status'
-  belongs_to :parent    , :foreign_key => :parent_id, :class_name => 'Sys::Group'
-###  belongs_to :layout    , :foreign_key => :layout_id, :class_name => 'Cms::Layout'
-  
-  has_many :children  , :foreign_key => :parent_id, :class_name => 'Sys::Group',
-    :order => :sort_no, :dependent => :destroy
-  has_many :enabled_children  , :foreign_key => :parent_id, :class_name => 'Sys::Group',
-    :conditions => {:state => 'enabled'},
-    :order => :sort_no, :dependent => :destroy
 
-  has_many :users_groups, :foreign_key => :group_id
-  has_many :users, :through => :users_groups, :source => :user, 
-    :order => 'sys_users.email, sys_users.account'
-  has_many :ldap_users, :through => :users_groups, :source => :user, 
-    :conditions => {:ldap => 1, :state => 'enabled'},
-    :order => 'sys_users.email, sys_users.account'
-  has_many :enabled_users, :through => :users_groups, :source => :user, 
-    :conditions => {:state => 'enabled'},
-    :order => 'sys_users.email, sys_users.account'
+  belongs_to_active_hash :status, foreign_key: :state, class_name: 'Sys::Base::Status'
+  belongs_to_active_hash :web_status, foreign_key: :web_state, class_name: 'Sys::Base::Status'
 
-  validates_presence_of :state, :level_no, :code, :name, :name_en, :ldap
-  validates_uniqueness_of :code
-  
+  belongs_to :parent, foreign_key: :parent_id, class_name: 'Sys::Group'
+  has_many :children, -> { order(:sort_no) }, 
+    foreign_key: :parent_id, class_name: 'Sys::Group', dependent: :destroy
+  has_many :enabled_children, -> { where(state: 'enabled').order(:sort_no) },
+    foreign_key: :parent_id, class_name: 'Sys::Group', dependent: :destroy
+
+  has_many :users_groups, foreign_key: :group_id
+  has_many :users, -> { order('sys_users.email, sys_users.account') },
+    through: :users_groups, source: :user
+  has_many :ldap_users, -> { where(ldap: 1, state: 'enabled').order('sys_users.email, sys_users.account') },
+    through: :users_groups, source: :user
+  has_many :enabled_users, -> { where(state: 'enabled').order('sys_users.email, sys_users.account') },
+    through: :users_groups, source: :user
+
   attr_accessor :call_update_child_level_no
   after_save :update_child_level_no
   before_destroy :disable_users
   
+  validates :state, :level_no, :name, :name_en, :ldap, presence: true
+  validates :code, presence: true, uniqueness: true
+
+  scope :readable, -> { all }
+
+  def ou_name
+    "#{code}#{name}"
+  end
+  
+  def full_name
+    n = name
+    n = "#{parent.name}　#{n}" if parent && parent.level_no > 1
+    n
+  end
+
+  def nested_name
+    nested_count = [0, level_no - 1].max
+    "#{'　　'*nested_count}#{name}"
+  end
+
   def ldap_users_having_email(order = "id")
-    self.ldap_users.find(:all, :conditions => ["email IS NOT NULL AND email != ''"], :order => order)
+    self.ldap_users.with_valid_email.order(order)
   end
 
   def count_ldap_users_having_email
-    self.ldap_users.count(:all, :conditions => ["email IS NOT NULL AND email != ''"])
+    self.ldap_users.with_valid_email.count
   end
   
   def enabled_users_having_email(order = "id")
-    self.enabled_users.find(:all, :conditions => ["email IS NOT NULL AND email != ''"], :order => order)
+    self.enabled_users.with_valid_email.order(order)
   end
   
   def count_enabled_users_having_email
-    self.enabled_users.count(:all, :conditions => ["email IS NOT NULL AND email != ''"])
+    self.enabled_users.with_valid_email.count
   end
   
   def self.show_only_ldap_user
@@ -67,10 +79,6 @@ class Sys::Group < Sys::ManageDatabase
     else
       count_enabled_users_having_email
     end
-  end
-  
-  def readable
-    self
   end
   
   def creatable?
@@ -102,16 +110,6 @@ class Sys::Group < Sys::ManageDatabase
     return nil
   end
   
-  def ou_name
-    "#{code}#{name}"
-  end
-  
-  def full_name
-    n = name
-    n = "#{parent.name}　#{n}" if parent && parent.level_no > 1
-    n
-  end
-  
   def candidate(include_top = false)
     choices = []
     
@@ -122,9 +120,7 @@ class Sys::Group < Sys::ManageDatabase
       end
     end
 
-    group = self.class.new
-    group.and 'level_no', 1
-    top = group.find(:first)
+    top = self.class.where(level_no: 1).first
     if include_top
       roots = [top]
     else
@@ -134,12 +130,12 @@ class Sys::Group < Sys::ManageDatabase
     
     choices
   end
-  
+
 private
   def disable_users
     users.each do |user|
       if user.groups.size == 1
-        u = Sys::User.find_by_id(user.id)
+        u = Sys::User.find_by(id: user.id)
         u.state = 'disabled'
         u.save
       end
@@ -152,8 +148,22 @@ private
       children.each do |c|
         c.level_no = level_no + 1
         c.call_update_child_level_no = true
-        c.save(:validate => false)
+        c.save(validate: false)
       end
+    end
+  end
+
+  class << self
+    def select_options
+      self.roots.select(:id, :name, :level_no)
+        .map {|g| g.descendants {|rel| rel.select(:id, :name, :level_no) } }
+        .flatten.map {|g| [g.nested_name, g.id] }
+    end
+
+    def select_options_except(group)
+      self.roots.select(:id, :name, :level_no)
+        .map {|g| g.descendants {|rel| rel.select(:id, :name, :level_no).where.not(id: group.id) } }
+        .flatten.map {|g| [g.nested_name, g.id] }
     end
   end
 end

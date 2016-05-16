@@ -5,8 +5,8 @@
 <table id="webmailContainer"><tr><td id="webmailContent">
 <div id="mailContent" style="padding-top:10px;text-align: center;">
 
-<%= link_to 'メール一覧画面へ移動する', gw_webmail_mails_path(:mailbox => 'INBOX') %><br /><br />
-<%= button_to '閉じる', '', :onclick => "window.close();return false;" %>
+<%= link_to 'メール一覧画面へ移動する', gw_webmail_mails_path(mailbox: 'INBOX') %><br /><br />
+<%= button_to '閉じる', '', onclick: "window.close();return false;" %>
 
 </div><!-- end #webmailContainer --></td></table>
 <!-- end #mailFormContainer --></div>

@@ -1,0 +1,67 @@
+Date: Tue, 19 Apr 2011 11:05:58 +0900
+From: admin@localhost
+To: admin@localhost
+Subject: =?UTF-8?B?5re75LuY44OV44Kh44Kk44OrIHV1ZW5jb2Rl?=
+Mime-Version: 1.0
+Content-Type: multipart/mixed;
+ boundary="--==_mimepart_4dacee0667011_118e47929fe68551";
+ charset=utf-8
+Content-Transfer-Encoding: 8bit
+
+
+----==_mimepart_4dacee0667011_118e47929fe68551
+Date: Tue, 19 Apr 2011 11:05:58 +0900
+Mime-Version: 1.0
+Content-Type: text/plain;
+ charset=utf-8
+Content-Transfer-Encoding: 8bit
+
+admin@localhost
+
+
+----==_mimepart_4dacee0667011_118e47929fe68551
+Date: Tue, 19 Apr 2011 11:05:58 +0900
+Mime-Version: 1.0
+Content-Type: application/octet-stream
+Content-Transfer-Encoding: x-uuencode
+Content-Disposition: attachment;
+ filename="=?UTF-8?B?dXVlbmNvZGU=?="
+
+begin 664 test.txt
+%````````
+`
+end
+
+
+----==_mimepart_4dacee0667011_118e47929fe68551
+Date: Tue, 19 Apr 2011 11:05:58 +0900
+Mime-Version: 1.0
+Content-Type: application/octet-stream
+Content-Transfer-Encoding: x-uuencode
+Content-Disposition: attachment;
+ filename="=?UTF-8?B?dXVlbmNvZGXml6XmnKzoqp4=?="
+
+
+begin 664 =?UTF-8?B?dXVlbmNvZGXmt7vku5jjg5XjgqHjgqTjg6vlkI3jgYzopIfmlbDooYzjgavj?=
+ =?UTF-8?B?go/jgZ/jgovjg4bjgrnjg4g=?=
+%````````
+`
+end
+
+
+----==_mimepart_4dacee0667011_118e47929fe68551
+Date: Tue, 19 Apr 2011 11:05:58 +0900
+Mime-Version: 1.0
+Content-Type: application/octet-stream
+Content-Transfer-Encoding: uuencode
+Content-Disposition: attachment;
+ filename="=?UTF-8?B?dXVlbmNvZGXml6XmnKzoqp4=?="
+
+begin 664 =?UTF-8?B?dXVlbmNvZGXmt7vku5jjg5XjgqHjgqTjg6vlkI3jgYzopIfmlbDooYzjgavj?=
+ =?UTF-8?B?go/jgZ/jgovjg4bjgrnjg4g=?=
+%````````
+`
+end
+
+
+----==_mimepart_4dacee0667011_118e47929fe68551--

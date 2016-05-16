@@ -1,4 +1,3 @@
-# encoding: utf-8
 module Gw::MailboxHelper
   
   def mailbox_selection(mailboxes, options = {})

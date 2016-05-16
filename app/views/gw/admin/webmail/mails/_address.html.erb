@@ -1,3 +1,22 @@
+<table id="addresses" class="index">
+  <tr><th>アドレス帳</th></tr>
+  <tr>
+    <td>
+      <div class="group"><a href="#void" onclick="return onClickGroup(0);">すべて</a></div>
+      <div class="addresses" id="addresses0"></div>
+    </td>
+  </tr>
+  <% Gw::WebmailAddressGroup.user_groups.each do |g| %>
+    <tr>
+      <td>
+        <div class="group"><a href="#void" onclick="return onClickGroup(<%= g.id %>);"><%= g.name %></a></div>
+        <div class="addresses" id="addresses<%= g.id %>"></div>
+      </td>
+    </tr>
+  <% end %>
+  
+</table>
+
 <style type="text/css">
   #addresses ul {
     margin: 4px 0px 0px 0px;
@@ -43,7 +62,7 @@
       return false;
     }
     
-    var url = "<%= gw_webmail_addresses_path(:format => 'xml') %>";
+    var url = "<%= gw_webmail_addresses_path(format: 'xml') %>";
     var myAjax = new Ajax.Request(url, {
       method: 'get',
       parameters: "group_id=" + group_id,
@@ -95,21 +114,3 @@
   }
 //]]>
 </script>
-
-<table id="addresses" class="index">
-  
-  <tr><th>アドレス帳</th></tr>
-  
-  <tr><td>
-    <div class="group"><a href="#void" onclick="return onClickGroup(0);">すべて</a></div>
-    <div class="addresses" id="addresses0"></div>
-  </td></tr>
-
-  <% Gw::WebmailAddressGroup.user_groups.each do |g| %>
-  <tr><td>
-    <div class="group"><a href="#void" onclick="return onClickGroup(<%= g.id %>);"><%=h g.name %></a></div>
-    <div class="addresses" id="addresses<%= g.id %>"></div>
-  </td></tr>
-  <% end %>
-  
-</table>

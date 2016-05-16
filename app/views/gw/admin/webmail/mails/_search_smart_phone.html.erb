@@ -1,5 +1,4 @@
 <%
-
 kopts = [["件名（Subject）","subject"],["差出人（From）","from"],["宛先（To）","to"],["本文（Body）","body"],["全文","text"]]
 sopts = [["すべて",""],["未読のみ","unseen"],["既読のみ","seen"]]
 disp  = params[:search] ? "block" : "none"
@@ -8,37 +7,36 @@ fromto = @mailbox.name =~ /^(Sent|Drafts)(\.|$)/ ? ["受信者","to"] : ["差出
 skopts = [["件名","subject"],fromto,["送信日時","date"],["サイズ","size"]]
 soopts = [["昇順",""],["降順","reverse"]]
 ssopts = [["",""],["スター付き優先","1"]]
-
 %>
 
-<%= form_tag '', :method => :get, :id => 'searchForm', :class => 'searchForm' do %>
+<%= form_tag url_for(action: :index), id: 'searchForm', class: 'searchForm' do %>
   <%= hidden_field_tag :search, 1 %>
   <table>
     <tr>
       <th>キーワード</th>
       <td>:</td>
       <td>
-        <%= text_field_tag 's_keyword', params[:s_keyword], :class => 'keyword', :size => 15 %>
-        <%= select_tag('s_column', options_for_select(kopts, params[:s_column])) %>
+        <%= text_field_tag :s_keyword, params[:s_keyword], class: 'keyword', size: 15 %>
+        <%= select_tag :s_column, options_for_select(kopts, params[:s_column]) %>
       </td>
     </tr>
     <tr>
       <th>状態</th>
       <td>:</td>
-      <td><%= select_tag('s_status', options_for_select(sopts, params[:s_status])) %></td>
+      <td><%= select_tag :s_status, options_for_select(sopts, params[:s_status]) %></td>
     </tr>
     <tr>
       <th>並び順</th>
       <td>:</td>
       <td>
-        <%= select_tag('sort_key', options_for_select(skopts, params[:sort_key])) %>
-        <%= select_tag('sort_order', options_for_select(soopts, params[:sort_order])) %>
-        <%= select_tag('sort_starred', options_for_select(ssopts, params[:sort_starred])) %>
+        <%= select_tag :sort_key, options_for_select(skopts, params[:sort_key]) %>
+        <%= select_tag :sort_order, options_for_select(soopts, params[:sort_order]) %>
+        <%= select_tag :sort_starred, options_for_select(ssopts, params[:sort_starred]) %>
       </td>
     </tr>
   </table>
   <div class="submitters">
-    <%= submit_tag '検索', :name => :search, :class => 'search' %>
-    <%= submit_tag 'リセット', :name => :reset, :class => 'reset' %>
+    <%= submit_tag '検索', name: :search, class: 'search' %>
+    <%= submit_tag 'リセット', name: :reset, class: 'reset' %>
   </div>
 <% end %>

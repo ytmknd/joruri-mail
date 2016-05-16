@@ -5,86 +5,93 @@ pri_search_field_options = [['名前', 's_name_or_kana'], ['メールアドレ�
 <%= javascript_include_tag "/_common/js/address_selector.js" %>
 <div id="addressSelector" style="display: none;">
   <div>
-    <table class="search"><tr>
-      <td style="width:30px">検索</td>
-      <td style="width:210px"><%= text_field_tag 'addressSearchKeyword', '', :style => "width:200px" %></td>
-      <td id="sysAddressSearchFieldColumn" style="display:none;width:110px"><%= select_tag 'sysAddressSearchField', options_for_select(sys_search_field_options) %></td>
-      <td id="priAddressSearchFieldColumn" style="display:none;width:110px"><%= select_tag 'priAddressSearchField', options_for_select(pri_search_field_options) %></td>
-      <td>
-      <%= link_to '検索', '#', :class => "action", :onclick => "AddressSelector.instance.search();return false;" %>
-      <%= link_to 'リセット', '#', :class => "action", :onclick => "AddressSelector.instance.resetSearchResult();return false;" %>
-      </td>
-    </tr></table>
+    <table class="search">
+      <tr>
+        <td style="width:30px">検索</td>
+        <td style="width:210px"><%= text_field_tag 'addressSearchKeyword', '', style: "width:200px" %></td>
+        <td id="sysAddressSearchFieldColumn" style="display:none;width:110px"><%= select_tag 'sysAddressSearchField', options_for_select(sys_search_field_options) %></td>
+        <td id="priAddressSearchFieldColumn" style="display:none;width:110px"><%= select_tag 'priAddressSearchField', options_for_select(pri_search_field_options) %></td>
+        <td>
+          <%= link_to '検索', '#', class: "action", onclick: "AddressSelector.instance.search();return false;" %>
+          <%= link_to 'リセット', '#', class: "action", onclick: "AddressSelector.instance.resetSearchResult();return false;" %>
+        </td>
+      </tr>
+    </table>
   </div>
   <table>
-  <tr>
-    <td rowspan="3" class="addressesColumn">
-      <div id="sysAddresses" class="addresses" style="display:none"><ul id="sysAddressesRoot">
-        <% Sys::Group.find(:all, :conditions => {:parent_id => 1, :state => 'enabled'}, :order => :sort_no).each do |g| %>
-        <li class="group" id="sysGroup<%= g.id %>">
-        <% if g.enabled_children.length > 0 %>
-          <%= link_to '+', '#', :id => "sysToggleItems#{g.id}", :class => "toggleItems toggleItemsClose",
-            :onclick => "AddressSelector.instance.loadItems('sys', '#{g.id}');return false" %>
-        <% else %>
-          <%= link_to '+', '#', :class => "toggleItems", :style => "visibility:hidden;" %>
-        <% end %>
-        <%= link_to g.name, "#", :class => "itemName groupName",
-          :onclick => "AddressSelector.instance.loadItems('sys', '#{g.id}', {'close':false});return false;" %>
-        </li>
-        <% end %>
-      </ul></div>
-      <div id="priAddresses" class="addresses" style="display:none"><ul id="priAddressesRoot">
-          <li class="group" id="priGroup0">
-          <% if (addresses = Gw::WebmailAddress.user_addresses).size > 0 %>
-            <%= link_to '+', '#', :id => "priToggleItems0", :class => "toggleItems toggleItemsClose",
-              :onclick => "AddressSelector.instance.loadItems('pri', '0');return false" %>
-          <% else %>
-            <%= link_to '+', '#', :class => "toggleItems", :style => "visibility:hidden;" %>
+    <tr>
+      <td rowspan="3" class="addressesColumn">
+        <div id="sysAddresses" class="addresses" style="display:none">
+          <ul id="sysAddressesRoot">
+          <% Sys::Group.where(parent_id: 1, state: 'enabled').order(:sort_no).each do |g| %>
+            <li class="group" id="sysGroup<%= g.id %>">
+            <% if g.enabled_children.length > 0 %>
+              <%= link_to '+', '#', id: "sysToggleItems#{g.id}", class: "toggleItems toggleItemsClose",
+                onclick: "AddressSelector.instance.loadItems('sys', '#{g.id}');return false" %>
+            <% else %>
+              <%= link_to '+', '#', class: "toggleItems", style: "visibility:hidden;" %>
+            <% end %>
+            <%= link_to g.name, "#", class: "itemName groupName",
+              onclick: "AddressSelector.instance.loadItems('sys', '#{g.id}', {'close':false});return false;" %>
+            </li>
           <% end %>
-          <%= link_to 'すべて', "#", :class => "itemName groupName",
-            :onclick => "AddressSelector.instance.loadItems('pri', '0', {'close':false});return false;" %>
-          </li>
-          <% Gw::WebmailAddressGroup.user_root_groups.each do |g| %>
-          <li class="group" id="priGroup<%= g.id %>">
-          <% if g.children.count() > 0 || g.addresses.count() > 0 %>
-            <%= link_to '+', '#', :id => "priToggleItems#{g.id}", :class => "toggleItems toggleItemsClose",
-              :onclick => "AddressSelector.instance.loadItems('pri', '#{g.id}');return false" %>
-          <% else %>
-            <%= link_to '+', '#', :class => "toggleItems", :style => "visibility:hidden;" %>
-          <% end %>
-          <%= link_to g.name, "#", :class => "itemName groupName",
-            :onclick => "AddressSelector.instance.loadItems('pri', '#{g.id}', {'close':false});return false;" %>
-          </li>
-          <% end %>
-      </ul></div>
-    </td>
-    <td class="actionsColumn"><%= link_to '宛先に追加', '#', :class => "action", :title => "宛先に追加",
-      :onclick => "AddressSelector.instance.addAddresses('to');return false;" %></td>
-    <td><div id="toAddresses" class="selectedAddresses"></div></td>
-  </tr>
-  <tr>
-    <td class="actionsColumn"><%= link_to 'CCに追加', '#', :class => "action", :title => "CCに追加",
-      :onclick => "AddressSelector.instance.addAddresses('cc');return false;" %></td>
-    <td><div id="ccAddresses" class="selectedAddresses"></div></td>    
-  </tr>
-  <tr>
-    <td class="actionsColumn"><%= link_to 'BCCに追加', '#', :class => "action", :title => "BCCに追加",
-      :onclick => "AddressSelector.instance.addAddresses('bcc');return false;" %></td>
-    <td>
-      <div id="bccAddresses" class="selectedAddresses"></div>
-    </td>
-  </tr>
+          </ul>
+        </div>
+        <div id="priAddresses" class="addresses" style="display:none">
+          <ul id="priAddressesRoot">
+            <li class="group" id="priGroup0">
+            <% if (addresses = Gw::WebmailAddress.user_addresses).size > 0 %>
+              <%= link_to '+', '#', id: "priToggleItems0", class: "toggleItems toggleItemsClose",
+                onclick: "AddressSelector.instance.loadItems('pri', '0');return false" %>
+            <% else %>
+              <%= link_to '+', '#', class: "toggleItems", style: "visibility:hidden;" %>
+            <% end %>
+            <%= link_to 'すべて', "#", class: "itemName groupName",
+              onclick: "AddressSelector.instance.loadItems('pri', '0', {'close':false});return false;" %>
+            </li>
+            <% Gw::WebmailAddressGroup.user_root_groups.each do |g| %>
+            <li class="group" id="priGroup<%= g.id %>">
+            <% if g.children.count > 0 || g.addresses.count > 0 %>
+              <%= link_to '+', '#', id: "priToggleItems#{g.id}", class: "toggleItems toggleItemsClose",
+                onclick: "AddressSelector.instance.loadItems('pri', '#{g.id}');return false" %>
+            <% else %>
+              <%= link_to '+', '#', class: "toggleItems", style: "visibility:hidden;" %>
+            <% end %>
+            <%= link_to g.name, "#", class: "itemName groupName",
+              onclick: "AddressSelector.instance.loadItems('pri', '#{g.id}', {'close':false});return false;" %>
+            </li>
+            <% end %>
+          </ul>
+        </div>
+      </td>
+      <td class="actionsColumn"><%= link_to '宛先に追加', '#', class: "action", title: "宛先に追加",
+        onclick: "AddressSelector.instance.addAddresses('to');return false;" %></td>
+      <td><div id="toAddresses" class="selectedAddresses"></div></td>
+    </tr>
+    <tr>
+      <td class="actionsColumn"><%= link_to 'CCに追加', '#', class: "action", title: "CCに追加",
+        onclick: "AddressSelector.instance.addAddresses('cc');return false;" %></td>
+      <td><div id="ccAddresses" class="selectedAddresses"></div></td>    
+    </tr>
+    <tr>
+      <td class="actionsColumn"><%= link_to 'BCCに追加', '#', class: "action", title: "BCCに追加",
+        onclick: "AddressSelector.instance.addAddresses('bcc');return false;" %></td>
+      <td>
+        <div id="bccAddresses" class="selectedAddresses"></div>
+      </td>
+    </tr>
   </table>
   <div class="submitters">
-    <%= link_to 'OK', '#', :class => "action", :title => 'OK',
-      :onclick => "AddressSelector.instance.finishSelection(true);return false;" %>
-    <%= link_to 'キャンセル', '#', :class => "action", :title => 'キャンセル',
-      :onclick => "AddressSelector.instance.finishSelection(false);return false;" %>
+    <%= link_to 'OK', '#', class: "action", title: 'OK',
+      onclick: "AddressSelector.instance.finishSelection(true);return false;" %>
+    <%= link_to 'キャンセル', '#', class: "action", title: 'キャンセル',
+      onclick: "AddressSelector.instance.finishSelection(false);return false;" %>
   </div>
 </div>
+
 <script type="text/javascript">
 //<![CDATA[
-AddressSelector.instance.parseAddressURI = '<%= url_for(:controller => "gw/admin/webmail/address_selector", :action => "parse_address", :format => "js") %>';
+AddressSelector.instance.parseAddressURI = '<%= url_for(controller: "gw/admin/webmail/address_selector", action: "parse_address", format: "js", authenticity_token: form_authenticity_token) %>';
 AddressSelector.instance.sysAddressesURI = '<%= gw_webmail_sys_addresses_path %>';
 AddressSelector.instance.priAddressesURI = '<%= gw_webmail_address_groups_path %>';
 

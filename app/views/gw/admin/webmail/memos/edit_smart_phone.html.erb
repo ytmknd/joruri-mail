@@ -1,10 +1,8 @@
 <div class="memo">
 <div class="title">メモ</div>
 
-<%= form_tag url_for(:action => :update), {:method => :put, :id => 'memoEditForm', :name => 'memoEditForm', :class => 'memoEditForm'} do |f| %>
-  <%= error_messages_for :item %>
-  <%= render :partial => 'form', :locals => {:f => f} %>
-  <%= submit_tag '編集する', :class => 'editMemo' %>
+<%= form_tag url_for(action: :update), { method: :patch, id: 'memoEditForm', name: 'memoEditForm', class: 'memoEditForm' } do |f| %>
+  <%= render 'form', f: f %>
 <% end %>
 
 </div>

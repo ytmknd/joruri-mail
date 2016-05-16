@@ -4,86 +4,86 @@
 
 <table class="show">
   <tr>
-    <th><%= @item.locale(:name) %></th>
+    <th><%= @item.class.human_attribute_name :name %></th>
     <td><%= @item.name %></td>
   </tr>
   <tr>
-    <th><%= @item.locale(:kana) %></th>
+    <th><%= @item.class.human_attribute_name :kana %></th>
     <td><%= @item.kana %></td>
   </tr>
   <tr>
-    <th><%= @item.locale(:sort_no) %></th>
+    <th><%= @item.class.human_attribute_name :sort_no %></th>
     <td><%= @item.sort_no %></td>
   </tr>
   <tr>
-    <th><%= @item.locale(:email) %></th>
+    <th><%= @item.class.human_attribute_name :email %></th>
     <td><%= mail_text_wrap @item.email %></td>
   </tr>
   <tr>
-    <th><%= @item.locale(:mobile_tel) %></th>
+    <th><%= @item.class.human_attribute_name :mobile_tel %></th>
     <td><%= @item.mobile_tel %></td>
   </tr>
   <tr>
-    <th><%= @item.locale(:uri) %></th>
+    <th><%= @item.class.human_attribute_name :uri %></th>
     <td><%= mail_text_wrap @item.uri %></td>
   </tr>
   <tr>
-    <th><%= @item.locale(:tel) %></th>
+    <th><%= @item.class.human_attribute_name :tel %></th>
     <td><%= @item.tel %></td>
   </tr>
   <tr>
-    <th><%= @item.locale(:fax) %></th>
+    <th><%= @item.class.human_attribute_name :fax %></th>
     <td><%= @item.fax %></td>
   </tr>
   <tr>
-    <th><%= @item.locale(:zip_code) %></th>
+    <th><%= @item.class.human_attribute_name :zip_code %></th>
     <td><%= @item.zip_code %></td>
   </tr>
   <tr>
-    <th><%= @item.locale(:address) %></th>
+    <th><%= @item.class.human_attribute_name :address %></th>
     <td><%= @item.address %></td>
   </tr>
   <tr>
-    <th><%= @item.locale(:company_name) %></th>
+    <th><%= @item.class.human_attribute_name :company_name %></th>
     <td><%= @item.company_name %></td>
   </tr>
   <tr>
-    <th><%= @item.locale(:company_kana) %></th>
+    <th><%= @item.class.human_attribute_name :company_kana %></th>
     <td><%= @item.company_kana %></td>
   </tr>
   <tr>
-    <th><%= @item.locale(:official_position) %></th>
+    <th><%= @item.class.human_attribute_name :official_position %></th>
     <td><%= @item.official_position %></td>
   </tr>
   <tr>
-    <th><%= @item.locale(:company_tel) %></th>
+    <th><%= @item.class.human_attribute_name :company_tel %></th>
     <td><%= @item.company_tel %></td>
   </tr>
   <tr>
-    <th><%= @item.locale(:company_fax) %></th>
+    <th><%= @item.class.human_attribute_name :company_fax %></th>
     <td><%= @item.company_fax %></td>
   </tr>
   <tr>
-    <th><%= @item.locale(:company_zip_code) %></th>
+    <th><%= @item.class.human_attribute_name :company_zip_code %></th>
     <td><%= @item.company_zip_code %></td>
   </tr>
   <tr>
-    <th><%= @item.locale(:company_address) %></th>
+    <th><%= @item.class.human_attribute_name :company_address %></th>
     <td><%= @item.company_address %></td>
   </tr>
-  <% if !@item.memo.blank? %>
+  <% if @item.memo.present? %>
   <tr>
-    <th><%= @item.locale(:memo) %></th>
+    <th><%= @item.class.human_attribute_name :memo %></th>
     <td><%= @item.memo %></td>
   </tr>
   <% end %>
 </table>
 
-<%= form_tag mobile_manage_gw_webmail_address_groups_path, {:id => 'mailForm', :name => 'mailForm', :class => 'mailForm' } do |f| %>
+<%= form_tag mobile_manage_gw_webmail_address_groups_path, { id: 'mailForm', name: 'mailForm', class: 'mailForm' } do |f| %>
   <%= hidden_field_tag "to[#{@item.id}]", '1' %>
   <%= hidden_field_tag "group_id", params[:group_id] %>
-  <%= submit_tag 'メール作成', :name => 'createMail', :class => 'createMail' %>
+  <%= submit_tag 'メール作成', name: 'createMail', class: 'createMail' %>
 <% end %>
 
-<%= link_to '<戻る', gw_webmail_address_groups_path(:group_id => params[:group_id]), :class => 'back' %>
+<%= link_to '<戻る', gw_webmail_address_groups_path(group_id: params[:group_id]), class: 'back' %>
 

@@ -14,7 +14,7 @@ function showSpec(u) {
   
   <div class="links">
       <% @groups.each do |g| %>
-      <%= link_to h(g.ou), url_for(:action => :index, :parent => g.ou) %><br />
+      <%= link_to h(g.ou), url_for(action: :index, parent: g.ou) %><br />
       <% end %>
       <%= 'no groups' if @groups.size == 0 %>
   </div>
@@ -25,7 +25,7 @@ function showSpec(u) {
     <% @users.each_with_index do |u, idx| %>
     <tr><td>
       <a id="uid<%= idx %>Link" href="#" onclick="return showSpec(this);">詳細</a>&nbsp;
-      <%=h u.name %> (<%=h u.uid %>) <%=h u.email %>
+      <%= u.name %> (<%= u.uid %>) <%= u.email %>
       <div id="uid<%= idx %>Spec" style="display: none;"><hr />
       <% u.attributes.each do |key, values| %><%= "#{key} : #{values.join(",")}" %><br /><% end %>
       </div>

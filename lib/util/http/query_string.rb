@@ -1,4 +1,3 @@
-# encoding: utf-8
 class Util::Http::QueryString
   
   def self.parse_query(query_string)

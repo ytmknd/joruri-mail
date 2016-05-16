@@ -2,25 +2,19 @@
 <div id="webmailMenuContainer">
 
 <div class="menu">
-  <%= link_to "フォルダの登録", url_for(:action => :new, :mailbox => "INBOX"), :class => 'newMailbox', :title => "フォルダの登録" %>
+  <%= link_to "フォルダの登録", url_for(action: :new, mailbox: "INBOX"), class: 'newMailbox', title: "フォルダの登録" %>
 </div>
 
-<%= render :partial => 'gw/admin/webmail/base/account' %>
-<%= render :partial => "mailbox" %>
+<%= render 'gw/admin/webmail/base/account' %>
+<%= render 'mailbox' %>
 
 </div>
 </td><td id="webmailContent"><div id="mailboxContent">
 
 <p class="form">フォルダの登録</p>
 
-<%= form_for :item, :url => {:action => :create} do |f| %>
-
-<%= f.error_messages %>
-
-<%= render :partial => 'form', :locals => {:f => f} %>
-
-<%= raw submit(:register) %>
-
+<%= form_for @item, as: :item, url: { action: :create } do |f| %>
+  <%= render 'form', f: f %>
 <% end %>
 
 </div><!-- end #webmailContainer --></td></table>

@@ -1,4 +1,3 @@
-# encoding: utf-8
 class Util::Unit
   def self.eng_unit(size, postfix = "B")
     return '' unless size.to_s =~ /^[0-9]+$/

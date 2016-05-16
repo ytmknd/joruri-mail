@@ -1,6 +1,5 @@
-# encoding: utf-8
 module Gw::Controller::Admin::Mobile::Address
-  
+
   def mobile_manage
     if params[:createMail]
       return mobile_create_mail
@@ -9,11 +8,11 @@ module Gw::Controller::Admin::Mobile::Address
     elsif params[:selectAddress]
       mobile_select_address
     end
-    redirect_to :action => :index, :group_id => params[:group_id]
+    redirect_to action: :index, group_id: params[:group_id]
   end
-  
-protected
-  
+
+  private
+
   def mobile_create_mail
     session[:mobile] ||= {}
     [:to, :cc, :bcc].each do |t|
@@ -24,22 +23,21 @@ protected
     [:subject, :body, :tmp_id, :tmp_attachment_ids].each do |t|
       flash["mail_#{t}".intern] = session[:mobile][t]
     end
-    
+
     location = {
-      :controller => 'gw/admin/webmail/mails',
-      :action => session[:mobile][:action] || 'new',
-      :mailbox => session[:mobile][:mailbox] || 'INBOX',
-      :id => session[:mobile][:uid],
-      :qt => session[:mobile][:qt] != "" ? session[:mobile][:qt] : nil 
+      controller: 'gw/admin/webmail/mails',
+      action: session[:mobile][:action] || 'new',
+      mailbox: session[:mobile][:mailbox] || 'INBOX',
+      id: session[:mobile][:uid],
+      qt: session[:mobile][:qt] != "" ? session[:mobile][:qt] : nil 
     }
-    
+
     session[:mobile] = nil
-    
+
     redirect_to url_for(location)
   end
-  
-  def mobile_delete_address
 
+  def mobile_delete_address
     delete_address = lambda do
       strs = params[:deleteAddress].split('=')
       return false if strs.blank?
@@ -48,14 +46,14 @@ protected
       session[:mobile][strs[0].intern].delete_at(strs[1].to_i)
       true
     end
-    
+
     if delete_address.call
       flash[:notice] = "1件の選択済みアドレスを削除しました。"
     else
       flash[:notice] = "選択済みアドレスを削除できませんでした。"
     end
   end
-  
+
   def mobile_select_address
     select_num = 0
     session[:mobile] ||= {}

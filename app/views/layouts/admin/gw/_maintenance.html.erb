@@ -1,4 +1,11 @@
 <% if maintenance = recent_maintenance() %>
+<div id="maintenanceMessage">
+  <div class="title">
+    <%= link_to maintenance.title, '#', onclick: 'return toggleMaintenance();' %>
+    <span>（<%=l maintenance.published_at if maintenance.published_at %>）</span>
+  </div>
+  <div id="maintenanceMessageBody" class="message" style = "display:none;"><%=raw maintenance.body %></div>
+</div>
 <%= javascript_tag do %>
 function toggleMaintenance() {
   var elm = $('maintenanceMessageBody');
@@ -10,11 +17,4 @@ function toggleMaintenance() {
   return false;
 }
 <% end %>
-<div id="maintenanceMessage">
-  <div class="title">
-    <%= link_to maintenance.title, '#', :onclick => 'return toggleMaintenance();' %>
-    <span>（<%= safe{maintenance.published_at.strftime('%Y-%m-%d %H:%M')} %>）</span>
-  </div>
-  <div id="maintenanceMessageBody" class="message" style = "display:none;"><%=raw maintenance.body %></div>
-</div>
 <% end %>

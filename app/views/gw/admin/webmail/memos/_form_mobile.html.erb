@@ -1,1 +1,7 @@
-<%= text_area_tag :memo_body, @item.value, :rows => '10' %>
+<%= error_messages_for @item %>
+
+<%= text_area_tag :memo_body, @item.value, rows: 10 %>
+
+<div class="submitters">
+  <%= submit_tag '編集する' %>
+</div>

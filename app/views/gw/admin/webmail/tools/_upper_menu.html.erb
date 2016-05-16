@@ -6,7 +6,7 @@ cls = lambda do |name|
 end
 %>
 <div class="toolMenu">
-  <%= link_to "一括削除", batch_delete_gw_webmail_tools_path, :class => cls.call(:batch_delete) %><br />
+  <%= link_to "一括削除", batch_delete_gw_webmail_tools_path, class: cls.call(:batch_delete) %><br />
 </div>
 <div class="command">
   

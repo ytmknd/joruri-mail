@@ -1,61 +1,47 @@
-# encoding: utf-8
 class ApplicationController < ActionController::Base
-###  include Cms::Controller::Public
   include Jpmobile::ViewSelector
   helper  FormHelper
   helper  LinkHelper
   protect_from_forgery #:secret => '1f0d667235154ecf25eaf90055d99e99'
-  before_filter :initialize_application
-  after_filter :inline_css_for_mobile
-  after_filter :set_content_type_for_mobile
-  rescue_from Exception, :with => :rescue_exception
+  before_action :initialize_application
+  after_action :inline_css_for_mobile
+  after_action :set_content_type_for_mobile
+  rescue_from Exception, with: :rescue_exception
   trans_sid
-  
+
   def initialize_application
-###    mobile_view if Page.mobile? || request.mobile?
     return false if Core.dispatched?
     return Core.dispatched
   end
-  
+
   def skip_layout
     self.class.layout 'base'
   end
-  
+
   def query(params = nil)
     Util::Http::QueryString.get_query(params)
   end
-  
+
   def send_mail(mail_fr, mail_to, subject, message)
     return false if mail_fr.blank?
     return false if mail_to.blank?
     Sys::Lib::Mail::Base.deliver_default(mail_fr, mail_to, subject, message)
   end
-  
-  def send_download
-    #
-  end
-  
-###  def mobile_view
-###    Page.mobile = true
-###    def request.mobile
-###      Jpmobile::Mobile::Au.new(nil)
-###    end unless request.mobile?
-###  end
-  
+
   def inline_css_for_mobile
     if request.mobile? && !request.smart_phone?
       begin
         require 'tamtam'
         response.body = TamTam.inline(
-          :css  => tamtam_css(response.body),
-          :body => response.body
+          css:  tamtam_css(response.body),
+          body: response.body
         )
       rescue Exception => e #InvalidStyleException
         error_log(e)
       end
     end
   end
-  
+
   def tamtam_css(body)
     css = ''
     body.scan(/<link [^>]*?rel="stylesheet"[^>]*?>/i) do |m|
@@ -68,7 +54,7 @@ class ApplicationController < ActionController::Base
     css.gsub!(/[a-z]:after/i, '-after')
     css
   end
-  
+
   def convert_css_for_tamtam(css)
     css.gsub(/^@import .*/) do |m|
       path = m.gsub(/^@import ['"](.*?)['"];/, '\1').gsub(/([^\?]+)\?.[^\?]+/, '\1')
@@ -87,7 +73,7 @@ class ApplicationController < ActionController::Base
       m
     end
   end
-  
+
   def set_content_type_for_mobile
     if request.mobile? && !request.smart_phone?
       case request.mobile
@@ -98,7 +84,7 @@ class ApplicationController < ActionController::Base
       end
     end
   end
-  
+
   def convert_to_download_filename(filename)
     filename.gsub(/[\/\<\>\|:"\?\*\\]/, '_')
   end
@@ -119,11 +105,11 @@ class ApplicationController < ActionController::Base
 private
   def rescue_exception(exception)
     Core.terminate
-    
+
     log  = exception.to_s
     log += "\n" + exception.backtrace.join("\n") if Rails.env.to_s == 'production'
     error_log(log)
-    
+
     html  = %Q(<div style="padding: 15px 20px; color: #e00; font-weight: bold; line-height: 1.8;">)
     case
     when exception.is_a?(Sys::Lib::Net::Imap::Error)
@@ -137,9 +123,9 @@ private
       html += exception.backtrace.join("<br />")
       html += %Q(</div>)
     end
-    render :inline => html, :layout => true, :status => 500
+    render inline: html, layout: true, status: 500
   end
-  
+
   def rescue_action(error)
     case error
     when ActionController::InvalidAuthenticityToken
@@ -149,13 +135,13 @@ private
       super
     end
   end
-  
+
   ## Production && local
   def rescue_action_in_public(exception)
     #exception.each{}
     http_error(500, nil)
   end
-  
+
   def http_error(status, message = nil)
     Core.terminate
     
@@ -163,10 +149,9 @@ private
     
     ## errors.log
     if status != 404
-      request_uri = request.fullpath.force_encoding('UTF-8')
-      error_log("#{status} #{request_uri} #{message.to_s.gsub(/\n/, ' ')}")
+      error_log("#{status} #{request.fullpath} #{message.to_s.gsub(/\n/, ' ')}")
     end
-    
+
     ## Render
     file = "#{Rails.public_path}/500.html"
 ###    if Page.site && FileTest.exist?("#{Page.site.public_path}/#{status}.html")
@@ -177,7 +162,7 @@ private
     if FileTest.exist?("#{Rails.public_path}/#{status}.html")
       file = "#{Rails.public_path}/#{status}.html"
     end
-    
+
     @message = message
     return respond_to do |format|
       #render :text => "<html><body><h1>#{message}</h1></body></html>"

@@ -1,5 +1,4 @@
 <%
-
 mailboxes = []
 Gw::WebmailMailbox.load_mailboxes.each do |box|
   next if box.name =~ /^INBOX$/
@@ -8,8 +7,62 @@ Gw::WebmailMailbox.load_mailboxes.each do |box|
 end
 
 conditions_count = @item.in_columns.count > 5 ? @item.in_columns.count : 5
+%>
 
-%><script type="text/javascript">
+<%= f.error_messages %>
+
+<table class="show">
+  <tr>
+    <th><%= @item.class.human_attribute_name :name %></th>
+    <td><%= @item.name !~ /^[*]/ ? f.text_field(:name, class: 'name') : @item.name %></td>
+  </tr><tr>
+    <th><%= @item.class.human_attribute_name :state %></th>
+    <td><%= f.collection_radio_buttons :state, @item.states, :last, :first, class: 'states' %></td>
+  </tr><tr>
+    <th><%= @item.class.human_attribute_name :sort_no %></th>
+    <td><%= f.text_field :sort_no, class: 'number' %></td>
+  </tr>
+</table>
+
+<br /><p class="form">条件</p>
+<table class="show">
+  <tr>
+    <th><%= @item.class.human_attribute_name :conditions_chain %></th>
+    <td><%= f.collection_radio_buttons :conditions_chain, @item.conditions_chain_labels, :last, :first, class: 'states' %></td>
+  </tr><tr>
+    <th>条件</th>
+    <td>
+      <div id="filter_conditions" <%= %Q(style="padding: 1px 6px; border: 1px solid #f00;") if @item.errors[:in_conditions].any? %>>
+        <% conditions_count.times do |i| %>
+          <div style="margin: 5px 0px;">
+            <%= select_tag "item[in_columns][#{i}]", options_for_select(@item.condition_column_labels, @item.conditions[i] ? @item.conditions[i].column : nil), include_blank: true %>
+            <%= select_tag "item[in_inclusions][#{i}]", options_for_select(@item.condition_inclusion_labels, @item.conditions[i] ? @item.conditions[i].inclusion : nil), include_blank: true %>
+            <%= text_field_tag "item[in_values][#{i}]", @item.conditions[i] ? @item.conditions[i].value : nil, class: "name"  %>
+            <%= link_to "クリア", "#", onclick: "return reset_condition(#{i});" %>
+          </div>
+        <% end %>
+      </div>
+      <%= link_to "追加", "#", id: 'addition_link', onclick: "return add_condition();" %>
+    </td>
+  </tr>
+</table>
+
+<br /><p class="form">動作</p>
+<table class="show">
+  <tr>
+    <th><%= @item.class.human_attribute_name :action %></th>
+    <td><%= f.select :action, @item.action_labels, include_blank: true %></td>
+  </tr><tr>
+    <th><%= @item.class.human_attribute_name :mailbox %></th>
+    <td><%= f.select :mailbox, mailboxes, include_blank: true %></td>
+  </tr>
+</table>
+
+<div class="submitters">
+  <%= f.submit %>
+</div>
+
+<script type="text/javascript">
 //<![CDATA[
 function reset_condition(idx) {
   $('item_in_columns_' + idx).selectedIndex    = 0;
@@ -82,50 +135,3 @@ function add_condition() {
 }
 //]]>
 </script>
-
-<table class="show">
-  <tr>
-    <th><%= @item.locale :name %></th>
-    <td><%= @item.name !~ /^[*]/ ? f.text_field(:name, :class => 'name') : @item.name %></td>
-  </tr><tr>
-    <th><%= @item.locale :state %></th>
-    <td><%= f.radio_buttons(:state, @item.states, :class => 'states') %></td>
-  </tr><tr>
-    <th><%= @item.locale :sort_no %></th>
-    <td><%= f.text_field(:sort_no, :class => 'number') %></td>
-  </tr>
-</table>
-
-<br /><p class="form">条件</p>
-<table class="show">
-  <tr>
-    <th><%= @item.locale :conditions_chain %></th>
-    <td><%= f.radio_buttons :conditions_chain, @item.conditions_chain_labels, :class => 'states' %></td>
-  </tr><tr>
-    <th>条件</th>
-    <td>
-      <div id="filter_conditions" <%= %Q(style="padding: 1px 6px; border: 1px solid #f00;") if @item.errors[:in_conditions].any? %>>
-        <% conditions_count.times do |i| %>
-        <div style="margin: 5px 0px;">
-        <%= f.array_select "in_columns[#{i}]", @item.condition_column_labels, :include_blank => true %>
-        <%= f.array_select "in_inclusions[#{i}]", @item.condition_inclusion_labels, :include_blank => true %>
-        <%= f.array_text_field "in_values[#{i}]", :class => "name"  %>
-        <%= link_to "クリア", "#", :onclick => "return reset_condition(#{i});" %>
-        </div>
-        <% end %>
-      </div>
-      <%= link_to "追加", "#", :id => 'addition_link', :onclick => "return add_condition();" %>
-    </td>
-  </tr>
-</table>
-
-<br /><p class="form">動作</p>
-<table class="show">
-  <tr>
-    <th><%= @item.locale :action %></th>
-    <td><%= f.select(:action, @item.action_labels, :include_blank => true) %></td>
-  </tr><tr>
-    <th><%= @item.locale :mailbox %></th>
-    <td><%= f.select(:mailbox, mailboxes, :include_blank => true) %></td>
-  </tr>
-</table>

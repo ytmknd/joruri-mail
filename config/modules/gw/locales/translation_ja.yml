@@ -3,63 +3,69 @@ ja:
     attributes: 
       gw/webmail:
       gw/webmail_mailbox:
-        title: "フォルダ名"
+        title: フォルダ名
       gw/webmail_address:
-        group_id: "グループ" 
-        name: "名前"
-        email: "メールアドレス"
-        memo: "メモ"
-        kana: "名前フリガナ"
-        company_name: "会社名"
-        company_kana: "会社名フリガナ"
-        official_position: "役職"
-        company_tel: "電話番号（会社）"
-        company_fax: "ファクシミリ（会社）"
-        company_zip_code: "郵便番号（会社）"
-        company_address: "住所（会社）"
-        tel: "電話番号（自宅）"
-        fax: "ファクシミリ（自宅）"
-        zip_code: "郵便番号（自宅）"
-        address: "住所（自宅）"
-        mobile_tel: "携帯電話"
-        uri: "URL"
-        sort_no: "並び順"
+        group_id: グループ 
+        name: 名前
+        email: メールアドレス
+        memo: メモ
+        kana: 名前フリガナ
+        company_name: 会社名
+        company_kana: 会社名フリガナ
+        official_position: 役職
+        company_tel: 電話番号（会社）
+        company_fax: ファクシミリ（会社）
+        company_zip_code: 郵便番号（会社）
+        company_address: 住所（会社）
+        tel: 電話番号（自宅）
+        fax: ファクシミリ（自宅）
+        zip_code: 郵便番号（自宅）
+        address: 住所（自宅）
+        mobile_tel: 携帯電話
+        uri: URL
+        sort_no: 並び順
       gw/webmail_address_group: 
-        parent_id: "親グループ"
-        name: "グループ名"
+        parent_id: 親グループ
+        name: グループ名
       gw/webmail_sign: 
-        name: "署名タイトル"
-        body: "内容"
-        default_flag: "既定の署名"
+        name: 署名タイトル
+        body: 内容
+        default_flag: 既定の署名
+        created_at: 作成日時
+        updated_at: 更新日時
       gw/webmail_filter: 
-        state: "状態"
-        name: "フィルタ名"
-        sort_no: "並び順"
-        action: "動作"
-        mailbox: "対象フォルダ"
-        conditions_chain: "条件の結合"
-        in_conditions: "条件"
+        state: 状態
+        name: フィルタ名
+        sort_no: 並び順
+        action: 動作
+        mailbox: 対象フォルダ
+        conditions_chain: 条件の結合
+        in_conditions: 条件
+        created_at: 作成日時
+        updated_at: 更新日時
       gw/webmail_template: 
-        name: "テンプレート名"
-        to: "宛先"
-        cc: "Cc"
-        bcc: "Bcc"
-        subject: "件名"
-        body: "本文"
-        default_flag: "既定のテンプレート"
+        name: テンプレート名
+        to: 宛先
+        cc: Cc
+        bcc: Bcc
+        subject: 件名
+        body: 本文
+        default_flag: 既定のテンプレート
+        created_at: 作成日時
+        updated_at: 更新日時
       gw/webmail_setting:
-        mobile_access: "モバイルアクセス" 
-        mobile_password: "モバイルパスワード" 
-        memo_body: "本文" 
-        updated_at: "更新日時" 
-      gw/webmail_doc: 
-        state: "状態"
-        sort_no: "並び順"
-        title: "タイトル"
-        body: "本文"
-        created_at: "作成日時"
-        updated_at: "更新日時"
-        published_at: "公開日時"
+        mobile_access: モバイルアクセス
+        mobile_password: モバイルパスワード
+        memo_body: 本文
+        updated_at: 更新日時
+      gw/webmail_doc:
+        state: 状態
+        sort_no: 並び順
+        title: タイトル
+        body: 本文
+        created_at: 作成日時
+        updated_at: 更新日時
+        published_at: 公開日時
       gw/webmail_tool_batch_delete_setting: 
         mailbox_id: メールボックス
         start_date: 削除開始日

@@ -1,12 +1,12 @@
-<%= form_tag gw_webmail_address_groups_path, :method => :get, :class => 'search' do %>
+<%= form_tag gw_webmail_address_groups_path, method: :get, class: 'search' do %>
 <table>
   <tr>
     <th>名前</th>
-    <td><%= text_field_tag 's_name_or_kana', params[:s_name_or_kana], :class => "name", :style => "width: 120px" %></td>
-  	<th>メールアドレス</th>
-  	<td><%= text_field_tag 's_email', params[:s_email], :class => "email", :style => "width: 200px" %></td>
+    <td><%= text_field_tag :s_name_or_kana, params[:s_name_or_kana], class: "name", style: "width: 120px" %></td>
+    <th>メールアドレス</th>
+    <td><%= text_field_tag :s_email, params[:s_email], class: "email", style: "width: 200px" %></td>
     <td class="formSubmitters">
-      <%= submit_tag '検索', :name => :search %><%= submit_tag 'リセット', :name => :reset %>
+      <%= submit_tag '検索', name: :search %><%= submit_tag 'リセット', name: :reset %>
     </td>
   </tr>
 </table>

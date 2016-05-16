@@ -28,7 +28,7 @@ function showTokenError() {
   alert('ログイン状態がリセットされました。画面を閉じて再度ログインしてから送信して下さい。');
 }
 function getAuthenticityToken() {
-  var tokenNodes = $$('input[name="authenticity_token"]');
+  var tokenNodes = jQuery('input[name="authenticity_token"]');
   if (tokenNodes.length > 0) {
     return tokenNodes[0].value;
   }

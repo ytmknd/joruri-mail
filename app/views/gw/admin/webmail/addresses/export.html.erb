@@ -1,11 +1,13 @@
 <table id="webmailContainer"><tr><td id="webmailMenu">
 <div id="webmailMenuContainer">
 
-<%= render :partial => "upper_menu" %>
+<%= render "upper_menu" %>
 
 </div>
 </td><td id="webmailContent"><div id="addressContent">
-<%= form_tag export_gw_webmail_addresses_path, :multipart => true do %>
-  <%= raw submit('エクスポート') %>
+<%= form_tag export_gw_webmail_addresses_path, multipart: true do %>
+  <div class="submitters">
+    <%= submit_tag 'エクスポート' %>
+  </div>
 <% end %>
 </div><!-- end #webmailContainer --></td></table>

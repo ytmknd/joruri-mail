@@ -2,27 +2,20 @@ require File.expand_path('../boot', __FILE__)
 
 require 'rails/all'
 
-# If you have a Gemfile, require the gems listed there, including any gems
+# Require the gems listed in Gemfile, including any gems
 # you've limited to :test, :development, or :production.
-Bundler.require(:default, Rails.env) if defined?(Bundler)
+Bundler.require(*Rails.groups)
 
 module Joruri
   class Application < Rails::Application
     require "#{Rails.root}/lib/joruri"
-    
+
     # Settings in config/environments/* take precedence over those specified here.
     # Application configuration should go into files in config/initializers
     # -- all .rb files in that directory are automatically loaded.
 
     # Custom directories with classes and modules you want to be autoloadable.
     config.autoload_paths += %W(#{config.root}/lib)
-
-    # Only load the plugins named here, in the order given (default is alphabetical).
-    # :all can be used as a placeholder for all plugins not explicitly named.
-    # config.plugins = [ :exception_notification, :ssl_requirement, :all ]
-
-    # Activate observers that should always be running.
-    # config.active_record.observers = :cacher, :garbage_collector, :forum_observer
 
     # Set Time.zone default to the specified zone and make Active Record auto-convert to this zone.
     # Run "rake -D time" for a list of tasks for finding time zone names. Default is UTC.
@@ -34,27 +27,21 @@ module Joruri
     # The default locale is :en and all translations from config/locales/*.rb,yml are auto loaded.
     # config.i18n.load_path += Dir[Rails.root.join('my', 'locales', '*.{rb,yml}').to_s]
     # config.i18n.default_locale = :de
+    config.i18n.load_path += Dir[Rails.root.join('config', 'modules', '**', 'translation_ja.yml').to_s]
     config.i18n.default_locale = :ja
-    Dir::entries("#{Rails.root}/config/modules").each do |mod|
-      next if mod =~ /^\./
-      file = "#{Rails.root}/config/modules/#{mod}/locales/translation_ja.yml"
-      config.i18n.load_path << file if FileTest.exist?(file)
-    end
+
+    # Do not swallow errors in after_commit/after_rollback callbacks.
+    config.active_record.raise_in_transactional_callbacks = true
 
     # JavaScript files you want as :defaults (application.js is always included).
     # config.action_view.javascript_expansions[:defaults] = %w(jquery rails)
 
-    # Configure the default encoding used in templates for Ruby 1.9.
-    config.encoding = "utf-8"
-
-    # Configure sensitive parameters which will be filtered from the log file.
-    config.filter_parameters += [:password]
+    # Load settings
+    def load_settings(filename)
+      YAML::load(ERB.new(File.read(Rails.root.join(filename))).result)[Rails.env].with_indifferent_access
+    end
+    config.action_mailer.smtp_settings = load_settings('config/smtp.yml')
+    Joruri.config.imap_settings = load_settings('config/imap.yml')
+    Joruri.config.sso_settings = load_settings('config/sso.yml')
   end
 end
-
-#require "condition_builder.rb"
-#require 'action_controller/integration'
-#require 'application.rb'
-#require 'jpmobile'
-#require 'passive_record'
-#require "will_paginate"

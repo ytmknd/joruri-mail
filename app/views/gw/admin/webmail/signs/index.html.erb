@@ -1,22 +1,19 @@
 <div id="signContent">
-<%= render :partial => 'menu' %>
+<%= render 'menu' %>
 
 <table class="index">
-  
   <tr>
     <th style="width: 60px; text-align: center;">詳細</th>
-    <th style="width: ;"><%= Gw::WebmailSign.new.locale(:name) %></th>
-    <th style="width: 120px; text-align: center;">作成日時</th>
+    <th style="width: ;"><%= Gw::WebmailSign.human_attribute_name :name %></th>
+    <th style="width: 120px; text-align: center;"><%= Gw::WebmailSign.human_attribute_name :created_at %></th>
   </tr>
-  
-  <% for item in @items %>
-  <tr <%= cycle '', 'class="cycle"' %>>
-    <td style="text-align: center;"><%= link_to :show, url_for(:action => :show, :id => item) %></td>
-    <td><%=h item.name %> <%= '（既定）' if item.default_flag == 1 %></td>
-    <td style="text-align: center;"><%= item.created_at.strftime('%Y-%m-%d %H:%M')%></td>
-  </tr>
+  <% @items.each do |item| %>
+    <tr <%= cycle '', 'class="cycle"' %>>
+      <td style="text-align: center;"><%= link_to :show, url_for(item) %></td>
+      <td><%= item.name %> <%= '（既定）' if item.default_flag == 1 %></td>
+      <td style="text-align: center;"><%=l item.created_at if item.created_at %></td>
+    </tr>
   <% end %>
-
 </table>
 
 <%= paginate @items %>

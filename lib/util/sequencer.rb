@@ -1,4 +1,3 @@
-# encoding: utf-8
 class Util::Sequencer
   def self.next_id(name, options = {})
     name    = name.to_s
@@ -9,7 +8,7 @@ class Util::Sequencer
       raise "SequencerLockError"
     end
     
-    if seq = Sys::Sequence.versioned(version.to_s).find_by_name(name)
+    if seq = Sys::Sequence.versioned(version.to_s).find_by(name: name)
       seq.value += 1
       seq.save
     else

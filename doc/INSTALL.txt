@@ -1,20 +1,20 @@
-## Joruri Mail v1.3.1 インストールマニュアル                2015.08.03
+## Joruri Mail v2.0.0 インストールマニュアル                2016.05.16
 
 **********************************************************************
  1 想定環境
 **********************************************************************
 
 [システム]
-OS         : CentOS 6.6
+OS         : CentOS 6.7 (64bit)
 Webサーバ  : Apache 2.2
 DBシステム : MySQL 5
-Ruby       : 1.9.2
-Rails      : 3.0.0
+Ruby       : 2.3.1
+Rails      : 4.2.6
 Mailサーバ : SMTP, IMAP4
 
 [設定]
 IPアドレス : 192.168.0.2
-ドメイン   : 192.168.0.2
+メールドメイン : localhost.localdomain.jp
 
 **********************************************************************
  2 CentOS のインストール
@@ -34,39 +34,61 @@ rootユーザに変更します。
 
 必要なパッケージをインストールします。
 
-  # yum -y install \
-  #   wget make gcc-c++ \
-  #   libxslt libxslt-devel libxml2-devel \
-  #   libjpeg-devel libpng-devel \
-  #   librsvg2-devel ghostscript-devel \
-  #   ImageMagick ImageMagick-devel \
-  #   curl-devel \
-  #   shared-mime-info \
-  #   httpd httpd-devel \
-  #   mysql-server mysql-devel
+  # yum -y install wget git
 
-必要なパッケージをダウンロードします。
+**********************************************************************
+ 4 Ruby のインストール
+**********************************************************************
+
+依存パッケージをインストールします。
+
+  # yum -y install make automake gcc-c++ glibc-headers glibc-devel autoconf patch \
+      libyaml-devel readline-devel zlib-devel libffi-devel openssl-devel libtool bison
+
+Rubyをインストールします。
 
   # cd /usr/local/src
-  # wget https://github.com/joruri/joruri-mail/archive/v1.3.1.tar.gz
-  # wget ftp://ftp.ruby-lang.org/pub/ruby/1.9/ruby-1.9.2-p290.tar.gz
+  # wget https://cache.ruby-lang.org/pub/ruby/2.3/ruby-2.3.1.tar.gz
+  # tar xvzf ruby-2.3.1.tar.gz
+  # cd ruby-2.3.1
+  # ./configure
+  # make && make install
+
+bundler をインストールします。
+
+  # gem install bundler
+
+**********************************************************************
+ 5 Joruri Mail のインストール
+**********************************************************************
+
+依存パッケージをインストールします。
+
+  # yum -y install libjpeg-devel libpng-devel ImageMagick-devel shared-mime-info libicu-devel
 
 Joruriユーザを作成します。
 
   # useradd -m joruri
 
-Joruriソースコードを設置します。
+Joruri ソースコードを設置します。
 
   # mkdir /var/share
-  # tar xvzf v1.3.1.tar.gz -C /var/share
-  # mv /var/share/joruri-mail-1.3.1 /var/share/jorurimail
+  # git clone https://github.com/joruri/joruri-mail.git /var/share/jorurimail
   # chown -R joruri:joruri /var/share/jorurimail
 
 **********************************************************************
- 4 Apache の設定
+ 6 Apache, Passenger のインストール
 **********************************************************************
 
-設定ファイルを編集します。
+======================================================================
+ 6.1 Apache のインストール
+======================================================================
+
+Apacheをインストールします。
+
+  # yum -y install httpd-devel
+  
+ 設定ファイルを編集します。
 
   # vi /etc/httpd/conf/httpd.conf
   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
@@ -82,9 +104,30 @@ Joruriソースコードを設置します。
 
   # /sbin/chkconfig httpd on
 
+======================================================================
+ 6.2 Passenger のインストール
+======================================================================
+
+Passengerをインストールします。
+
+  # yum -y install curl-devel
+  # gem install passenger -v 5.0.23
+  # passenger-install-apache2-module -a
+  
+  ( 画面の内容を確認して Enterキーを押してください。 )
+
+Apacheに設定を追加します。
+
+  # cp /var/share/jorurimail/config/samples/passenger.conf \
+  #   /etc/httpd/conf.d/
+
 **********************************************************************
- 5 MySQL の設定
+ 7 MySQL のインストール
 **********************************************************************
+
+MySQLをインストールします。
+
+  # yum -y install mysql-server mysql-devel
 
 文字エンコーディングの標準を UTF-8 に設定します。
 
@@ -116,75 +159,7 @@ joruriユーザを作成します。
   #   -e "grant all on *.* to joruri@localhost IDENTIFIED BY 'pass'"
 
 **********************************************************************
- 6 Ruby on Rails のインストール
-**********************************************************************
-
-======================================================================
- 6.1 Ruby, RubyGems のインストール
-======================================================================
-
-Rubyをインストールします。
-
-  # cd /usr/local/src
-  # tar xvzf ruby-1.9.2-p290.tar.gz
-  # cd ruby-1.9.2-p290
-  # ./configure
-  # make && make install
-
-  ※コンパイル時に下記のエラーが発生した場合はパッチの適用をお試しください。
-
-  ---
-  ossl_pkey_ec.c: In function ‘ossl_ec_group_initialize’:
-  ossl_pkey_ec.c:765: 警告: assignment makes pointer from integer without a cast
-  ossl_pkey_ec.c:819: error: ‘EC_GROUP_new_curve_GF2m’ undeclared (first use in this function)
-  ossl_pkey_ec.c:819: error: (Each undeclared identifier is reported only once
-  ossl_pkey_ec.c:819: error: for each function it appears in.)
-  ossl_pkey_ec.c: In function ‘ossl_ec_group_set_seed’:
-  ossl_pkey_ec.c:1114: 警告: 符合付きと符合無しの整数式同士の比較です
-  make[1]: *** [ossl_pkey_ec.o] エラー 1
-  ---
-
-  # yum install patch
-  # cd /usr/local/src/ruby-1.9.2-p290/ext/openssl/
-  # wget http://joruri.org/download/jorurimail/ruby1.9.2-p290-ossl_pkey_ec.patch
-  # patch < ruby1.9.2-p290-ossl_pkey_ec.patch
-
-RubyGemsをインストールします。
-
-  # gem install rubygems-update -v 1.6.2
-  # update_rubygems
-
-======================================================================
- 6.2 gemライブラリ のインストール
-======================================================================
-
-Ruby on Rails をインストールします。
-
-  # gem install rails -v 3.0.0
-  
-必要ライブラリをインストールします。
-
-  # cd /var/share/jorurimail
-  # bundle install
-
-======================================================================
- 6.3 Phusion Passenger のインストール
-======================================================================
-
-Phusion Passengerをインストールします。
-
-  # gem install passenger -v 3.0.9
-  # passenger-install-apache2-module
-  
-  ( 画面の内容を確認して Enterキーを押してください。 )
-
-Apacheに設定を追加します。
-
-  # cp /var/share/jorurimail/config/samples/passenger.conf \
-  #   /etc/httpd/conf.d/
-
-**********************************************************************
-  7 Joruri のインストール
+ 8 Joruri Mail の設定
 **********************************************************************
 
 Joruriユーザに変更します。
@@ -193,38 +168,65 @@ Joruriユーザに変更します。
   $ cd /var/share/jorurimail
 
 ======================================================================
- 8.1 設定ファイル
+ 8.1 ライブラリ のインストール
 ======================================================================
 
-環境に応じて設定ファイルを編集します。
+必要ライブラリをインストールします。
 
-Joruri Mail 基本設定
+  $ bundle install --without development test
+
+======================================================================
+ 8.2 設定ファイルの変更
+======================================================================
+
+サンプルの設定ファイルをコピーします。
+
+  $ cp /var/share/jorurimail/config/original/* /var/share/jorurimail/config/
+
+基本設定を変更します。
 
   $ vi config/core.yml
   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
   title  : Joruri Mail
   uri    : http://192.168.0.2/
   proxy  : ※プロキシ
+  mail_domain: ※メールドメイン
   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
   
   ※プロキシ
   プロキシサーバが導入されている場合は
   http://example:8080/ の様に記述してください。
 
-DB接続情報
+DB接続情報を変更します。
 
   $ vi config/database.yml
 
-SMTP, IMAPサーバ設定
+SMTP, IMAPサーバ接続情報を変更します。
 
-  $ vi config/environments/production.rb
+  $ vi config/smtp.yml
+  $ vi config/imap.yml
 
-VirtualHost設定
+Joruri Gwへのシングルサインオン設定を変更します。（Joruri Gwと連携する場合のみ）
+
+  $ vi config/sso.yml
+
+VirtualHost設定を変更します。
 
   $ vi config/virtual-hosts/jorurimail.conf
 
+secret keyを設定します。
+
+  $ bundle exec rake secret RAILS_ENV=production
+    ( 出力されたシークレットキーをコピーします )
+
+  $ vi config/secrets.yml
+  - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+  production:
+    secret_key_base: ( コピーしたシークレットキーをペーストします )
+  - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
 ======================================================================
- 8.2 データベースの作成
+ 8.3 データベースの作成
 ======================================================================
 
 データベースを作成します。
@@ -233,18 +235,26 @@ VirtualHost設定
 
 テーブルを作成します。
 
-  $ rake db:schema:load RAILS_ENV=production
+  $ bundle exec rake db:schema:load RAILS_ENV=production
 
 初期データを登録します。
 
-  $ rake db:seed RAILS_ENV=production
+  $ bundle exec rake db:seed RAILS_ENV=production
 
 サンプルデータを登録します。
 
-  $ rake db:seed:demo RAILS_ENV=production
+  $ bundle exec rake db:seed:demo RAILS_ENV=production
 
 ======================================================================
- 8.3 VirtualHost の反映
+ 8.4 assets のコンパイル
+======================================================================
+
+assetsをコンパイルします。
+
+  $ bundle exec rake assets:precompile RAILS_ENV=production
+
+======================================================================
+ 8.5 VirtualHost の反映
 ======================================================================
 
 Apacheに設定を追加します。

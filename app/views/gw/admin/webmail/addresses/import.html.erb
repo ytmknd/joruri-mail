@@ -1,17 +1,19 @@
 <table id="webmailContainer"><tr><td id="webmailMenu">
 <div id="webmailMenuContainer">
 
-<%= render :partial => "upper_menu" %>
+<%= render "upper_menu" %>
 
 </div>
 </td><td id="webmailContent"><div id="addressContent">
-<%= form_tag candidate_import_gw_webmail_addresses_path, :multipart => true do %>
+<%= form_tag candidate_import_gw_webmail_addresses_path, multipart: true do %>
   <table class="show">
     <tr>
       <th>CSVファイル</th>
-	   <td><%= file_field_tag :import_file, :size => "50", :style => "width:320px;" %></td>
+      <td><%= file_field_tag :import_file, size: 50, style: "width:320px;" %></td>
     </tr>
   </table>
-  <%= raw submit('読み込み') %>
+  <div class="submitters">
+    <%= submit_tag '読み込み' %>
+  </div>
 <% end %>
 </div><!-- end #webmailContainer --></td></table>

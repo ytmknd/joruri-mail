@@ -1,5 +1,3 @@
-# encoding: utf-8
-
 truncate_table "sessions"
 truncate_table "sys_creators"
 truncate_table "sys_editable_groups"

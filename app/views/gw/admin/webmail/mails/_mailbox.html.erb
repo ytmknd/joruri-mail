@@ -23,18 +23,17 @@ plv  = 0
     tree += %Q(\n#{idt}<li #{li_class}>)
   end
   
-  tree += link_to(h(box.title), url_for(:action => :index, :mailbox => box.name), :class => nm_class, :id => "mailbox_#{box.name}")
+  tree += link_to(h(box.title), url_for(action: :index, mailbox: box.name), class: nm_class, id: "mailbox_#{box.name}")
   tree += %Q{<span class="unseenNum">(<span class="num">#{box.unseen}</span>)</span>} if box.unseen > 0
   
   if box.trash_box? && (box.messages > 0 || box.children.length > 0)
-    tree += link_to("≫空にする", empty_gw_webmail_mails_path(box.name),
-      :class => :empty, :confirm => "空にしてよろしいですか？")
+    tree += link_to("≫空にする", empty_gw_webmail_mails_path(box.name), class: :empty, data: { confirm: "空にしてよろしいですか？" })
   end
   
   tree += %Q(</li>) if @mailboxes.size == idx + 1
 
   plv = clv
 end
-tree = %Q(<ul class="root">#{tree}</ul>) if !tree.blank?
+tree = %Q(<ul class="root">#{tree}</ul>) if tree.present?
 
 %><div class="mailbox"><%= raw tree %></div>

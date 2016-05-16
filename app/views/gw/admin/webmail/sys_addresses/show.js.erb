@@ -1,5 +1,4 @@
 <%
-
 ghtml = (@groups.size == 0 ? "" : "")
 @groups.each do |g|
   ghtml += %Q(<div id="addressGroup#{g.id}" class="group"><a href="#" onclick="return selectSysGroup('#{g.id}');">#{h(g.name)}</a></div>)

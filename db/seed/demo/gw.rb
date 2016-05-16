@@ -1,11 +1,9 @@
-# encoding: utf-8
-
 ## ---------------------------------------------------------
 ## gw/webmail
 
 current_user = Sys::User.find(1)
 
-Sys::User.find(:all, :order => :id).each do |user|
+Sys::User.order(:id).each do |user|
   Gw::WebmailAddress.create(
     :user_id => current_user.id,
     :name    => user.name,

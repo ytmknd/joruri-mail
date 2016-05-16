@@ -1,17 +1,8 @@
-<script type="text/javascript">
-//<![CDATA[
-function getSubmitButton() {
-  return $('item_form').commit_edit;
-}
-//]]>
-</script>
 <div id="templateContent">
-<%= render :partial => 'menu' %>
+<%= render 'menu' %>
 
-<%= form_for :item, :url => {:action => :update}, :html => {:id => "item_form", :method => :put} do |f| %>
-  <%= f.error_messages %>
-  <%= render :partial => 'form', :locals => {:f => f} %>
-  <%= raw submit(:edit) %>
+<%= form_for @item, as: :item, url: { action: :update }, html: { id: "item_form", method: :patch } do |f| %>
+  <%= render 'form', f: f %>
 <% end %>
 
 </div>

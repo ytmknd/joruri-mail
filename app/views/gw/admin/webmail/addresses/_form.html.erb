@@ -1,6 +1,111 @@
 <%
 group_ids = @item.in_groups ? @item.in_groups.split(",") : []
 %>
+
+<%= f.error_messages %>
+
+<table style="width: 100%;"><tr><td style="width: 49%; vertical-align: top;">
+
+  <table class="show addressInfo">
+    <tr>
+      <th><%= @item.class.human_attribute_name :name %></th>
+      <td><%= f.text_field :name, class: 'name' %></td>
+    </tr><tr>
+      <th><%= @item.class.human_attribute_name :kana %></th>
+      <td><%= f.text_field :kana, class: 'kana' %></td>
+    </tr><tr>
+      <th><%= @item.class.human_attribute_name :sort_no %></th>
+      <td><%= f.text_field :sort_no, class: 'number', style: 'width:100px;' %></td>
+    </tr>
+  </table>
+  
+</td><td style="width: 16px;"></td><td style="vertical-align: top;">
+
+  <table class="show addressInfo">
+    <tr>
+      <th><%= @item.class.human_attribute_name :group_id %></th>
+      <td><div id="addressGroups">
+        <% Gw::WebmailAddressGroup.user_sorted_groups.each do |g| %>
+          <div><%= '　　' * (g.level_no - 1) %>
+          <%= check_box_tag "group_#{g.id}", g.id, group_ids.index(g.id.to_s), onclick: "checkGroup(this);return true;", style: 'width:auto;' %>
+          <%= label_tag "group_#{g.id}", g.name %></div>
+        <% end %>
+      </div>
+      <%= f.hidden_field :in_groups %></td>
+    </tr> 
+  </table>
+
+</td></tr></table>
+
+<br />
+<table style="width: 100%;"><tr><td style="width: 49%; vertical-align: top;">
+
+  <table class="show addressInfo">
+    <tr>
+      <th><%= @item.class.human_attribute_name :email %></th>
+      <td><%= f.text_field :email, class: 'email' %></td>
+    </tr><tr>
+      <th><%= @item.class.human_attribute_name :mobile_tel %></th>
+      <td><%= f.text_field :mobile_tel, class: 'tel' %></td>
+    </tr><tr>
+      <th><%= @item.class.human_attribute_name :uri %></th>
+      <td><%= f.text_field :uri, class: 'url' %></td>
+    </tr><tr>
+      <th><%= @item.class.human_attribute_name :tel %></th>
+      <td><%= f.text_field :tel, class: 'tel' %></td>
+    </tr><tr>
+      <th><%= @item.class.human_attribute_name :fax %></th>
+      <td><%= f.text_field :fax, class: 'fax' %></td>
+    </tr><tr>
+      <th><%= @item.class.human_attribute_name :zip_code %></th>
+      <td><%= f.text_field :zip_code, class: 'zipCode' %></td>
+    </tr><tr>
+      <th><%= @item.class.human_attribute_name :address %></th>
+      <td><%= f.text_area :address, class: 'address', style: 'height: 2.4em;' %></td>
+    </tr>
+  </table>
+  
+  <br />
+  <table class="show addressInfo">
+    <tr>
+      <th><%= @item.class.human_attribute_name :memo %></th>
+      <td><%= f.text_area :memo, style: 'height: 2.4em;' %></td>
+    </tr>
+  </table>
+
+</td><td style="width: 16px;"></td><td style="vertical-align: top;">
+
+  <table class="show addressInfo">
+    <tr>
+      <th><%= @item.class.human_attribute_name :company_name %></th>
+      <td><%= f.text_field :company_name, class: 'name' %></td>
+    </tr><tr>
+      <th><%= @item.class.human_attribute_name :company_kana %></th>
+      <td><%= f.text_field :company_kana, class: 'kana' %></td>
+    </tr><tr>
+      <th><%= @item.class.human_attribute_name :official_position %></th>
+      <td><%= f.text_field :official_position, class: 'officialPosition' %></td>
+    </tr><tr>
+      <th><%= @item.class.human_attribute_name :company_tel %></th>
+      <td><%= f.text_field :company_tel, class: 'tel' %></td>
+    </tr><tr>
+      <th><%= @item.class.human_attribute_name :company_fax %></th>
+      <td><%= f.text_field :company_fax, class: 'fax' %></td>
+    </tr><tr>
+      <th><%= @item.class.human_attribute_name :company_zip_code %></th>
+      <td><%= f.text_field :company_zip_code, class: 'zipCode' %></td>
+    </tr><tr>
+      <th><%= @item.class.human_attribute_name :company_address %></th>
+      <td><%= f.text_area :company_address, class: 'address', style: 'height: 2.4em;' %></td>
+    </tr>
+  </table>
+
+</td></tr></table>
+
+<div class="submitters">
+  <%= f.submit %>
+</div>
+
 <script type="text/javascript">
 //<![CDATA[
 function checkGroup(check_box) {
@@ -24,100 +129,3 @@ function checkGroup(check_box) {
 }
 //]]>
 </script>
-<table style="width: 100%;"><tr><td style="width: 49%; vertical-align: top;">
-
-  <table class="show addressInfo">
-    <tr>
-      <th><%= @item.locale :name %></th>
-      <td><%= f.text_field :name, :class => 'name' %></td>
-    </tr><tr>
-      <th><%= @item.locale(:kana) %></th>
-      <td><%= f.text_field :kana, :class => 'kana' %></td>
-    </tr><tr>
-      <th><%= @item.locale(:sort_no) %></th>
-      <td><%= f.text_field :sort_no, :class => 'number', :style => 'width:100px;' %></td>
-    </tr>
-  </table>
-  
-</td><td style="width: 16px;"></td><td style="vertical-align: top;">
-
-  <table class="show addressInfo">
-    <tr>
-      <th><%= @item.locale :group_id %></th>
-      <td><div id="addressGroups">
-        <% Gw::WebmailAddressGroup.user_sorted_groups.each do |g| %>
-          <div><%= '　　' * (g.level_no - 1) %>
-          <%= check_box_tag "group_#{g.id}", g.id, group_ids.index(g.id.to_s), :onclick => "checkGroup(this);return true;", :style => 'width:auto;' %>
-          <%= label_tag "group_#{g.id}", g.name %></div>
-        <% end %>
-      </div>
-      <%= f.hidden_field :in_groups %></td>
-    </tr> 
-  </table>
-
-</td></tr></table>
-
-<br />
-<table style="width: 100%;"><tr><td style="width: 49%; vertical-align: top;">
-
-  <table class="show addressInfo">
-    <tr>
-      <th><%= @item.locale :email %></th>
-      <td><%= f.text_field :email, :class => 'email' %></td>
-    </tr><tr>
-      <th><%= @item.locale(:mobile_tel) %></th>
-      <td><%= f.text_field :mobile_tel, :class => 'tel' %></td>
-    </tr><tr>
-      <th><%= @item.locale(:uri) %></th>
-      <td><%= f.text_field :uri, :class => 'url' %></td>
-    </tr><tr>
-      <th><%= @item.locale(:tel) %></th>
-      <td><%= f.text_field :tel, :class => 'tel' %></td>
-    </tr><tr>
-      <th><%= @item.locale(:fax) %></th>
-      <td><%= f.text_field :fax, :class => 'fax' %></td>
-    </tr><tr>
-      <th><%= @item.locale(:zip_code) %></th>
-      <td><%= f.text_field :zip_code, :class => 'zipCode' %></td>
-    </tr><tr>
-      <th><%= @item.locale(:address) %></th>
-      <td><%= f.text_area :address, :class => 'address', :style => 'height: 2.4em;' %></td>
-    </tr>
-  </table>
-  
-  <br />
-  <table class="show addressInfo">
-    <tr>
-      <th><%= @item.locale :memo %></th>
-      <td><%= f.text_area :memo, :style => 'height: 2.4em;' %></td>
-    </tr>
-  </table>
-
-</td><td style="width: 16px;"></td><td style="vertical-align: top;">
-
-  <table class="show addressInfo">
-    <tr>
-      <th><%= @item.locale(:company_name) %></th>
-      <td><%= f.text_field :company_name, :class => 'name' %></td>
-    </tr><tr>
-      <th><%= @item.locale(:company_kana) %></th>
-      <td><%= f.text_field :company_kana, :class => 'kana' %></td>
-    </tr><tr>
-      <th><%= @item.locale(:official_position) %></th>
-      <td><%= f.text_field :official_position, :class => 'officialPosition' %></td>
-    </tr><tr>
-      <th><%= @item.locale(:company_tel) %></th>
-      <td><%= f.text_field :company_tel, :class => 'tel' %></td>
-    </tr><tr>
-      <th><%= @item.locale(:company_fax) %></th>
-      <td><%= f.text_field :company_fax, :class => 'fax' %></td>
-    </tr><tr>
-      <th><%= @item.locale(:company_zip_code) %></th>
-      <td><%= f.text_field :company_zip_code, :class => 'zipCode' %></td>
-    </tr><tr>
-      <th><%= @item.locale(:company_address) %></th>
-      <td><%= f.text_area :company_address, :class => 'address', :style => 'height: 2.4em;' %></td>
-    </tr>
-  </table>
-
-</td></tr></table>

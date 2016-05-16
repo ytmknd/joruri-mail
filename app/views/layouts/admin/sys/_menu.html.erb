@@ -1,17 +1,16 @@
 <%
-
 @current = current
 def menu_link(auth, key, label, uri)
   return '' unless Core.user.has_auth?(auth)
   cls = [key.to_s]
   cls << 'current' if @current == key
-  link_to(label, uri, :class => cls.join(' '))
+  link_to(label, uri, class: cls.join(' '))
 end
-
-%><div class="mainMenu">
-<%= menu_link   :manager , :maintenance, 'メンテナンス' , sys_maintenances_path
-%><%= menu_link :manager , :doc        , 'ヘルプ'       , sys_docs_path
-%><%= menu_link :manager , :user       , 'ユーザ'       , sys_groups_path(0)
-%><%= menu_link :manager , :language   , '言語'         , sys_languages_path
+%>
+<div class="mainMenu">
+<%= menu_link   :manager, :maintenance, 'メンテナンス', sys_maintenances_path
+%><%= menu_link :manager, :doc, 'ヘルプ', sys_docs_path
+%><%= menu_link :manager, :user, 'ユーザ', sys_groups_path(0)
+%><%= menu_link :manager, :language, '言語', sys_languages_path
 %>
 </div>

@@ -1,3 +1,12 @@
+<%= f.error_messages %>
+
 <div style="text-align: center;">
 LDAPサーバから情報を取得し、中間データを作成します。
+</div>
+
+<div class="submitters">
+  <div style="color: #b40; text-align: center;">
+  <span id="message"></span>
+  </div>
+  <%= f.submit '作成する', onclick: "$('message').innerHTML='処理を開始しました。そのままでお待ちください。<br /><br />';" %>
 </div>

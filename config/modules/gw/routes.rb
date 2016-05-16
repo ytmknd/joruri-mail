@@ -32,7 +32,7 @@ Joruri::Application.routes.draw do
         match "webmail/*mailbox/mailbox" => 
           "webmail/mailboxes#show", :via => :get
         match "webmail/*mailbox/mailbox" => 
-          "webmail/mailboxes#update", :via => :put
+          "webmail/mailboxes#update", :via => :patch
         match "webmail/*mailbox/mailbox" => 
           "webmail/mailboxes#destroy", :via => :delete
         resources "webmail_attachments",
@@ -103,21 +103,20 @@ Joruri::Application.routes.draw do
       end
     end
   end
-  
-  match "_admin/#{mod}/webmail/address_selector/parse_address(.:format)" =>
-    "gw/admin/webmail/address_selector#parse_address"
 
-  match "_admin/#{mod}/siteinfo" => "gw/admin/siteinfo#index"
-  
+  match "_admin/#{mod}/webmail/address_selector/parse_address(.:format)" =>
+    "gw/admin/webmail/address_selector#parse_address", via: [:get, :post]
+
+  match "_admin/#{mod}/siteinfo" => "gw/admin/siteinfo#index", via: :get
+
   match "_admin/#{mod}" => "#{mod}/admin/webmail/mails#index",
-    :defaults => {:mailbox => 'INBOX'}
-  
+    defaults: { mailbox: 'INBOX' }, via: :get
+
   match "_admin/#{mod}/webmail/tools/batch_delete(.:format)" => 
-    "#{mod}/admin/webmail/tools#batch_delete"
-  
-  match "_admin/#{mod}/webmail_mobile_users(.:format)" => "#{mod}/admin/webmail/mobile#users"
-  
-  match "_api/#{mod}/webmail/unseen(.:format)" => "#{mod}/admin/webmail/api#unseen"
-  match "_api/#{mod}/webmail/recent(.:format)" => "#{mod}/admin/webmail/api#recent"
-  
+    "#{mod}/admin/webmail/tools#batch_delete", via: :get
+
+  match "_admin/#{mod}/webmail_mobile_users(.:format)" => "#{mod}/admin/webmail/mobile#users", via: :get
+
+  match "_api/#{mod}/webmail/unseen(.:format)" => "#{mod}/admin/webmail/api#unseen", via: :get
+  match "_api/#{mod}/webmail/recent(.:format)" => "#{mod}/admin/webmail/api#recent", via: :get
 end

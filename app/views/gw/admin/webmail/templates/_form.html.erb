@@ -1,5 +1,57 @@
+<div id="mailContent">
+
+<%= f.error_messages %>
+
+<table class="show">
+  <tr>
+    <th><%= @item.class.human_attribute_name :name %></th>
+    <td><%= f.text_field :name, class: 'title' %></td>
+  </tr>
+</table>
+
+<div id="openAddress" style="margin-top:10px">
+  <a href="#" id="sys_openAddressButton" onclick="return startAddressSelection('sys');"><%= Joruri.config.application['webmail.sys_address_menu'] %></a>
+  <a href="#" id="pri_openAddressButton" onclick="return startAddressSelection('pri');"><%= Joruri.config.application['webmail.address_group_menu'] %></a>
+</div>
+<%= render "gw/admin/webmail/mails/address_selector" %>
+
+<table class="show" id="mailAddressesForm">
+  <tr>
+    <th><%= @item.class.human_attribute_name :to %></th>
+    <td><%= f.text_area :to, class: 'to' %></td>
+  </tr><tr>
+    <th><%= @item.class.human_attribute_name :cc %></th>
+    <td><%= f.text_area :cc, class: 'cc' %></td>
+  </tr><tr>
+    <th><%= @item.class.human_attribute_name :bcc %></th>
+    <td><%= f.text_area :bcc, class: 'bcc' %></td>
+  </tr>
+</table>
+
+<table class="show" style="margin-top:10px">
+  <tr>
+    <th><%= @item.class.human_attribute_name :subject %></th>
+    <td><%= f.text_area :subject, class: 'subject' %></td>
+  </tr><tr>
+    <th><%= @item.class.human_attribute_name :body %></th>
+    <td><%= f.text_area :body, class: 'body', style: 'width:700px' %></td>
+  </tr><tr>
+    <th><%= @item.class.human_attribute_name :default_flag %></th>
+    <td><%= f.collection_radio_buttons :default_flag, [['設定する',1],['設定しない',0]], :last, :first, class: 'states' %></td>
+  </tr>
+</table>
+
+<div class="submitters">
+  <%= f.submit %>
+</div>
+
+<!-- end #mailContent --></div>
+
 <script type="text/javascript">
 //<![CDATA[
+function getSubmitButton() {
+  return $('item_form').commit;
+}
 function submitButtonOnClick() {
   alert("アドレス帳を閉じてください。");
   return false;
@@ -32,46 +84,3 @@ function addressSelectorCallBack(ok, to, cc, bcc) {
 }
 //]]>
 </script>
-<div id="mailContent">
-
-<table class="show">
-  <tr>
-    <th><%= @item.locale :name %></th>
-    <td><%= f.text_field :name, :class => 'title' %></td>
-  </tr>
-</table>
-
-<div id="openAddress" style="margin-top:10px">
-  <a href="#" id="sys_openAddressButton" onclick="return startAddressSelection('sys');"><%= Joruri.config.application['webmail.sys_address_menu'] %></a>
-  <a href="#" id="pri_openAddressButton" onclick="return startAddressSelection('pri');"><%= Joruri.config.application['webmail.address_group_menu'] %></a>
-</div>
-
-<%= render :partial => "gw/admin/webmail/mails/address_selector" %>
-
-<table class="show" id="mailAddressesForm">
-  <tr>
-    <th><%= @item.locale :to %></th>
-    <td><%= f.text_area :to, :class => 'to' %></td>
-  </tr><tr>
-    <th><%= @item.locale :cc %></th>
-    <td><%= f.text_area :cc, :class => 'cc' %></td>
-  </tr><tr>
-    <th><%= @item.locale :bcc %></th>
-    <td><%= f.text_area :bcc, :class => 'bcc' %></td>
-  </tr>
-</table>
-
-<table class="show" style="margin-top:10px">
-  <tr>
-    <th><%= @item.locale :subject %></th>
-    <td><%= f.text_area :subject, :class => 'subject' %></td>
-  </tr><tr>
-    <th><%= @item.locale :body %></th>
-    <td><%= f.text_area :body, :class => 'body', :style => 'width:700px' %></td>
-  </tr><tr>
-    <th><%= @item.locale :default_flag %></th>
-    <td><%= f.radio_buttons :default_flag, [['設定する',1],['設定しない',0]], :class => 'states' %></td>
-  </tr>
-</table>
-
-<!-- end #mailContent --></div>

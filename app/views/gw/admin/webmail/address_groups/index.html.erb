@@ -1,3 +1,98 @@
+<table id="webmailContainer"><tr><td id="webmailMenu">
+<div id="webmailMenuContainer">
+
+<%= render 'menu'%>
+
+<div class="mailbox">
+  <ul class="root">
+    <% if params[:search] %>
+      <li class="folder">
+        <a href="#top" id="group0" class="current" onclick="return loadAddresses(0, '検索結果');">検索結果</a>
+      </li>
+    <% end %>
+    <li class="folder">
+      <a href="#top" id="groupAll" class="<%= 'current' unless params[:search] %>" onclick="return loadAddresses('All', 'すべて');">すべて</a>
+    </li>
+    <%= render 'children', groups: @root_groups %>
+  </ul>
+</div>
+
+<br />
+<div class="actionMenu">
+  <%= link_to "CSVインポート", import_gw_webmail_addresses_path, style: "margin-bottom: 10px;" %>
+  <%= link_to "CSVエクスポート", export_gw_webmail_addresses_path %>
+</div>
+
+</div>
+</td><td id="webmailContent"><div id="addressContent">
+
+<%= render "search" %>
+
+<%= form_for :item, url: { action: :create_mail }, html: { id: 'users', name: 'users', target: '_blank' } do |f| %>
+
+<div id="addresses">
+
+  <div id="addresses0">
+    <% if params[:search] %>
+    <p class="form">検索結果</p>
+    <div class="actionMenu"><a href="#" onclick="return createMail();" class="create" title="メール作成">メール作成</a></div>
+    <table class="index">
+      <tr>
+        <th class="checkUI"><a onmousedown="return checkAll('to' , '0');" onclick="return false;" href="#" title="TO">TO</a></th>
+        <th class="checkUI"><a onmousedown="return checkAll('cc' , '0');" onclick="return false;" href="#" title="CC">CC</a></th>
+        <th class="checkUI"><a onmousedown="return checkAll('bcc', '0');" onclick="return false;" href="#" title="BCC">BCC</a></th>
+        <th style="width: 30%;"><a class="sorter" id="nameCaption0" href="#" onclick="sortAddresses('0', 'name'); return false;">名前</a></th>
+        <th style="width: 20%;"><a class="sorter" id="kanaCaption0" href="#" onclick="sortAddresses('0', 'kana'); return false;">フリガナ</a></th>
+        <th style="width: ;"><div class="email"><a class="sorter" id="emailCaption0" href="#" onclick="sortAddresses('0', 'email'); return false;">メールアドレス</a></div><div class="sortNo">並び順</div></th>
+      </tr>
+      <% @s_items.each do |u| %>
+      <tr <%= cycle '', 'class="cycle"' %>>
+        <td class="checkUI"><input type="checkbox" name="to[<%= u.id %>]" value="1" class="group0" /></td>
+        <td class="checkUI"><input type="checkbox" name="cc[<%= u.id %>]" value="1" class="group0" /></td>
+        <td class="checkUI"><input type="checkbox" name="bcc[<%= u.id %>]" value="1" class="group0" /></td>
+        <td><%= link_to h(u.name), gw_webmail_address_path(u.id) %></td>
+        <td><div class="kana"><%= u.kana %></div></td>
+        <td><div class="email"><%= u.email %></div><div class="sortNo"><%= u.sort_no %></span></td>
+      </tr>
+      <% end %>
+    </table>
+    <div class="actionMenu"><a href="#" onclick="return createMail();" class="create" title="メール作成">メール作成</a></div>
+    <% end %>
+  </div>
+
+  <div id="addressesAll" style="<%= 'display: none;' if params[:search] %>">
+    <p class="form">すべて</p>
+    <div class="actionMenu">
+      <a href="#" onclick="return createMail();" class="create" title="メール作成">メール作成</a>
+    </div>
+    <table class="index">
+      <tr>
+        <th class="checkUI"><a onmousedown="checkAll('to' , 'All');" onclick="return false;" href="#" title="TO">TO</a></th>
+        <th class="checkUI"><a onmousedown="checkAll('cc' , 'All');" onclick="return false;" href="#" title="CC">CC</a></th>
+        <th class="checkUI"><a onmousedown="checkAll('bcc', 'All');" onclick="return false;" href="#" title="BCC">BCC</a></th>
+        <th style="width: 30%;"><a class="sorter" id="nameCaptionAll" href="#" onclick="sortAddresses('All', 'name'); return false;">名前</a></th>
+        <th style="width: 20%;"><a class="sorter" id="kanaCaptionAll" href="#" onclick="sortAddresses('All', 'kana'); return false;">フリガナ</a></th>
+        <th style="width: ;"><div class="email"><a class="sorter" id="emailCaptionAll" href="#" onclick="sortAddresses('All', 'email'); return false;">メールアドレス</a></div><div class="sortNo">並び順</div></th>
+      </tr>
+      <% @items.each do |u| %>
+      <tr <%= cycle '', 'class="cycle"' %>>
+        <td class="checkUI"><input type="checkbox" name="to[<%= u.id %>]" value="1" class="groupAll" /></td>
+        <td class="checkUI"><input type="checkbox" name="cc[<%= u.id %>]" value="1" class="groupAll" /></td>
+        <td class="checkUI"><input type="checkbox" name="bcc[<%= u.id %>]" value="1" class="groupAll" /></td>
+        <td><%= link_to h(u.name), gw_webmail_address_path(u.id) %></td>
+        <td><div class="kana"><%= u.kana %></div></td>
+        <td><div class="email"><%= u.email %></div><div class="sortNo"><%= u.sort_no %></span></td>
+      </tr>
+      <% end %>
+    </table>
+    <div class="actionMenu"><a href="#" onclick="return createMail();" class="create" title="メール作成">メール作成</a></div>
+  </div>
+</div>
+
+<% end %>
+
+</div><!-- end #webmailContainer --></td></table>
+
 <%= javascript_include_tag "/_common/js/mail_form.js" %>
 <script type="text/javascript">
 //<![CDATA[
@@ -216,111 +311,3 @@ function sortAddresses(gid, key) {
 }
 //]]>
 </script>
-<%
-def search_children(group, html = "", level_no = 0)
-  html += %Q(<li class="folder">)
-  html += link_to( h(group.name), "#top", :id => "group#{group.id}",
-    :onclick => "return loadAddresses(#{group.id}, '#{escape_javascript(group.name)}');" )
-  html += link_to(:edit, edit_gw_webmail_address_group_path(group.id), :class => "editGroup", :title => "編集")
-  cond  = {:parent_id => group.id, :user_id => Core.user.id}
-  if (children = Gw::WebmailAddressGroup.find(:all, :conditions => cond, :order => "name, id")).size > 0
-    ccls  = level_no > 0 ? "level#{level_no}" : ""
-    html += %Q(<ul class="children #{ccls}">)
-    children.each {|c| html = search_children(c, html)}
-    html += %Q(</ul>)
-  end
-  html += %Q(</li>)
-  html
-end
-%>
-<table id="webmailContainer"><tr><td id="webmailMenu">
-<div id="webmailMenuContainer">
-
-<%= render :partial => 'menu'%>
-
-<div class="mailbox">
-  <ul class="root">
-    <% if params[:search] %>
-      <li class="folder"><a href="#top" id="group0" class="current" onclick="return loadAddresses(0, '検索結果');">検索結果</a></li>
-    <% end %>
-    <li class="folder"><a href="#top" id="groupAll" class="<%= 'current' unless params[:search] %>"
-      onclick="return loadAddresses('All', 'すべて');">すべて</a></li>
-    <% @root_groups.each do |g| %><%= raw search_children(g) %><% end %>
-  </ul>
-</div>
-
-<br />
-<div class="actionMenu">
-  <%= link_to "CSVインポート", import_gw_webmail_addresses_path, :style => "margin-bottom: 10px;" %>
-  <%= link_to "CSVエクスポート", export_gw_webmail_addresses_path %>
-</div>
-
-</div>
-</td><td id="webmailContent"><div id="addressContent">
-
-<%= render :partial => "search" %>
-
-<%= form_for :item, :url => url_for(:action => :create_mail), :html => {:id => 'users', :name => 'users', :target => '_blank'} do |f| %>
-
-<div id="addresses">
-
-  <div id="addresses0">
-    <% if params[:search] %>
-    <p class="form">検索結果</p>
-    <div class="actionMenu"><a href="#" onclick="return createMail();" class="create" title="メール作成">メール作成</a></div>
-    <table class="index">
-      <tr>
-        <th class="checkUI"><a onmousedown="return checkAll('to' , '0');" onclick="return false;" href="#" title="TO">TO</a></th>
-        <th class="checkUI"><a onmousedown="return checkAll('cc' , '0');" onclick="return false;" href="#" title="CC">CC</a></th>
-        <th class="checkUI"><a onmousedown="return checkAll('bcc', '0');" onclick="return false;" href="#" title="BCC">BCC</a></th>
-        <th style="width: 30%;"><a class="sorter" id="nameCaption0" href="#" onclick="sortAddresses('0', 'name'); return false;">名前</a></th>
-        <th style="width: 20%;"><a class="sorter" id="kanaCaption0" href="#" onclick="sortAddresses('0', 'kana'); return false;">フリガナ</a></th>
-        <th style="width: ;"><div class="email"><a class="sorter" id="emailCaption0" href="#" onclick="sortAddresses('0', 'email'); return false;">メールアドレス</a></div><div class="sortNo">並び順</div></th>
-      </tr>
-      <% @s_items.each do |u| %>
-      <tr <%= cycle '', 'class="cycle"' %>>
-        <td class="checkUI"><%= %Q(<input type="checkbox" name="to[#{u.id}]"  value="1" class="group0" />).html_safe %></td>
-        <td class="checkUI"><%= %Q(<input type="checkbox" name="cc[#{u.id}]"  value="1" class="group0" />).html_safe %></td>
-        <td class="checkUI"><%= %Q(<input type="checkbox" name="bcc[#{u.id}]" value="1" class="group0" />).html_safe %></td>
-        <td><%= link_to h(u.name), gw_webmail_address_path(u.id) %></td>
-        <td><div class="kana"><%= u.kana %></div></td>
-        <td><div class="email"><%= u.email %></div><div class="sortNo"><%= u.sort_no %></span></td>
-      </tr>
-      <% end %>
-    </table>
-    <div class="actionMenu"><a href="#" onclick="return createMail();" class="create" title="メール作成">メール作成</a></div>
-    <% end %>
-  </div>
-
-  <div id="addressesAll" style="<%= 'display: none;' if params[:search] %>">
-    <p class="form">すべて</p>
-    <div class="actionMenu">
-      <a href="#" onclick="return createMail();" class="create" title="メール作成">メール作成</a>
-    </div>
-    <table class="index">
-      <tr>
-        <th class="checkUI"><a onmousedown="checkAll('to' , 'All');" onclick="return false;" href="#" title="TO">TO</a></th>
-        <th class="checkUI"><a onmousedown="checkAll('cc' , 'All');" onclick="return false;" href="#" title="CC">CC</a></th>
-        <th class="checkUI"><a onmousedown="checkAll('bcc', 'All');" onclick="return false;" href="#" title="BCC">BCC</a></th>
-        <th style="width: 30%;"><a class="sorter" id="nameCaptionAll" href="#" onclick="sortAddresses('All', 'name'); return false;">名前</a></th>
-        <th style="width: 20%;"><a class="sorter" id="kanaCaptionAll" href="#" onclick="sortAddresses('All', 'kana'); return false;">フリガナ</a></th>
-        <th style="width: ;"><div class="email"><a class="sorter" id="emailCaptionAll" href="#" onclick="sortAddresses('All', 'email'); return false;">メールアドレス</a></div><div class="sortNo">並び順</div></th>
-      </tr>
-      <% @items.each do |u| %>
-      <tr <%= cycle '', 'class="cycle"' %>>
-        <td class="checkUI"><%= %Q(<input type="checkbox" name="to[#{u.id}]"  value="1" class="groupAll" />).html_safe %></td>
-        <td class="checkUI"><%= %Q(<input type="checkbox" name="cc[#{u.id}]"  value="1" class="groupAll" />).html_safe %></td>
-        <td class="checkUI"><%= %Q(<input type="checkbox" name="bcc[#{u.id}]" value="1" class="groupAll" />).html_safe %></td>
-        <td><%= link_to h(u.name), gw_webmail_address_path(u.id) %></td>
-        <td><div class="kana"><%= u.kana %></div></td>
-        <td><div class="email"><%= u.email %></div><div class="sortNo"><%= u.sort_no %></span></td>
-      </tr>
-      <% end %>
-    </table>
-    <div class="actionMenu"><a href="#" onclick="return createMail();" class="create" title="メール作成">メール作成</a></div>
-  </div>
-</div>
-
-<% end %>
-
-</div><!-- end #webmailContainer --></td></table>

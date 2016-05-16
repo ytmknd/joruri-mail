@@ -1,0 +1,16 @@
+Date: Tue, 10 Jul 2012 11:26:14 +0900
+From: admin@localhost
+To: admin@localhost
+Subject: Content-Type is message/rfc822
+Mime-Version: 1.0
+Content-Type: message/rfc822;
+Content-Transfer-Encoding: 7bit
+
+From: admin@localhost
+To: admin@localhost
+Date: Thu, 24 May 2012 19:51:01 +0900
+Subject: part of message/rfc822
+MIME-Version: 1.0
+Content-Type: text/plain
+
+part of message/rfc822

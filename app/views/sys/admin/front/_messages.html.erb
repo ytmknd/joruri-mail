@@ -1,19 +1,7 @@
-<script type="text/javascript">
-function openMessage(id){
-  var elm = document.getElementById(id);
-  if (elm.style.display == 'block') {
-    elm.style.display = 'none';
-  } else {
-    elm.style.display = 'block';
-  }
-  return false;
-}
-</script>
-
 <div id="messages" class="piace">
 <div class="piaceHeader">
   <div class="title">お知らせ
-    <%= link_to '［管理］', sys_messages_path if Core.user.has_auth?(:manager)%></div>
+    <%= link_to '［管理］', sys_messages_path if Core.user.has_auth?(:manager) %></div>
 </div>
 
 <div class="piaceBody">
@@ -26,7 +14,7 @@ function openMessage(id){
   <% eid = "message#{item.id}" %>
   <li>
     <p><a href="#" onclick="return openMessage('<%= eid %>');">
-      <%= item.title %></a> （<%= item.published_at.strftime('%Y-%m-%d %H:%M') %>）</p>
+      <%= item.title %></a> （<%=l item.published_at if item.published_at %>）</p>
     <div id="<%= eid %>" class="body"><%=raw item.body %></div>
   </li>
   <% end %>
@@ -35,5 +23,16 @@ function openMessage(id){
 
 <div class="piaceFooter"></div>
 
-
 </div>
+
+<script type="text/javascript">
+function openMessage(id){
+  var elm = document.getElementById(id);
+  if (elm.style.display == 'block') {
+    elm.style.display = 'none';
+  } else {
+    elm.style.display = 'block';
+  }
+  return false;
+}
+</script>

@@ -1,69 +1,45 @@
-# encoding: utf-8
 class Gw::WebmailMailNode < ActiveRecord::Base
   include Sys::Model::Base
   include Sys::Model::Auth::Free
 
-  validates_presence_of :user_id, :uid, :mailbox
+  validates :user_id, :uid, :mailbox, presence: true
+
+  scope :readable, ->(user = Core.current_user) { where(user_id: user.id) }
   
   def self.find_nodes(boxname, uids = nil)
-    cond = Condition.new
-    cond.and :user_id, Core.current_user.id
-    cond.and :mailbox, boxname
-    cond.and :uid, uids if uids
-    Gw::WebmailMailNode.find(:all, :conditions => cond.where)
+    items = Gw::WebmailMailNode.where(user_id: Core.current_user.id, mailbox: boxname)
+    items = items.where(uid: uids) if uids
+    items
   end
-  
+
   def self.find_nodes_with_ref(boxname, uids = nil)
-    cond = Condition.new
-    cond.and :user_id, Core.current_user.id
-    cond.and :mailbox, boxname
-    cond.and :uid, uids if uids
-    cond.and :ref_mailbox, 'IS NOT ', nil
-    cond.and :ref_uid, 'IS NOT ', nil
-    Gw::WebmailMailNode.find(:all, :conditions => cond.where)
+    items = Gw::WebmailMailNode.where(user_id: Core.current_user.id, mailbox: boxname)
+    items = items.where.not(ref_mailbox: nil, ref_uid: nil)
+    items = items.where(uid: uids) if uids
+    items
   end
-  
+
   def self.find_ref_nodes(boxname, uids = nil)
-    cond = Condition.new
-    cond.and :user_id, Core.current_user.id
-    cond.and :ref_mailbox, boxname
-    cond.and :ref_uid, uids if uids
-    Gw::WebmailMailNode.find(:all, :conditions => cond.where)
+    items = Gw::WebmailMailNode.where(user_id: Core.current_user.id, ref_mailbox: boxname)
+    items = items.where(ref_uid: uids) if uids
+    items
   end
-  
+
   def self.delete_nodes(boxname, uids = nil)
-    dcon = Condition.new do |c|
-      c.and :user_id, Core.current_user.id
-      c.and :mailbox, boxname
-      if uids.is_a?(Array)
-        c.and :uid, 'IN', uids 
-      elsif uids
-        c.and :uid, uids
-      end
-    end
-    Gw::WebmailMailNode.delete_all(dcon.where)    
+    Gw::WebmailMailNode.where(user_id: Core.current_user.id, mailbox: boxname, uid: uids).delete_all
   end
-  
+
   def self.delete_ref_nodes(boxname, uids = nil)
-    cond = Condition.new
-    cond.and :user_id, Core.current_user.id
-    cond.and :ref_mailbox, boxname
-    cond.and :ref_uid, uids if uids
-    Gw::WebmailMailNode.delete_all(cond.where)
+    items = Gw::WebmailMailNode.where(user_id, Core.current_user.id, ref_mailbox: boxname)
+    items = items.where(ref_uid: uids) if uids
+    items.delete_all
   end
-  
-  def readable
-    self.and :user_id, Core.current_user.id
-    self
-  end
-  
+
   def editable?
-    return true if Core.current_user.has_auth?(:manager)
-    user_id == Core.current_user.id
+    Core.current_user.has_auth?(:manager) || user_id == Core.current_user.id
   end
   
   def deletable?
-    return true if Core.current_user.has_auth?(:manager)
-    user_id == Core.current_user.id
+    Core.current_user.has_auth?(:manager) || user_id == Core.current_user.id
   end
 end

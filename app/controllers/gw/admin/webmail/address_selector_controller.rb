@@ -1,4 +1,3 @@
-# encoding: utf-8
 class Gw::Admin::Webmail::AddressSelectorController < Gw::Controller::Admin::Base
 
   def parse_address
@@ -10,15 +9,15 @@ class Gw::Admin::Webmail::AddressSelectorController < Gw::Controller::Admin::Bas
     @addresses[:bcc] = extract_addresses(mail.parse_address(params[:bcc]))
   end
 
-protected
+  private
 
   def extract_addresses(addrs)
     rtn = []
     addrs.each do |addr|
       begin
         rtn << {
-          :name => addr.display_name,
-          :email => addr.address
+          name: addr.display_name,
+          email: addr.address
         }
       rescue
         #例外発生時は無視

@@ -2,17 +2,11 @@
 
 <div class="actionMenu">
 <%= link_to :index, gw_webmail_address_groups_path() %>
-<%= link_to submission_label(:register), '#' , :onclick => "$('addressForm').submit();return false;" %> 
+<%= link_to submission_label(:register), '#', onclick: "$('addressForm').submit();return false;" %> 
 </div>
 
-<%= form_for :item, :url => {:action => :create}, :html => {:id => 'addressForm'} do |f| %>
-
-<%= f.error_messages %>
-
-<%= render :partial => 'form', :locals => {:f => f} %>
-
-<%=raw submit(:register) %>
-
+<%= form_for @item, as: :item, url: { action: :create }, html: { id: 'addressForm' } do |f| %>
+  <%= render 'form', f: f %>
 <% end %>
 
 </div><!-- end #webmailContainer --></td></table>

@@ -1,3 +1,32 @@
+<div id="settingContent">
+
+<div class="categoryTabs" id="category_tabs">
+<% @categories.each do |category| %>
+  <%= link_to category.title, "#", id: "#{category.name}_tab", onclick: "return toggleCategories('#{category.name}');" %>
+<% end %>
+</div>
+
+<div class="configs" id="category_configs">
+<% @categories.each do |category| %>
+<table class="index" id="<%= category.name %>_config"  style="display:none;">
+  <tr>
+    <th style="width: 60px; text-align: center;">編集</th>
+    <th style="width: 200px;">設定名</th>
+    <th style="">設定値</th>
+  </tr>
+  <% category.configs.each do |conf| %>
+    <tr <%= cycle '', 'class="cycle"' %>>
+      <td style="text-align: center;"><%= link_to :edit, url_for(action: :edit, category: category.name, id: conf.name) %></td>
+      <td><%= conf.config_name %></td>
+      <td><%= conf.value_name || "未設定" %></td>
+    </tr>
+  <% end %>
+</table>
+<% end %>
+</div>
+
+</div>
+
 <script type="text/javascript">
 //<![CDATA[
 window.onload = function() {
@@ -23,35 +52,3 @@ function toggleCategories(current) {
 }
 //]]>
 </script>
-<div id="settingContent">
-
-<div class="categoryTabs" id="category_tabs">
-<% @categories.each do |category| %>
-  <%= link_to category.title, "#", :id => "#{category.name}_tab",
-    :onclick => "return toggleCategories('#{category.name}');" %>
-<% end %>  
-</div>
-
-<div class="configs" id="category_configs">
-<% @categories.each do |category| %>
-<table class="index" id="<%= category.name %>_config"  style="display:none;">
-
-  <tr>
-    <th style="width: 60px; text-align: center;">編集</th>
-    <th style="width: 200px;">設定名</th>
-    <th style="">設定値</th>
-  </tr>
-
-  <% category.configs.each do |conf| %>
-  <tr <%= cycle '', 'class="cycle"' %>>
-    <td style="text-align: center;"><%= link_to :edit, url_for(:action => :edit, :category => category.name, :id => conf.name) %></td>
-    <td><%= conf.config_name %></td>
-    <td><%= conf.value_name || "未設定" %></td>
-  </tr>
-  <% end %>
-
-</table>
-<% end %>
-</div>
-
-</div>

@@ -1,12 +1,318 @@
 <%
-show_mdn_uri = send_mdn_gw_webmail_mail_path(@mailbox.name, @item.uid)
-current_mail_view = 'text'
-if html_mail = @item.html_mail?
-  current_mail_view = 'html'
-end
+html_mail = @item.html_mail?
 inline_contents = @item.inline_contents
 mail_text_body = ""
 %>
+
+<% if @mdnRequest.present? && !@item.draft? && @mailbox.name !~ /Sent(\.|$)/ %>
+<%= hidden_field_tag :handleMdnRequest, @mdnRequest, id: 'handleMdnRequest'%>
+<% end %>
+<% if html_mail %>
+<%= hidden_field_tag :show_html_image, @item.html_image_was_omited? ? '' : 'show', id: :showHtmlImage %>
+<% end %>
+<%= hidden_field_tag :mail_view, html_mail ? 'html' : 'text', id: 'currentMailView' %>
+<%= hidden_field_tag :from_addr, @from_addr, id: 'fromAddr' %>
+<%= hidden_field_tag :from_name, @from_name, id: 'fromName' %>
+
+<%= form_for :item, url: move_gw_webmail_mails_path(@mailbox.name), html: { id: "mail", name: "mail"} do |f| %>
+<input type="hidden" name="id" value="<%= @item.uid %>" />
+<input type="hidden" name="item[ids][<%= @item.uid %>]" value="1" />
+<input type="hidden" name="new_window" value="<%= @new_window %>" />
+<% end %>
+
+<table id="webmailContainer"><tr>
+<% unless @new_window %>
+<td id="webmailMenu"><div id="webmailMenuContainer">
+
+<div class="menu">
+  <%= link_to 'メールの受信', gw_webmail_mails_path(@mailbox.name), class: 'index', title: "メールの受信" %>
+  <%= link_to 'メールの作成', new_gw_webmail_mail_path('INBOX'), class: 'newMail', title: "メールの作成", target: '_blank',
+    onclick: open_mail_form(new_gw_webmail_mail_path('INBOX')) %>
+</div>
+
+<%= render 'gw/admin/webmail/base/account' %>
+<%= render 'mailbox' %>
+<%= render 'mail_address_history' if @mail_address_history != 0 %>
+
+</div></td>
+<% end %>
+<td id="webmailContent">
+
+<div class="menu">
+  <div class="leftMenu" style="position:relative;">
+    <% if @item.draft? %>
+      <% unless @new_window %>
+      <%= link_to "≪一覧へ戻る", gw_webmail_mails_path(@s_params.merge(mailbox: @mailbox.name)), class: "index"
+      %><span class="separator">|</span
+      ><% end %><%= link_to "編集", '#', class: 'edit', title: "編集", target: '_blank',
+        onclick: "return answerWithView('#{raw escape_javascript resend_gw_webmail_mail_path(@mailbox.name, @item.uid)}');"
+      %><%= link_to "削除", url_for(action: :destroy, new_window: @new_window), method: :delete, class: :delete, title: "削除"
+      %><span class="separator">|</span
+      ><%= link_to "ラベル", '#', id: 'labelLink', class: 'label', title: 'ラベル',
+        onclick: "return showPopupMenu(this, 'labelMenu');"
+      %><%= link_to "その他", '#', id: 'etcLink', class: 'etc', title: 'その他',
+        onclick: "return showPopupMenu(this, 'etcMenu');"
+      %><%= link_to "印刷", "#print", onclick: "window.print(); return false;", class: 'print', title: "印刷" %>
+    <% else %>
+      <% unless @new_window %>
+      <%= link_to "≪一覧へ戻る", gw_webmail_mails_path(@s_params.merge(mailbox: @mailbox.name)), class: "index"
+      %><span class="separator">|</span
+      ><% end %><%= link_to "返信", '#', id: 'answerLink', class: 'answer', title: "返信",
+        onclick: "return showPopupMenu(this, 'answerMenu');"
+      %><%= link_to "転送", '#', class: 'forward', title: "転送", target: '_blank',
+        onclick: "return answerWithView('#{raw escape_javascript forward_gw_webmail_mail_path(@mailbox.name, @item.uid)}');"
+      %><%= link_to "編集", '#', class: 'edit', title: "編集", target: '_blank',
+        onclick: "return answerWithView('#{raw escape_javascript resend_gw_webmail_mail_path(@mailbox.name, @item.uid)}');" if @mailbox.name =~ /^Sent(\.|$)/
+      %><%= link_to "移動", "#", onclick: "$('mail').submit(); return false;", class: 'move', title: "移動"
+      %><%= link_to "コピー", "#void", onclick: "copyMail(); return false;", class: 'copy', title: "コピー"
+      %><%= link_to "削除", url_for(action: :destroy, new_window: @new_window), method: :delete, class: :delete, title: "削除"
+      %><span class="separator">|</span
+      ><%= link_to "ラベル", '#', id: 'labelLink', class: 'label', title: 'ラベル',
+        onclick: "return showPopupMenu(this, 'labelMenu');"
+      %><%= link_to "その他", '#', id: 'etcLink', class: 'etc', title: 'その他',
+        onclick: "return showPopupMenu(this, 'etcMenu');"
+      %><%= link_to "印刷", "#print", onclick: "window.print(); return false;", class: 'print', title: "印刷" %>
+    <% end %>
+    <div id="answerMenu" class="popupMenu" style="display:none;width:140px">
+      <div class="menuItem"><%= link_to '送信者に返信', '#',
+        onclick: "return answerWithView('#{raw escape_javascript answer_gw_webmail_mail_path(@mailbox.name, @item.uid)}');" %></div>
+      <div class="menuItem"><%= link_to '送信者に返信（引用あり）', '#',
+        onclick: "return answerWithView('#{raw escape_javascript answer_gw_webmail_mail_path(@mailbox.name, @item.uid, qt: 1)}');" %></div>
+      <div class="menuItem"><%= link_to '全員に返信', '#',
+        onclick: "return answerWithView('#{raw escape_javascript answer_gw_webmail_mail_path(@mailbox.name, @item.uid, all: 1)}');" %></div>
+      <div class="menuItem"><%= link_to '全員に返信（引用あり）', '#',
+        onclick: "return answerWithView('#{raw escape_javascript answer_gw_webmail_mail_path(@mailbox.name, @item.uid, all: 1, qt: 1)}');" %></div>
+    </div>
+    <div id="etcMenu" class="popupMenu" style="display:none;width:100px">
+      <div class="menuItem"><%= link_to "ローカル保存", { download: "eml" } %></div>
+      <div class="menuItem"><%= link_to "ヘッダ表示", "?header=1", target: "_blank" %></div>
+      <div class="menuItem"><%= link_to "ソース表示", "?source=1", target: "_blank" %></div>
+      <% if Core.current_user.id == Core.user.id %>
+      <div class="menuItem"><%= link_to "迷惑メール登録", "#", onclick: "registerSpam(); return false;" %></div>
+      <% end %>
+      <div class="menuItem"><%= link_to @item.starred? ? "スターをはずす" : "スターを付ける", "#", id: 'starMenu', onclick: "starMail('#{@item.uid}'); return false;" %></div>
+    </div>
+    <div id="labelMenu" class="popupMenu" style="display:none;width:100px;">
+      <% @label_confs.each do |label_conf| %>
+        <div class="menuItem"><%= link_to "#{label_conf[:name]}", '#', onclick: "labelMail('#{@item.uid}', '#{label_conf[:id]}'); return false;" %></div>
+      <% end %>
+      <div class="menuItem"><hr /></div>
+      <div class="menuItem"><%= link_to 'すべてはずす', '#', onclick: "labelMail('#{@item.uid}', '0'); return false;" %></div>
+    </div>
+  </div>
+  <div class="simplePagination">
+    <%= link_to "≪前", url_for(@s_params.merge(mailbox: @mailbox.name, id: @pagination[:prev_uid], new_window: @new_window)) if @pagination[:prev_uid]
+    %><span><b><%= @pagination[:current_page] %></b>/<b><%= @pagination[:total_items] %></b></span
+    ><%= link_to "次≫", url_for(@s_params.merge(mailbox: @mailbox.name, id: @pagination[:next_uid], new_window: @new_window)) if @pagination[:next_uid] %>
+  </div>
+</div>
+
+<div id="mailContent">
+
+<table class="mail">
+  <tr>
+    <th>送信者</th>
+    <td class="autoWrap">
+      <% if @from_addr %>
+        <%= link_to "アドレス帳に登録する", "#void", class: "addAddress", onclick: "return addAddress();" %><% end %>
+      <%= mail_text_wrap @item.friendly_from_addr %>
+    </td>
+  </tr><tr>
+    <th><%= @item.draft? ? "保存日時" : "送信日時" %></th>
+    <td><%= @item.date %></td>
+  </tr><tr>
+    <th>宛先</th>
+    <td class="autoWrap"><%= mail_text_wrap @item.friendly_to_addrs.join('，') %></td>
+  </tr>
+  <% if @item.friendly_cc_addrs.present? %><tr>
+    <th>Cc</th>
+    <td class="autoWrap"><%= mail_text_wrap @item.friendly_cc_addrs.join('，') %></td>
+  </tr><% end %>
+  <% if @item.friendly_bcc_addrs.present? %><tr>
+    <th>Bcc</th>
+    <td class="autoWrap"><%= mail_text_wrap @item.friendly_bcc_addrs.join('，') %></td>
+  </tr><% end %>
+  <tr>
+    <th>件名</th>
+    <td class="subject autoWrap">
+      <%
+        star_class = @item.starred? ? "starOn" : "starOff"
+        star_title = @item.starred? ? "スター" : ""
+      %>
+      <a id="mail_star_<%= @item.uid %>" class="<%= star_class %>" title="<%= star_title %>" onclick="starMail('<%= @item.uid %>');"></a>
+      <span id="mail_star_<%= @item.uid %>_loading" class="loading star-loading" style="display:none;"></span>
+      <span id="mail_<%= @item.uid %>_labels" class="labels">
+        <% @item.labels.each do |label| %>
+          <% if label_conf = @label_confs.find{|conf| conf[:id] == label} %>
+            <% concat raw %Q(<span class="label" style="background-color: #{label_conf[:color]};">#{label_conf[:name]}</span>) %>
+          <% end %>
+        <% end %>
+      </span>
+      <span id="mail_<%= @item.uid %>_label_loading" class="loading label-loading" style="display:none;"></span>
+      <span class="subject"><%= mail_text_wrap(@item.subject) %></span>
+      <% if @item.has_attachments? %>
+        <span class="attachmentMark"><%= raw %Q(<a href="#attachments" class="attachmentMark" title="#{(@item.attachments.collect{|a| a.name}).join(', ')}">添付ファイル有り</a>) %></span>
+      <% end %>
+    </td>
+  </tr>
+</table>
+<% if html_mail %>
+<table id="htmlSecurityAlert" class="mailAttention" style="display:none;">
+  <tr>
+    <td class="message">画像が非表示になっています。画像を表示しますか？</td>
+    <td class="actions" style="width:130px">
+      <%= link_to "はい", "#", onclick: 'showHtmlImage();return false;' %>
+      <%= link_to "いいえ", "#", onclick: "hideHtmlImage();return false;" %>
+    </td>
+  </tr>
+</table>
+<% end %>
+<% if @mdnRequest.present? && !@item.draft? && @mailbox.name !~ /Sent(\.|$)/ %>
+<table id="mdnRequest" class="mailAttention" style="display:none;">
+  <tr>
+    <td class="message">メッセージ送信者は、開封確認を要求しています。開封確認のメールを送信しますか？</td>
+    <td class="actions" style="width:130px">
+      <%= link_to "はい", "#", onclick: 'sendMdn();return false;' %>
+      <%= link_to "いいえ", "#", onclick: 'hideMdnRequest();return false;' %>
+    </td>
+  </tr>
+</table>
+<% end %>
+<% if @item.disposition_notification_mail? %>
+<table id="mdnAlert" class="mailAttention">
+  <tr>
+    <td class="message">これは、 <%= @item.friendly_from_addr %> により送信された、開封確認のメールです。</td>
+    <td class="actions" style="width:80px">
+      <%= link_to "OK", "#", onclick: "$('mdnAlert').hide();return false;" %>
+    </td>
+  </tr>
+</table>
+<% end %>
+
+<div class="mailBody">
+  <% if html_mail %>
+    <div class="mailViewSelector">
+      <%= link_to "TEXT", "#", onclick: "toggleView('text');return false;", class: 'textView', title: "テキスト表示" %>
+      <%= link_to "HTML", "#", onclick: "toggleView('html');return false;", class: 'htmlView', title: "HTML表示" %>
+    </div>    
+  <% end %>
+  <div id="inlineContents">
+  <% inline_contents.each_with_index do |inline, idx| %>
+    <%
+    cls = idx > 0 ? "inlineContent" : ""
+    mail_text_body << "#{inline.text_body}\n\n"
+    %>
+    <div id="inlineContent_<%= inline.seqno %>" class="<%= cls %>">
+      <% if ((inline.alternative? && inline.html_body.present?) || inline.content_type == "text/html") %>
+        <div id="textBody_<%= inline.seqno %>" class="autoWrap mailBodyText" style="display:none;"><%= mail_text_wrap(inline.text_body, 10, auto_link: true) %></div>
+        <div id="htmlPreview_<%= inline.seqno %>" class="mailBodyText" style="display:none;"></div>
+        <input type="hidden" id="htmlBody_<%= inline.seqno %>" value="<%= mail_html_autolink(inline.html_body) %>" />
+      <% else %>
+        <div id="textBody_<%= inline.seqno %>" class="autoWrap mailBodyText"><%= mail_text_wrap(inline.text_body, 10, auto_link: true) %></div>
+      <% end %>
+    </div>
+  <% end %>
+  </div>
+  <%
+    if @mailbox.draft_box?(:all) || @mailbox.sent_box?(:all)
+      sent_mdn = @item.has_disposition_notification_to?
+    else
+      sent_mdn = @item.has_disposition_notification_to?# && @item.notified?
+    end
+  %>
+  <div class="scheduleMenu">
+    <% if Joruri.config.application['webmail.show_gw_schedule_link'] == 1 %>
+    <%= link_to 'スケジュールを作成する', '#', onclick: 'openScheduleWindow(); return false;' %>
+    <% end %>
+    <%= form_tag '/_admin/sso', method: :post, name: "scheduleForm", target: "scheduleWindow_#{Core.now.gsub(/[\W]/, '')}", style: 'display:none;' do %>
+      <%= hidden_field_tag :to, 'gw' %>
+      <%= hidden_field_tag :path, '/gw/schedules/new', id: 'schedule_path' %>
+      <%= hidden_field_tag 'item[title]', @item.subject, id: 'schedule_title'  %>
+      <%= hidden_field_tag 'item[memo]', mail_text_body, id: 'schedule_memo'  %>
+    <% end %>
+  </div>
+  <% if sent_mdn %>
+    <div id="mdnSent" class="recipientConfirm">[開封確認メッセージを送信]</div>
+  <% end %>
+</div>
+
+<% if @item.has_attachments? && @item.attachments.size > 0 %>
+<a name="attachments"></a><br />
+
+<table class="attachmentDownloader">
+  <tr>
+    <td class="title">添付ファイル</td>
+    <td class="actions">
+      <%= link_to '一括ダウンロード', { download: :all } %>
+    </td>
+  </tr>
+</table>
+<table class="mail attachments">
+  <tr>
+    <% if @mail_attachment_view != 'list' && @item.has_images? %>
+      <td class="thumbnailArea">
+      <% @item.attachments.each do |at| %>
+        <% file_title = "#{at.name}(#{at.eng_unit})" %>
+        <% if at.image? %>
+          <span class="thumbnail">
+            <span class="box" title="<%= file_title %>">
+              <a class="box" href="<%= url_for(download: at.seqno, size: at.size) %>" target="_blank">
+                <% if thumbnail = thumbnail_for_embed(at, width: 128, height: 96) %>
+                  <img src="data:image/jpeg;base64,<%= thumbnail %>" class="image" alt="<%= file_title %>" title="<%= file_title %>" />
+                <% else %>
+                  <%= image_tag url_for(download: at.seqno, thumbnail: 1, width: 128, height: 96), alt: file_title, title: file_title %>
+                <% end %>
+              </a>
+            </span>
+            <span class="remarks">
+              <%= at.name %><br />
+              <a href="<%= url_for(download: at.seqno, size: at.size, disposition: :attachment) %>" title="<%= file_title %>">ダウンロード</a> (<%= at.eng_unit %>)
+            </span>
+          </span>
+        <% else %>
+          <span class="thumbnail">
+            <span class="box" title="<%= file_title %>">
+              <a href="<%= url_for(download: at.seqno, size: at.size) %>" target="<%= (at.image? ? '_blank' : nil) %>" title="<%= file_title %>">
+                <span class="<%= at.css_class %>"><%= mail_text_wrap(at.name, 5) %></span>
+              </a>
+            </span>
+            <span class="remarks">
+              <%= at.name %><br />
+              <a href="<%= url_for(download: at.seqno, size: at.size, disposition: :attachment) %>" title="<%= file_title %>">ダウンロード</a> (<%= at.eng_unit %>)
+            </span>
+          </span>
+        <% end %>
+      <% end %>
+      </td>
+    <% else %>
+      <td id="normalArea">
+        <% @item.attachments.each do |at| %>
+          <%= link_to h("#{at.name}(#{at.eng_unit})"), url_for(download: at.seqno, size: at.size),
+            target: (at.image? ? '_blank' : nil), class: at.css_class %>
+        <% end %>
+      </td>
+    <% end %>
+  </tr>
+</table>
+<% end %>
+
+<!-- end #mailContent --></div>
+
+<div class="menu">
+  <div class="leftMenu">
+    <% unless @new_window %>
+    <%= link_to "≪一覧へ戻る", gw_webmail_mails_path(@s_params.merge(mailbox: @mailbox.name)), class: "index" %>
+    <% end %>
+  </div>
+  <div class="simplePagination">
+    <%= link_to "≪前", url_for(@s_params.merge(id: @pagination[:prev_uid], new_window: @new_window)) if @pagination[:prev_uid]
+    %><span><b><%= @pagination[:current_page] %></b>/<b><%= @pagination[:total_items] %></b></span
+    ><%= link_to "次≫", url_for(@s_params.merge(id: @pagination[:next_uid], new_window: @new_window)) if @pagination[:next_uid] %>
+  </div>
+</div>
+
+<!-- end #webmailContainer --></td></table>
+
 <%= javascript_include_tag "/_common/js/popup_menu.js" %>
 <%= javascript_include_tag "/_common/js/mail_form.js" %>
 <script type="text/javascript">
@@ -113,9 +419,9 @@ function toggleView(type) {
 function sendMdn() {
   var send_mode = $('handleMdnRequest').value;
   hideMdnRequest();
-  new Ajax.Request('<%=raw escape_javascript(show_mdn_uri) %>', {
+  new Ajax.Request('<%=raw escape_javascript(send_mdn_gw_webmail_mail_path(@mailbox.name, @item.uid)) %>', {
     method: 'POST',
-    parameters : {'send_mode':send_mode},
+    parameters : { send_mode: send_mode, authenticity_token: '<%= form_authenticity_token %>' },
     onSuccess: function(request) {
       //alert("開封確認メールを送信しました。");
     },
@@ -150,7 +456,7 @@ function answerWithView(uri) {
 }
   
 function addAddress(address, name) {
-  var uri = "<%= gw_webmail_addresses_path(:format => 'xml') %>";
+  var uri = "<%= gw_webmail_addresses_path(format: 'xml') %>";
   var myAjax = new Ajax.Request(uri, {
     method: 'post',
     parameters: {
@@ -187,7 +493,7 @@ function copyMail() {
 }
 function registerSpam() {
   if (confirm('迷惑メールに登録した後、ごみ箱に移動します。よろしいですか？')) {
-    $('mail').action = '<%=raw escape_javascript register_spam_gw_webmail_mails_path(:mailbox => @mailbox.name) %>';
+    $('mail').action = '<%=raw escape_javascript register_spam_gw_webmail_mails_path(mailbox: @mailbox.name) %>';
     $('mail').submit();
   }
 }
@@ -198,7 +504,7 @@ function showPopupMenu(btn, id) {
 }
 function showHtmlImage() {
   $('htmlSecurityAlert').hide();
-  var uri = '<%=raw escape_javascript(gw_webmail_mail_path(:format => "xml", :show_html_image => 1))%>';
+  var uri = '<%=raw escape_javascript(gw_webmail_mail_path(format: "xml", show_html_image: 1))%>';
   var myAjax = new Ajax.Request(uri, {
     method: 'get',
     onSuccess: function(request) {
@@ -231,7 +537,7 @@ function showThumbnailImage() {
     toggleThumbnail(true);
     return;
   }
-  var uri = '<%=raw escape_javascript gw_webmail_mail_path(:format => "xml", :show_thumbnail_image => 1) %>';
+  var uri = '<%=raw escape_javascript gw_webmail_mail_path(format: "xml", show_thumbnail_image: 1) %>';
   document.body.style.cursor = "wait";
   var myAjax = new Ajax.Request(uri, {
     method: 'get',
@@ -355,312 +661,3 @@ function updateLabels(uid, html) {
 }
 //]]>
 </script>
-<% if !@mdnRequest.blank? && !@item.draft? && @mailbox.name !~ /Sent(\.|$)/ %>
-<%= hidden_field_tag :handleMdnRequest, @mdnRequest, :id => 'handleMdnRequest'%>
-<% end %>
-<% if html_mail %>
-<%= hidden_field_tag :show_html_image, @item.html_image_was_omited? ? '' : 'show',
-  :id => :showHtmlImage %>
-<% end %>
-<%= hidden_field_tag :mail_view, current_mail_view, :id => 'currentMailView' %>
-<%= hidden_field_tag :from_addr, @from_addr, :id => 'fromAddr' %>
-<%= hidden_field_tag :from_name, @from_name, :id => 'fromName' %>
-
-<%= form_for :item, :url => move_gw_webmail_mails_path(@mailbox.name), :html => {:id => "mail", :name => "mail"} do |f| %>
-<input type="hidden" name="id" value="<%= @item.uid %>" />
-<input type="hidden" name="item[ids][<%= @item.uid %>]" value="1" />
-<input type="hidden" name="new_window" value="<%= @new_window %>" />
-<% end %>
-
-<table id="webmailContainer"><tr>
-<% unless @new_window %>
-<td id="webmailMenu"><div id="webmailMenuContainer">
-
-<div class="menu">
-  <%= link_to 'メールの受信', gw_webmail_mails_path(@mailbox.name), :class => 'index', :title => "メールの受信" %>
-  <%= link_to 'メールの作成', new_gw_webmail_mail_path('INBOX'), :class => 'newMail', :title => "メールの作成", :target => '_blank',
-    :onclick => open_mail_form(new_gw_webmail_mail_path('INBOX')) %>
-</div>
-
-<%= render :partial => 'gw/admin/webmail/base/account' %>
-<%= render :partial => 'mailbox' %>
-<%= render :partial => 'mail_address_history' if @mail_address_history != 0 %>
-
-</div></td>
-<% end %>
-<td id="webmailContent">
-
-<div class="menu">
-  <div class="leftMenu" style="position:relative;">
-    <% if @item.draft? %>
-      <% unless @new_window %>
-      <%= link_to "≪一覧へ戻る", gw_webmail_mails_path(@s_params.merge(:mailbox => @mailbox.name)), :class => "index"
-      %><span class="separator">|</span
-      ><% end %><%= link_to "編集", '#', :class => 'edit', :title => "編集", :target => '_blank',
-        :onclick => "return answerWithView('#{raw escape_javascript resend_gw_webmail_mail_path(@mailbox.name, @item.uid)}');"
-      %><%= link_to "削除", url_for(:action => :destroy, :new_window => @new_window), :method => :delete, :class => :delete, :title => "削除"
-      %><span class="separator">|</span
-      ><%= link_to "ラベル", '#', :id => 'labelLink', :class => 'label', :title => 'ラベル',
-        :onclick => "return showPopupMenu(this, 'labelMenu');"
-      %><%= link_to "その他", '#', :id => 'etcLink', :class => 'etc', :title => 'その他',
-        :onclick => "return showPopupMenu(this, 'etcMenu');"
-      %><%= link_to h("印刷"), "#print", :onclick => "window.print(); return false;", :class => 'print', :title => "印刷" %>
-    <% else %>
-      <% unless @new_window %>
-      <%= link_to "≪一覧へ戻る", gw_webmail_mails_path(@s_params.merge(:mailbox => @mailbox.name)), :class => "index"
-      %><span class="separator">|</span
-      ><% end %><%= link_to "返信", '#', :id => 'answerLink', :class => 'answer', :title => "返信",
-        :onclick => "return showPopupMenu(this, 'answerMenu');"
-      %><%= link_to "転送", '#', :class => 'forward', :title => "転送", :target => '_blank',
-        :onclick => "return answerWithView('#{raw escape_javascript forward_gw_webmail_mail_path(@mailbox.name, @item.uid)}');"
-      %><%= link_to "編集", '#', :class => 'edit', :title => "編集", :target => '_blank',
-        :onclick => "return answerWithView('#{raw escape_javascript resend_gw_webmail_mail_path(@mailbox.name, @item.uid)}');" if @mailbox.name =~ /^Sent(\.|$)/
-      %><%= link_to "移動", "#", :onclick => "$('mail').submit(); return false;", :class => 'move', :title => "移動"
-      %><%= link_to "コピー", "#void", :onclick => "copyMail(); return false;", :class => 'copy', :title => "コピー"
-      %><%= link_to "削除", url_for(:action => :destroy, :new_window => @new_window), :method => :delete, :class => :delete, :title => "削除"
-      %><span class="separator">|</span
-      ><%= link_to "ラベル", '#', :id => 'labelLink', :class => 'label', :title => 'ラベル',
-        :onclick => "return showPopupMenu(this, 'labelMenu');"
-      %><%= link_to "その他", '#', :id => 'etcLink', :class => 'etc', :title => 'その他',
-        :onclick => "return showPopupMenu(this, 'etcMenu');"
-      %><%= link_to h("印刷"), "#print", :onclick => "window.print(); return false;", :class => 'print', :title => "印刷" %>
-    <% end %>
-    <div id="answerMenu" class="popupMenu" style="display:none;width:140px">
-      <div class="menuItem"><%= link_to '送信者に返信', '#',
-        :onclick => "return answerWithView('#{raw escape_javascript answer_gw_webmail_mail_path(@mailbox.name, @item.uid)}');" %></div>
-      <div class="menuItem"><%= link_to '送信者に返信（引用あり）', '#',
-        :onclick => "return answerWithView('#{raw escape_javascript answer_gw_webmail_mail_path(@mailbox.name, @item.uid, :qt => 1)}');" %></div>
-      <div class="menuItem"><%= link_to '全員に返信', '#',
-        :onclick => "return answerWithView('#{raw escape_javascript answer_gw_webmail_mail_path(@mailbox.name, @item.uid, :all => 1)}');" %></div>
-      <div class="menuItem"><%= link_to '全員に返信（引用あり）', '#',
-        :onclick => "return answerWithView('#{raw escape_javascript answer_gw_webmail_mail_path(@mailbox.name, @item.uid, :all => 1, :qt => 1)}');" %></div>
-    </div>
-    <div id="etcMenu" class="popupMenu" style="display:none;width:100px">
-      <div class="menuItem"><%= link_to "ローカル保存", {:download => "eml"} %></div>
-      <div class="menuItem"><%= link_to "ヘッダ表示", "?header=1", :target => "_blank" %></div>
-      <div class="menuItem"><%= link_to "ソース表示", "?source=1", :target => "_blank" %></div>
-      <% if Core.current_user.id == Core.user.id %>
-      <div class="menuItem"><%= link_to "迷惑メール登録", "#", :onclick => "registerSpam(); return false;" %></div>
-      <% end %>
-      <div class="menuItem"><%= link_to @item.starred? ? "スターをはずす" : "スターを付ける", "#", :id => 'starMenu', :onclick => "starMail('#{@item.uid}'); return false;" %></div>
-    </div>
-    <div id="labelMenu" class="popupMenu" style="display:none;width:100px;">
-      <% @label_confs.each do |label_conf| %>
-        <div class="menuItem"><%= link_to "#{label_conf[:name]}", '#', :onclick => "labelMail('#{@item.uid}', '#{label_conf[:id]}'); return false;" %></div>
-      <% end %>
-      <div class="menuItem"><hr /></div>
-      <div class="menuItem"><%= link_to 'すべてはずす', '#', :onclick => "labelMail('#{@item.uid}', '0'); return false;" %></div>
-    </div>
-  </div>
-  <div class="simplePagination">
-    <%= link_to "≪前", url_for(@s_params.merge(:mailbox => @mailbox.name, :id => @pagination[:prev_uid], :new_window => @new_window)) if @pagination[:prev_uid]
-    %><span><b><%= @pagination[:current_page] %></b>/<b><%= @pagination[:total_items] %></b></span
-    ><%= link_to "次≫", url_for(@s_params.merge(:mailbox => @mailbox.name, :id => @pagination[:next_uid], :new_window => @new_window)) if @pagination[:next_uid] %>
-  </div>
-</div>
-
-<div id="mailContent">
-
-<table class="mail">
-  <tr>
-    <th>送信者</th>
-    <td class="autoWrap">
-      <% if @from_addr %>
-        <%= link_to "アドレス帳に登録する", "#void", :class => "addAddress", :onclick => "return addAddress();" %><% end %>
-      <%= mail_text_wrap @item.friendly_from_addr %>
-    </td>
-  </tr><tr>
-    <th><%= @item.draft? ? "保存日時" : "送信日時" %></th>
-    <td><%= @item.date %></td>
-  </tr><tr>
-    <th>宛先</th>
-    <td class="autoWrap"><%= mail_text_wrap @item.friendly_to_addrs.join('，') %></td>
-  </tr>
-  <% if !@item.friendly_cc_addrs.blank? %><tr>
-    <th>Cc</th>
-    <td class="autoWrap"><%= mail_text_wrap @item.friendly_cc_addrs.join('，') %></td>
-  </tr><% end %>
-  <% if !@item.friendly_bcc_addrs.blank? %><tr>
-    <th>Bcc</th>
-    <td class="autoWrap"><%= mail_text_wrap @item.friendly_bcc_addrs.join('，') %></td>
-  </tr><% end %>
-  <tr>
-    <th>件名</th>
-    <td class="subject autoWrap">
-      <%
-        star_class = @item.starred? ? "starOn" : "starOff"
-        star_title = @item.starred? ? "スター" : ""
-      %>
-      <a id="mail_star_<%= @item.uid %>" class="<%= star_class %>" title="<%= star_title %>" onclick="starMail('<%= @item.uid %>');"></a>
-      <span id="mail_star_<%= @item.uid %>_loading" class="loading star-loading" style="display:none;"></span>
-      <span id="mail_<%= @item.uid %>_labels" class="labels">
-        <% @item.labels.each do |label| %>
-          <% if label_conf = @label_confs.find{|conf| conf[:id] == label} %>
-            <% concat raw %Q(<span class="label" style="background-color: #{label_conf[:color]};">#{label_conf[:name]}</span>) %>
-          <% end %>
-        <% end %>
-      </span>
-      <span id="mail_<%= @item.uid %>_label_loading" class="loading label-loading" style="display:none;"></span>
-      <span class="subject"><%= mail_text_wrap(@item.subject) %></span>
-      <% if @item.has_attachments? %>
-        <span class="attachmentMark"><%= raw %Q(<a href="#attachments" class="attachmentMark" title="#{(@item.attachments.collect{|a| a.name}).join(', ')}">添付ファイル有り</a>) %></span>
-      <% end %>
-    </td>
-  </tr>
-</table>
-<% if html_mail %>
-<table id="htmlSecurityAlert" class="mailAttention" style="display:none;">
-  <tr>
-    <td class="message">画像が非表示になっています。画像を表示しますか？</td>
-    <td class="actions" style="width:130px">
-      <%= link_to "はい", "#", :onclick => 'showHtmlImage();return false;' %>
-      <%= link_to "いいえ", "#", :onclick => "hideHtmlImage();return false;" %>
-    </td>
-  </tr>
-</table>
-<% end %>
-<% if !@mdnRequest.blank? && !@item.draft? && @mailbox.name !~ /Sent(\.|$)/ %>
-<table id="mdnRequest" class="mailAttention" style="display:none;">
-  <tr>
-    <td class="message">メッセージ送信者は、開封確認を要求しています。開封確認のメールを送信しますか？</td>
-    <td class="actions" style="width:130px">
-      <%= link_to "はい", "#", :onclick => 'sendMdn();return false;' %>
-      <%= link_to "いいえ", "#", :onclick => 'hideMdnRequest();return false;' %>
-    </td>
-  </tr>
-</table>
-<% end %>
-<% if @item.disposition_notification_mail? %>
-<table id="mdnAlert" class="mailAttention">
-  <tr>
-    <td class="message">これは、 <%= @item.friendly_from_addr %> により送信された、開封確認のメールです。</td>
-    <td class="actions" style="width:80px">
-      <%= link_to "OK", "#", :onclick => "$('mdnAlert').hide();return false;" %>
-    </td>
-  </tr>
-</table>
-<% end %>
-
-<div class="mailBody">
-  <% if html_mail %>
-    <div class="mailViewSelector">
-      <%= link_to h("TEXT"), "#", :onclick => "toggleView('text');return false;", :class => 'textView', :title => "テキスト表示" %>
-      <%= link_to h("HTML"), "#", :onclick => "toggleView('html');return false;", :class => 'htmlView', :title => "HTML表示" %>
-    </div>    
-  <% end %>
-  <div id="inlineContents">
-  <% inline_contents.each_with_index do |inline, idx| %>
-    <%
-    cls = idx > 0 ? "inlineContent" : ""
-    mail_text_body << "#{inline.text_body}\n\n"
-    %>
-    <div id="inlineContent_<%= inline.seqno %>" class="<%= cls %>">
-      <% if ((inline.alternative? && !inline.html_body.blank?) || inline.content_type == "text/html") %>
-        <div id="textBody_<%= inline.seqno %>" class="autoWrap mailBodyText" style="display:none;"><%= mail_text_wrap(inline.text_body, 10, :auto_link => true) %></div>
-        <div id="htmlPreview_<%= inline.seqno %>" class="mailBodyText" style="display:none;"></div>
-        <input type="hidden" id="htmlBody_<%= inline.seqno %>" value="<%=h mail_html_autolink(inline.html_body) %>" />
-      <% else %>
-        <div id="textBody_<%= inline.seqno %>" class="autoWrap mailBodyText"><%= mail_text_wrap(inline.text_body, 10, :auto_link => true) %></div>
-      <% end %>
-    </div>
-  <% end %>
-  </div>
-  <%
-    if @mailbox.draft_box?(:all) || @mailbox.sent_box?(:all)
-      sent_mdn = @item.has_disposition_notification_to?
-    else
-      sent_mdn = @item.has_disposition_notification_to?# && @item.notified?
-    end
-  %>
-  <div class="scheduleMenu">
-    <% if Joruri.config.application['webmail.show_gw_schedule_link'] == 1 %>
-    <%= link_to 'スケジュールを作成する', '#', :onclick => 'openScheduleWindow(); return false;' %>
-    <% end %>
-    <%= form_tag '/_admin/sso', :method => :post, :name => "scheduleForm", :target => "scheduleWindow_#{Core.now.gsub(/[\W]/, '')}", :style => 'display:none;' do %>
-      <%= hidden_field_tag :to, 'gw' %>
-      <%= hidden_field_tag :path, '/gw/schedules/new', :id => 'schedule_path' %>
-      <%= hidden_field_tag 'item[title]', @item.subject, :id => 'schedule_title'  %>
-      <%= hidden_field_tag 'item[memo]', mail_text_body, :id => 'schedule_memo'  %>
-    <% end %>
-  </div>
-  <% if sent_mdn %>
-    <div id="mdnSent" class="recipientConfirm">[開封確認メッセージを送信]</div>
-  <% end %>
-</div>
-
-<% if @item.has_attachments? && @item.attachments.size > 0 %>
-<a name="attachments"></a><br />
-
-<table class="attachmentDownloader">
-  <tr>
-    <td class="title">添付ファイル</td>
-    <td class="actions">
-      <%= link_to '一括ダウンロード', url_for(:download => :all) %>
-    </td>
-  </tr>
-</table>
-<table class="mail attachments">
-  <tr>
-    <% if @mail_attachment_view != 'list' && @item.has_images? %>
-      <td class="thumbnailArea">
-      <% @item.attachments.each do |at| %>
-        <% file_title = "#{at.name}(#{at.eng_unit})" %>
-        <% if at.image? %>
-          <span class="thumbnail">
-            <span class="box" title="<%= file_title %>">
-              <a class="box" href="<%= url_for(:download => at.seqno, :size => at.size) %>" target="_blank">
-                <% if thumbnail = thumbnail_for_embed(at, :width => 128, :height => 96) %>
-                  <img src="data:image/jpeg;base64,<%= thumbnail %>" class="image" alt="<%= file_title %>" title="<%= file_title %>" />
-                <% else %>
-                  <%= image_tag url_for(:download => at.seqno, :thumbnail => 1, :width => 128, :height => 96), :alt => file_title, :title => file_title %>
-                <% end %>
-              </a>
-            </span>
-            <span class="remarks">
-              <%= at.name %><br />
-              <a href="<%= url_for(:download => at.seqno, :size => at.size, :disposition => :attachment) %>" title="<%= file_title %>">ダウンロード</a> (<%= at.eng_unit %>)
-            </span>
-          </span>
-        <% else %>
-          <span class="thumbnail">
-            <span class="box" title="<%= file_title %>">
-              <a href="<%= url_for(:download => at.seqno, :size => at.size) %>" target="<%= (at.image? ? '_blank' : nil) %>" title="<%= file_title %>">
-                <span class="<%= at.css_class %>"><%= mail_text_wrap(at.name, 5) %></span>
-              </a>
-            </span>
-            <span class="remarks">
-              <%= at.name %><br />
-              <a href="<%= url_for(:download => at.seqno, :size => at.size, :disposition => :attachment) %>" title="<%= file_title %>">ダウンロード</a> (<%= at.eng_unit %>)
-            </span>
-          </span>
-        <% end %>
-      <% end %>
-      </td>
-    <% else %>
-      <td id="normalArea">
-        <% @item.attachments.each do |at| %>
-          <%= link_to h("#{at.name}(#{at.eng_unit})"), url_for(:download => at.seqno, :size => at.size),
-            :target => (at.image? ? '_blank' : nil), :class => at.css_class %>
-        <% end %>
-      </td>
-    <% end %>
-  </tr>
-</table>
-<% end %>
-
-<!-- end #mailContent --></div>
-
-<div class="menu">
-  <div class="leftMenu">
-    <% unless @new_window %>
-    <%= link_to "≪一覧へ戻る", gw_webmail_mails_path(@s_params.merge(:mailbox => @mailbox.name)), :class => "index" %>
-    <% end %>
-  </div>
-  <div class="simplePagination">
-    <%= link_to "≪前", url_for(@s_params.merge(:id => @pagination[:prev_uid], :new_window => @new_window)) if @pagination[:prev_uid]
-    %><span><b><%= @pagination[:current_page] %></b>/<b><%= @pagination[:total_items] %></b></span
-    ><%= link_to "次≫", url_for(@s_params.merge(:id => @pagination[:next_uid], :new_window => @new_window)) if @pagination[:next_uid] %>
-  </div>
-</div>
-
-<!-- end #webmailContainer --></td></table>

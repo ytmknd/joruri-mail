@@ -2,30 +2,30 @@
 <% mailbox_type = "rootFolder" if mailbox_type == "folder" && @mailbox.name.index('.').nil? %>
 
 <div class="mailboxTitle">
-  <%#=raw mailbox_mobile_image_tag(mailbox_type, :blue => true) %>
-  <%= link_to @mailbox.title, url_for(:mobile => :list, :page => 1), :class => "link" %>
+  <%#=raw mailbox_mobile_image_tag(mailbox_type, blue: true) %>
+  <%= link_to @mailbox.title, url_for(mobile: :list, page: 1), class: "link" %>
 </div>
 
-<%= form_for :item, :url => mobile_manage_gw_webmail_mails_path(@mailbox.name), :html => {:id => "mailForm", :name => "mailForm", :class => "mailForm"} do |f| %>
-<input type="hidden" name="page" value="<%=h params[:page] %>" />
+<%= form_for :item, url: mobile_manage_gw_webmail_mails_path(@mailbox.name), html: { id: "mailForm", name: "mailForm", class: "mailForm" } do |f| %>
+<input type="hidden" name="page" value="<%= params[:page] %>" />
 <% if params[:sort_starred] == '1' %>
-  <%= render :partial => 'mail_list_mobile', :locals => {:items => @starred_items + @unstarred_items} %>
+  <%= render 'mail_list_mobile', items: @starred_items + @unstarred_items %>
 <% else %>
-  <%= render :partial => 'mail_list_mobile', :locals => {:items => @items} %>
+  <%= render 'mail_list_mobile', items: @items %>
 <% end %>
 
 <div class="pagination">
-<%= paginate @items, :page_links => false %>
+<%= paginate @items, page_links: false %>
 </div>
 
 <div class="managementMenu">
 <div class="title"><img alt="管理メニュー" src="/_common/themes/admin/gw/webmail/mobile/images/manage-menu-blue.jpg" />管理メニュー</div>
 <div class="menus">
-<%= submit_tag '移動', :name => 'mobile_move', :class => 'menuItem', :accesskey => '1' %>
-<%= submit_tag 'コピー', :name => 'mobile_copy', :class => 'menuItem', :accesskey => '2' %>
-<%= submit_tag '削除', :name => 'mobile_delete', :class => 'menuItem', :accesskey => '3' %>
-<%= submit_tag '既読にする', :name => 'mobile_seen', :class => 'menuItem', :accesskey => '4' %>
-<%= submit_tag '未読にする', :name => 'mobile_unseen', :class => 'menuItem', :accesskey => '5' %>
+<%= submit_tag '移動', name: 'mobile_move', class: 'menuItem', accesskey: '1' %>
+<%= submit_tag 'コピー', name: 'mobile_copy', class: 'menuItem', accesskey: '2' %>
+<%= submit_tag '削除', name: 'mobile_delete', class: 'menuItem', accesskey: '3' %>
+<%= submit_tag '既読にする', name: 'mobile_seen', class: 'menuItem', accesskey: '4' %>
+<%= submit_tag '未読にする', name: 'mobile_unseen', class: 'menuItem', accesskey: '5' %>
 </div>
 </div>
 
@@ -34,6 +34,6 @@
 <div class="searchMenu">
 <div class="title">検索</div>
 <div class="menus">
-<%= render :partial => 'search_mobile' %>
+<%= render 'search_mobile' %>
 </div>
 </div>

@@ -1,14 +1,13 @@
-# encoding: utf-8
 module ApplicationHelper
   ## nl2br
   def br(str)
-    str.gsub(/\r\n|\r|\n/, '<br />')
+    str.gsub(/\r\n|\r|\n/, '<br />').html_safe
   end
   
   ## nl2br and escape
   def hbr(str)
     str = html_escape(str)
-    str.gsub(/\r\n|\r|\n/, '<br />')
+    str.gsub(/\r\n|\r|\n/, '<br />').html_safe
   end
   
   ## wrap long string
@@ -45,10 +44,10 @@ module ApplicationHelper
   def paginate(items, options = {})
     return '' unless items
     defaults = {
-      :params         => p,
-      :previous_label => '前のページ',
-      :next_label     => '次のページ',
-      :separator      => '<span class="separator"> | </span' + "\n" + '>'
+      params:         p,
+      previous_label: '前のページ',
+      next_label:     '次のページ',
+      separator:      '<span class="separator"> | </span' + "\n" + '>'
     }
     if request.mobile? && !request.smart_phone?
       defaults[:page_links]     = false
@@ -83,7 +82,7 @@ module ApplicationHelper
   
   ## Number format
   def number_format(num)
-    number_to_currency(num, :unit => '', :precision => 0)
+    number_to_currency(num, unit: '', precision: 0)
   end
 
   #show tag if condition is true.

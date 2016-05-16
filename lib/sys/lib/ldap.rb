@@ -1,4 +1,3 @@
-# encoding: utf-8
 class Sys::Lib::Ldap
   attr_accessor :connection
   attr_accessor :host
