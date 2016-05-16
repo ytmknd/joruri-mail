@@ -8,6 +8,7 @@ Gemfile.lock
 /.rvmrc
 /.rspec
 
+/config/*.yml
 /log
 /public/assets
 /tmp
