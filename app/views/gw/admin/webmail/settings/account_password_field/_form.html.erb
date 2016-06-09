@@ -14,9 +14,9 @@ end
     <th>設定値</th>
     <td>
       <span style="width:70px; display:inline-block;">アカウント</span>
-      <%= text_field_tag :account, value[:account], style: "width: 150px;", autocomplete: 'off' %><br />
+      <%= text_field_tag :account, value[:account], style: 'width: 150px;', autocomplete: 'off' %><br />
       <span style="width:70px; display:inline-block;">パスワード</span>
-      <%= password_field_tag :password, value[:password], style: "width: 150px;", autocomplete: 'off' %>
+      <%= password_field_tag :password, value[:password], style: 'width: 150px;', autocomplete: 'off' %>
       <%=raw @item.message if @item.message %>
     </td>
   </tr>

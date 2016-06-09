@@ -1,6 +1,3 @@
-<%= stylesheet_link_tag '/_common/themes/admin/gw/webmail/style', media: 'all' %>
-<%= stylesheet_link_tag '/_common/themes/admin/gw/print', media: 'print' %>
-
 <div id="siteinfoContent">
 <table id="siteinfo" class="show">
   <tr>
@@ -12,26 +9,24 @@
     <td><%= request.env['HTTP_X_FORWARDED_FOR'] || request.remote_ip %></td>
   </tr>
 </table>
-<script type="text/javascript">
-<!--
-var props = [
-  ["ブラウザコード名", navigator.appCodeName],
-  ["ブラウザ名", navigator.appName],
-  ["バージョン", navigator.appVersion],
-  ["プラットフォーム", navigator.platform],
-  ["ユーザーエージェント", navigator.userAgent]
-];
 
-for (var i = 0;i < props.length;i++) {
-  var tr = document.createElement("tr");
-  var th = document.createElement("th");
-  var td = document.createElement("td");
-  th.innerHTML = props[i][0];
-  td.innerHTML = props[i][1];
-  tr.appendChild(th);
-  tr.appendChild(td);
-  $("siteinfo").appendChild(tr);
-}
-// -->
+<script type="text/javascript">
+//<![CDATA[
+$(function() {
+  var props = [
+    ["ブラウザコード名", navigator.appCodeName],
+    ["ブラウザ名", navigator.appName],
+    ["バージョン", navigator.appVersion],
+    ["プラットフォーム", navigator.platform],
+    ["ユーザーエージェント", navigator.userAgent]
+  ];
+  for (var i=0; i<props.length; i++) {
+    var tr = $("<tr>")
+      .append( $("<th>").html(props[i][0]) )
+      .append( $("<td>").html(props[i][1]) );
+    $("#siteinfo").append(tr);
+  }
+});
+//]]>
 </script>
 </div>

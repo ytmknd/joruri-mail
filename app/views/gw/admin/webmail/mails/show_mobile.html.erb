@@ -11,15 +11,14 @@
   <% if @item.has_attachments? %>
   <img src="/_common/themes/admin/gw/webmail/mobile/images/clip-lightblue.jpg" alt="[有]">
   <% end %>
-  <% star_image = @item.starred? ? "/_common/themes/admin/gw/images/mailoption/star_on.gif" : "/_common/themes/admin/gw/images/mailoption/star_off.gif" %>
-  <%= link_to image_tag(star_image), star_gw_webmail_mails_path(@s_params.merge(mailbox: @mailbox.name, id: @item.uid, from: :show)) %>
+  <%= link_to image_tag(mail_star_image_path(@item)), star_gw_webmail_mails_path(@s_params.merge(mailbox: @mailbox.name, id: @item.uid, from: :show)) %>
 </div>
 <div class="showItem">
   <font class="field">送信者</font>
   <font class="value"><%= mail_text_wrap(omit_from_address_in_mail_list(@item.friendly_from_addr)[0], 1000) %></font>
 </div>
 <div class="showItem">
-  <font class="field"><%= @item.draft? ? "保存日時" : "送信日時" %></font>
+  <font class="field"><%= @item.draft? ? '保存日時' : '送信日時' %></font>
   <font class="value"><%= @item.date %></font>
 </div>
 <div class="showItem">
@@ -61,14 +60,7 @@
     </div>
   <% end %>
   </div>
-  <%
-    if @mailbox.draft_box?(:all) || @mailbox.sent_box?(:all)
-      sent_mdn = @item.has_disposition_notification_to?
-    else
-      sent_mdn = @item.has_disposition_notification_to?# && @item.notified?
-    end
-  %>
-  <% if sent_mdn %>
+  <% if mail_mdn_dipslay?(@item, @mailbox) %>
     <div id="mdnSent" class="recipientConfirm">[開封確認メッセージを送信]</div>
   <% end %>
 </div>
@@ -76,13 +68,11 @@
 <% if @item.has_attachments? %>
 <div class="attachmentFile">
 <div class="title"><img src="/_common/themes/admin/gw/webmail/mobile/images/clip-glay.jpg" alt="[有]">添付ファイル</div>
+<% if (message = mail_form_download_message).present? %>
 <div class="attention">
-  <% if attachment_file_downloadable? %>
-    <%=raw Joruri.config.application['webmail.download_allow_message'] %>
-  <% else %>
-    <%=raw Joruri.config.application['webmail.download_deny_message'] %>
-  <% end %>
+  <%=raw message %>
 </div>
+<% end %>
 <div class="files">
 <% @item.attachments.each do |at| %>
   <div class="file"><%= link_to_if attachment_file_downloadable?, h("#{at.name}"), url_for(download: at.seqno, size: at.size),
@@ -134,10 +124,12 @@
 </div>
 
 <div class="pagination">
-  <% if @pagination[:prev_uid] %><%= link_to "<<*前へ", gw_webmail_mail_path(@s_params.merge(mailbox: @mailbox.name, id: @pagination[:prev_uid])), accesskey: '*' %>
+  <% if @pagination[:prev_uid] %>
+    <%= link_to '<<*前へ', url_for(@s_params.merge(mailbox: @mailbox.name, id: @pagination[:prev_uid])), accesskey: '*' %>
   <% else %>&lt;&lt;*前へ<% end %>
   <span class="separator"> | </span> 
-  <% if @pagination[:next_uid] %><%= link_to "次へ#>>", gw_webmail_mail_path(@s_params.merge(mailbox: @mailbox.name, id: @pagination[:next_uid])), accesskey: '#' %>
+  <% if @pagination[:next_uid] %>
+    <%= link_to '次へ#>>', url_for(@s_params.merge(mailbox: @mailbox.name, id: @pagination[:next_uid])), accesskey: '#' %>
   <% else %>次へ#&gt;&gt;<% end %>
   <br />
 </div>

@@ -1,50 +1,37 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="ja" lang="ja">
-<head>
-<meta http-equiv="content-type" content="text/html;charset=<%= request.mobile.default_charset %>" />
-<meta http-equiv="content-style-type" content="text/css" />
-<title><%= Core.title %></title>
-<%= csrf_meta_tag %>
-<%= stylesheet_link_tag '/_common/themes/admin/gw/webmail/mobile/style', media: 'all' %>
-</head>
-<body>
+<div class="groups"><%= Joruri.config.application['webmail.sys_address_menu'] %></div>
+<div class="sysUser">
+<div class="showItem">
+  <font class="title"><%= '所属部署' %></font>
+  <font class="value"><%= @item.groups.first.full_name if @item.groups.first %></font>
+</div>
+<div class="showItem">
+  <font class="title"><%= @item.class.human_attribute_name :name %></font>
+  <font class="value"><%= @item.name %></font>
+</div>
+<div class="showItem">
+  <font class="title"><%= @item.class.human_attribute_name :kana %></font>
+  <font class="value"><%= @item.kana %></font>
+</div>
+<div class="showItem">
+  <font class="title"><%= @item.class.human_attribute_name :official_position %></font>
+  <font class="value"><%= @item.official_position %></font>
+</div>
+<div class="showItem">
+  <font class="title"><%= @item.class.human_attribute_name :assigned_job %></font>
+  <font class="value"><%= @item.assigned_job %></font>
+</div>
+<div class="showItem">
+  <font class="title"><%= @item.class.human_attribute_name :email %></font>
+  <font class="value"><%= @item.email %></font>
+</div>
+</div>
 
-<div id="container">
+<div class="newMailMenu">
+<%= form_tag mobile_manage_gw_webmail_sys_addresses_path, { id: 'mailForm', name: 'mailForm', class: 'mailForm' } do |f| %>
+  <%= hidden_field_tag "to[#{@item.id}]", '1' %>
+  <%= hidden_field_tag :group_id, params[:group_id] %>
+  <%= submit_tag 'メール作成', class: 'menuItem', name: 'createMail', accesskey: '1' %>
+<% end %>
+</div>
 
-<div id="header">
-<div id="headerContainer">
-<div id="headerBody">
-
-<%= render 'layouts/admin/gw/header_mobile' %>
-
-<!-- end #headerBody --></div>
-<!-- end #headerContainer --></div>
-<!-- end #header --></div>
-
-<% if flash[:notice] %><div class="notice"><%= flash[:notice] %></div><% end %>
-<% if flash[:error] %><div class="error"><%= flash[:error] %></div><% end %>
-
-<div id="content">
-<div id="contentContainer">
-<div id="contentBody">
-
-<%= render 'show_mobile' %> 
-
-<!-- end #contentBody --></div>
-<!-- end #contentContainer --></div>
-<!-- end #content --></div>
-
-<div id="footer">
-<div id="footerContainer">
-<div id="footerBody">
-
-<%= render 'layouts/admin/gw/footer_mobile' %>
-
-<!-- end #footerBody --></div>
-<!-- end #footerContainer --></div>
-<!-- end #footer --></div>
-
-<!-- end #container --></div>
-
-</body>
-</html>
+<%= link_to '<戻る', gw_webmail_sys_addresses_path(group_id: params[:group_id]), class: 'link' %>

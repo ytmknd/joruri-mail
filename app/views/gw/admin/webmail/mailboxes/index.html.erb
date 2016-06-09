@@ -11,7 +11,7 @@ end
 <div id="webmailMenuContainer">
 
 <div class="menu">
-  <%= link_to "フォルダの登録", url_for(action: :new, mailbox: "INBOX"), class: 'newMailbox', title: "フォルダの登録" %>
+  <%= link_to 'フォルダの登録', url_for(action: :new, mailbox: 'INBOX'), class: 'newMailbox', title: 'フォルダの登録' %>
 </div>
 
 <%= render 'gw/admin/webmail/base/account' %>
@@ -31,8 +31,10 @@ end
   <%= f.hidden_field :path, value: "#{@item.name}." %>
   <table class="show" style="height: 40px;"><tr>
     <th style="">新しいフォルダの登録</th>
-    <td style=""><%= f.text_field :title, value: "" %>
-      <%= f.submit "登録する" %></td>
+    <td style="">
+      <%= f.text_field :title, value: '' %>
+      <%= f.submit '登録する' %>
+    </td>
   </tr></table>
   <% end %>
 <% end %>
@@ -43,8 +45,11 @@ end
     <table class="show" style="height: 40px;">
       <tr>
         <th style="">フォルダ名の変更</th>
-        <td style=""><%= f.text_field :title %><%= f.submit "変更する" %></td>
-        </tr>
+        <td style="">
+          <%= f.text_field :title %>
+          <%= f.submit '変更する' %>
+        </td>
+      </tr>
     </table>
   <% end %>
   <br />
@@ -52,7 +57,9 @@ end
     <table class="show" style="height: 40px;">
       <tr>
         <th style="">フォルダの移動</th>
-        <td style=""><%= f.select :path, path_options, include_blank: "（ルート階層）" %><%= f.submit "移動する" %>
+        <td style="">
+          <%= f.select :path, path_options, include_blank: '（ルート階層）' %>
+          <%= f.submit '移動する' %>
         </td>
       </tr>
     </table>
@@ -61,7 +68,9 @@ end
   <table class="show" style="height: 40px;">
     <tr>
       <th style="">フォルダの削除</th>
-      <td style=""><%= link_to "削除する", url_for(action: :destroy), method: :delete, data: { confirm: '削除してよろしいですか？' } %></td>
+      <td style="">
+        <%= link_to '削除する', url_for(action: :destroy), method: :delete, data: { confirm: '削除してよろしいですか？' } %>
+      </td>
     </tr>
   </table>
 <% end %>

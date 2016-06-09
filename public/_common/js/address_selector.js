@@ -12,12 +12,12 @@ function AddressSelector() {
 AddressSelector.instance = new AddressSelector();
 //Instance methods
 AddressSelector.prototype.toggle = function(prefix, to_addr, cc_addr, bcc_addr, callBack) {
-  var selectorElm = $('addressSelector');
-  if (selectorElm.visible()) {
+  var selectorElm = document.getElementById('addressSelector');
+  if (selectorElm.style.display != 'none') {
     if (!prefix || this._addressBook == prefix) {
       this.clearCheckboxes();
       this.clearSelected();
-      selectorElm.hide();
+      selectorElm.style.display = 'none';
       return false;
     } else {
       this.changeBook(prefix);
@@ -28,7 +28,7 @@ AddressSelector.prototype.toggle = function(prefix, to_addr, cc_addr, bcc_addr, 
     this.clearSelected();
     var self = this;
     var showSelector = function(){
-      selectorElm.show();
+      selectorElm.style.display = 'block';
       self.changeBook(prefix);
       self._callBack = callBack;
     };
@@ -38,13 +38,13 @@ AddressSelector.prototype.toggle = function(prefix, to_addr, cc_addr, bcc_addr, 
     if (to_addr == '' && cc_addr == '' && bcc_addr == '') {
       showSelector();
     } else {
-      var myAjax = new Ajax.Request(this.parseAddressURI, {
-        method: 'post',
-        parameters: {to: to_addr, cc: cc_addr, bcc: bcc_addr},
-        onSuccess: function(request){
+      jQuery.ajax(this.parseAddressURI, {
+        type: 'post',
+        data: { to: to_addr, cc: cc_addr, bcc: bcc_addr },
+        success: function(){
           showSelector();
         },
-        onFailure: function(request){
+        error: function(){
           alert('読み込みに失敗しました。');
           showSelector();
         }
@@ -57,19 +57,19 @@ AddressSelector.prototype.changeBook = function(prefix) {
   var addrElm = null;
   var selectElm = null;
   if (this._addressBook) {
-    addrElm = $(this._addressBook + 'Addresses');
-    if (addrElm.visible()) addrElm.hide();
-    selectElm = $(this._addressBook + 'AddressSearchFieldColumn');
-    if (selectElm.visible()) selectElm.hide();
+    addrElm = document.getElementById(this._addressBook + 'Addresses');
+    if (addrElm.style.display != 'none') addrElm.style.display = 'none';
+    selectElm = document.getElementById(this._addressBook + 'AddressSearchFieldColumn');
+    if (selectElm.style.display != 'none') selectElm.style.display = 'none';
   }
-  addrElm = $(prefix + 'Addresses');
-  if (!addrElm.visible()) addrElm.show();
-  selectElm = $(prefix + 'AddressSearchFieldColumn');
-  if (!selectElm.visible()) selectElm.show();
+  addrElm = document.getElementById(prefix + 'Addresses');
+  if (!addrElm.style.display != 'none') addrElm.style.display = 'block';
+  selectElm = document.getElementById(prefix + 'AddressSearchFieldColumn');
+  if (!selectElm.style.display != 'none') selectElm.style.display = 'block';
   this._addressBook = prefix;  
 };
 AddressSelector.prototype.currentBook = function() {
-  if($('addressSelector').visible()) {
+  if(document.getElementById('addressSelector').style.display != 'none') {
     return this._addressBook;
   } else {
     return null;
@@ -78,15 +78,15 @@ AddressSelector.prototype.currentBook = function() {
 AddressSelector.prototype.loadItems = function(prefix, gid, opt) {
   if (!opt) opt ={}; 
   if (this._loadingGroupIds[prefix][gid]) return;
-  var elmChildren = $(prefix + 'ChildItems' + gid);
-  var toggleElm = $(prefix + 'ToggleItems' + gid);
+  var elmChildren = document.getElementById(prefix + 'ChildItems' + gid);
+  var toggleElm = document.getElementById(prefix + 'ToggleItems' + gid);
   if (elmChildren) {
     if (toggleElm.firstChild.nodeValue == '+') {
-      elmChildren.show();
+      elmChildren.style.display = 'block';
       toggleElm.firstChild.nodeValue = '-';
       toggleElm.className = "toggleItems toggleItemsOpen";
     } else if (opt['close'] != false) {
-      elmChildren.hide();
+      elmChildren.style.display = 'none';
       toggleElm.firstChild.nodeValue = '+';
       toggleElm.className = "toggleItems toggleItemsClose";
     }
@@ -115,30 +115,32 @@ AddressSelector.prototype.loadItems = function(prefix, gid, opt) {
   }
   var self = this;
   var requestOptions = {
-    method: 'get',
-    onSuccess: function(request){
-      if (search) self.showSearchGroup(request, prefix);
-      self.showItems(request, prefix, gid);
+    type: 'get',
+    dataType: 'xml',
+    success: function(xml){
+      var xml = jQuery(xml).get(0);
+      if (search) self.showSearchGroup(xml, prefix);
+      self.showItems(xml, prefix, gid);
     },
-    onFailure: function(request) {
+    error: function() {
       delete self._loadingGroupIds[prefix][gid];
       alert('読み込みに失敗しました。');
     }
   };
   if (opt['parameters']) {
-    requestOptions['parameters'] = opt['parameters'];
+    requestOptions['data'] = opt['parameters'];
   }
-  var myAjax = new Ajax.Request(uri, requestOptions);
+  jQuery.ajax(uri, requestOptions);
 };
 AddressSelector.prototype.getNodeValue = function(node, name) {
     var elem = node.getElementsByTagName(name);
     if (elem.length > 0 && elem[0].firstChild != null) { return elem[0].firstChild.nodeValue; }
     return null;
 };
-AddressSelector.prototype.showItems = function(request, prefix, parent_id) {
-  var groups = request.responseXML.getElementsByTagName("group");
-  var items = request.responseXML.getElementsByTagName("item");
-  var parentElm = $(prefix + 'Group' + parent_id);
+AddressSelector.prototype.showItems = function(xml, prefix, parent_id) {
+  var groups = xml.getElementsByTagName("group");
+  var items = xml.getElementsByTagName("item");
+  var parentElm = document.getElementById(prefix + 'Group' + parent_id);
   var ul = document.createElement('ul');
   ul.id = prefix + 'ChildItems' + parent_id;
   ul.className = 'children';
@@ -162,17 +164,25 @@ AddressSelector.prototype.showItems = function(request, prefix, parent_id) {
   }
   if (ul.childNodes.length > 0) parentElm.appendChild(ul);
 
-  var toggleElm = $(prefix + 'ToggleItems' + parent_id);
+  var toggleElm = document.getElementById(prefix + 'ToggleItems' + parent_id);
   if (toggleElm) {
     toggleElm.firstChild.nodeValue = '-';
     toggleElm.className = "toggleItems toggleItemsOpen";    
   }  
   delete this._loadingGroupIds[prefix][parent_id];
 };
+AddressSelector.prototype.escapeHTML = function(str) {
+  var escapes = {
+    "&": "&amp;",
+    "\"": "&quot;",
+    "<": "&lt;",
+    ">": "&gt;"
+  };
+  return str.replace(/[&"<>]/g, function(match) {
+    return escapes[match];
+  });
+};
 AddressSelector.prototype.makeGroupElement = function(prefix, id, name, hasChildren) {
-  function escape_html(str) {
-    return str.escapeHTML().replace(/"/g, '&quot;');
-  }
   var li = document.createElement('li');
   li.className = 'group';
   li.id = prefix + 'Group' + id;
@@ -182,33 +192,30 @@ AddressSelector.prototype.makeGroupElement = function(prefix, id, name, hasChild
   } else {
     html += '<a href="#" class="toggleItems" style="visibility:hidden;">+</a> ';
   }
-  html += '<a href="#" class="itemName groupName" onclick="AddressSelector.instance.loadItems(\'' + prefix + '\', \'' + id + '\', {\'close\':false});return false;">' + escape_html(name) + '</a>';
+  html += '<a href="#" class="itemName groupName" onclick="AddressSelector.instance.loadItems(\'' + prefix + '\', \'' + id + '\', {\'close\':false});return false;">' + this.escapeHTML(name) + '</a>';
   li.innerHTML = html;
   return li;
 };
 AddressSelector.prototype.makeAddressElement = function(prefix, gid, id, name, email, group) {
-  function escape_html(str) {
-    return str.escapeHTML().replace(/"/g, '&quot;');
-  }
   var li = document.createElement('li');
   li.className = 'address';
   li.id = prefix + 'Address' + id + '_' + gid;
   var checkId = prefix + 'CheckAddress' + id + '_' + gid;
   var checkValue = "1";
   if (id != '0') {
-    checkValue = escape_html(name + "\t" + email);
+    checkValue = this.escapeHTML(name + "\t" + email);
   }
   var nameValue = name;
   if (group != null) nameValue += " （" + group + "）";
   var html = '';  
   html += '<a href="#" class="toggleItems" style="visibility:hidden;">+</a> ';
   html += '<input type="checkbox" id="' + checkId + '" class="check" value="' + checkValue + '" onclick="AddressSelector.instance.checked(this)">';
-  html += '<a href="#" class="itemName addressName" title="' + escape_html(email) + '" onclick="AddressSelector.instance.toggleCheckbox(\'' + checkId + '\');return false;">' + nameValue.escapeHTML() + '</a>';
+  html += '<a href="#" class="itemName addressName" title="' + this.escapeHTML(email) + '" onclick="AddressSelector.instance.toggleCheckbox(\'' + checkId + '\');return false;">' + this.escapeHTML(nameValue) + '</a>';
   li.innerHTML = html;
   return li;
 };
-AddressSelector.prototype.showSearchGroup = function(request, prefix) {
-  var items = request.responseXML.getElementsByTagName("items")[0];
+AddressSelector.prototype.showSearchGroup = function(xml, prefix) {
+  var items = xml.getElementsByTagName("items")[0];
   var count = this.getNodeValue(items, "count");
   var total = this.getNodeValue(items, "total");
   var name = '検索結果';
@@ -216,7 +223,7 @@ AddressSelector.prototype.showSearchGroup = function(request, prefix) {
     name += '（' + total + ' 件中 ' + count + ' 件を表示）';
   }
   var rsltElm = this.makeGroupElement(prefix, 'Search', name, count > 0);
-  var rootElm = $(prefix + 'AddressesRoot');
+  var rootElm = document.getElementById(prefix + 'AddressesRoot');
   if (rootElm.firstChild) {
     rootElm.insertBefore(rsltElm, rootElm.firstChild);    
   } else {
@@ -225,13 +232,13 @@ AddressSelector.prototype.showSearchGroup = function(request, prefix) {
   return count;
 };
 AddressSelector.prototype.removeSearchGroup = function(prefix) {
-  var rsltElm = $(prefix + 'GroupSearch');
+  var rsltElm = document.getElementById(prefix + 'GroupSearch');
   if (rsltElm) rsltElm.parentNode.removeChild(rsltElm);  
 };
 AddressSelector.prototype.search = function() {
   var prefix = this._addressBook;
-  var keyword = $('addressSearchKeyword').value;
-  var field = $(prefix + 'AddressSearchField').value;
+  var keyword = document.getElementById('addressSearchKeyword').value;
+  var field = document.getElementById(prefix + 'AddressSearchField').value;
   if (keyword == '') return false;
   var param = {'search':'on'};
   param[field] = keyword;
@@ -244,7 +251,7 @@ AddressSelector.prototype.resetSearchResult = function() {
 AddressSelector.prototype.addAddresses = function(type) {
   var prefix = this._addressBook;
   var reg = new RegExp('^' + prefix + 'CheckAddress(.+?)_.+$');
-  var inputs = $(prefix + 'Addresses').getElementsByTagName('input');
+  var inputs = document.getElementById(prefix + 'Addresses').getElementsByTagName('input');
   for (var i = 0;i < inputs.length;i++) {
     if (inputs[i].type != 'checkbox' || !inputs[i].checked) continue;
     var mt = reg.exec(inputs[i].id);
@@ -263,22 +270,22 @@ AddressSelector.prototype.add = function(type, name, email) {
   }
   var newAddress = false;
   var elm = null;
-  if (this._selected[type][email]) elm = $(type + '_' + email);
+  if (this._selected[type][email]) elm = document.getElementById(type + '_' + email);
   if (!elm) {
     elm = document.createElement('div');
     elm.className = 'selectedAddress';
     elm.id = type + '_' + email;
     newAddress = true;
   }
-  escaped_id = elm.id.replace(/[\\'"]/g, "\\$&").escapeHTML().replace(/"/g, '&quot;');
+  escaped_id = this.escapeHTML(elm.id.replace(/[\\'"]/g, "\\$&"));
   var html = '<a href="#" class="deleteButton" title="削除" onclick="AddressSelector.instance.remove(\'' + escaped_id + '\'); return false;">削除</a>';
-  html += '<span class="addressName">' + address.escapeHTML() + '</span>';
+  html += '<span class="addressName">' + this.escapeHTML(address) + '</span>';
   elm.innerHTML = html;
-  if (newAddress) $(type + 'Addresses').appendChild(elm);
+  if (newAddress) document.getElementById(type + 'Addresses').appendChild(elm);
   this._selected[type][email] = address;
 };
 AddressSelector.prototype.remove = function(id) {
-  var elm = $(id);
+  var elm = document.getElementById(id);
   if (elm) elm.parentNode.removeChild(elm);
   var mt = id.match(/^(to|cc|bcc)_(.+)$/);
   if (mt) {
@@ -300,7 +307,7 @@ AddressSelector.prototype.finishSelection = function(ok) {
 AddressSelector.prototype.clearCheckboxes = function() {
   var prefixes = ['sys', 'pri'];
   for (var i = 0;i < prefixes.length;i++) {
-    var inputs = $(prefixes[i] + 'Addresses').getElementsByTagName('input');
+    var inputs = document.getElementById(prefixes[i] + 'Addresses').getElementsByTagName('input');
     for (var k = 0;k < inputs.length;k++) {
       if (inputs[k].type == 'checkbox') inputs[k].checked = false; 
     }
@@ -310,14 +317,14 @@ AddressSelector.prototype.clearSelected = function() {
   var types = ['to', 'cc', 'bcc'];
   for (var i = 0;i < types.length;i++) {
     this._selected[types[i]] = {};
-    var elm = $(types[i] + 'Addresses');
+    var elm = document.getElementById(types[i] + 'Addresses');
     for (var k = elm.childNodes.length - 1;k >= 0;k--) {
       elm.removeChild(elm.childNodes[k]);
     }
   }
 };
 AddressSelector.prototype.toggleCheckbox = function(checkId) {
-  var checkElm = $(checkId);
+  var checkElm = document.getElementById(checkId);
   if (checkElm) {
     checkElm.checked = !checkElm.checked;
   }
@@ -333,7 +340,7 @@ AddressSelector.prototype.checked = function(checkElm) {
     gid = mt[3];
   }
   if (id == '0') {
-    var itemsElm = $(prefix + 'ChildItems' + gid);
+    var itemsElm = document.getElementById(prefix + 'ChildItems' + gid);
     var inputs = itemsElm.getElementsByTagName('input');
     for (var i = 0;i < inputs.length;i++) {
       if (inputs[i].type != 'checkbox') continue;
@@ -343,13 +350,13 @@ AddressSelector.prototype.checked = function(checkElm) {
     }
   } else {
     if (checkElm.checked) return;
-    var allElm = $(prefix + 'CheckAddress0_' + gid);
+    var allElm = document.getElementById(prefix + 'CheckAddress0_' + gid);
     if (allElm) allElm.checked = false;
   }
 };
 AddressSelector.prototype.selected = function(type) {
   var list = '';
-  var nodes = $(type + 'Addresses').childNodes;
+  var nodes = document.getElementById(type + 'Addresses').childNodes;
   var reg = new RegExp('^' + type + '_(.+)$');
   for (var i = 0;i < nodes.length;i++) {
     if (nodes[i].nodeType != 1 /* ELEMENT_NODE */ || nodes[i].tagName.toLowerCase() != 'div') continue;

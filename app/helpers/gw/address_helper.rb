@@ -1,22 +1,21 @@
-# coding: utf-8
-
 module Gw::AddressHelper
-
-  def show_address_groups(roots, &block)
-    text = ''
-    show_group = lambda do |item, indent|
-      rtn = capture item, indent, &block
-      item.children.each {|i| rtn += show_group.call(i, indent + 1)} if item.children.size > 0
-      rtn
-    end
-    
-    roots.each {|i| text += show_group.call(i, 0)}
-    raw(text)
+  def address_view_model(group_id = '', group_name = '', addresses = [], options = {})
+    {
+      group_id: group_id.to_s,
+      group_name: group_name,
+      sort_key: '',
+      sort_order: '',
+      checked: { to: false, cc: false, bcc: false },
+      addresses: addresses.map { |addr|
+        {
+          id: addr.id,
+          name: addr.name,
+          kana: addr.kana,
+          email: addr.email,
+          sort_no: addr.sort_no,
+          checked: { to: false, cc: false, bcc: false }
+        }
+      }
+    }.merge(options)
   end
-
-  def show_actions?
-    return true if controller.class == Gw::Admin::Webmail::AddressGroupsController
-    false
-  end
-  
 end

@@ -13,8 +13,10 @@
   <% @maintenances.each do |item| %>
   <% eid = "maintenance#{item.id}" %>
   <li>
-    <p><a href="#" onclick="return openMaintenances('<%= eid %>');">
-      <%= item.title %></a> （<%=l item.published_at if item.published_at %>）</p>
+    <p>
+      <a href="#showMaintenance" data-id="<%= eid %>">
+      <%= item.title %></a> （<%=l item.published_at if item.published_at %>）
+    </p>
     <div id="<%= eid %>" class="body"><%=raw item.body %></div>
   </li>
   <% end %>
@@ -26,13 +28,12 @@
 </div>
 
 <script type="text/javascript">
-function openMaintenances(id){
-  var elm = document.getElementById(id);
-  if (elm.style.display == 'block') {
-    elm.style.display = 'none';
-  } else {
-    elm.style.display = 'block';
-  }
-  return false;
-}
+//<![CDATA[
+$(function() {
+  $('a[href="#showMaintenance"]').on('click', function() {
+    $('#' + $(this).attr('data-id')).toggle();
+    return false;
+  });
+});
+//]]>
 </script>

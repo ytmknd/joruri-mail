@@ -1,4 +1,9 @@
 module Gw::Controller::Admin::Mobile::Address
+  extend ActiveSupport::Concern
+
+  included do
+    before_action :adjust_mobile_params
+  end
 
   def mobile_manage
     if params[:createMail]
@@ -12,6 +17,17 @@ module Gw::Controller::Admin::Mobile::Address
   end
 
   private
+
+  def adjust_mobile_params
+    val = nil
+    params.each do |k,v|
+      if k =~ /^deleteAddress=/
+        val = k
+        break
+      end
+    end
+    params[:deleteAddress] = val.sub(/^deleteAddress=/, '') if val
+  end
 
   def mobile_create_mail
     session[:mobile] ||= {}

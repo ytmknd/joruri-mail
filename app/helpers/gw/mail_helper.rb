@@ -1,4 +1,48 @@
 module Gw::MailHelper
+  def mail_flags(mail)
+    flags = []
+    flags << 'answered' if mail.answered?
+    flags << 'forwarded' if mail.forwarded?
+    flags << 'mdnRequest' if mail.has_disposition_notification_to?
+    flags
+  end
+
+  def mail_from_display(mail, mailbox, omit = false)
+    if mailbox.draft_box?(:all) || mailbox.sent_box?(:all)
+      from = mail.simple_to_addr
+      s_from = mail.friendly_to_addrs[0] || ''
+    else
+      from = mail.friendly_from_addr
+      s_from = mail.friendly_from_addr
+    end
+    from_tooltip = truncate(mail.subject, length: 70)
+    from, from_tooltip = omit_from_address_in_mail_list(from) if omit
+    return from, s_from, from_tooltip
+  end
+
+  def mail_mdn_dipslay?(mail, mailbox)
+    if mailbox.draft_box?(:all) || mailbox.sent_box?(:all)
+      mail.has_disposition_notification_to?
+    else
+      mail.has_disposition_notification_to? && mail.notified?
+    end
+  end
+
+  def mail_short_date(mail)
+    if mail.date && (match = mail.date.match(/\d{4}-(\d{2})-(\d{2})\s*\d{2}:\d{2}/))
+      "#{match[1]}/#{match[2]}"
+    else
+      mail.date
+    end
+  end
+
+  def mail_star_image_path(mail)
+    if mail.starred?
+      "/_common/themes/admin/gw/images/mailoption/star_on.gif"
+    else
+      "/_common/themes/admin/gw/images/mailoption/star_off.gif"
+    end
+  end
 
   def recent_maintenance
     Sys::Maintenance.state_public.order(published_at: :desc).first
@@ -96,11 +140,8 @@ module Gw::MailHelper
 
   def omit_from_address_in_mail_list(from)
     return from unless from
-    @from_address_pattern1_in_mail_list ||= /^(.+)<(.+)>\s*(他|$)/
-    @from_address_pattern2_in_mail_list ||= /^(.+?)(他|$)/
     addr = from
-    match = from.match(@from_address_pattern1_in_mail_list) || from.match(@from_address_pattern2_in_mail_list)
-    if match
+    if match = from.match(/^(.+)<(.+)>\s*(他|$)/) || from.match(/^(.+?)(他|$)/)
       from = match[1].strip
       from = "#{from} 他" if match[3] ? match[3].present? : match[2].present? 
       addr = (match[3] ? match[2] : match[1]).strip 
@@ -135,10 +176,6 @@ module Gw::MailHelper
     froms.split(/,/).map do |from|
       extract_address_from_mail_list(from)
     end
-  end
-
-  def candidate_mail_list_limit
-      [[20, 20], [30, 30], [40, 40], [50, 50]]
   end
 
   def mailbox_mobile_image_tag(mailbox_type, options = {})
@@ -220,6 +257,14 @@ module Gw::MailHelper
       end
     end
     return nil
+  end
+
+  def mail_form_download_message
+    if attachment_file_downloadable?
+      Joruri.config.application['webmail.download_allow_message']
+    else
+      Joruri.config.application['webmail.download_deny_message']
+    end
   end
 
   def attachment_file_downloadable?

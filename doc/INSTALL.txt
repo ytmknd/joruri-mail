@@ -34,7 +34,8 @@ rootユーザに変更します。
 
 必要なパッケージをインストールします。
 
-  # yum -y install wget git
+  # yum -y install epel-release
+  # yum -y install wget git npm
 
 **********************************************************************
  4 Ruby のインストール
@@ -174,6 +175,7 @@ Joruriユーザに変更します。
 必要ライブラリをインストールします。
 
   $ bundle install --without development test
+  $ bundle exec bower:install RAILS_ENV=production
 
 ======================================================================
  8.2 設定ファイルの変更

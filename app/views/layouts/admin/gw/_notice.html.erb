@@ -3,25 +3,15 @@
 
 <script type="text/javascript">
 //<![CDATA[
-var timeoutID = undefined;
-Event.observe(window, 'load', function(e) {
-  if ($('notice')) {
+$(function() {
+  var timeoutID = undefined;
+  $(window).on('load', function(e) {
     timeoutID = setTimeout(function() {
-      hideNotice();
+      $('#notice').hide();
+      if (timeoutID) { clearTimeout(timeoutID); }
     }, 2000);
-  }
+  });
 });
-function hideNotice() {
-  $('notice').style.display = 'none';
-  //$('noticeIcon').style.display = 'block';
-  if (timeoutID) {
-    clearTimeout(timeoutID);
-  }
-}
-function showNotice() {
-  $('notice').style.display = 'block';
-  $('noticeIcon').style.display = 'none';
-}
 //]]>
 </script>
 <% end %>

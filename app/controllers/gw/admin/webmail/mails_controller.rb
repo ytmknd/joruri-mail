@@ -139,10 +139,8 @@ class Gw::Admin::Webmail::MailsController < Gw::Controller::Admin::Base
     elsif params[:show_html_image]
       return http_error(404) unless @item.html_mail?
       return respond_to do |format|
-        format.xml { render action: 'show_html' }
+        format.json { render :show_html }
       end
-    elsif params[:show_thumbnail_image]
-      return render action: 'show_thumbnail'
     end
 
     Core.title += " - #{@item.subject} - #{Core.current_user.email}"
@@ -176,7 +174,7 @@ class Gw::Admin::Webmail::MailsController < Gw::Controller::Admin::Base
 
       if @item.has_disposition_notification_to? && !@item.notified? && !@mailbox.draft_box?(:all) && !@mailbox.sent_box?(:all)
         @mdnRequest = mdn_request_mode
-        if @mdnRequest && @mdnRequest == :auto
+        if @mdnRequest == :auto
           begin
             send_mdn_message(@mdnRequest)
           rescue => e
@@ -228,17 +226,16 @@ class Gw::Admin::Webmail::MailsController < Gw::Controller::Admin::Base
     return http_error(404) unless @file = @item.attachments[no.to_i]
     #return http_error(404) unless @file.name == params[:filename]
 
-    filedata     = @file.body
-    content_type = @file.content_type
-    disposition  = params[:disposition] ? params[:disposition] : (@file.image? ? 'inline' : 'attachment')
-    if params[:thumbnail].present? && data = @file.thumbnail(width: params[:width] || 64, height: params[:height] || 64, format: :JPEG, quality: 70)
+    if params[:thumbnail].present? && (data = @file.thumbnail(width: params[:width] || 64, height: params[:height] || 64, format: :JPEG, quality: 70))
       filedata = data
       content_type = 'image/jpeg'
+    else
+      filedata = @file.body
+      content_type = @file.content_type
     end
+    disposition = params[:disposition] ? params[:disposition] : (@file.image? ? 'inline' : 'attachment')
 
-    filename = convert_to_download_filename(@file.name)
-
-    send_data(filedata, type: content_type, filename: filename, disposition: disposition)
+    send_data(filedata, type: content_type, filename: @file.name, disposition: disposition)
   end
 
   def new
@@ -302,7 +299,7 @@ class Gw::Admin::Webmail::MailsController < Gw::Controller::Admin::Base
     load_attachments(@ref, @item)
 
     #@mailboxes  = load_mailboxes
-    render action: :new
+    render :new
   end
 
   def answer
@@ -349,7 +346,7 @@ class Gw::Admin::Webmail::MailsController < Gw::Controller::Admin::Base
     load_address_from_flash
 
     #@mailboxes  = load_mailboxes
-    render action: :new
+    render :new
   end
 
   def forward
@@ -392,7 +389,7 @@ class Gw::Admin::Webmail::MailsController < Gw::Controller::Admin::Base
     load_attachments(@ref, @item)
 
     #@mailboxes  = load_mailboxes
-    render action: :new
+    render :new
   end
 
   def resend
@@ -422,7 +419,7 @@ class Gw::Admin::Webmail::MailsController < Gw::Controller::Admin::Base
 
     load_attachments(@ref, @item)
 
-    render action: :new
+    render :new
   end
 
   def create
@@ -473,7 +470,7 @@ class Gw::Admin::Webmail::MailsController < Gw::Controller::Admin::Base
     ## submit/file
     if params[:commit_file].present?
       item.valid?(:file)
-      return render action: :new
+      return render :new
     end
 
     ## submit/destroy
@@ -487,7 +484,7 @@ class Gw::Admin::Webmail::MailsController < Gw::Controller::Admin::Base
     if params[:commit_draft].present?
       unless item.valid?(:draft)
         #@mailboxes  = load_mailboxes
-        return render action: :new
+        return render :new
       end
       return save_as_draft(item, ref, &block)
     end
@@ -495,7 +492,7 @@ class Gw::Admin::Webmail::MailsController < Gw::Controller::Admin::Base
     ## submit/send
     unless item.valid?(:send)
       #@mailboxes  = load_mailboxes
-      return render action: :new
+      return render :new
     end
 
     begin
@@ -809,7 +806,10 @@ class Gw::Admin::Webmail::MailsController < Gw::Controller::Admin::Base
     @item = Gw::WebmailMail.find_by_uid(params[:id], select: @mailbox.name, conditions: @filter)
     return error_auth unless @item && @item.has_disposition_notification_to?
 
-    if params[:mobile]
+    if request.xhr?
+      send_mdn_message(params[:send_mode])
+      return render text: ''
+    else
       begin
         send_mdn_message(params[:send_mode])
         flash[:notice] = "開封確認メールを送信しました。"
@@ -817,8 +817,6 @@ class Gw::Admin::Webmail::MailsController < Gw::Controller::Admin::Base
         flash[:notice] = "開封確認メールの送信に失敗しました。"
       end
       return redirect_to url_for(action: :show)
-    else
-      send_mdn_message(params[:send_mode])
     end
   end
 
@@ -927,21 +925,24 @@ class Gw::Admin::Webmail::MailsController < Gw::Controller::Admin::Base
     imap_settings = Joruri.config.imap_settings
     smtp_settings = ActionMailer::Base.smtp_settings
 
-    imap_sock = TCPSocket.open(imap_settings[:address], imap_settings[:port])
-    smtp_sock = TCPSocket.open(smtp_settings[:address], smtp_settings[:port])
-    if imap_sock && smtp_sock
-      if protect_against_forgery? && params[:authenticity_token] != form_authenticity_param
-        @status = "NG TokenError"
-      else
-        @status = "OK"
+    begin
+      imap_sock = TCPSocket.open(imap_settings[:address], imap_settings[:port])
+      smtp_sock = TCPSocket.open(smtp_settings[:address], smtp_settings[:port])
+      if imap_sock && smtp_sock
+        if protect_against_forgery? && params[:authenticity_token] != form_authenticity_param
+          status = "NG TokenError"
+        else
+          status = "OK"
+        end
       end
+    rescue => e
+      status = "NG"
+    ensure
+      imap_sock.close if imap_sock
+      smtp_sock.close if smtp_sock
     end
 
-  rescue => e
-    @status = "NG"
-  ensure
-    imap_sock.close if imap_sock
-    smtp_sock.close if smtp_sock
+    _show status: status
   end
 
   private
@@ -1227,6 +1228,6 @@ class Gw::Admin::Webmail::MailsController < Gw::Controller::Admin::Base
 
     @item = Gw::WebmailMail.new(params[:item])
     flash.now[:error] = "エラーが発生しました。#{e}"
-    render action: :new
+    render :new
   end
 end

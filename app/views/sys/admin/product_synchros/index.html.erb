@@ -34,10 +34,21 @@ end
   <div class="submitters">
     <span id="message" style="display:none; color: #b40; text-align: center;">処理を開始しました。そのままでお待ちください。<br /><br /></span>
     <%= hidden_field_tag :version_id, @version %>
-    <input type="submit" value="同期する" onclick="document.getElementById('message').style.display='block';" />
+    <input type="submit" value="同期する" />
   </div>
 <% end %>
 
 <div id="ldapView">
 <% @groups.each { |group| children(group) } if @groups.present? %>
 </div>
+
+<script type="text/javascript">
+//<![CDATA[
+$(function() {
+  $('input:submit').on('click', function() {
+    $('#message').show();
+    return true;
+  });
+});
+//]]>
+</script>

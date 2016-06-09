@@ -7,16 +7,10 @@
 <title><%= Core.title %></title>
 <%= javascript_include_tag :application %>
 <%= stylesheet_link_tag :application, media: 'all' %>
-<%= javascript_include_tag 'prototype' %>
-<%= javascript_include_tag '/_common/js/cookiemanager.js' %>
 <%= javascript_include_tag '/_common/js/navigation.js' %>
-<%#= javascript_include_tag '/_common/js/jquery/jquery.min.js' %>
-<%#= javascript_include_tag '/_common/js/jquery/jquery-ui.min.js' %>
-<%#= javascript_include_tag '/_common/js/prototype' %>
-<%#= stylesheet_link_tag '/_common/themes/admin/style', media: 'all' %>
 <%= stylesheet_link_tag '/_common/themes/admin/gw/webmail/style', media: 'all' %>
 <%= stylesheet_link_tag '/_common/themes/admin/gw/print', media: 'print' %>
-<%= yield :header %>
+<%= yield :head %>
 </head>
 <body><a id="top" name="top"></a>
 

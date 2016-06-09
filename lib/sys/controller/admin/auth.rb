@@ -1,4 +1,3 @@
-# coding: utf-8
 module Sys::Controller::Admin::Auth
   ACCOUNT_KEY = :sys_user_account
   PASSWD_KEY  = :sys_user_password

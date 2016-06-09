@@ -79,19 +79,4 @@ module ApplicationHelper
 ###    ruby = Page.ruby unless ruby
 ###    return ruby == true ? Cms::Lib::Navi::Ruby.convert(str) : str
 ###  end
-  
-  ## Number format
-  def number_format(num)
-    number_to_currency(num, unit: '', precision: 0)
-  end
-
-  #show tag if condition is true.
-  def show_tag_if(tag, cond, options = {}, &block)
-    unless cond
-      options[:style] ||= ''
-      options[:style] += 'display:none;'
-    end
-    
-    content_tag(tag, options, &block)
-  end
 end

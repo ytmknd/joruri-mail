@@ -15,7 +15,7 @@ gem 'coffee-rails', '~> 4.1.0'
 gem 'therubyracer', platforms: :ruby
 
 # Use jquery as the JavaScript library
-gem 'jquery-rails'
+#gem 'jquery-rails'
 # Turbolinks makes following links in your web application faster. Read more: https://github.com/rails/turbolinks
 #gem 'turbolinks'
 # Build JSON APIs with ease. Read more: https://github.com/rails/jbuilder
@@ -31,6 +31,8 @@ gem 'sdoc', '~> 0.4.0', group: :doc
 
 # Use Capistrano for deployment
 # gem 'capistrano-rails', group: :development
+
+gem 'bower-rails', '~> 0.10.0'
 
 gem 'activerecord-session_store', '~> 0.1.2'
 gem 'active_hash', '~> 1.4.1'
@@ -48,8 +50,6 @@ gem 'mail-iso-2022-jp', '2.0.5.rc1'
 gem 'charlock_holmes', '~> 0.7.3'
 
 gem 'dynamic_form', '~> 1.1.4'
-gem 'jquery-ui-rails', '~> 5.0.5'
-gem 'jquery-timepicker-addon-rails', '~> 1.4.1'
 
 group :development, :test do
   # Call 'byebug' anywhere in the code to stop execution and get a debugger console

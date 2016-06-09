@@ -1,7 +1,5 @@
 class ApplicationController < ActionController::Base
   include Jpmobile::ViewSelector
-  helper  FormHelper
-  helper  LinkHelper
   protect_from_forgery #:secret => '1f0d667235154ecf25eaf90055d99e99'
   before_action :initialize_application
   after_action :inline_css_for_mobile
@@ -85,12 +83,9 @@ class ApplicationController < ActionController::Base
     end
   end
 
-  def convert_to_download_filename(filename)
-    filename.gsub(/[\/\<\>\|:"\?\*\\]/, '_')
-  end
-
   def send_data(data, options = {})
     if options[:filename].present?
+      options[:filename].gsub!(/[\/\<\>\|:"\?\*\\]/, '_')
       case
       when request.env['HTTP_USER_AGENT'] =~ /(MSIE 6|MSIE 7)/
         options[:filename] = NKF.nkf("-s", options[:filename])

@@ -9,17 +9,18 @@ class Gw::WebmailFilter < ActiveRecord::Base
   has_many :conditions, -> { order(:sort_no) },
     foreign_key: :filter_id, class_name: 'Gw::WebmailFilterCondition', dependent: :destroy
 
-  attr_accessor :in_columns, :in_inclusions, :in_values, :include_sub
+  accepts_nested_attributes_for :conditions, allow_destroy: true
+
+  attr_accessor :include_sub
   attr_reader :applied
 
   validates :user_id, :state, :name, :conditions_chain, :action, presence: true
   validates :sort_no, numericality: { greater_than_or_equal_to: 0, only_integer: true }
-
   validate :validate_conditions
   validate :validate_mailbox
   validate :validate_name
 
-  after_save :save_conditions
+  before_validation :set_conditions_for_save
 
   scope :readable, ->(user = Core.user) { where(user_id: user.id) }
 
@@ -29,21 +30,6 @@ class Gw::WebmailFilter < ActiveRecord::Base
 
   def deletable?
     Core.user.has_auth?(:manager) || user_id == Core.user.id
-  end
-
-  def in_columns
-    @in_columns = conditions.collect{|c| c.column} if @in_columns.nil?
-    @in_columns
-  end
-
-  def in_inclusions
-    @in_inclusions = conditions.collect{|c| c.inclusion} if @in_inclusions.nil?
-    @in_inclusions
-  end
-
-  def in_values
-    @in_values = conditions.collect{|c| c.value} if @in_values.nil?
-    @in_values
   end
 
   def states
@@ -75,14 +61,6 @@ class Gw::WebmailFilter < ActiveRecord::Base
   def conditions_chain_label
     conditions_chain_labels.each {|a| return a[0] if conditions_chain == a[1].to_s }
     nil
-  end
-
-  def condition_column_labels
-    [["件名（Subject）","subject"],["差出人（From）","from"],["宛先（To）","to"]]
-  end
-
-  def condition_inclusion_labels
-    [["に次を含む","<"],["に次を含まない","!<"],["が次と一致する","=="],["正規表現","=~"]]
   end
 
   def apply(params)
@@ -285,56 +263,17 @@ class Gw::WebmailFilter < ActiveRecord::Base
     end
   end
 
-  def in_conditions
-    #dummy
-  end
-
   def validate_conditions
-    if "#{in_columns.values.join}#{in_inclusions.values.join}#{in_values.values.join}".blank?
-      return errors.add(:in_conditions, :empty)
-    end
-    in_columns.each do |i, c|
-      next if "#{c}#{in_inclusions[i]}#{in_values[i]}".blank?
-      if c.blank? || in_inclusions[i].blank? || in_values[i].blank?
-        return errors.add(:in_conditions, :invalid)
-      end
-      if in_inclusions[i] == '=~'
-        begin
-          timeout(1) { test = ("text" =~ /#{in_values[i]}/im) }
-        rescue => e
-          errors.add(:in_conditions, "を正しく入力してください。（正規表現　/#{in_values[i]}/）")
-        end
-      end
+    if conditions.reject(&:marked_for_destruction?).blank?
+      return errors.add(:conditions, :empty)
     end
   end
 
-  def save_conditions
-    return true if !in_columns.is_a?(Hash) && !in_columns.is_a?(Array)
-
-    in_conds = []
-    in_columns.each do |i, c|
-      next if c.blank? || in_inclusions[i].blank? || in_values[i].blank?
-      in_conds << { column: c, inclusion: in_inclusions[i], value: in_values[i] }
+  def set_conditions_for_save
+    conditions.each_with_index do |c, i|
+      c.user_id = user_id
+      c.sort_no = i
+      c.mark_for_destruction if c.column.blank? && c.inclusion.blank? && c.value.blank?
     end
-
-    in_conds.each_with_index do |c, idx|
-      cond = conditions[idx] || Gw::WebmailFilterCondition.new
-      cond.attributes = {
-        user_id:   user_id,
-        filter_id: id,
-        sort_no:   idx,
-        column:    c[:column],
-        inclusion: c[:inclusion],
-        value:     c[:value]
-      }
-      cond.save
-    end
-
-    in_conds.size.upto(conditions.size) do |i|
-      conditions[i].destroy if conditions[i]
-    end
-
-    conditions(true)
-    true
   end
 end

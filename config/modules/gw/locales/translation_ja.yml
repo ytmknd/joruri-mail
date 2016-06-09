@@ -40,9 +40,15 @@ ja:
         action: 動作
         mailbox: 対象フォルダ
         conditions_chain: 条件の結合
-        in_conditions: 条件
+        conditions: 条件
         created_at: 作成日時
         updated_at: 更新日時
+      gw/webmail_filter_condition: &filter_condition
+        column: 条件の適用対象
+        inclusion: 条件の演算子
+        value: 条件の値
+      gw/webmail_filter/conditions:
+        <<: *filter_condition
       gw/webmail_template: 
         name: テンプレート名
         to: 宛先

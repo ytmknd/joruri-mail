@@ -1,8 +1,7 @@
 <div class="actionMenu">
-  <%= link_to :index, '#', onclick: "returnToAddresses();return false;" %>
-  <%= link_to "メール作成", '#', onclick: open_mail_form(create_mail_gw_webmail_sys_address_path(@item.id)) %>
-  <%= link_to "個人アドレス帳に登録", '#',
-    onclick: "addAddress('#{escape_javascript(@item.email)}', '#{escape_javascript(@item.name)}', '#{escape_javascript(@item.kana)}');return false;" %>
+  <%= link_to :index, '#returnToAddresses' %>
+  <%= link_to 'メール作成', '#', onclick: open_mail_form(create_mail_gw_webmail_sys_address_path(@item.id)) %>
+  <%= link_to '個人アドレス帳に登録', '#addAddress', data: { email: @item.email, name: @item.name, kana: @item.kana } %>
 </div>
 
 <table class="show">

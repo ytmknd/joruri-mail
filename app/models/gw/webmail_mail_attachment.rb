@@ -61,6 +61,8 @@ class Gw::WebmailMailAttachment < ActiveRecord::Base
     return false
   end
 
+  private
+
   def validate_image(filedata)
     begin
       require 'RMagick'

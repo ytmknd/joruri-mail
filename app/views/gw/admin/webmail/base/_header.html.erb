@@ -19,15 +19,20 @@ end
     <%= link_to Joruri.config.application['webmail.setting_menu'], gw_webmail_settings_path('mail_list'), class: cls.call(:setting) %>
     <%= link_to Joruri.config.application['webmail.doc_menu'], gw_webmail_docs_path, class: cls.call(:doc) %>
   </div>  
-  <script type="text/javascript">
-  new Navigation({
-  'fontSize': {'fontNormal': '1.0em', 'fontLarge': '1.3em', 'fontExtraLarge': '1.5em'}
-  });
-  </script>
   <div class="rightMenu">
     文字サイズ
-    <a href="#void" id="fontNormal" name="fontNormal" title="小">小</a
-    ><a href="#void" id="fontLarge" name="fontLarge" title="中">中</a
-    ><a href="#void" id="fontExtraLarge" name="fontExtraLarge" title="大">大</a>
+    <a href="#void" id="fontNormal" title="小">小</a
+    ><a href="#void" id="fontLarge" title="中">中</a
+    ><a href="#void" id="fontExtraLarge" title="大">大</a>
   </div>
 </div>
+
+<script type="text/javascript">
+//<![CDATA[
+$(function() {
+  Navigation.initialize({
+    fontSize: {'#fontNormal': '1.0em', '#fontLarge': '1.3em', '#fontExtraLarge': '1.5em'}
+  });
+});
+//]]>
+</script>

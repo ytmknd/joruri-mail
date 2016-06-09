@@ -1,5 +1,4 @@
 <%
-
 mailboxes = []
 Gw::WebmailMailbox.load_mailboxes.each do |box|
   next if box.name == @mailbox.name && params[:copy].blank?
@@ -10,7 +9,6 @@ end
 
 action_label = params[:copy].blank? ? '移動' : 'コピー'
 %>
-<%= javascript_include_tag "/_common/js/mail_form.js" %>
 <table id="webmailContainer"><tr>
 <% unless @new_window %>
 <td id="webmailMenu"><div id="webmailMenuContainer">
@@ -22,8 +20,8 @@ action_label = params[:copy].blank? ? '移動' : 'コピー'
 </div>
 
 <%= render 'gw/admin/webmail/base/account' %>
-<%= render 'mailbox' %>
-<%= render 'mail_address_history' if @mail_address_history != 0 %>
+<%= render 'gw/admin/webmail/mails/shared/mailbox' %>
+<%= render 'gw/admin/webmail/mails/shared/mail_address_history' if @mail_address_history != 0 %>
 
 </div></td>
 <% end %>

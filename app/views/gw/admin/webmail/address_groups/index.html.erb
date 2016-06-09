@@ -1,17 +1,17 @@
 <table id="webmailContainer"><tr><td id="webmailMenu">
 <div id="webmailMenuContainer">
 
-<%= render 'menu'%>
+<%= render 'menu' %>
 
 <div class="mailbox">
   <ul class="root">
     <% if params[:search] %>
       <li class="folder">
-        <a href="#top" id="group0" class="current" onclick="return loadAddresses(0, '検索結果');">検索結果</a>
+        <a href="#loadAddresses" id="group0" class="current" data-gid="0">検索結果</a>
       </li>
     <% end %>
     <li class="folder">
-      <a href="#top" id="groupAll" class="<%= 'current' unless params[:search] %>" onclick="return loadAddresses('All', 'すべて');">すべて</a>
+      <a href="#loadAddresses" id="groupAll" class="<%= 'current' unless params[:search] %>" data-gid="All">すべて</a>
     </li>
     <%= render 'children', groups: @root_groups %>
   </ul>
@@ -19,8 +19,8 @@
 
 <br />
 <div class="actionMenu">
-  <%= link_to "CSVインポート", import_gw_webmail_addresses_path, style: "margin-bottom: 10px;" %>
-  <%= link_to "CSVエクスポート", export_gw_webmail_addresses_path %>
+  <%= link_to 'CSVインポート', import_gw_webmail_addresses_path, style: 'margin-bottom: 10px;' %>
+  <%= link_to 'CSVエクスポート', export_gw_webmail_addresses_path %>
 </div>
 
 </div>
@@ -29,285 +29,163 @@
 <%= render "search" %>
 
 <%= form_for :item, url: { action: :create_mail }, html: { id: 'users', name: 'users', target: '_blank' } do |f| %>
-
-<div id="addresses">
-
-  <div id="addresses0">
-    <% if params[:search] %>
-    <p class="form">検索結果</p>
-    <div class="actionMenu"><a href="#" onclick="return createMail();" class="create" title="メール作成">メール作成</a></div>
-    <table class="index">
-      <tr>
-        <th class="checkUI"><a onmousedown="return checkAll('to' , '0');" onclick="return false;" href="#" title="TO">TO</a></th>
-        <th class="checkUI"><a onmousedown="return checkAll('cc' , '0');" onclick="return false;" href="#" title="CC">CC</a></th>
-        <th class="checkUI"><a onmousedown="return checkAll('bcc', '0');" onclick="return false;" href="#" title="BCC">BCC</a></th>
-        <th style="width: 30%;"><a class="sorter" id="nameCaption0" href="#" onclick="sortAddresses('0', 'name'); return false;">名前</a></th>
-        <th style="width: 20%;"><a class="sorter" id="kanaCaption0" href="#" onclick="sortAddresses('0', 'kana'); return false;">フリガナ</a></th>
-        <th style="width: ;"><div class="email"><a class="sorter" id="emailCaption0" href="#" onclick="sortAddresses('0', 'email'); return false;">メールアドレス</a></div><div class="sortNo">並び順</div></th>
-      </tr>
-      <% @s_items.each do |u| %>
-      <tr <%= cycle '', 'class="cycle"' %>>
-        <td class="checkUI"><input type="checkbox" name="to[<%= u.id %>]" value="1" class="group0" /></td>
-        <td class="checkUI"><input type="checkbox" name="cc[<%= u.id %>]" value="1" class="group0" /></td>
-        <td class="checkUI"><input type="checkbox" name="bcc[<%= u.id %>]" value="1" class="group0" /></td>
-        <td><%= link_to h(u.name), gw_webmail_address_path(u.id) %></td>
-        <td><div class="kana"><%= u.kana %></div></td>
-        <td><div class="email"><%= u.email %></div><div class="sortNo"><%= u.sort_no %></span></td>
-      </tr>
-      <% end %>
-    </table>
-    <div class="actionMenu"><a href="#" onclick="return createMail();" class="create" title="メール作成">メール作成</a></div>
-    <% end %>
-  </div>
-
-  <div id="addressesAll" style="<%= 'display: none;' if params[:search] %>">
-    <p class="form">すべて</p>
-    <div class="actionMenu">
-      <a href="#" onclick="return createMail();" class="create" title="メール作成">メール作成</a>
+  <div id="addresses"></div>
+  <script id="addressesTemplate" type="text/x-jsrender">
+    <div id="addresses{{:group_id}}" data-gid="{{:group_id}}">
+      <p class="form">{{>group_name}}</p>
+      <div class="actionMenu">
+        <div class="leftMenu">
+          <a href="#createMail" class="create" title="メール作成">メール作成</a>
+        </div>
+        {{if group_id != 'All' && group_id != '0'}}
+          <div class="rightMenu">
+            <a class="edit" href="<%= gw_webmail_address_groups_path %>/{{:group_id}}/edit">編集</a>
+            <a class="delete" href="<%= gw_webmail_address_groups_path %>/{{:group_id}}" data-method="delete" data-confirm="削除してよろしいですか？" >削除</a>
+          </div>
+        {{/if}}
+        <div style="clear:both;"></div>
+      </div>
+      <table class="index">
+        <tbody>
+          <tr>
+            <th class="checkUI"><a href="#checkAll" title="TO" data-type="to">TO</a></th>
+            <th class="checkUI"><a href="#checkAll" title="CC" data-type="cc">CC</a></th>
+            <th class="checkUI"><a href="#checkAll" title="BCC" data-type="bcc">BCC</a></th>
+            <th style="width: 30%;">
+              <a class="sorter" href="#sortAddresses" data-key="name">名前{^{:sort_key == "name" ? sort_order: ""}}</a>
+            </th>
+            <th style="width: 20%;">
+              <a class="sorter" href="#sortAddresses" data-key="kana">フリガナ{^{:sort_key == "kana" ? sort_order: ""}}</a>
+            </th>
+            <th style="width: ;">
+              <div class="email"><a class="sorter" href="#sortAddresses" data-key="email">メールアドレス{^{:sort_key == "email" ? sort_order: ""}}</a></div>
+              <div class="sortNo">並び順</div>
+            </th>
+          </tr>
+          {^{for addresses}}
+            <tr>
+              <td class="checkUI"><input type="checkbox" name="to[{{:id}}]"  value="1" data-link="checked.to" /></td>
+              <td class="checkUI"><input type="checkbox" name="cc[{{:id}}]"  value="1" data-link="checked.cc" /></td>
+              <td class="checkUI"><input type="checkbox" name="bcc[{{:id}}]" value="1" data-link="checked.bcc" /></td>
+              <td><a href="<%= gw_webmail_addresses_path %>/{{:id}}">{{>name}}</a></td>
+              <td>{{>kana}}</td>
+              <td>
+                <div class="email">{{>email}}</div>
+                <div class="sortNo">{{:sort_no}}</div>
+              </td>
+            </tr>
+          {{/for}}
+        </tbody>
+      </table>
+      <div class="actionMenu">
+        <a href="#createMail" class="create" title="メール作成">メール作成</a>
+      </div>
     </div>
-    <table class="index">
-      <tr>
-        <th class="checkUI"><a onmousedown="checkAll('to' , 'All');" onclick="return false;" href="#" title="TO">TO</a></th>
-        <th class="checkUI"><a onmousedown="checkAll('cc' , 'All');" onclick="return false;" href="#" title="CC">CC</a></th>
-        <th class="checkUI"><a onmousedown="checkAll('bcc', 'All');" onclick="return false;" href="#" title="BCC">BCC</a></th>
-        <th style="width: 30%;"><a class="sorter" id="nameCaptionAll" href="#" onclick="sortAddresses('All', 'name'); return false;">名前</a></th>
-        <th style="width: 20%;"><a class="sorter" id="kanaCaptionAll" href="#" onclick="sortAddresses('All', 'kana'); return false;">フリガナ</a></th>
-        <th style="width: ;"><div class="email"><a class="sorter" id="emailCaptionAll" href="#" onclick="sortAddresses('All', 'email'); return false;">メールアドレス</a></div><div class="sortNo">並び順</div></th>
-      </tr>
-      <% @items.each do |u| %>
-      <tr <%= cycle '', 'class="cycle"' %>>
-        <td class="checkUI"><input type="checkbox" name="to[<%= u.id %>]" value="1" class="groupAll" /></td>
-        <td class="checkUI"><input type="checkbox" name="cc[<%= u.id %>]" value="1" class="groupAll" /></td>
-        <td class="checkUI"><input type="checkbox" name="bcc[<%= u.id %>]" value="1" class="groupAll" /></td>
-        <td><%= link_to h(u.name), gw_webmail_address_path(u.id) %></td>
-        <td><div class="kana"><%= u.kana %></div></td>
-        <td><div class="email"><%= u.email %></div><div class="sortNo"><%= u.sort_no %></span></td>
-      </tr>
-      <% end %>
-    </table>
-    <div class="actionMenu"><a href="#" onclick="return createMail();" class="create" title="メール作成">メール作成</a></div>
-  </div>
-</div>
-
+  </script>
 <% end %>
 
 </div><!-- end #webmailContainer --></td></table>
 
-<%= javascript_include_tag "/_common/js/mail_form.js" %>
 <script type="text/javascript">
 //<![CDATA[
-
-var chkval = {}
-function checkAll(type, gid) {
-  var value = chkval[type + gid];
-  chkval[type + gid] = value = value ? 0 : 1;
-  var frm = document.users;
-  var len = frm.elements.length;
-  for ( var i = 0; i < len; i++) {
-    if(frm.elements[i].name.match(new RegExp('^' + type + '\\['))) {
-      if (frm.elements[i].className == "group" + gid) {
-        frm.elements[i].checked = value;
-      }
+$(function() {
+  var groupingView = <%= 
+    g1 = address_view_model('All', 'すべて', @items)
+    g2 = address_view_model('0', '検索結果', @s_items) if @s_items.present?
+    [g1, g2].compact.to_json.html_safe
+  %>;
+  groupingView.loadingFlag = false;
+  groupingView.findGrouping = function(gid) {
+    return $.grep(this, function(g) {
+      return g.group_id == gid;
+    })[0];
+  }
+  groupingView.checkAll = function(gid, type) {
+    var grouping = this.findGrouping(gid);
+    var flag = !grouping.checked[type]
+    $.observable(grouping).setProperty('checked.' + type, flag);
+    $.each(grouping.addresses, function() {
+      $.observable(this).setProperty('checked.' + type, flag);
+    });
+  }
+  groupingView.sortAddresses = function(gid, key) {
+    var grouping = this.findGrouping(gid);
+    var order = grouping.sort_order.match(/▲/) ? '▼' : '▲';
+    $.observable(grouping).setProperty({sort_key: key, sort_order: order});
+    $.observable(grouping.addresses).refresh(
+      grouping.addresses.sort(function(a, b) {
+        if (order == '▲') {
+          return a[key] > b[key];
+        } else {
+          return a[key] < b[key];
+        }
+      })
+    );
+  }
+  groupingView.loadAddresses = function(gid) {
+    if (this.loadingFlag == true) return;
+    $('[id^="group"][data-gid]').removeClass('current')
+      .filter('[data-gid="' + gid + '"]')
+      .addClass('current');
+    $('[id^=addresses][data-gid]').hide();
+    var grouping = this.findGrouping(gid);
+    if (grouping) {
+      $('#addresses' + gid).show();
+    } else {
+      groupingView.loadingFlag = true;
+      $.get('<%= gw_webmail_address_groups_path %>/' + gid + '.json').done(function(data) {
+        $.observable(groupingView).insert(data);
+        $('#addresses' + gid).show();
+        groupingView.loadingFlag = false;
+      });
     }
   }
-  return false;
-}
 
-function createMail() {
-  var frm = document.users;
-  var len = frm.elements.length;
-  var chk = {to : 0, cc : 0, bcc : 0};
-  for ( var i = 0; i < len; i++) {
-    if (frm.elements[i].checked != true) continue;
-    if (frm.elements[i].name.match(/^to\[/)) {
-      chk['to'] += 1;
-    } else if (frm.elements[i].name.match(/^cc\[/)) {
-      chk['cc'] += 1;
-    } else if (frm.elements[i].name.match(/^bcc\[/)) {
-      chk['bcc'] += 1;
-    }
-  }
-  if (chk['to'] + chk['cc'] + chk['bcc'] == 0) {
-    alert("ユーザを選択してください。");
+  $.templates("#addressesTemplate").link('#addresses', groupingView);
+  <% if @s_items.present? %>
+  $('#addressesAll').hide();
+  $('#addresses0').show();
+  <% end %>
+
+  $('a[href="#loadAddresses"]').on('click', function() {
+    var gid = $(this).attr('data-gid')
+    groupingView.loadAddresses(gid);
     return false;
-  } else if (chk['to'] > 150) {
-    alert("宛先に選択できるのは150件までです。");
-    return false;
-  } else if (chk['cc'] > 150) {
-    alert("Toに選択できるのは150件までです。");
-    return false;
-  } else if (chk['bcc'] > 150) {
-    alert("Bccに選択できるのは150件までです。");
-    return false;
-  }
-  var w = openMailForm("", '<%=raw mail_form_style %>', "mailForm" + new Date().getTime());
-  frm.target = w.name;
-  frm.submit();
-  return false;
-}
-
-function deleteGroup(gid) {
-  if (!confirm('削除してよろしいですか？')) return false;
-  var f = document.createElement('form');
-  f.style.display = 'none';
-  $('addressContent').appendChild(f);
-  f.method = 'POST';
-  f.action = "<%= gw_webmail_address_groups_path %>/" + gid;
-  var m = document.createElement('input');
-  m.setAttribute('type', 'hidden');
-  m.setAttribute('name', '_method');
-  m.setAttribute('value', 'delete');
-  f.appendChild(m);
-  var s = document.createElement('input');
-  s.setAttribute('type', 'hidden');
-  s.setAttribute('name', 'authenticity_token');
-  s.setAttribute('value', '<%= form_authenticity_token %>');
-  f.appendChild(s);
-  f.submit();
-}
-
-function getNodeValue(node, name) {
-  var elem = node.getElementsByTagName(name);
-  if (elem.length > 0 && elem[0].firstChild != null) {
-    return elem[0].firstChild.nodeValue;
-  }
-  return null;
-}
-
-var loading_id = null;
-var showing_id = "<%= params[:search] ? '0' : 'All' %>";
-
-function loadAddresses(gid, gname) {
-  if (loading_id != null) { return false; }
-  if ($("addresses" + showing_id)) { $("addresses" + showing_id).hide(); }
-  if ($('group' + showing_id)) { $('group' + showing_id).className = ""; }
-  showing_id = gid;
-  $('group' + gid).addClassName('current');
-  if ($('addresses' + gid)) { $('addresses' + gid).show(); return false; }
-
-  loading_id = gid;
-  var uri = "<%= gw_webmail_address_groups_path %>/" + gid + ".xml";
-  var myAjax = new Ajax.Request(uri, {
-    method: 'get',
-    parameters: "group_id=" + gid,
-    onSuccess: function(request){
-      showAddresses(request, gid, gname);
-    },
-    onFailure: function(request) { alert('送信に失敗しました。'); }
   });
-  return true;
-}
-function showAddresses(request, gid, gname) {
-  var html = '';
-  html += '<p class="form">' + gname.escapeHTML() + '</p>';
-  html += '<div class="actionMenu">';
-  html += '  <div class="leftMenu">';
-  html += '  <a href="#" onclick="return createMail();" class="create" title="メール作成">メール作成</a>';
-  html += '  </div>';
-  html += '  <div class="rightMenu">';
-  html += '  <a class="edit" href="<%= gw_webmail_address_groups_path %>/' + gid + '/edit">編集</a>';
-  html += '  <a class="delete" href="#delete" onclick="return deleteGroup(' + gid + ');">削除</a>';
-  html += '  </div><div style="clear:both;"></div>';
-  html += '</div>';
-  html += '<table class="index"><tr>';
-  html += '<th class="checkUI"><a onmousedown="checkAll(\'to\' , \'' + gid + '\');" onclick="return false;" href="#" title="TO">TO</a></th>';
-  html += '<th class="checkUI"><a onmousedown="checkAll(\'cc\' , \'' + gid + '\');" onclick="return false;" href="#" title="CC">CC</a></th>';
-  html += '<th class="checkUI"><a onmousedown="checkAll(\'bcc\', \'' + gid + '\');" onclick="return false;" href="#" title="BCC">BCC</a></th>';
-  html += '<th style="width: 30%;"><a class="sorter" id="nameCaption' + gid + '" href="#" onclick="sortAddresses(\'' + gid + '\', \'name\'); return false;">名前</a></th>';
-  html += '<th style="width: 20%;"><a class="sorter" id="kanaCaption' + gid + '" href="#" onclick="sortAddresses(\'' + gid + '\', \'kana\'); return false;">フリガナ</a></th>';
-  html += '<th style="width: ;"><div class="email"><a class="sorter" id="emailCaption' + gid + '" href="#" onclick="sortAddresses(\'' + gid + '\', \'email\'); return false;">メールアドレス</a></div><div class="sortNo">並び順</div></th>';
-  html += '</tr>';
-  
-  var items = request.responseXML.getElementsByTagName("item");
-  for (var i = 0; i < items.length; i++) {
-    var item  = items[i];
-    var id    = getNodeValue(item, 'id');
-    var name  = getNodeValue(item, 'name');
-    var kana  = getNodeValue(item, 'kana');
-    var email = getNodeValue(item, 'email');
-    var sortNo = getNodeValue(item, 'sort_no');
-    if (kana == null) kana = ""
-    if (sortNo == null) sortNo = "";
-    html += "<tr>";
-    html += '<td class="checkUI"><input type="checkbox" name="to[' + id + ']"  value="1" class="group' + gid + '" /></td>';
-    html += '<td class="checkUI"><input type="checkbox" name="cc[' + id + ']"  value="1" class="group' + gid + '" /></td>';
-    html += '<td class="checkUI"><input type="checkbox" name="bcc[' + id + ']" value="1" class="group' + gid + '" /></td>';
-    html += '<td><a href="<%= gw_webmail_addresses_path %>/' + id + '">' + name.escapeHTML() + "</a></td>";
-    html += '<td><div class="kana">' + kana.escapeHTML() + '</div>'
-    html += '<td><div class="email">' + email.escapeHTML() + '</div>'
-    html += '<div class="sortNo">' + sortNo + '</div>'
-    html += "</td>";
-    html += "</tr>";
-  }
-  html += '</table>';
-  html += '<div class="actionMenu"><a href="#" onclick="return createMail();" class="create" title="メール作成">メール作成</a></div>';
-
-  var elm = document.createElement("div");
-  elm.id = 'addresses' + gid;
-  elm.innerHTML = html;
-  $('addresses').appendChild(elm);
-  loading_id = null;
-}
-function getTbodyNode(gid) {
-  var addressesNode = $('addresses' + gid);
-  if (addressesNode == null) return null;
-  var nodes = addressesNode.getElementsByTagName('tbody');
-  if (nodes.length == 0) return null;
-  return nodes[0];
-}
-function nextSortOrder(titleText) {
-  var mark = "▲";
-  if (titleText.match(/▲/)) mark = "▼";
-  return mark;
-}
-function setNextSortOrder(gid, key) {
-  var keyNode = $(key + 'Caption' + gid);
-  var nameNode = $('nameCaption' + gid);
-  var kanaNode = $('kanaCaption' + gid);
-  var emailNode = $('emailCaption' + gid);
-  var order = "▲";
-  if (!nameNode || !kanaNode || !emailNode || !keyNode) return order;
-  order = nextSortOrder(keyNode.innerHTML);
-  nameNode.innerHTML = nameNode.innerHTML.replace("▲","").replace("▼","");
-  kanaNode.innerHTML = kanaNode.innerHTML.replace("▲","").replace("▼","");
-  emailNode.innerHTML = emailNode.innerHTML.replace("▲","").replace("▼","");
-  keyNode.innerHTML += order;
-  return order;
-}
-function getInnerText(elm) {
-  if ('textContent' in  elm) {
-    return elm.textContent;
-  }
-  return elm.innerText;
-}
-function sortAddresses(gid, key) {
-  var tbodyNode = getTbodyNode(gid);
-  if (tbodyNode == null) return false;
-  var trNodes = tbodyNode.getElementsByTagName('tr');
-  if (trNodes.length == 0) return false;
-  var order = setNextSortOrder(gid, key);
-  var clones = new Array();
-  while (trNodes.length > 1) {
-    var node = trNodes[1];
-    var children = node.getElementsByTagName('td');
-    if (children.length >= 6) {
-      var hash = new Hash();
-      hash.node = node;
-      hash.name = getInnerText(children[3]);
-      hash.kana = getInnerText(children[4]);
-      hash.email = getInnerText(children[5]);
-      clones.push(hash);
+  $(document).on('click', 'a[href="#checkAll"]', function() {
+    var gid = $(this).parents('[data-gid]:first').attr('data-gid');
+    var type = $(this).attr('data-type');
+    groupingView.checkAll(gid, type);
+    return false;
+  })
+  .on('click', 'a[href="#sortAddresses"]', function() {
+    var gid = $(this).parents('[data-gid]:first').attr('data-gid');
+    var key = $(this).attr('data-key');
+    groupingView.sortAddresses(gid, key);
+    return false;
+  })
+  .on('click', 'a[href="#createMail"]', function() {
+    var num = {
+      to: $('input[name^="to"]:checked').length,
+      cc: $('input[name^="cc"]:checked').length,
+      bcc: $('input[name^="bcc"]:checked').length
     }
-    node.parentNode.removeChild(node);
-  }
-  if (order == "▲") {
-    clones.sort(function(e1,e2){ return e1[key] > e2[key] ? 1 : -1; });
-  } else {
-    clones.sort(function(e1,e2){ return e1[key] < e2[key] ? 1 : -1; });
-  }
-  for (var i=0; i<clones.length; i++) {
-    tbodyNode.appendChild(clones[i].node);
-  }
-}
+    if (num['to'] + num['cc'] + num['bcc'] == 0) {
+      alert('ユーザを選択してください。');
+    } else if (num['to'] > 150) {
+      alert('宛先に選択できるのは150件までです。');
+    } else if (num['cc'] > 150) {
+      alert('Ccに選択できるのは150件までです。');
+    } else if (num['bcc'] > 150) {
+      alert('Bccに選択できるのは150件までです。');
+    } else {
+      var w = openMailForm('', '<%=raw mail_form_style %>', "mailForm" + new Date().getTime());
+      var form = $('#users');
+      form.attr('target', w.name);
+      form.submit();
+    }
+    return false;
+  })
+});
 //]]>
 </script>

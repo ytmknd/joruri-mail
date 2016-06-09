@@ -1,0 +1,174 @@
+<%= content_for :head do %>
+  <script type="text/javascript" src="/_common/js/swfupload/swfupload.js"></script>
+  <script type="text/javascript" src="/_common/js/swfupload/plugins/swfupload.queue.js"></script>
+  <script type="text/javascript" src="/_common/js/swfupload/plugins/fileprogress.js"></script>
+  <script type="text/javascript" src="/_common/js/swfupload/plugins/handlers.js"></script>
+<% end %>
+
+<table style="width: 100%;">
+  <tr>
+    <td>
+      <div id="flashUploader" style="display: none;">
+        <div id="swfupButtons">
+          <span id="spanButtonPlaceHolder"></span
+          ><input id="btnCancel" type="button" value="キャンセル" disabled="disabled" />
+        </div>
+      </div>
+      <div id="defaultUploader" style="display: none;">
+        <%= f.file_field :in_files, name: 'item[in_files][]', size: 90, style: 'width: 300px;', class: 'file' %><br />
+        <%= tag :input, type: 'button', value: '選択したファイルを添付', id: 'commit_file', name: 'commit_file', style: 'display: none;' %>
+      </div>
+    </td>
+    <td style="vertical-align: bottom;">
+      <%= yield %>
+    </td>
+  </tr>
+</table>
+
+<div id="uploadedFiles" style="<%= 'display: none;' if @item.tmp_attachments.blank? %>">
+  <script id="uploadFileTemplate" type="text/x-jsrender">
+    <span class="uploadedFile" id="uploadedFile{{:id}}">
+      {{if image_is == 1}}
+        <a href="<%= gw_webmail_attachments_path %>/{{:id}}?tmp_id={{:tmp_id}}&filename={{:name}}" class="uploadedFileName {{:css_class}}" target="_blank">{{>title}}</a>
+      {{else}}
+        <a href="<%= gw_webmail_attachments_path %>/{{:id}}?tmp_id={{:tmp_id}}&filename={{:name}}" class="uploadedFileName {{:css_class}}">{{>title}}</a>
+      {{/if}}
+      <a href="#deleteUploadedFile" data-id="{{:id}}" class="deleteUploadedFile" title="削除">x</a>
+      <input type="hidden" value="{{:id}}" name="item[tmp_attachment_ids][]">
+    </span>
+  </script>
+</div>
+<div id="divStatus"></div>
+<div id="fsUploadProgress"></div>
+<div id="defaultUploaderProgress" style="display:none;">
+  <div class="progressWrapper">
+    <div class="progressContainer red">
+      <div id="defaultUploaderProgressName" class="progressName"></div>
+      <div class="progressBarStatus">uploading...</div>
+    </div>
+  </div>
+</div>
+
+<%
+attachment_file_max_size = Joruri.config.application['webmail.attachment_file_max_size']
+%>
+<script type="text/javascript">
+//<![CDATA[
+$(function() {
+  <% case Joruri.config.application['webmail.attachment_file_upload_method'] %>
+  <% when 'auto' %>
+    if (isFlashInstalled()) {
+      $('#flashUploader').show();
+    } else {
+      $('#defaultUploader').show();
+    }
+  <% when 'flash' %>
+    $('#flashUploader').show();
+  <% else %>
+    $('#defaultUploader').show();
+  <% end %>
+
+  var tmp_attachments = <%=
+    @item.tmp_attachments.map { |at|
+      mail_attachment_view_model(at, tmp_id: @item.tmp_id)
+    }.to_json.html_safe
+  %>
+  $('#uploadedFiles').append( $('#uploadFileTemplate').render(tmp_attachments) );
+
+  var swfu = new SWFUpload({
+    upload_url: '<%= gw_webmail_attachments_path(format: :json) %>',
+    post_params: {
+      //authenticity_token: '<%= form_authenticity_token %>',
+      tmp_id: '<%= @item.tmp_id %>',
+      total_size_limit: '<%= attachment_file_max_size %> MB'
+    },
+    flash_url: '/_common/js/swfupload/swfupload.swf',
+    file_post_name: 'file',
+    file_size_limit: '<%= attachment_file_max_size %> MB',
+    file_types: '*.*',
+    file_types_description: 'All Files',
+    file_upload_limit: 0,
+    file_queue_limit: 0,
+    custom_settings: {
+      progressTarget: 'fsUploadProgress',
+      cancelButtonId: 'btnCancel'
+    },
+    debug: false,
+    prevent_swf_caching: false,
+    button_image_url: '/_common/themes/admin/gw/images/bt/bt_f_newfile.png',
+    button_width: '99',
+    button_height: '24',
+    button_placeholder_id: 'spanButtonPlaceHolder',
+    file_queued_handler: fileQueued,
+    file_queue_error_handler: fileQueueError,
+    file_dialog_complete_handler: fileDialogComplete,
+    upload_start_handler: uploadStart,
+    upload_progress_handler: uploadProgress,
+    upload_error_handler : uploadError,
+    upload_success_handler: uploadSuccessCallback,
+    upload_complete_handler: uploadComplete,
+    queue_complete_handler: queueComplete  // Queue plugin event
+  });
+  function uploadSuccessCallback(file, data) {
+    var progress = new FileProgress(file, this.customSettings.progressTarget);
+    progress.setComplete();
+    progress.setStatus('Complete.');
+    progress.toggleCancel(false);
+    data = $.parseJSON(data);
+    if (data.status == 'Error') { 
+      alert(data.message);
+    } else {
+      $('#uploadedFiles').append( $('#uploadFileTemplate').render(data) );
+      toggleUploadedFiles(data);
+    }
+  }
+  function toggleUploadedFiles() {
+    var elem = $('#uploadedFiles');
+    if (elem.children('span').length) {
+      elem.show();
+    } else {
+      elem.hide();
+    }
+  }
+  $('#btnCancel').on('click', function() {
+    swfu.cancelQueue();
+  });
+  $(document).on('click', 'a[href="#deleteUploadedFile"]', function() {
+    var id = $(this).attr('data-id');
+    $.post('<%= gw_webmail_attachments_path %>/' + id, {
+      _method: 'delete',
+      authenticity_token: '<%= form_authenticity_token %>',
+      tmp_id: '<%= @item.tmp_id %>'
+    })
+    .done(function() {
+      $('#uploadedFile' + id).remove();
+      toggleUploadedFiles();
+    });
+    return false;
+  });
+  $(document).on('click', 'a.uploadedFileName', function() {
+    if ($(this).attr('target') == '_blank') return;
+    $(window).off('beforeunload');
+    window.location.href = this.href;
+    $(window).on('beforeunload', checkFormChanged);
+    return false;
+  });
+  $('#item_in_files').on('change', function() {
+    var maxsize = <%= attachment_file_max_size %>*1024*1024;
+    if (this.value == '') { return; }
+    if (this.files) {
+      if (this.files[0].size > maxsize) {
+        alert('ファイルサイズが容量制限（<%= attachment_file_max_size %>MB）を超えています。');
+        return;
+      }
+    }
+    $('#defaultUploaderProgressName').html(elm.val());
+    $('#defaultUploaderProgress').show();
+    $('#commit_file').click();
+  });
+  $('#commit_file').on('click', function() {
+    checkServerStatus(this);
+  });
+});
+//]]>
+</script>

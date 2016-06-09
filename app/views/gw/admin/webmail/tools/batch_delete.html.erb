@@ -35,7 +35,7 @@
 </table>
 <br />
 <div class="submitters">
-  <%= submit_tag "一括削除する", onclick: "confirm_before_submit(this); return false;" %>
+  <%= submit_tag '一括削除する' %>
 </div>
 <% end %>
 
@@ -43,16 +43,15 @@
 
 <script type="text/javascript">
 //<![CDATA[
-(function($) {
-  $(function() {
-    $('input.datepicker').datepicker();
+$(function() {
+  $('input.datepicker').datepicker();
+  $('#batchDeleteForm').on('submit', function() {
+    if (confirm('ごみ箱に移動せず、直接削除します。\n（元に戻すことはできません）')) {
+      return true;
+    } else {
+      return false;
+    }
   });
-})(jQuery);
-
-var confirm_before_submit = function(form) {
-  if (confirm('ごみ箱に移動せず、直接削除します。\n（元に戻すことはできません）')) {
-    $('batchDeleteForm').submit();
-  }
-}
+});
 //]]>
 </script>

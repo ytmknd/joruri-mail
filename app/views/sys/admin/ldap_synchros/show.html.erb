@@ -28,10 +28,21 @@ end
 <%= form_tag url_for(action: :synchronize) do |f| %>
   <div class="submitters">
     <span id="message" style="color: #b40; text-align: center;"></span>
-    <input type="submit" value="同期する" onclick="$('message').innerHTML='処理を開始しました。そのままでお待ちください。<br /><br />';" />
+    <input type="submit" value="同期する" />
   </div>
 <% end %>
 
 <div id="ldapView">
 <% @items.each {|group| children(group)} %>
 </div>
+
+<script type="text/javascript">
+//<![CDATA[
+$(function() {
+  $('form').on('submit', function() {
+    $('#message').html('処理を開始しました。そのままでお待ちください。<br /><br />');
+    return true;
+  });
+});
+//]]>
+</script>

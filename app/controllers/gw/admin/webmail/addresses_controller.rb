@@ -2,7 +2,6 @@ require 'csv'
 class Gw::Admin::Webmail::AddressesController < Gw::Controller::Admin::Base
   include Sys::Controller::Scaffold::Base
   layout "admin/gw/webmail"
-  helper Gw::AddressHelper
 
   def pre_dispatch
     #return error_auth unless Core.user.has_auth?(:designer)
@@ -10,18 +9,11 @@ class Gw::Admin::Webmail::AddressesController < Gw::Controller::Admin::Base
 
   def index
     return render text: ''
-
-##    item = Gw::WebmailAddress.readable.where(user_id: Core.user.id)
-##    item = item.where(group_id: @parent.id) if @parent
-##    @items = item.order(:kana, :id).paginate(page: params[:page], per_page: params[:limit])
-##    _index @items
   end
 
   def show
     @item = Gw::WebmailAddress.find(params[:id])
     return error_auth unless @item.readable?
-
-    @item.in_groups = @item.groups.map(&:id).join(",")
 
     _show @item
   end
@@ -254,7 +246,7 @@ class Gw::Admin::Webmail::AddressesController < Gw::Controller::Admin::Base
     params.require(:item).permit(:name, :kana, :sort_no, :email,
       :mobile_tel, :uri, :tel, :fax, :zip_code, :address, :company_name, :company_kana,
       :official_position, :company_tel, :company_fax, :company_zip_code, :company_address, :memo,
-      :in_groups)
+      :easy_entry, :escaped, :group_ids => [])
   end
 
   def split_addr(addr)

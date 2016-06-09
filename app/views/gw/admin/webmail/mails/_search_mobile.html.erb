@@ -9,7 +9,7 @@ soopts = [["昇順",""],["降順","reverse"]]
 ssopts = [["",""],["スター付き優先","1"]]
 %>
 
-<%= form_tag url_for(action: :index), id: 'searchForm', class: 'searchForm' do %>
+<%= form_tag url_for(action: :index), method: :get, id: 'searchForm', class: 'searchForm' do %>
   <%= hidden_field_tag :search, 1 %>
   <div class="option">
     <div class="subTitle">キーワード</div>

@@ -1,12 +1,9 @@
-<%
-html_format = @item.in_format == Gw::WebmailMail::FORMAT_HTML
-%>
 <div id="openAddress">
-  <a href="#" id="sys_openAddressButton" onclick="return startAddressSelection('sys');"><%= Joruri.config.application['webmail.sys_address_menu'] %></a>
-  <a href="#" id="pri_openAddressButton" onclick="return startAddressSelection('pri');"><%= Joruri.config.application['webmail.address_group_menu'] %></a>
+  <a href="#openAddressSelector" data-prefix="sys"><%= Joruri.config.application['webmail.sys_address_menu'] %></a>
+  <a href="#openAddressSelector" data-prefix="pri"><%= Joruri.config.application['webmail.address_group_menu'] %></a>
 </div>
 
-<%= render "address_selector" %>
+<%= render 'gw/admin/webmail/base/address_selector' %>
 <%= f.hidden_field :tmp_id %>
 
 <div id="mailAddressesForm" class="mailForm">
@@ -14,18 +11,18 @@ html_format = @item.in_format == Gw::WebmailMail::FORMAT_HTML
   <tr>
     <th>宛先 ：</th>
     <td><%= f.text_area :in_to, class: 'to' %></td>
-  </tr><tr id="ccContainer" style="display:none;">
+  </tr><tr id="ccContainer" style="<%= 'display:none;' unless @item.in_cc.present? %>">
     <th>Cc ：</th>
     <td><%= f.text_area :in_cc, class: 'cc' %></td>
-  </tr><tr id="bccContainer" style="display:none;">
+  </tr><tr id="bccContainer" style="<%= 'display:none;' unless @item.in_bcc.present? %>">
     <th>Bcc ：</th>
     <td><%= f.text_area :in_bcc, class: 'bcc' %></td>
   </tr><tr>
     <th></th>
     <td style="padding-bottom:0">
       <div class="addressToggleButtons">
-        <%= link_to 'Ccを追加', '#', id: "ccToggleButton", onclick: "return toggleAddressInput('cc');" %>
-        <%= link_to 'Bccを追加', '#', id: "bccToggleButton", onclick: "return toggleAddressInput('bcc');" %>
+        <%= link_to 'Ccを追加', '#showCcAddress', style: "#{'display:none' if @item.in_cc.present? }" %>
+        <%= link_to 'Bccを追加', '#showBccAddress', style: "#{'display:none' if @item.in_bcc.present? }" %>
       </div>
     </td>
   </tr>
@@ -40,57 +37,31 @@ html_format = @item.in_format == Gw::WebmailMail::FORMAT_HTML
   </tr><tr>
     <th>添付 ：</th>
     <td>
-      <table style="width: 100%;"><tr><td>
-        <div id="flashUploader" style="display: none;">
-          <div id="swfupButtons">
-            <span id="spanButtonPlaceHolder"></span
-            ><input id="btnCancel" type="button" value="キャンセル" onclick="swfu.cancelQueue();" disabled="disabled" />
-          </div>
-        </div>
-        <div id="defaultUploader" style="display: none;">
-          <%= f.file_field :in_files, name: 'item[in_files][]', size: 90, style: 'width: 300px;', class: 'file', onchange: 'uploadAttachmentFile();' %><br />
-          <%= tag :input, type: 'button', value: "選択したファイルを添付", id: "commit_file", name: "commit_file", onclick: "checkServerStatus(this); return false;", style: 'display: none;' %>
-        </div>
-      </td><td style="vertical-align: bottom;">
+      <%= render layout: 'gw/admin/webmail/mails/form/file_uploader', locals: { f: f } do %>
         <div class="editorMenu">
           <div class="formatSelector">
-            <%= link_to 'TEXT', '#', onclick: "toggleEditor('text');return false;", title: "TEXT形式" %>
-            <%= link_to 'HTML', '#', onclick: "toggleEditor('html');return false;", title: "HTML形式" %>
+            <%= link_to 'TEXT', '#toggleEditor', data: { format: 'text' }, title: 'TEXT形式' %>
+            <%= link_to 'HTML', '#toggleEditor', data: { format: 'html' }, title: 'HTML形式' %>
           </div>
           <div class="templateSelector">
-            <%= select_tag :changeTemplate,
-              options_from_collection_for_select(Gw::WebmailTemplate.user_templates, 'id', 'name'),
-              include_blank: '# テンプレート切替', onchange: "return loadTemplate();" %>
-          </div>
-        <!-- end of editorMenu --></div>
-      </td></tr></table>
-
-      <div id="uploadedFiles" style="display: none;"></div>
-      <div id="divStatus"></div>
-      <div id="fsUploadProgress"></div>
-      <div id="defaultUploaderProgress" style="display:none;">
-        <div class="progressWrapper">
-          <div class="progressContainer red">
-            <div id="defaultUploaderProgressName" class="progressName"></div>
-            <div class="progressBarStatus">uploading...</div>
+            <%= select_tag :template, options_for_select(Gw::WebmailTemplate.user_templates.pluck(:name, :id)), include_blank: '# テンプレート切替' %>
           </div>
         </div>
-      </div>
+      <% end %>
     </td>
   </tr>
 </table>
 <%= f.hidden_field :in_format %>
 
-<%= show_tag_if 'div', !html_format, id: 'textFormatEditor', class: 'textFormatEditor' do %>
+<div id="textFormatEditor" class="textFormatEditor" style="<%= 'display:none;' if @item.in_format != 'text' %>">
   <%= f.text_area :in_body, class: 'body', style: "width:#{mail_form_size(@mail_form_size)[:textarea]}px;" %>
-<% end %>
-
-<%= show_tag_if 'div', html_format, id: 'htmlFormatEditor', class: 'htmlFormatEditor' do %>
+</div>
+<div id="htmlFormatEditor" class="htmlFormatEditor" style="<%= 'display:none;' if @item.in_format != 'html' %>">
   <%= f.text_area :in_html_body, class: 'mceEditor' %>
-<% end %>
+</div>
 
 <% if Joruri.config.application['webmail.show_gw_schedule_link'] == 1 %>
-<%= link_to 'スケジュールを作成する', '#', class: 'scheduleLink', onclick: 'openScheduleWindow(); return false;' %>
+  <%= link_to 'スケジュールを作成する', '#openScheduleWindow', class: 'scheduleLink' %>
 <% end %>
 
 <div class="recipientConfirm">
@@ -99,299 +70,15 @@ html_format = @item.in_format == Gw::WebmailMail::FORMAT_HTML
 
 </div>
 
-
-<script type="text/javascript" src="/_common/js/swfupload/swfupload.js"></script>
-<script type="text/javascript" src="/_common/js/swfupload/plugins/swfupload.queue.js"></script>
-<script type="text/javascript" src="/_common/js/swfupload/plugins/fileprogress.js"></script>
-<script type="text/javascript" src="/_common/js/swfupload/plugins/handlers.js"></script>
-<script type="text/javascript" src="/_common/js/dump.js"></script>
 <%= javascript_include_tag("/_common/js/tiny_mce/tiny_mce.js") %>
 <%= javascript_include_tag("/_common/js/tiny_mce/init_html_mail.js") %>
-<%
-attachment_file_max_size = Joruri.config.application['webmail.attachment_file_max_size']
-attachment_file_upload_method = Joruri.config.application['webmail.attachment_file_upload_method']
-%>
 <script type="text/javascript">
 //<![CDATA[
-// onload event
-var swfu = null;
-window.onload = function() {
-  var list = document.getElementsByTagName('input');
-  for (var i=0; i<list.length; i++) {
-    if(list[i].type == "text") {
-      list[i].onkeydown = function (event) { return stopReset(event); }
-    }
-  }
-  var list = document.getElementsByTagName('textarea');
-  for (var i=0; i<list.length; i++) {
-    list[i].onkeydown = function (event) { return stopReset(event); }
-  }
-  //<% if @item.in_cc.present? %>
-  toggleAddressInput('cc');
-  //<% end %>
-  //<% if @item.in_bcc.present? %>
-  toggleAddressInput('bcc');
-  //<% end %>
-  initSwfupload();
-  loadUploadedFiles();
-  if ($('item_in_format').value == 'html') {
-    initTinyMCE();
-  }
-  
-  <% case attachment_file_upload_method %>
-  <% when 'auto' %>
-  if (isFlashInstalled()) {
-    $('flashUploader').style.display = 'block';
-  } else {
-    $('defaultUploader').style.display = 'block';
-  }
-  <% when 'flash' %>
-  $('flashUploader').style.display = 'block';
-  <% else %>
-  $('defaultUploader').style.display = 'block';
-  <% end %>
-}
-// Flashインストールチェック
-function isFlashInstalled() {
-  if (navigator.plugins['Shockwave Flash']) {
-    return true;
-  }
-  try {
-    new ActiveXObject('ShockwaveFlash.ShockwaveFlash');
-    return true;
-  } catch (e) {
-    return false;
-  }
-}
-// EnterキーによるSubmitを無効化
-function stopSubmitting(e) {
-  if (!e) var e = window.event;
-  if (e.keyCode == 13) return false;
-}
-function stopReset(e) {
-  if (!e) var e = window.event;
-  if (e.keyCode == 27) return false;
-}
-// form check
-function isChanged() {
-  if ( $('original_to').value != $('item_in_to').value ) return true;
-  if ( $('original_cc').value != $('item_in_cc').value ) return true;
-  if ( $('original_bcc').value != $('item_in_bcc').value ) return true;
-  if ( $('original_subject').value != $('item_in_subject').value ) return true;
-  if ( $('original_format').value != $('item_in_format').value ) return true;
-  if ($('original_format').value == 'text') {
-    if ( $('original_body').value != $('item_in_body').value ) return true; 
-  } else if ($('original_format').value == 'html')  {
-    if ( $('original_html_body').value != $('item_in_html_body').value ) return true;
-  }
-  return false;
-}
-// form check
-var form_submitted = false;
-window.onbeforeunload = function() {
-  if (form_submitted == false && isChanged()) {
-    return "メールは保存されていません。";
-  }
-}
-// form check
-$('item_form').onsubmit = function() {
-  if (form_submitted) return false;
-  if ($('item_in_format').value == 'html') {
-    var html = tinyMCE.activeEditor.getContent();
-    $('item_in_body').value = html_to_text(html);
-  }
-  form_submitted = true;
-  return true;
-}
-// submit button
-function submitButtonOnClick() {
-  alert("アドレス帳を閉じてください。");
-  return false;
-};
-function applyOnClickToSubmitButtons(submits, onclick) {
-  for(var i = 0;i < submits.length;i++) {
-    submits[i].onclick = onclick;
-  }
-}
-// file uploader
-function initSwfupload() {
-  swfu = new SWFUpload({
-    upload_url : "<%= gw_webmail_attachments_path %>",
-    post_params: {
-      authenticity_token : "<%= form_authenticity_token %>",
-      tmp_id : "<%= @item.tmp_id %>",
-      total_size_limit : "<%= attachment_file_max_size %> MB"
-    },
-    flash_url : "/_common/js/swfupload/swfupload.swf",
-    file_post_name : "file",
-    file_size_limit : "<%= attachment_file_max_size %> MB",
-    file_types : "*.*",
-    file_types_description : "All Files",
-    file_upload_limit : 0,
-    file_queue_limit : 0,
-    custom_settings : {
-      progressTarget : "fsUploadProgress",
-      cancelButtonId : "btnCancel"
-    },
-    debug: false,
-    prevent_swf_caching : false,
-    button_image_url: "/_common/themes/admin/gw/images/bt/bt_f_newfile.png",
-    button_width: "99",
-    button_height: "24",
-    button_placeholder_id: "spanButtonPlaceHolder",//"uploadHtml",
-    //file_dialog_complete_handler : function(numFilesSelected, numFilesQueued) { this.startUpload(); },
-    //upload_error_handler : function(file, errorCode, message){ alert('読み込みに失敗しました。'); },
-    //upload_success_handler : function(file, data, response) { tinyMCE.activeEditor.setContent(data); }
-    file_queued_handler : fileQueued,
-    file_queue_error_handler : fileQueueError,
-    file_dialog_complete_handler : fileDialogComplete,
-    upload_start_handler : uploadStart,
-    upload_progress_handler : uploadProgress,
-    upload_error_handler : uploadError,
-    //upload_success_handler : uploadSuccess,
-    upload_success_handler : function(file, data) {
-      var progress = new FileProgress(file, this.customSettings.progressTarget);
-      progress.setComplete();
-      progress.setStatus("Complete.");
-      progress.toggleCancel(false);
-      if (data.match(/^Error/i) != null) { 
-        alert(data);
-      } else {
-        var id = '', name = '', size = '', image_is = '';
-        if (data.match(/^OK ([0-9]+) (.+) (.+?) (.?)$/)) {
-          id = RegExp.$1;
-          name = RegExp.$2;
-          size = RegExp.$3;
-          image_is = RegExp.$4;
-        }
-        addUploadedFile(id, name, size, image_is);
-      }
-    },
-    upload_complete_handler : uploadComplete,
-    queue_complete_handler : queueComplete  // Queue plugin event
-  });
-}
-
-// load uploaded files
-function loadUploadedFiles() {
-  var uri = "<%= gw_webmail_attachments_path(format: 'xml') %>";
-  var myAjax = new Ajax.Request(uri, {
-    method: 'get',
-    parameters: "tmp_id=<%= @item.tmp_id %>",
-    onSuccess: showUploadedFiles,
-    onFailure: function(request) { alert('送信に失敗しました。'); }
-  });
-}
-function showUploadedFiles(request) {
-  var html  = "";
-  var items = request.responseXML.getElementsByTagName("item");
-  for (var i = 0; i < items.length; i++) {
-    var item = items[i];
-    var id   = getNodeValue(item, 'id');
-    var name = getNodeValue(item, 'name');
-    var size = getNodeValue(item, 'eng_unit');
-    var image_is = getNodeValue(item, 'image_is');
-    addUploadedFile(id, name, size, image_is);
-  }
-}
-function getNodeValue(node, name) {
-  var elem = node.getElementsByTagName(name);
-  if (elem && elem[0] && elem[0].firstChild) {
-    return elem[0].firstChild.nodeValue;
-  }
-  return "";
-}
-function addUploadedFile(id, name, size, image_is) {
-  var field = $('uploadedFiles');
-  if (field.visible() == false) { field.show(); }
-  var sepa = ""; //(field.innerHTML == "") ? '' : '<span class="uploadedFileSeparator"></span>';
-  var icon = "iconFile icon" + name.replace(/.*\./, '').capitalize();
-  var html = '<span id="uploadedFile' + id + '" class="uploadedFile">' + sepa;
-  var uri = '<%= gw_webmail_attachments_path %>'
-    + '/' + id + '?tmp_id=<%= @item.tmp_id %>&filename=' + encodeURIComponent(name);
-  var opt = '';
-  if (image_is == '1') {
-    opt = 'target="_blank"';
-  } else {
-    opt = 'onclick="return downloadUploadedFile(this.href);"';
-  }
-  html += '<a href="' + uri +'" class="uploadedFileName '+ icon + '" ' + opt + ' >' + name.escapeHTML() + "(" + size + ")" + '</a>';
-  html += '<a href="#" class="deleteUploadedFile" onclick="return deleteUploadedFile(\'' + id + '\')" title="削除">x</a>';
-  html += '<input type="hidden" name="item[tmp_attachment_ids][]" value="' + id + '" />'
-  html += '</span> ';
-  field.innerHTML += html;
-}
-function downloadUploadedFile(uri) {
-  var beforeUnloadFunc = window.onbeforeunload;
-  window.onbeforeunload = function() {
-    window.onbeforeunload = beforeUnloadFunc;
-  };
-  window.location.href = uri;
-  return false; 
-}
-function deleteUploadedFile(id) {
-  var elm = $('uploadedFile' + id);
-  var uri = "<%= gw_webmail_attachments_path %>/" + id + '.xml';
-  var myAjax = new Ajax.Request(uri, {
-    method: 'post',
-    parameters: "_method=delete&authenticity_token=<%= form_authenticity_token %>&tmp_id=<%= @item.tmp_id %>",
-    onComplete: deletedUploadedFile,
-    onFailure: function(request) { alert('送信に失敗しました。'); }
-  });
-  return false;
-}
-function deletedUploadedFile(request) {
-  var id  = request.responseText.replace(/^OK /, '');
-  var elm = $('uploadedFile' + id);
-  if (elm) { elm.remove(); }
-  var field = $('uploadedFiles');
-  field.innerHTML = field.innerHTML.replace(/> +</, '> <');
-  if (field.innerHTML.match(/^ *$/) != null) {
-    field.innerHTML = "";
-    field.hide();
-  }
-}
-//toggle editor
-function toggleEditor(format) {
-  if ($('item_in_format').value == format) return;  
-  switch(format) {
-  case 'text':
-    if (!confirm("テキスト形式に変換することにより、書式情報が失われます。よろしいですか？")) return;
-    $('item_in_body').value = "";
-    $('textFormatEditor').style.display = "block";
-    $('htmlFormatEditor').style.display = "none";
-    $('item_in_body').value = html_to_text(tinyMCE.activeEditor.getContent());
-    tinyMCE.activeEditor.setContent('');
-    break;
-  case 'html':
-    $('textFormatEditor').style.display = "none";
-    $('htmlFormatEditor').style.display = "block";
-    var html = text_to_html($('item_in_body').value);
-    $('item_in_body').value = '';
-    var ace = tinyMCE.activeEditor;
-    if (ace) {
-      ace.setContent(html);
-    } else {
-      mceOnLoadContent = function(ed, o) {
-        ed.setContent(html);
-        ed.onLoadContent.remove(mceOnLoadContent);
-      };
-      mceOnAddEditor = function(mgr, ed) {
-        ed.onLoadContent.add(mceOnLoadContent);
-        tinyMCE.onAddEditor.remove(mceOnAddEditor);
-      };
-      tinyMCE.onAddEditor.add(mceOnAddEditor);
-      initTinyMCE();
-    }
-    break;
-  }
-  $('item_in_format').value = format;
-}
-function text_to_html(text) {
+function convertTextToHtml(text) {
   var lines = text.split("\n");
   var rslt = "";
-  for (var i = 0;i < lines.length;i++) {
-    line = lines[i].replace("\r", '').escapeHTML();
+  for (var i=0; i<lines.length; i++) {
+    line = escapeHTML(lines[i].replace("\r", ''));
     line = line.replace(/(\s+)(\s)/, function(s, p1, p2) {
       var nbsp = "";
       for (var k = 0;k < p1.length;k++) {
@@ -404,7 +91,12 @@ function text_to_html(text) {
   }
   return rslt;
 }
-function html_to_text_by_node(node, blockquote){
+function convertHtmlToText(html) {
+  var current = document.createElement('div');
+  current.innerHTML = html;
+  return convertHtmlToTextByNode(current, 0);
+}
+function convertHtmlToTextByNode(node, blockquote){
   var str = '';
   if (node.nodeType == 1) { //Element
     switch (node.nodeName.toLowerCase()) {
@@ -422,7 +114,7 @@ function html_to_text_by_node(node, blockquote){
     }
   }
   for (var i=0; i<node.childNodes.length; i++) {
-    str += html_to_text_by_node(node.childNodes[i], blockquote);
+    str += convertHtmlToTextByNode(node.childNodes[i], blockquote);
   }
   if (node.nodeType == 1) { //Element
     switch (node.nodeName.toLowerCase()) {
@@ -440,121 +132,182 @@ function html_to_text_by_node(node, blockquote){
   }
   return str;
 }
-function html_to_text(html) {
-  var current = document.createElement('div');
-  current.innerHTML = html;
-  return html_to_text_by_node(current, 0);
-}
-function loadTemplate() {
-  var elm_template = $('changeTemplate');
-  if (!elm_template.value) return false;
-  if (!confirmChangeTemplate()) {
-    elm_template.value = "";
-    return false;
+function isFormChanged() {
+  if ($('#original_to').val() != $('#item_in_to').val() ||
+    $('#original_cc').val() != $('#item_in_cc').val() ||
+    $('#original_bcc').val() != $('#item_in_bcc').val() ||
+    $('#original_subject').val() != $('#item_in_subject').val() ||
+    $('#original_format').val() != $('#item_in_format').val() ||
+    ($('#original_format').val() == 'text' && $('#original_body').val() != $('#item_in_body').val()) ||
+    ($('#original_format').val() == 'html' && $('#original_html_body').val() != $('#item_in_html_body').val()) ) {
+    return true;
   }
-  var uri = "<%= gw_webmail_templates_path() %>/" + elm_template.value + ".xml";
-  var myAjax = new Ajax.Request(uri, {
-    method: 'get',
-    onSuccess: function(request) {
-      showTemplate(request.responseXML);
-    },
-    onFailure: function(request) { alert('テンプレートの取得に失敗しました。'); },
-    onException: function(request, ex) {
-      alert("テンプレートの取得中にエラーが発生しました。\n\n" + ex.message);
-    },
-    onComplete : function(request) {
-      elm_template.value = "";
+  return false;
+}
+function checkFormChanged() {
+  if (isFormChanged()) {
+    return 'メールは保存されていません。';
+  }
+}
+
+$(function() {
+  $(window).on('beforeunload', checkFormChanged);
+
+  var submitted = false;
+  $('#item_form').on('submit', function() {
+    if (submitted) { return false; }
+    submitted = true;
+    $(window).off('beforeunload');
+    if ($('#item_in_format').val() == 'html') {
+      var html = tinyMCE.activeEditor.getContent();
+      $('#item_in_body').val(convertHtmlToText(html));
+    }
+    return true;
+  });
+  $('input[type="text"], input[type="textarea"]').on('keydown', function(e) {
+    // disable ESC
+    if (e.keyCode == 27) return false;
+    return true;
+  });
+  $('a[href="#showCcAddress"]').on('click', function() {
+    $('#ccContainer').show();
+    $(this).hide();
+  });
+  $('a[href="#showBccAddress"]').on('click', function() {
+    $('#bccContainer').show();
+    $(this).hide();
+  });
+});
+$(function() {
+  if ($('#item_in_format').val() == 'html') {
+    initTinyMCE();
+  }
+  $('a[href="#toggleEditor"]').on('click', function() {
+    var format = $(this).attr('data-format');
+    if ($('#item_in_format').val() == format) return;
+    switch(format) {
+    case 'text':
+      if (!confirm("テキスト形式に変換することにより、書式情報が失われます。よろしいですか？")) return;
+      $('#item_in_body').val('');
+      $('#textFormatEditor').show();
+      $('#htmlFormatEditor').hide();
+      $('#item_in_body').val(convertHtmlToText(tinyMCE.activeEditor.getContent()));
+      tinyMCE.activeEditor.setContent('');
+      break;
+    case 'html':
+      $('#textFormatEditor').hide();
+      $('#htmlFormatEditor').show();
+      var html = convertTextToHtml($('#item_in_body').val());
+      $('#item_in_body').val('');
+      var ace = tinyMCE.activeEditor;
+      if (ace) {
+        ace.setContent(html);
+      } else {
+        mceOnLoadContent = function(ed, o) {
+          ed.setContent(html);
+          ed.onLoadContent.remove(mceOnLoadContent);
+        };
+        mceOnAddEditor = function(mgr, ed) {
+          ed.onLoadContent.add(mceOnLoadContent);
+          tinyMCE.onAddEditor.remove(mceOnAddEditor);
+        };
+        tinyMCE.onAddEditor.add(mceOnAddEditor);
+        initTinyMCE();
+      }
+      break;
+    }
+    $('#item_in_format').val(format);
+  });
+});
+$(function() {
+  $('a[href="#openAddressSelector"]').on('click', function() {
+    var prefix = $(this).attr('data-prefix');
+    var current = AddressSelector.instance.currentBook();
+    if (current && current == prefix) {
+      AddressSelector.instance.finishSelection(true);
+    } else {
+      AddressSelector.instance.toggle(prefix, 
+        $('#item_in_to').val(),
+        $('#item_in_cc').val(),
+        $('#item_in_bcc').val(),
+        addressSelectorCallBack
+      );
+      $('a[href="#openAddressSelector"]').removeClass('current');
+      $(this).addClass('current');
+      $('#mailAddressesForm').hide();
+    }
+    return false;
+  });
+  function addressSelectorCallBack(ok, to, cc, bcc) {
+    if (ok) {
+      $('#item_in_to').val(to);
+      $('#item_in_cc').val(cc);
+      $('#item_in_bcc').val(bcc);
+      if (cc != "") { $('a[href="#showCcAddress"]').click(); }
+      if (bcc != "") { $('a[href="#showBccAddress"]').click(); }
+    }
+    $('#mailAddressesForm').show();
+    $('a[href="#openAddressSelector"]').removeClass('current');
+  }
+  $('input[name="commit_send"], input[name="commit_draft"]').on('click', function(e) {
+    if ($('#mailAddressesForm').is(':hidden')) {
+      alert("アドレス帳を閉じてください。");
+      e.stopImmediatePropagation();
     }
   });
-  return false;
-}
-function confirmChangeTemplate() {
-  if (isChanged() && !confirm('入力内容は失われますがよろしいですか？')) {
+});
+$(function() {
+  $('#template').on('change', function() {
+    var template = $(this);
+    if (template.val() == '' || !confirmTemplateChange()) {
+      template.val('');
+      return false;
+    }
+    $.get('<%= gw_webmail_templates_path %>/' + template.val() + '.json')
+      .done(function(data) {
+        setTemplateData(data);
+        template.val('');
+      });
     return false;
+  });
+  function confirmTemplateChange() {
+    if (isFormChanged() && !confirm('入力内容は失われますがよろしいですか？')) {
+      return false;
+    }
+    return true;
   }
-  return true;
-}
-function showTemplate(template) {
-  var ccElm = $('item_in_cc');
-  var bccElm = $('item_in_bcc');
-  $('item_in_to').value = getNodeValue(template, 'to');
-  ccElm.value = getNodeValue(template, 'cc');
-  if (ccElm.value !="") toggleAddressInput('cc');
-  bccElm.value = getNodeValue(template, 'bcc');
-  if (bccElm.value !="") toggleAddressInput('bcc');
-  $('item_in_subject').value = getNodeValue(template, 'subject');
-  if ($('item_in_format').value == "html") {
-    tinyMCE.activeEditor.setContent(text_to_html(getNodeValue(template, 'body')));
-  } else {
-    $('item_in_body').value = getNodeValue(template, 'body');
-  }
-}
-var commitSendButtonOnClick = $('commit_send1').onclick;
-var commitDraftButtonOnClick = $('commit_draft1').onclick;
-function startAddressSelection(prefix) {
-  var reverse = {'sys':'pri', 'pri':'sys'};
-  var addressesForm = $('mailAddressesForm');
-  var current = AddressSelector.instance.currentBook();
-  if (current && current == prefix) {
-    AddressSelector.instance.finishSelection(true);
-  } else {
-    AddressSelector.instance.toggle(prefix, $('item_in_to').value, $('item_in_cc').value, $('item_in_bcc').value, addressSelectorCallBack);
-    $(prefix + '_openAddressButton').className = 'current';
-    $(reverse[prefix] + '_openAddressButton').className = '';
-    applyOnClickToSubmitButtons($('item_form').commit_send, submitButtonOnClick);
-    applyOnClickToSubmitButtons($('item_form').commit_draft, submitButtonOnClick);
-    if (addressesForm.visible()) addressesForm.hide();             
-  }
-  return false;
-}
-function addressSelectorCallBack(ok, to, cc, bcc) {
-  if (ok) {
-    $('item_in_to').value = to;
-    $('item_in_cc').value = cc;
-    $('item_in_bcc').value = bcc;
-    if (cc != "") toggleAddressInput('cc');
-    if (bcc != "") toggleAddressInput('bcc');
-  }
-  $('mailAddressesForm').show();
-  $('sys_openAddressButton').className = '';
-  $('pri_openAddressButton').className = '';
-  applyOnClickToSubmitButtons($('item_form').commit_send, commitSendButtonOnClick);
-  applyOnClickToSubmitButtons($('item_form').commit_draft, commitDraftButtonOnClick);
-}
-function toggleAddressInput(type) {
-  var containerElm = $(type + 'Container');
-  if (containerElm && !containerElm.visible()) containerElm.show();
-  var buttonElm = $(type + 'ToggleButton');
-  if (buttonElm && buttonElm.visible()) buttonElm.hide();
-} 
-
-function openScheduleWindow() {
-  $('schedule_title').value = $('item_in_subject').value;
-  if ($('item_in_format').value == 'html') {
-    var html = tinyMCE.activeEditor.getContent();
-    $('schedule_memo').value = html_to_text(html);
-  } else {
-    $('schedule_memo').value = $('item_in_body').value;
-  }
-  window.open('', 'scheduleWindow_<%=escape_javascript Core.now.gsub(/[\W]/, '') %>', 'resizable=yes,scrollbars=yes,location=yes,menubar=1,toolbar=1');
-  document.scheduleForm.submit();
-}
-
-function uploadAttachmentFile() {
-  var elm = $('item_in_files');
-  var maxsize = <%= attachment_file_max_size %>*1024*1024;
-  if (elm.value == '') { return; }
-  
-  if (elm.files) {
-    if (elm.files[0].size > maxsize) {
-      alert("ファイルサイズが容量制限（<%= attachment_file_max_size %>MB）を超えています。");
-      return;
+  function setTemplateData(data) {
+    $('#item_in_to').val(data.to);
+    $('#item_in_cc').val(data.cc);
+    $('#item_in_bcc').val(data.bcc);
+    $('#item_in_subject').val(data.subject);
+    if ($('#item_in_format').val() == 'html') {
+      tinyMCE.activeEditor.setContent(convertTextToHtml(data.body));
+    } else {
+      $('#item_in_body').val(data.body);
+    }
+    if ($('#item_in_cc').val() != '') {
+      $('a[href="#showCcAddress"]').click();
+    }
+    if ($('#item_in_bcc').val() != '') {
+      $('a[href="#showBccAddress"]').click();
     }
   }
-  
-  $("defaultUploaderProgressName").innerHTML = elm.value;
-  $("defaultUploaderProgress").style.display = "block";
-  $("commit_file").click();
-}
+});
+$(function() {
+  $('a[href="#openScheduleWindow"]').on('click', function() {
+    $('#schedule_title').val(
+      $('#item_in_subject').val()
+    );
+    $('#schedule_memo').val(
+      $('#item_in_format').val() == 'html' ?
+        convertHtmlToText(tinyMCE.activeEditor.getContent()) :
+        $('#item_in_body').val()
+    );
+    window.open('', 'scheduleWindow_<%=escape_javascript Core.now.gsub(/[\W]/, '') %>', 'resizable=yes,scrollbars=yes,location=yes,menubar=1,toolbar=1');
+    $('#scheduleForm').submit();
+    return false;
+  });
+});
 //]]>
 </script>

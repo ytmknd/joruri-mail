@@ -145,8 +145,8 @@ module Sys::Lib::Mail
     return @text_body
   end
 
-  def html_image_was_omited?
-    @html_image_was_omited
+  def html_image_was_omitted?
+    @html_image_was_omitted
   end
 
   def html_body(options = {})
@@ -471,8 +471,8 @@ module Sys::Lib::Mail
     else
       body = decode(part.body.decoded, part.charset)
     end
-    body, image_was_omited = secure_html_body(body, options)
-    @html_image_was_omited ||= image_was_omited
+    body, image_was_omitted = secure_html_body(body, options)
+    @html_image_was_omitted ||= image_was_omitted
 
     unless options[:replace_cid] == false
       files = []

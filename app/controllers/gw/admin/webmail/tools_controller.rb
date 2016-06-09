@@ -11,12 +11,12 @@ class Gw::Admin::Webmail::ToolsController < Gw::Controller::Admin::Base
 
     if request.get?
       @item = Gw::WebmailToolBatchDeleteSetting.new
-      return render action: :batch_delete
+      return render :batch_delete
     end
 
     @item = Gw::WebmailToolBatchDeleteSetting.new(params[:item])
     unless @item.valid?
-      return render action: :batch_delete
+      return render :batch_delete
     end
 
     delete_num = @item.batch_delete_mails(@mailboxes)

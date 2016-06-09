@@ -99,9 +99,7 @@ class Gw::Admin::Webmail::FiltersController < Gw::Controller::Admin::Base
 
   def item_params
     params.require(:item).permit(:name, :state, :sort_no, :conditions_chain, :action, :mailbox,
-      :in_columns => params[:item][:in_columns].keys,
-      :in_inclusions => params[:item][:in_inclusions].keys,
-      :in_values => params[:item][:in_values].keys)
+      :conditions_attributes => [:id, :column, :inclusion, :value, :_destroy])
   end
 
   def f_item_params

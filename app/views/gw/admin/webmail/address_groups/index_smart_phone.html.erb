@@ -113,12 +113,12 @@ end
 
 <script type="text/javascript">
 //<![CDATA[
-function changeSelection() {
-  //document.body.style.cursor = 'wait';
-  $('nowLoading').style.display = 'block';
-  $('mailForm').style.display = 'none';
-  
-  $('groupForm').submit();
-}
+$(function() {
+  $('#group_id').on('change', function() {
+    $('#nowLoading').show();
+    $('#mailForm').hide();
+    $('#groupForm').submit();
+  });
+});
 //]]>
 </script>

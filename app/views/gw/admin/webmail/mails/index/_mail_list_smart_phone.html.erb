@@ -1,0 +1,61 @@
+<%
+subject_wrap = @mail_list_subject.blank? ? '' : 'autoWrap'
+%>
+<table id="mails" class="mails">
+  <% items.each do |item| %>
+    <%
+      from, s_from, from_tooltip = mail_from_display(item, @mailbox, @mail_list_from_address.present?)
+    %>
+    <tr class="mail <%= 'unseen' if item.unseen? %> <%= cycle '', 'cycle' %>">
+      <td class="check"><input type="checkbox" name="item[ids][<%= item.uid %>]" value="1" class="checkUI" /></td>
+      <td class="star <%= item.starred? ? 'starOn' : 'starOff' %>" id="mail_star_<%= item.uid %>" title="<%= 'スター' if item.starred? %>" data-uid="<%= item.uid %>">&nbsp;</td>
+      <td class="attach subject from date <%= mail_flags(item).join(' ') %> <%= subject_wrap %>">
+        <a href="<%= url_for(@s_params.merge(action: :show, id: item.uid, new_window: (@mail_open_window.blank? ? nil : 1))) %>">
+          <span class="date"><%= item.date %></span>
+          <span class="from"><%= mail_text_wrap(from) %></span><br />
+          <span class="subject overflowHidden <%= subject_wrap %>" title="<%= item.subject %>">
+            <span id="mail_<%= item.uid %>_labels" class="labels">
+              <% item.labels.each do |label| %>
+                <% if label_conf = @label_confs.detect {|conf| conf[:id] == label } %>
+                  <span class="label" style="background-color: <%= label_conf[:color] %>;"><%= label_conf[:name] %></span>
+                <% end %>
+              <% end %>
+            </span>
+            <span class="text"><%= mail_text_wrap(truncate(item.subject, length: 70).presence || ' ') %></span>
+          </span>
+          <% if @mailbox.name =~ /^(Star)$/ %>
+            <span class="mailbox"> 
+              <%= @mailboxes.detect {|mbox| mbox.name == item.node.ref_mailbox}.try(:title) if item.node %>
+            </span>
+          <% end %>
+        </a>
+      </td>
+    </tr>
+  <% end %>
+</table>
+
+<script type="text/javascript">
+//<![CDATA[
+$(function() {
+  $('#mails .mail .star').on('click', function() {
+    var elem = $(this);
+    if (elem.hasClass('loading')) { return false; }
+
+    var uid = elem.attr('data-uid');
+    var beforeClass = elem.hasClass('starOn') ? 'starOn': 'starOff';
+    var afterClass = beforeClass == 'starOn' ? 'starOff': 'starOn';
+    elem.addClass('loading');
+
+    $.get('<%=raw star_gw_webmail_mails_path(@mailbox.name) %>', {
+      id: uid
+    })
+    .done(function() {
+      elem.removeClass('starOn starOff').addClass(afterClass);
+    })
+    .always(function() {
+      elem.removeClass('loading');
+    });
+  });
+});
+//]]>
+</script>

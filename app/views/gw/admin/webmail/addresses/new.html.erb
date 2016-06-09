@@ -2,7 +2,6 @@
 
 <div class="actionMenu">
 <%= link_to :index, gw_webmail_address_groups_path() %>
-<%= link_to submission_label(:register), '#', onclick: "$('addressForm').submit();return false;" %> 
 </div>
 
 <%= form_for @item, as: :item, url: { action: :create }, html: { id: 'addressForm' } do |f| %>

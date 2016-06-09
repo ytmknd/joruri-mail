@@ -57,7 +57,7 @@ end
 </div>
 
 <%= form_tag gw_webmail_sys_addresses_path, { id: 'groupForm', name: 'groupForm', class: 'groupForm', method: :get } do |f| %>
-  グループ：<%= select_tag :group_id, options_for_select(group_selection(@group), @group.id), class: 'selectUI', onchange: "changeSelection();" %><br/>
+  グループ：<%= select_tag :group_id, options_for_select(group_selection(@group), @group.id), class: 'selectUI' %><br/>
   <%#= submit_tag "検索", :name => 'select', :class => 'search' %>
   <%= submit_tag "リセット", name: 'clear', class: 'reset' %>
 <% end %>
@@ -119,12 +119,12 @@ end
 
 <script type="text/javascript">
 //<![CDATA[
-function changeSelection() {
-  //document.body.style.cursor = 'wait';
-  $('nowLoading').style.display = 'block';
-  $('mailForm').style.display = 'none';
-
-  $('groupForm').submit();
-}
+$(function() {
+  $('#group_id').on('change', function() {
+    $('#nowLoading').show();
+    $('#mailForm').hide();
+    $('#groupForm').submit();
+  });
+});
 //]]>
 </script>

@@ -23,7 +23,7 @@ class Gw::WebmailMail
 
   def attributes=(attributes)
     attributes.each do |key, val|
-      eval("self.#{key} = val")
+      self.send("#{key}=", val)
     end
   end
 
@@ -74,7 +74,9 @@ class Gw::WebmailMail
           @tmp_attachment_ids ||= []
           @tmp_attachment_ids << attach.id
         else
-          attach.errors.full_messages.each{|msg| errors.add(:base, "#{file.original_filename.force_encoding('UTF-8')}: #{msg}")}
+          attach.errors.full_messages.each do |msg|
+            errors.add(:base, "#{file.original_filename.force_encoding('UTF-8')}: #{msg}")
+          end
         end
       end
 

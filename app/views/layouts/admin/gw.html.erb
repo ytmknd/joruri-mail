@@ -3,9 +3,10 @@
 <head>
 <meta charset="UTF-8" />
 <title><%= Core.title %></title>
-<%#= stylesheet_link_tag '/_common/themes/admin/style', media: 'all' %>
+<%= javascript_include_tag :application %>
 <%= stylesheet_link_tag '/_common/themes/admin/gw/style', media: 'all' %>
-<%= javascript_include_tag '/_common/js/prototype' %>
+<%= stylesheet_link_tag '/_common/themes/admin/gw/webmail/style', media: 'all' %>
+<%= stylesheet_link_tag '/_common/themes/admin/gw/print', media: 'print' %>
 </head>
 <body>
 

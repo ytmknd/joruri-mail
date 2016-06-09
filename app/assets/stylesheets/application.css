@@ -10,8 +10,10 @@
  * defined in the other CSS/SCSS files in this directory. It is generally better to create a new
  * file per style scope.
  *
- *= require jquery-ui/datepicker
- *= require jquery-ui-timepicker-addon
- *= require_tree .
+ *= require jquery-ui/themes/base/jquery-ui
+ *= require jquery-ui/themes/base/jquery.ui.datepicker
+ *= require jqueryui-timepicker-addon
+ *= require simple-color-picker/jquery.simple-color-picker
+ *= require_tree ./jquery-ui
  *= require_self
  */

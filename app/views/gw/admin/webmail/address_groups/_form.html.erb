@@ -3,7 +3,7 @@
 <table class="show">
   <tr>
     <th><%= @item.class.human_attribute_name :parent_id %></th>
-    <td><%= f.select :parent_id, @item.parent_options, { include_blank: "（ルート階層）" }, { class: "parent_id" } %></td>
+    <td><%= f.select :parent_id, @item.parent_options, { include_blank: '（ルート階層）' }, { class: 'parent_id' } %></td>
   </tr>
   <tr>
     <th><%= @item.class.human_attribute_name :name %></th>

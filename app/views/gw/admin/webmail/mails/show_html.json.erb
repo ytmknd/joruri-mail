@@ -1,0 +1,13 @@
+<%
+inlines = []
+limit_size = data_uri_scheme_limit_size
+@item.inline_contents(show_image: true, embed_image: limit_size > 0, embed_image_size_limit: limit_size).each do |inline|
+  if inline.alternative? || inline.content_type == "text/html"
+    inlines << {
+      seqno: inline.seqno,
+      html: mail_html_autolink(inline.html_body)
+    }
+  end
+end
+%>
+<%=raw inlines.to_json %>

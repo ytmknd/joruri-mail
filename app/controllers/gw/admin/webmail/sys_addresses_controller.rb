@@ -22,14 +22,13 @@ class Gw::Admin::Webmail::SysAddressesController < Gw::Controller::Admin::Base
       user = user.where(ldap: 1) if Sys::Group.show_only_ldap_user
       user = user.search(params)
       @users = user.order(get_orders).paginate(page: 1, per_page: @limit)
-    #else
-    #  @users = @group.ldap_users.find(:all, :conditions => ["email IS NOT NULL AND email != ''"])
-    end
-
-    respond_to do |format|
-      format.html {}
-      format.xml {}
-      format.js   {}
+      @gid = params[:gid]
+      @gname = "検索結果（#{params[:index]}）"
+      if params[:format] == 'json'
+        return render :child_users, layout: false
+      else
+        return render :index, layout: false
+      end
     end
   end
 
@@ -39,9 +38,7 @@ class Gw::Admin::Webmail::SysAddressesController < Gw::Controller::Admin::Base
     @item = item.first
     return http_error(404) if @item.blank? || @item.email.blank?
 
-    respond_to do |format|
-      format.html { render layout: false }
-    end
+    render layout: false if request.xhr?
   end
 
   ## post/create mail
@@ -63,19 +60,16 @@ class Gw::Admin::Webmail::SysAddressesController < Gw::Controller::Admin::Base
 
   def child_groups
     @group = Sys::Group.find(params[:id])
-    @groups = @group.enabled_children
-
-    respond_to do |format|
-      format.xml
-    end
+    @children = @group.enabled_children
+    render layout: false if request.xhr?
   end
 
   def child_users
     @group = Sys::Group.find(params[:id])
-    @users = @group.users_having_email(get_order)
-    respond_to do |format|
-      format.xml  { }
-    end
+    @users = @group.users_having_email(get_order).paginate(page: 1, per_page: 1000)
+    @gid = @group.id
+    @gname = @group.name
+    render layout: false if request.xhr?
   end
 
   def child_items
@@ -88,19 +82,6 @@ class Gw::Admin::Webmail::SysAddressesController < Gw::Controller::Admin::Base
   end
 
   private
-
-  def search_children(group)
-    searched = {}
-    list = []
-    cond = 
-    Sys::Group.where(parent_id: group.id, state: 'enabled').order(:sort_no, :code).each do |g|
-      next if searched.key?(g.id)
-      searched[g.id] = 1
-      list << g
-      list += search_children(g)
-    end
-    list
-  end
 
   def ids_to_addrs(ids)
     if ids.is_a?(Hash)

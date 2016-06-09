@@ -1,7 +1,3 @@
-<%
-group_ids = @item.in_groups ? @item.in_groups.split(",") : []
-%>
-
 <%= f.error_messages %>
 
 <table style="width: 100%;"><tr><td style="width: 49%; vertical-align: top;">
@@ -24,14 +20,18 @@ group_ids = @item.in_groups ? @item.in_groups.split(",") : []
   <table class="show addressInfo">
     <tr>
       <th><%= @item.class.human_attribute_name :group_id %></th>
-      <td><div id="addressGroups">
+      <td>
+        <%= hidden_field_tag "item[group_ids[]" %>
         <% Gw::WebmailAddressGroup.user_sorted_groups.each do |g| %>
-          <div><%= '　　' * (g.level_no - 1) %>
-          <%= check_box_tag "group_#{g.id}", g.id, group_ids.index(g.id.to_s), onclick: "checkGroup(this);return true;", style: 'width:auto;' %>
-          <%= label_tag "group_#{g.id}", g.name %></div>
+          <div>
+            <label>
+              <%= '　　' * (g.level_no - 1) %>
+              <%= check_box_tag "item[group_ids[]", g.id, nil, { checked: @item.group_ids.include?(g.id), style: 'width:auto;' } %>
+              <%= g.name %>
+            </label>
+          </div>
         <% end %>
-      </div>
-      <%= f.hidden_field :in_groups %></td>
+      </td>
     </tr> 
   </table>
 
@@ -105,27 +105,3 @@ group_ids = @item.in_groups ? @item.in_groups.split(",") : []
 <div class="submitters">
   <%= f.submit %>
 </div>
-
-<script type="text/javascript">
-//<![CDATA[
-function checkGroup(check_box) {
-  var groups = $('item_in_groups').value;
-  if (check_box.checked) {
-    if (groups != "") groups += ",";
-    groups += check_box.value;
-  } else {
-    var tmp = groups.split(",");
-    var match = -1;
-    for (var i = 0;i < tmp.length;i++) {
-      if (tmp[i] == check_box.value) {
-        match = i;
-        break;
-      }
-    }
-    if (match >= 0) tmp.splice(match, 1);
-    groups = tmp.join(",");
-  }
-  $('item_in_groups').value = groups;
-}
-//]]>
-</script>

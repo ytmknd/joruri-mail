@@ -10,10 +10,10 @@
 </table>
 
 <div id="openAddress" style="margin-top:10px">
-  <a href="#" id="sys_openAddressButton" onclick="return startAddressSelection('sys');"><%= Joruri.config.application['webmail.sys_address_menu'] %></a>
-  <a href="#" id="pri_openAddressButton" onclick="return startAddressSelection('pri');"><%= Joruri.config.application['webmail.address_group_menu'] %></a>
+  <a href="#openAddressSelector" data-prefix="sys"><%= Joruri.config.application['webmail.sys_address_menu'] %></a>
+  <a href="#openAddressSelector" data-prefix="pri"><%= Joruri.config.application['webmail.address_group_menu'] %></a>
 </div>
-<%= render "gw/admin/webmail/mails/address_selector" %>
+<%= render "gw/admin/webmail/base/address_selector" %>
 
 <table class="show" id="mailAddressesForm">
   <tr>
@@ -49,38 +49,41 @@
 
 <script type="text/javascript">
 //<![CDATA[
-function getSubmitButton() {
-  return $('item_form').commit;
-}
-function submitButtonOnClick() {
-  alert("アドレス帳を閉じてください。");
-  return false;
-};
-function startAddressSelection(prefix) {
-  var reverse = {'sys':'pri', 'pri':'sys'};
-  var addressesForm = $('mailAddressesForm');
-  var current = AddressSelector.instance.currentBook();
-  if (current && current == prefix) {
-    AddressSelector.instance.finishSelection(true);
-  } else {
-    AddressSelector.instance.toggle(prefix, $('item_to').value, $('item_cc').value, $('item_bcc').value, addressSelectorCallBack);
-    $(prefix + '_openAddressButton').className = 'current';
-    $(reverse[prefix] + '_openAddressButton').className = '';
-    getSubmitButton().onclick = submitButtonOnClick;
-    if (addressesForm.visible()) addressesForm.hide();             
+$(function() {
+  $('input:submit').on('click', function() {
+    if ($('#mailAddressesForm').is(':hidden')) {
+      alert("アドレス帳を閉じてください。");
+      return false;
+    }
+    return true;
+  });
+  $('a[href="#openAddressSelector"]').on('click', function() {
+    var prefix = $(this).attr('data-prefix');
+    var current = AddressSelector.instance.currentBook();
+    if (current && current == prefix) {
+      AddressSelector.instance.finishSelection(true);
+    } else {
+      AddressSelector.instance.toggle(prefix, 
+        $('#item_to').val(),
+        $('#item_cc').val(),
+        $('#item_bcc').val(),
+        addressSelectorCallBack
+      );
+      $('a[href="#openAddressSelector"]').removeClass('current');
+      $(this).addClass('current');
+      $('#mailAddressesForm').hide();
+    }
+    return false;
+  });
+  function addressSelectorCallBack(ok, to, cc, bcc) {
+    if (ok) {
+      $('#item_to').val(to);
+      $('#item_cc').val(cc);
+      $('#item_bcc').val(bcc);
+    }
+    $('#mailAddressesForm').show();
+    $('a[href="#openAddressSelector"]').removeClass('current');
   }
-  return false;
-}
-function addressSelectorCallBack(ok, to, cc, bcc) {
-  if (ok) {
-    $('item_to').value = to;
-    $('item_cc').value = cc;
-    $('item_bcc').value = bcc;
-  }
-  $('mailAddressesForm').show();
-  $('sys_openAddressButton').className = '';
-  $('pri_openAddressButton').className = '';
-  getSubmitButton().onclick = null;
-}
+});
 //]]>
 </script>

@@ -6,9 +6,9 @@ Joruri::Application.routes.draw do
   match '_admin/login(.:format)'   => 'sys/admin/account#login', via: [:get, :post]
   match '_admin/logout(.:format)'  => 'sys/admin/account#logout', via: [:get, :post]
   match '_admin/account(.:format)' => 'sys/admin/account#info', via: :get
-  match "_admin/sso"               => "sys/admin/account#sso", via: :get
+  match '_admin/sso'               => 'sys/admin/account#sso', via: [:get, :post]
   match '_admin/air_login'         => 'sys/admin/air#old_login', via: :get
-  match '_admin/air_sso'           => 'sys/admin/air#login', via: :get
+  match '_admin/air_sso'           => 'sys/admin/air#login', via: [:get, :post]
   match '_admin/cms'               => 'sys/admin/front#index', via: :get
   match '_admin/sys'               => 'sys/admin/front#index', via: :get
 

@@ -1,0 +1,4 @@
+<%= sys_address_view_model(@gid, @gname, @users, {
+  search: params[:search].present?,
+}).to_json.html_safe
+%>

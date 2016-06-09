@@ -17,7 +17,7 @@ class Sys::File < ActiveRecord::Base
     connection.execute("INSERT INTO #{table_name} (id, tmp_id) VALUES (null, 0)")
     id = find_by_sql("SELECT LAST_INSERT_ID() AS id")[0].id
     connection.execute("DELETE FROM #{table_name} WHERE id = #{id}")
-    Digest::MD5.new.update(id.to_s)
+    Digest::MD5.new.update(id.to_s).to_s
   end
 
   def duplicated?

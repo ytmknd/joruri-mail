@@ -3,7 +3,6 @@
 <div class="actionMenu">
 <%= link_to :index, gw_webmail_address_groups_path %>
 <%= link_to :show, gw_webmail_address_path(@item.id) %>
-<%= link_to submission_label(:edit), '#' , onclick: "$('addressForm').submit();return false;" %>
 </div>
 
 <%= form_for @item, as: :item, url: { action: :update }, html: { method: :patch, id: 'addressForm' } do |f| %>

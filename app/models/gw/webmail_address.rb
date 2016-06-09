@@ -6,12 +6,13 @@ class Gw::WebmailAddress < ActiveRecord::Base
     dependent: :destroy
   has_many :groups, -> { order(:name, :id) }, through: :groupings
 
-  attr_accessor :easy_entry, :escaped, :in_groups
+  attr_accessor :easy_entry, :escaped
 
   validates :user_id, :name, :email, presence: true
   validate :validate_attributes
 
-  after_save :save_groups
+  before_save :replace_name
+  before_save :replace_kana
 
   #CONSTANTS
   NO_GROUP = 'no_group'
@@ -42,26 +43,6 @@ class Gw::WebmailAddress < ActiveRecord::Base
     rel
   }
 
-  def validate_attributes
-    if easy_entry # from Ajax
-      if email.present? && name.present?
-        if self.class.where(user_id: Core.user.id, email: email).first
-          errors.add :base, "既に登録されています。"
-        else
-          self.name  = CGI.unescapeHTML(name.to_s) if escaped
-          self.name  = name.gsub(/^"(.*)"$/, '\\1')
-          self.email = email
-        end
-      end
-    end
-
-    self.name = name.gsub(/["<>]/, '') if name.present?
-
-    to_kana = lambda {|str| str.to_s.tr("ぁ-ん", "ァ-ン") }
-    self.kana = to_kana.call(kana)
-    self.company_kana = to_kana.call(company_kana)
-  end
-
   def self.user_addresses
     self.where(user_id: Core.user.id)  
   end
@@ -89,24 +70,27 @@ class Gw::WebmailAddress < ActiveRecord::Base
 
   private
 
-  def save_groups
-    gids = self.in_groups ? self.in_groups.split(",").map{|id| id.to_i} : []
-    grps = self.groupings;
-
-    grps.each do |g|
-      if idx = gids.index(g.group_id)
-        gids.delete_at(idx)
-      else
-        g.destroy()
+  def validate_attributes
+    if easy_entry # from Ajax
+      if email.present? && name.present?
+        if self.class.where(user_id: Core.user.id, email: email).first
+          errors.add(:base, "既に登録されています。")
+        else
+          self.name  = CGI.unescapeHTML(name.to_s) if escaped
+          self.name  = name.gsub(/^"(.*)"$/, '\\1')
+          self.email = email
+        end
       end
     end
+  end
 
-    gids.each do |gid|
-      group = Gw::WebmailAddressGroup.readable.where(id: gid, user_id: Core.user.id).first
-      self.groupings << Gw::WebmailAddressGrouping.new(
-        address_id: id,
-        group_id: gid
-      ) if group
-    end
+  def replace_name
+    self.name = name.gsub(/["<>]/, '') if name.present?
+  end
+
+  def replace_kana
+    to_kana = lambda {|str| str.to_s.tr("ぁ-ん", "ァ-ン") }
+    self.kana = to_kana.call(kana) if kana.present?
+    self.company_kana = to_kana.call(company_kana) if company_kana.present?
   end
 end

@@ -2,7 +2,6 @@ class Gw::Admin::Webmail::AddressGroupsController < Gw::Controller::Admin::Base
   include Sys::Controller::Scaffold::Base
   include Gw::Controller::Admin::Mobile::Address
   layout "admin/gw/webmail"
-  helper Gw::AddressHelper
 
   def pre_dispatch
     return redirect_to action: :index if params[:reset]
@@ -24,45 +23,21 @@ class Gw::Admin::Webmail::AddressGroupsController < Gw::Controller::Admin::Base
 
   def index
     @items = Gw::WebmailAddress.readable.where(user_id: Core.user.id).order(get_order())
-
-    if params[:search]
-      item = Gw::WebmailAddress.readable.where(user_id: Core.user.id).order(get_order())
-      item = item.search(params) if params[:search]
-      @s_items = item
-    end
+    @s_items = @items.search(params) if params[:search]
 
     @groups = Gw::WebmailAddressGroup.user_groups
-    @root_groups = @groups.select {|i| i.parent_id == 0}      
+    @root_groups = @groups.select {|i| i.parent_id == 0}
 
-    respond_to do |format|
-      format.html { }
-      format.xml  { @items = @s_items if params[:search] }
-    end
-
-    #_index @groups
+    _index @s_items || @items
   end
   
   def show
-    return show_all if params[:id] == '0'
-
     @item = Gw::WebmailAddressGroup.find(params[:id])
     return error_auth unless @item.readable?
-    @parent = @item
 
-    @items = @item.addresses.order(get_order())
+    @addresses = @item.addresses.order(get_order())
 
-    respond_to do |format|
-      format.html { }
-      format.xml  { }
-      format.js   { }
-    end
-
-    #_show @item
-  end
-
-  def show_all
-    @item = Gw::WebmailAddressGroup.new(name: "すべて")
-    @items = Gw::WebmailAddress.readable.where(user_id: Core.user.id).order(get_order())
+    render layout: false if request.xhr?
   end
 
   def new
@@ -124,7 +99,7 @@ class Gw::Admin::Webmail::AddressGroupsController < Gw::Controller::Admin::Base
   private
 
   def item_params
-    params.require(:item).permit(:name, :body, :default_flag)
+    params.require(:item).permit(:parent_id, :name)
   end
 
   def ids_to_addrs(ids)

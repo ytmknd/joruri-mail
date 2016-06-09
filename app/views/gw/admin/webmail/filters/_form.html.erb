@@ -5,8 +5,6 @@ Gw::WebmailMailbox.load_mailboxes.each do |box|
   next if box.name =~ /^(Drafts|Sent|Trash|Star)(\.|$)/
   mailboxes << [box.slashed_title, "#{box.name}"]
 end
-
-conditions_count = @item.in_columns.count > 5 ? @item.in_columns.count : 5
 %>
 
 <%= f.error_messages %>
@@ -24,7 +22,8 @@ conditions_count = @item.in_columns.count > 5 ? @item.in_columns.count : 5
   </tr>
 </table>
 
-<br /><p class="form">条件</p>
+<br />
+<p class="form">条件</p>
 <table class="show">
   <tr>
     <th><%= @item.class.human_attribute_name :conditions_chain %></th>
@@ -32,17 +31,14 @@ conditions_count = @item.in_columns.count > 5 ? @item.in_columns.count : 5
   </tr><tr>
     <th>条件</th>
     <td>
-      <div id="filter_conditions" <%= %Q(style="padding: 1px 6px; border: 1px solid #f00;") if @item.errors[:in_conditions].any? %>>
-        <% conditions_count.times do |i| %>
-          <div style="margin: 5px 0px;">
-            <%= select_tag "item[in_columns][#{i}]", options_for_select(@item.condition_column_labels, @item.conditions[i] ? @item.conditions[i].column : nil), include_blank: true %>
-            <%= select_tag "item[in_inclusions][#{i}]", options_for_select(@item.condition_inclusion_labels, @item.conditions[i] ? @item.conditions[i].inclusion : nil), include_blank: true %>
-            <%= text_field_tag "item[in_values][#{i}]", @item.conditions[i] ? @item.conditions[i].value : nil, class: "name"  %>
-            <%= link_to "クリア", "#", onclick: "return reset_condition(#{i});" %>
-          </div>
-        <% end %>
+      <div id="conditions">
+        <% (5-@item.conditions.size).times { @item.conditions.build } %>
+        <%= render 'form_conditions', f: f, conditions: @item.conditions, options: {} %>
       </div>
-      <%= link_to "追加", "#", id: 'addition_link', onclick: "return add_condition();" %>
+      <%= link_to '追加', '#addCondition'%>
+      <script id="conditionTemplate" type="text/x-jsrender">
+        <%= render 'form_conditions', f: f, conditions: [@item.conditions.engine.new], options: { child_index: '{{:index}}' } %>
+      </script>
     </td>
   </tr>
 </table>
@@ -64,74 +60,25 @@ conditions_count = @item.in_columns.count > 5 ? @item.in_columns.count : 5
 
 <script type="text/javascript">
 //<![CDATA[
-function reset_condition(idx) {
-  $('item_in_columns_' + idx).selectedIndex    = 0;
-  $('item_in_inclusions_' + idx).selectedIndex = 0;
-  $('item_in_values_' + idx).value             = '';
-  return false;
-}
-var next_idx = <%= conditions_count %>;
-window.onload = function() {
-  check_condition_count();
-}
-function check_condition_count() {
-  var filter_condition_max_count = <%= Joruri.config.application['webmail.filter_condition_max_count'] %>
-  if (next_idx >= filter_condition_max_count) {
-    $('addition_link').style.display = 'none';
+$(function() {
+  checkConditionCount();
+
+  function checkConditionCount() {
+    var maxConditionCount = <%= Joruri.config.application['webmail.filter_condition_max_count'] || 100 %>;
+    if ($('#conditions div').length >= maxConditionCount) {
+      $('#addCondition').hide();
+    }
   }
-}
-function add_condition() {
-  var column_labels = eval("(" + "<%=escape_javascript raw @item.condition_column_labels.to_json %>" + ")");
-  var inclusion_labels = eval("(" + "<%=escape_javascript raw @item.condition_inclusion_labels.to_json %>" + ")");
-  
-  var root = document.createElement("div");
-  root.style.cssText = "margin: 5px 0px;";
-  
-  var select = document.createElement("select");
-  select.id = "item_in_columns_" + next_idx;
-  select.name = "item[in_columns][" + next_idx + "]";
-  select.options[0] = new Option("", "");
-  for (var i=0; i<column_labels.size(); i++) {
-    select.options[i+1] = new Option(column_labels[i][0], column_labels[i][1]); 
-  }
-  
-  root.appendChild(select);
-  
-  var select = document.createElement("select");
-  select.id = "item_in_inclusions_" + next_idx;
-  select.name = "item[in_inclusions][" + next_idx + "]";
-  select.options[0] = new Option("", "");
-  for (var i=0; i<inclusion_labels.size(); i++) {
-    select.options[i+1] = new Option(inclusion_labels[i][0], inclusion_labels[i][1]); 
-  }
-  
-  root.appendChild(document.createTextNode(" "));
-  root.appendChild(select);
-  
-  var input = document.createElement("input");
-  input.id = "item_in_values_" + next_idx;
-  input.name = "item[in_values][" + next_idx + "]";
-  input.className = "name";
-  input.setAttribute("type", "text");
-  
-  root.appendChild(document.createTextNode(" "));
-  root.appendChild(input);
-  
-  var atag = document.createElement("a");
-  atag.innerHTML = "クリア";
-  atag.onclick = new Function("return reset_condition(" + next_idx +  ");")
-  atag.setAttribute("href", "#");
-  
-  root.appendChild(document.createTextNode(" "));
-  root.appendChild(atag);
-  
-  $('filter_conditions').appendChild(root);
-  
-  ++next_idx;
-  
-  check_condition_count();
-  
-  return false;
-}
+  $('a[href="#addCondition"]').on('click', function() {
+    var nextIndex = $('#conditions div').length;
+    $('#conditions').append( $('#conditionTemplate').render({index: nextIndex}) );
+    checkConditionCount();
+    return false;
+  });
+  $(document).on('click', 'a[href="#clearCondition"]', function() {
+    $(this).parent().find('select[name$="[column]"], select[name$="[inclusion]"], input[name$="[value]"]').val('');
+    return false;
+  });
+});
 //]]>
 </script>

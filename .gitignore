@@ -14,4 +14,5 @@ Gemfile.lock
 /tmp
 /upload
 /vendor/bundle
+/vendor/assets/bower_components
 

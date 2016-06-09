@@ -20,7 +20,7 @@ module Joruri
     # Set Time.zone default to the specified zone and make Active Record auto-convert to this zone.
     # Run "rake -D time" for a list of tasks for finding time zone names. Default is UTC.
     # config.time_zone = 'Central Time (US & Canada)'
-    config.time_zone = "Tokyo"
+    config.time_zone = 'Tokyo'
     config.active_record.default_timezone = :local
     config.active_record.time_zone_aware_attributes = false
 
@@ -35,10 +35,14 @@ module Joruri
 
     # JavaScript files you want as :defaults (application.js is always included).
     # config.action_view.javascript_expansions[:defaults] = %w(jquery rails)
+    config.action_view.field_error_proc = proc { |html_tag, instance|
+      %Q|<span class="field_with_errors">#{html_tag}</span>|.html_safe
+    }
 
     # Load settings
     def load_settings(filename)
-      YAML::load(ERB.new(File.read(Rails.root.join(filename))).result)[Rails.env].with_indifferent_access
+      file = Rails.root.join(filename)
+      YAML::load(ERB.new(File.read(file)).result)[Rails.env].with_indifferent_access if File.exist?(file)
     end
     config.action_mailer.smtp_settings = load_settings('config/smtp.yml')
     Joruri.config.imap_settings = load_settings('config/imap.yml')

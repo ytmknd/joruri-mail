@@ -1,0 +1,12 @@
+<% if maintenance = recent_maintenance %>
+<table class="show">
+  <tr>
+    <th><%= maintenance.title %> <%=l maintenance.published_at if maintenance.published_at %></th>
+  </tr>
+  <tr>
+    <td><%=raw maintenance.body %></td>
+  </tr>
+</table>
+<% end %>
+
+<%= link_to '<戻る', gw_webmail_mails_path(mailbox: 'INBOX', mobile: 'top'), class: 'back' %>

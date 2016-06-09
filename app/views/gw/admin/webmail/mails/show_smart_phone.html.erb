@@ -1,22 +1,17 @@
 <%
-show_mdn_uri = send_mdn_gw_webmail_mail_path(@mailbox.name, @item.uid)
-current_mail_view = 'text'
-if html_mail = @item.html_mail?
-  current_mail_view = 'html'
-end
 inline_contents = @item.inline_contents
 %>
 
 <div class="link">
   <span class="previous">
-    <% if @pagination[:prev_uid] %><%= link_to "前へ", gw_webmail_mail_path(@s_params.merge(mailbox: @mailbox.name, id: @pagination[:prev_uid])) %>
+    <% if @pagination[:prev_uid] %><%= link_to '前へ', gw_webmail_mail_path(@s_params.merge(mailbox: @mailbox.name, id: @pagination[:prev_uid])) %>
     <% end %>
   </span>
   <span class="index">
     <%= link_to '一覧へ戻る', url_for(@s_params.merge(action: :index, mailbox: @mailbox.name, mobile: :list)), class: 'back' %>
   </span>
   <span class="next">
-    <% if @pagination[:next_uid] %><%= link_to "次へ", gw_webmail_mail_path(@s_params.merge(mailbox: @mailbox.name, id: @pagination[:next_uid])) %>
+    <% if @pagination[:next_uid] %><%= link_to '次へ', gw_webmail_mail_path(@s_params.merge(mailbox: @mailbox.name, id: @pagination[:next_uid])) %>
     <% end %>
   </span>
   <br />
@@ -35,7 +30,7 @@ inline_contents = @item.inline_contents
       <%= mail_text_wrap(omit_from_address_in_mail_list(@item.friendly_from_addr)[0]) %>
     </td>
   </tr><tr>
-    <th><%= @item.draft? ? "保存日時" : "送信日時" %></th>
+    <th><%= @item.draft? ? '保存日時' : '送信日時' %></th>
     <td><%= @item.date %></td>
   </tr><tr>
     <th>宛先</th>
@@ -54,13 +49,14 @@ inline_contents = @item.inline_contents
     <td class="subject autoWrap">
       <%= mail_text_wrap(@item.subject) %>
       <% if @item.has_attachments? %>
-      <%= raw %Q(<a href="#attachments" class="attachmentMark" title="#{(@item.attachments.collect{|a| a.name}).join(', ')}">添付ファイル有り</a>) %>
+      <a href="#attachments" class="attachmentMark" title="<%= @item.attachments.map(&:name).join(', ') %>">添付ファイル有り</a>
       <% end %>
-      <a class="<%= @item.starred? ? "starOn" : "starOff" %>" id="mail_star_<%= @item.uid %>" onclick="starMail('<%= @item.uid %>');"></a>
+      <a href="#starMail" class="<%= @item.starred? ? 'starOn' : 'starOff' %>" id="mail_star_<%= @item.uid %>" data-uid="<%= @item.uid %>"></a>
+      <span id="mail_<%= @item.uid %>_star_loading" class="loading star-loading" style="display:none;"></span>
       <span id="mail_<%= @item.uid %>_labels" class="labels">
         <% @item.labels.each do |label| %>
           <% if label_conf = @label_confs.find{|conf| conf[:id] == label} %>
-            <% concat raw %Q(<span class="label" style="background-color:#{label_conf[:color]};">#{label_conf[:name]}</span>) %>
+            <span class="label" style="background-color:<%= label_conf[:color] %>;"><%= label_conf[:name] %></span>
           <% end %>
         <% end %>
       </span>
@@ -71,18 +67,18 @@ inline_contents = @item.inline_contents
 
 <table class="labelEdit">
   <tr><td>
-    <%= link_to 'ラベルを編集▼', '#', id: "labelEditLink", onclick: 'toggleLabelMenu(); return false;' %>
+    <%= link_to 'ラベルを編集▼', '#toggleLabelMenu' %>
   </td></tr> 
 </table>
 
 <table id="labelMenu" class="labelMenus" style="display:none;">
   <% @label_confs.each_with_index do |label_conf, i| %>
     <% if i%3 == 0 %><tr><% end %>
-    <td class="labelMenu"><%= link_to "#{label_conf[:name]}", '#', onclick: "labelMail('#{@item.uid}', '#{label_conf[:id]}'); return false;" %></td>
+    <td class="labelMenu"><%= link_to label_conf[:name], '#labelMail', data: { uid: @item.uid, label_id: label_conf[:id] } %></td>
     <% if i%3 == 2 %></tr><% end %>
   <% end %>
   <tr>
-  <td class="labelMenu" colspan="3"><%= link_to 'すべてはずす', '#', onclick: "labelMail('#{@item.uid}', '0'); return false;" %></td>
+  <td class="labelMenu" colspan="3"><%= link_to 'すべてはずす', '#labelMail', data: { uid: 0 } %></td>
   </tr>
 </table>
 
@@ -121,21 +117,18 @@ inline_contents = @item.inline_contents
     %>
     <div id="inlineContent_<%= inline.seqno %>" class="<%= cls %>">
       <% if ((inline.alternative? && inline.html_body.present?) || inline.content_type == "text/html") %>
-        <div id="htmlPreview_<%= inline.seqno %>"><%=raw mail_html_autolink(inline.html_body) %></div>
+        <div id="htmlBody_<%= inline.seqno %>">
+          <%=raw mail_html_autolink(inline.html_body) %>
+        </div>
       <% else %>
-        <div id="textBody_<%= inline.seqno %>" class="autoWrap mailBodyText"><%= mail_text_wrap(inline.text_body, 10, auto_link: true) %></div>
+        <div id="textBody_<%= inline.seqno %>" class="autoWrap mailBodyText">
+          <%= mail_text_wrap(inline.text_body, 10, auto_link: true) %>
+        </div>
       <% end %>
     </div>
   <% end %>
   </div>
-  <%
-    if @mailbox.draft_box?(:all) || @mailbox.sent_box?(:all)
-      sent_mdn = @item.has_disposition_notification_to?
-    else
-      sent_mdn = @item.has_disposition_notification_to? && @item.notified?
-    end
-  %>
-  <% if sent_mdn %>
+  <% if mail_mdn_dipslay?(@item, @mailbox) %>
     <div id="mdnSent" class="recipientConfirm">[開封確認メッセージを送信]</div>
   <% end %>
 </div>
@@ -149,15 +142,13 @@ inline_contents = @item.inline_contents
   </tr>
 </table>
 <table class="mail attachments">
+  <% if (message = mail_form_download_message).present? %>
   <tr>
     <td class="attention">
-      <% if attachment_file_downloadable? %>
-        <%=raw Joruri.config.application['webmail.download_allow_message'] %>
-      <% else %>
-        <%=raw Joruri.config.application['webmail.download_deny_message'] %>
-      <% end %>
+      <%=raw message %>
     </td>
   </tr>
+  <% end %>
   <tr>
     <td id="showNormalArea">
       <% @item.attachments.each do |at| %>
@@ -216,14 +207,16 @@ inline_contents = @item.inline_contents
 
 <div class="link">
   <span class="previous">
-    <% if @pagination[:prev_uid] %><%= link_to "前へ", gw_webmail_mail_path(@s_params.merge(mailbox: @mailbox.name, id: @pagination[:prev_uid])) %>
+    <% if @pagination[:prev_uid] %>
+      <%= link_to '前へ', url_for(@s_params.merge(mailbox: @mailbox.name, id: @pagination[:prev_uid])) %>
     <% end %>
   </span>
   <span class="index">
     <%= link_to '一覧へ戻る', url_for(@s_params.merge(action: :index, mailbox: @mailbox.name, mobile: :list)), class: 'back' %>
   </span>
   <span class="next">
-    <% if @pagination[:next_uid] %><%= link_to "次へ", gw_webmail_mail_path(@s_params.merge(mailbox: @mailbox.name, id: @pagination[:next_uid])) %>
+    <% if @pagination[:next_uid] %>
+      <%= link_to '次へ', url_for(@s_params.merge(mailbox: @mailbox.name, id: @pagination[:next_uid])) %>
     <% end %>
   </span>
   <br />
@@ -231,65 +224,67 @@ inline_contents = @item.inline_contents
 
 <script type="text/javascript">
 //<![CDATA[
-function starMail(uid) {
-  var starElm = $('mail_star_' + uid);
-  var beforeState = starElm.className;
-  if (beforeState == 'loading') {
+$(function() {
+  function syncStarClass(uid, starClass) {
+    var title = { starOn: 'スター', starOff: '' };
+    var menuText = { starOn: 'スターをはずす', starOff: 'スターを付ける' };
+    $('#mail_star_' + uid)
+      .removeClass('starOn starOff')
+      .addClass(starClass)
+      .attr('title', title[starClass]);
+    $('a[href="#starMail"]:not(:empty)').text(menuText[starClass]);
+  }
+  function syncLabels(uid, html) {
+    $('#mail_' + uid + '_labels').html(html);
+  }
+  $('a[href="#toggleLabelMenu"]').on('click', function() {
+    $('#labelMenu').toggle();
+    var text = $(this).text();
+    if (text.match('▼')) {
+      $(this).text(text.replace(/▼/,'▲'));
+    } else {
+      $(this).text(text.replace(/▲/,'▼'));
+    }
     return false;
-  }
-  starElm.className = 'loading';
-  var ajax = new Ajax.Request('<%=raw star_gw_webmail_mails_path(@mailbox.name) %>', {
-    method: 'get',
-    parameters: {
-      id: uid
-    },
-    onSuccess: function(request) {
-      if (beforeState == 'starOn') {
-        starElm.className = 'starOff';
-      } else {
-        starElm.className = 'starOn';
-      }
-    },
-    onFailure: function(request) {
-      alert('通信に失敗しました。');
-      starElm.className = beforeState;
-    }
   });
-}
+  $('a[href="#labelMail"]').on('click', function() {
+    var uid = '<%= @item.uid %>';
+    var labelElems = $('#mail_' + uid + '_labels, #mail_' + uid + '_label_loading');
 
-function toggleLabelMenu() {
-  $('labelMenu').toggle();
-  var html = $('labelEditLink').innerHTML;
-  if (html.match('▼')) {
-    $('labelEditLink').innerHTML = html.replace(/▼/,'▲');
-  } else {
-    $('labelEditLink').innerHTML = html.replace(/▲/,'▼');
-  }
-}
-function labelMail(uid, label_id) {
-  $('mail_' + uid + '_labels').style.display = 'none';
-  $('mail_' + uid + '_label_loading').style.display = 'block';
-  var ajax = new Ajax.Request('<%=raw escape_javascript label_gw_webmail_mails_path(@mailbox.name) %>', {
-    method: 'get',
-    parameters: {
+    labelElems.toggle();
+    $.get('<%=raw escape_javascript label_gw_webmail_mails_path(@mailbox.name) %>', {
       id: uid,
-      label: label_id
-    },
-    onSuccess: function(request) {
-      updateLabels(uid, request.responseText);
-    },
-    onFailure: function(request) {
-      alert('通信に失敗しました。');
-    },
-    onComplete: function(request) {
-      $('mail_' + uid + '_labels').style.display = 'block';
-      $('mail_' + uid + '_label_loading').style.display = 'none';
-    }
+      label: $(this).attr('data-label-id')
+    })
+    .done(function(html) {
+      syncLabels(uid, html);
+    })
+    .always(function() {
+      labelElems.toggle();
+    });
+    return false;
   });
-}
-function updateLabels(uid, html) {
-  var elm = $('mail_' + uid + '_labels');
-  if (elm) { elm.innerHTML = html; }
-}
+  $('a[href="#starMail"]').on('click', function() {
+    var uid = '<%= @item.uid %>';
+    var elem = $('#mail_star_' + uid);
+    var beforeClass = elem.hasClass('starOn') ? 'starOn' : 'starOff';
+    var afterClass = beforeClass == 'starOn' ? 'starOff' : 'starOn'
+    var loading = $('#mail_' + uid + '_star_loading');
+
+    elem.toggle();
+    loading.toggle();
+    $.get('<%=raw escape_javascript star_gw_webmail_mails_path(@mailbox.name) %>', {
+      id: uid
+    })
+    .done(function() {
+      syncStarClass(uid, afterClass);
+    })
+    .always(function() {
+      elem.toggle();
+      loading.toggle();
+    });
+    return false;
+  });
+});
 //]]>
 </script>

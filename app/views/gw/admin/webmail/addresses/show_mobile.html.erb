@@ -79,7 +79,7 @@
 <div class="newMailMenu">
 <%= form_tag mobile_manage_gw_webmail_address_groups_path, { id: 'mailForm', name: 'mailForm', class: 'mailForm' } do |f| %>
   <%= hidden_field_tag "to[#{@item.id}]", '1' %>
-  <%= hidden_field_tag "group_id", params[:group_id] %>
+  <%= hidden_field_tag :group_id, params[:group_id] %>
   <%= submit_tag 'メール作成', class: 'menuItem', name: 'createMail', accesskey: '1' %>
 <% end %>
 </div>

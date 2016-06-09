@@ -13,7 +13,8 @@ module LinkHelper
     end
 
     if type == :destroy
-      options[:confirm] = '削除してよろしいですか？'
+      options[:data] ||= {}
+      options[:data][:confirm] = '削除してよろしいですか？'
       options[:method]  = :delete
       #options[:remote]  = true
     end
@@ -66,5 +67,18 @@ module LinkHelper
     text ||= tel
     return tel if tel.to_s !~ /^([\(]?)([0-9]+)([-\(\)]?)([0-9]+)([-\)]?)([0-9]+$)/
     link_to text, "tel:#{tel}"
+  end
+
+  def link_to_sort(name, options = {}, html_options = {})
+    sort_key = options[:sort_key]
+
+    order, mark =
+      if sort_key.to_s == params[:sort_key]
+        params[:sort_order].blank? ? ['reverse', '▲'] : ['', '▼']
+      else
+        ['', '']
+      end
+
+    link_to "#{name}#{mark}".html_safe, options.merge(sort_order: order), html_options
   end
 end

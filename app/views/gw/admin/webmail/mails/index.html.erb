@@ -2,42 +2,42 @@
 <div id="webmailMenuContainer">
 
 <div class="menu">
-  <%= link_to 'メールの受信', gw_webmail_mails_path(@mailbox.name), class: 'index', title: "メールの受信" %>
-  <%= link_to 'メールの作成', new_gw_webmail_mail_path('INBOX'), class: 'newMail', title: "メールの作成", target: '_blank',
+  <%= link_to 'メールの受信', gw_webmail_mails_path(@mailbox.name), class: 'index', title: 'メールの受信' %>
+  <%= link_to 'メールの作成', new_gw_webmail_mail_path('INBOX'), class: 'newMail', title: 'メールの作成', target: '_blank',
     onclick: open_mail_form(new_gw_webmail_mail_path('INBOX')) %>
 </div>
 
 <%= render 'gw/admin/webmail/base/account' %>
-<%= render 'mailbox' %>
-<%= render 'mail_address_history' if @mail_address_history != 0 %>
+<%= render 'gw/admin/webmail/mails/shared/mailbox' %>
+<%= render 'gw/admin/webmail/mails/shared/mail_address_history' if @mail_address_history != 0 %>
 
 </div>
 </td><td id="webmailContent">
 
 <div class="menu">
   <div class="leftMenu" style="position:relative;">
-    <a href="#" onclick="return move_mails();" class="move" title="移動">移動</a
-    ><a href="#" onclick="return copy_mails();" class="copy" title="コピー">コピー</a
-    ><a href="#" onclick="return delete_mails();" class="delete" title="削除">削除</a>
-    <a href="#" onclick="return seen_mails();" class="seen" title="既読にする">既読にする</a
-    ><a href="#" onclick="return unseen_mails();" class="unseen" title="未読にする">未読にする</a
-    ><a href="#" id="labelLink" onclick="return showPopupMenu(this, 'labelMenu');" class="label" title="ラベル">ラベル</a
+    <a href="#moveMails" class="move" title="移動">移動</a
+    ><a href="#copyMails" class="copy" title="コピー">コピー</a
+    ><a href="#deleteMails" class="delete" title="削除">削除</a>
+    <a href="#seenMails" class="seen" title="既読にする">既読にする</a
+    ><a href="#unseenMails" class="unseen" title="未読にする">未読にする</a
+    ><a href="#showLabelMenu" class="label" title="ラベル">ラベル</a
     ><% if Core.current_user.id == Core.user.id 
-    %><a href="#" onclick="return register_spam_mails();" class="spam" title="迷惑メール登録">迷惑メール登録</a>
+    %><a href="#registerSpamMails" class="spam" title="迷惑メール登録">迷惑メール登録</a>
     <% end %>
-    <a href="#" onclick="return toggleSearchForm();" class="search" title="検索">検索</a>
+    <a href="#toggleSearchForm" class="search" title="検索">検索</a>
     <div id="labelMenu" class="popupMenu" style="display:none;width:100px;">
       <% @label_confs.each_with_index do |label_conf| %>
-        <div class="menuItem"><%= link_to label_conf[:name], '#', onclick: "labelMails('#{label_conf[:id]}'); return false;" %></div>
+        <div class="menuItem"><a href="#labelMails" data-label-id="<%= label_conf[:id] %>"><%= label_conf[:name] %></a></div>
       <% end %>
       <div class="menuItem"><hr /></div>
-      <div class="menuItem"><%= link_to 'すべてはずす', '#', onclick: "labelMails('0'); return false;" %></div>
+      <div class="menuItem"><a href="#labelMails" data-label-id="0">すべてはずす</a></div>
     </div>
   </div>
   <div class="simplePagination">
-    <%= link_to "≪前", url_for(@s_params.merge(page: @items.previous_page)) if @items.previous_page
+    <%= link_to '≪前', url_for(@s_params.merge(page: @items.previous_page)) if @items.previous_page
     %><span><b><%= @items.current_page %></b>/<b><%= @items.total_pages %></b></span
-    ><%= link_to "次≫", url_for(@s_params.merge(page: @items.next_page)) if @items.next_page
+    ><%= link_to '次≫', url_for(@s_params.merge(page: @items.next_page)) if @items.next_page
     %><%#= paginate @items, page_links: false, previous_label: "≪前", next_label: "次≫" %>
   </div>
 </div>
@@ -48,12 +48,12 @@
 <div class="quotaAlert"><%= "メールボックスの容量が、残り #{@quota[:usable]} です。" %></div>
 <% end %>
 
-<%= form_for :item, url: { action: :index }, html: { id: "mails", name: "mails" } do |f| %>
+<%= form_for :item, url: { action: :index }, html: { id: "mailsForm" } do |f| %>
   <input type="hidden" name="page" value="<%= params[:page] %>" />
   <% if params[:sort_starred] == '1' %>
-    <%= render 'mail_list', items: @starred_items + @unstarred_items %>
+    <%= render 'gw/admin/webmail/mails/index/mail_list', items: @starred_items + @unstarred_items %>
   <% else %>
-    <%= render 'mail_list', items: @items %>
+    <%= render 'gw/admin/webmail/mails/index/mail_list', items: @items %>
   <% end %>
 <% end %>
 
@@ -68,59 +68,8 @@
 
 <!-- end #webmailContainer --></td></table>
 
-<%= javascript_include_tag "/_common/js/popup_menu.js" %>
-<%= javascript_include_tag "/_common/js/mail_form.js" %>
 <script type="text/javascript">
 //<![CDATA[
-function checkAll(val) {
-  var frm = document.mails;
-  var len = frm.elements.length;
-  for ( var i = 0; i < len; i++) {
-    if(frm.elements[i].name.match(/^item\[ids\]/)) {
-      frm.elements[i].checked = val;
-    }
-  }
-}
-function post(action) {
-  var form = $('mails');
-  form.action = action;
-  form.submit();
-  return false;
-}
-function delete_mails() {
-  //if (confirm('削除してよろしいですか？')) post('<%= raw delete_gw_webmail_mails_path(@mailbox.name) %>');
-  post('<%=raw escape_javascript delete_gw_webmail_mails_path(@mailbox.name) %>');
-  return false;
-}
-function move_mails() {
-  return post('<%=raw escape_javascript move_gw_webmail_mails_path(@mailbox.name) %>');
-}
-function copy_mails() {
-  return post('<%=raw escape_javascript move_gw_webmail_mails_path(@mailbox.name, copy: 1) %>');
-}
-function seen_mails() {
-  return post('<%=raw escape_javascript seen_gw_webmail_mails_path(@mailbox.name) %>');
-}
-function unseen_mails() {
-  return post('<%=raw escape_javascript unseen_gw_webmail_mails_path(@mailbox.name) %>');
-}
-function register_spam_mails() {
-  if (confirm('迷惑メールに登録した後、ごみ箱に移動します。よろしいですか？')) { 
-    return post('<%=raw escape_javascript register_spam_gw_webmail_mails_path(@mailbox.name) %>');
-  }
-  return false;
-}
-function change_limit(limit) {
-  location.href = location.pathname + '?limit=' + limit;
-  return false;
-}
-function toggleSearchForm() {
-  $('searchForm').toggle();
-  if ($('searchForm').visible()) {
-    $('s_keyword').focus();
-  }
-  return false;
-}
 var childWindows = new Array();
 function openMail(uri, new_window) {
   if (new_window) {
@@ -130,185 +79,162 @@ function openMail(uri, new_window) {
     location.href = uri;
   }  
 }
-function starMail(uid) {
-  var starElm = $('mail_star_' + uid);
-  var beforeState = starElm.className;
-  if (beforeState == 'loading') {
-    return false;
+function syncStarClass(uid, starClass) {
+  var title = { starOn: 'スター', starOff: '' };
+  $('#mail_star_' + uid).removeClass('starOn starOff')
+    .addClass(starClass)
+    .attr('title', title[starClass]);
+}
+function syncUnseenClass(mailbox, uid) {
+  if (uid != '') {
+    $('#mail_' + uid).removeClass('unseen');
   }
-  var beforeTitle = starElm.getAttribute('title');
-  starElm.className = 'loading';
-  var ajax = new Ajax.Request('<%=raw escape_javascript star_gw_webmail_mails_path(@mailbox.name) %>', {
-    method: 'get',
-    parameters: {
+  var mbox = $('#mailbox_' + mailbox);
+  var unseen = mbox.siblings('span.unseenNum');
+  var num = unseen.find('span.num')
+  var n = parseInt(unseen.find('span.num').text());
+  if (n == NaN) { return; }
+  if (n == 1) {
+    unseen.remove();
+    mbox.removeClass('unseen')
+  } else {
+    num.text(n - 1);
+  }
+}
+function syncLabels(uid, html) {
+  $('#mail_' + uid + '_labels').html(html);
+}
+
+$(function() {
+  $('a[href="#showLabelMenu"]').popupMenu({ menu: '#labelMenu' });
+
+  function post(action) {
+    $('#mailsForm').attr('action', action).submit();
+  }
+  $('a[href="#moveMails"]').on('click', function() {
+    post('<%=raw escape_javascript move_gw_webmail_mails_path(@mailbox.name) %>');
+    return false;
+  });
+  $('a[href="#copyMails"]').on('click', function() {
+    post('<%=raw escape_javascript move_gw_webmail_mails_path(@mailbox.name, copy: 1) %>');
+    return false;
+  });
+  $('a[href="#deleteMails"]').on('click', function() {
+    post('<%=raw escape_javascript delete_gw_webmail_mails_path(@mailbox.name) %>');
+    return false;
+  });
+  $('a[href="#seenMails"]').on('click', function() {
+    post('<%=raw escape_javascript seen_gw_webmail_mails_path(@mailbox.name) %>');
+  });
+  $('a[href="#unseenMails"]').on('click', function() {
+    post('<%=raw escape_javascript unseen_gw_webmail_mails_path(@mailbox.name) %>');
+  });
+  $('a[href="#registerSpamMails"]').on('click', function() {
+    if (confirm('迷惑メールに登録した後、ごみ箱に移動します。よろしいですか？')) { 
+      post('<%=raw escape_javascript register_spam_gw_webmail_mails_path(@mailbox.name) %>');
+    }
+    return false;
+  });
+  $('a[href="#toggleSearchForm"]').on('click', function() {
+    $('#searchForm').toggle();
+    if ($('#searchForm').is(':visible')) {
+      $('#s_keyword').focus();
+    }
+    return false;
+  });
+  $('a[href="#labelMails"]').on('click', function() {
+    var labelID = $(this).attr('data-label-id');
+    $('#mails input:checked').each(function() {
+      var uid = $(this).attr('data-uid');
+      var labels = $('#mail_' + uid + '_labels');
+      var loading = $('#mail_' + uid + '_label_loading');
+
+      labels.hide();
+      loading.show();
+      $.get('<%=raw escape_javascript label_gw_webmail_mails_path(@mailbox.name) %>', {
+        id: uid, label: labelID
+      })
+      .done(function(data) {
+        syncLabels(uid, data)
+        for (var i=0; i<childWindows.length; i++) {
+          if (childWindows[i] && !childWindows[i].closed) {
+            childWindows[i].syncLabels(uid, data);
+          }
+        }
+      })
+      .always(function() {
+        loading.hide();
+        if (labels.children('span').length) {
+          labels.show();
+        } else {
+          labels.hide();
+        }
+      });
+    });
+  });
+  $('#checkAll').on('click', function() {
+    var checked = $(this).prop('checked');
+    $('input[name^="item[ids]"').prop('checked', checked);
+  });
+  $('#mails .mail').find('.subject, .mailbox, .date, .size').on('click', function() {
+    openMail($(this).parent().attr('data-url'), <%= @mail_open_window.present? %>);
+    return false;
+  });
+  $('#mails .mail .star').on('click', function() {
+    var target = $(this);
+    var uid = target.attr('data-uid');
+    if (target.hasClass('loading')) { return false; }
+
+    var beforeTitle = target.attr('title');
+    var beforeClass = target.hasClass('starOn') ? 'starOn' : 'starOff';
+    var afterClass = beforeClass == 'starOn' ? 'starOff' : 'starOn'
+    target.addClass('loading');
+    $.get('<%=raw escape_javascript star_gw_webmail_mails_path(@mailbox.name) %>', {
       id: uid
-    },
-    onSuccess: function(request){
-      var afterState = '';
-      if (beforeState == 'starOn') {
-        afterState = 'starOff';
-      } else {
-        afterState = 'starOn';
-      }
-      changeStarClass(uid, afterState);
+    })
+    .done(function(data) {
+      syncStarClass(uid, afterClass);
       for (var i=0; i<childWindows.length; i++) {
         if (childWindows[i] && !childWindows[i].closed) {
-          childWindows[i].changeStarClass(uid, afterState);
+          childWindows[i].syncStarClass(uid, afterClass);
         }
       }
-    },
-    onFailure: function(request) {
-      alert('通信に失敗しました。');
-      starElm.className = beforeState;
-      starElm.setAttribute('title', beforeTitle);
-    }
+    }).always(function() {
+      target.removeClass('loading');
+    });
   });
-}
-function changeStarClass(uid, starClass) {
-  var starElm = $('mail_star_' + uid);
-  if (starElm) {
-    starElm.className = starClass;
-    switch (starClass) {
-    case 'starOn':
-      starElm.setAttribute('title', 'スター');
-      break;
-    case 'starOff':
-      starElm.setAttribute('title', '');
-      break;
-    }
-  }
-}
-
-function removeUnseenClass(mailbox, uid) {
-  var elm = document.getElementById('mail_' + uid);
-  if (elm) {
-    elm.className = elm.className.gsub(/unseen/, '');
-  }
-  
-  var mailboxElm = document.getElementById('mailbox_' + mailbox);
-  if (mailboxElm) {
-    var unseenElm = mailboxElm.nextSibling;
-    if (unseenElm && unseenElm.tagName == 'SPAN' && unseenElm.className == 'unseenNum') {
-      var numElm = unseenElm.getElementsByTagName('span')[0];
-      if (numElm) {
-        var num = parseInt(numElm.innerHTML);
-        if (num != NaN) {
-          if (num == 1) {
-            unseenElm.innerHTML = '';
-            mailboxElm.className = mailboxElm.className.gsub(/unseen/, '')
-          } else {
-            numElm.innerHTML = num - 1;
-          }
+  $('#mails .mail .drag').draggable({
+    opacity: 0.8,
+    cursor: 'move',
+    helper: function(e) {
+      var container = $('<td />').css('width', '50%');
+      var mail = $(e.currentTarget).parents('#mails .mail');
+      $('#mails .mail').each(function() {
+        if ($(this).get(0) == mail.get(0) || $(this).find('input').is(':checked')) {
+          container.append($('<span />')
+            .text($(this).find('.subject a').text())
+            .css('padding', '0px 12px')
+          );
         }
-      }
+      });
+      return container;
     }
-  }
-}
-
-(function($) {
-  $(function() {
-    $('table.mails td.drag').draggable({
-      opacity: 0.8,
-      cursor: 'move',
-      helper: function(e) {
-        var container = $('<td />').css('width', '50%');
-        var target = $(e.currentTarget).parents('table.mails tr.mail');
-        $('table.mails tr.mail').each(function() {
-          if ($(this).get(0) == target.get(0) || $(this).find('input').is(':checked')) {
-            var elm = $('<span />').text($(this).find('td.subject a').text());
-            elm.css('padding', '0px 12px');
-            container.append(elm);
-          }
-        });
-        return container;
-      }
-    });
-    $('.mailbox .droppable').droppable({
-      hoverClass: "ui-hover",
-      activeClass: "ui-active",
-      tolerance: "pointer",
-      greedy: true,
-      drop: function(e, ui) {
-        var boxname = $(e.target).attr('id').gsub(/^mailbox_/, '');
-        var uid = ui.draggable.attr('id').gsub(/^drag_/, '');
-        $('#mails').append($('<input />').attr({
-          type: 'hidden', name: 'item[mailbox]', value: boxname
-        }));
-        $('#mails').append($('<input />').attr({
-          type: 'hidden', name: 'item[ids][' + uid + ']', value: 1
-        }));
-        post('<%=raw escape_javascript move_gw_webmail_mails_path(@mailbox.name) %>');
-      }
-    });
   });
-})(jQuery);
-
-Event.observe(window, 'load', function(event) {
-  var menus = [];
-  menus.push('labelMenu');
-  PopupMenu.init(menus);
-}, false);
-
-Event.observe(document, 'click', function(event) {
-  var excepts = [];
-  switch (event.element().id) {
-  case 'labelLink':
-    excepts.push('labelMenu');
-    break;
-  }
-  PopupMenu.hideAllMenusExcept(excepts);
-}, false);
-
-function showPopupMenu(btn, id) {
-  var menu = PopupMenu.getMenu(id);
-  menu.show(btn.offsetLeft, btn.offsetTop + btn.offsetHeight + 2);
-  return false;
-}
-
-function labelMails(label_id) {
-  (function($) {
-    $('input:checked').each(function() {
-      var name = $(this).attr('name');
-      if (name && name.match(/item\[ids\]\[(\d+)\]/)) {
-        var uid = RegExp.$1;
-        $.ajax({
-          url: '<%=raw escape_javascript label_gw_webmail_mails_path(@mailbox.name) %>',
-          type: 'get',
-          data: {
-            id: uid,
-            label: label_id
-          },
-          beforeSend: function(request) {
-            $('#mail_' + uid + '_labels').hide();
-            $('#mail_' + uid + '_label_loading').show();
-          },
-          success: function(data, dataType) {
-            updateLabels(uid, data)
-            for (var i=0; i<childWindows.length; i++) {
-              if (childWindows[i] && !childWindows[i].closed) {
-                childWindows[i].updateLabels(uid, data);
-              }
-            }
-            if (data == "") {
-              $('#mail_' + uid + '_labels').hide();
-            } else {
-              $('#mail_' + uid + '_labels').show();
-            }
-            $('#mail_' + uid + '_label_loading').hide();
-          },
-          error: function(request, status) {
-            $('#mail_' + uid + '_labels').show();
-            $('#mail_' + uid + '_label_loading').hide();
-          }
-        });
-      }
-    });
-  })(jQuery);
-}
-
-function updateLabels(uid, html) {
-  var elm = $('mail_' + uid + '_labels');
-  elm.innerHTML = html;
-}
+  $('#mailboxes .droppable').droppable({
+    hoverClass: "ui-hover",
+    activeClass: "ui-active",
+    tolerance: "pointer",
+    greedy: true,
+    drop: function(e, ui) {
+      var mailbox = $(e.target).attr('data-mailbox');
+      var uid = ui.draggable.attr('data-uid');
+      $('#mailsForm')
+        .append( $('<input />').attr({ type: 'hidden', name: 'item[mailbox]', value: mailbox }) )
+        .append( $('<input />').attr({ type: 'hidden', name: 'item[ids][' + uid + ']', value: 1 }) )
+        .attr('action', '<%=raw escape_javascript move_gw_webmail_mails_path(@mailbox.name) %>')
+        .submit();
+    }
+  });
+});
 //]]>
 </script>

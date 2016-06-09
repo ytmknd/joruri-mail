@@ -1,11 +1,10 @@
-<%= javascript_include_tag "/_common/js/mail_form.js" %>
 <table id="webmailContainer"><tr><td id="webmailContent"><div id="addressContent">
 
 <div class="actionMenu">
   <%= link_to :index, gw_webmail_address_groups_path %>
   <%= action_menu :edit    if safe{@item.editable?} %>
   <%= action_menu :destroy if safe{@item.deletable?} %>
-  <%= link_to "メール作成", '#', onclick: open_mail_form(create_mail_gw_webmail_address_path) %>
+  <%= link_to 'メール作成', '#', onclick: open_mail_form(create_mail_gw_webmail_address_path) %>
 </div>
 
 <table style="width: 100%;"><tr><td style="width: 49%; vertical-align: top;">

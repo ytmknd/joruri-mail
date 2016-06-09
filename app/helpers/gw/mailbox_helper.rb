@@ -1,5 +1,4 @@
 module Gw::MailboxHelper
-  
   def mailbox_selection(mailboxes, options = {})
     options[:except] ||= []
     selection = []
