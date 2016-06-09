@@ -53,7 +53,6 @@ class Sys::Admin::AirController < ApplicationController
     user.password = Util::String::Crypt.decrypt(Base64.decode64(enc_password))
 
     set_current_user(user)
-    Sys::Session.delete_past_sessions_at_random
 
     if request.get?
       redirect_to @admin_uri

@@ -48,6 +48,7 @@ gem 'shared-mime-info', '~> 0.2.5'
 gem 'mail', '2.6.4.rc2'
 gem 'mail-iso-2022-jp', '2.0.5.rc1'
 gem 'charlock_holmes', '~> 0.7.3'
+gem 'whenever', '~> 0.9.4', require: false
 
 gem 'dynamic_form', '~> 1.1.4'
 

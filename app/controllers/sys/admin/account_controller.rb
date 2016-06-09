@@ -51,7 +51,6 @@ class Sys::Admin::AccountController < Sys::Controller::Admin::Base
     end
 
     cookies.delete :sys_login_referrer
-    Sys::Session.delete_past_sessions_at_random
 
     respond_to do |format|
       format.html { redirect_to @uri }

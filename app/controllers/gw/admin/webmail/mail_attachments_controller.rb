@@ -40,9 +40,6 @@ class Gw::Admin::Webmail::MailAttachmentsController < ApplicationController#Gw::
     raise item.errors.full_messages.join("\n") unless rs
     raise "ファイルが存在しません。(#{item.upload_path})" unless FileTest.file?(item.upload_path)
 
-    ## garbage collect
-    Sys::File.garbage_collect if rand(100) == 0
-
     render json: view_context.mail_attachment_view_model(item, tmp_id: params[:tmp_id], status: 'OK')
   rescue => e
     render json: { status: 'Error', message: e.to_s }

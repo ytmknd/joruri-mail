@@ -79,9 +79,6 @@ class Gw::WebmailMail
           end
         end
       end
-
-      ## garbage collect
-      Sys::File.garbage_collect if rand(100) == 0
     end
 
     return if mode == :file

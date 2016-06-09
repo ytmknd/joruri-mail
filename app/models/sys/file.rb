@@ -5,8 +5,8 @@ class Sys::File < ActiveRecord::Base
 
   def self.garbage_collect
     self.where.not(tmp_id: nil).where(parent_unid: nil)
-      .where("created_at < ?", Date.strptime(Core.now, "%Y-%m-%d") - 2)
-      destroy_all
+      .where("created_at < ?", 2.days.ago)
+      .destroy_all
   end
 
   def self.fix_tmp_files(tmp_id, parent_unid)
