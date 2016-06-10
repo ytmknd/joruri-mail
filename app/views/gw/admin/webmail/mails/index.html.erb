@@ -125,9 +125,11 @@ $(function() {
   });
   $('a[href="#seenMails"]').on('click', function() {
     post('<%=raw escape_javascript seen_gw_webmail_mails_path(@mailbox.name) %>');
+    return false;
   });
   $('a[href="#unseenMails"]').on('click', function() {
     post('<%=raw escape_javascript unseen_gw_webmail_mails_path(@mailbox.name) %>');
+    return false;
   });
   $('a[href="#registerSpamMails"]').on('click', function() {
     if (confirm('迷惑メールに登録した後、ごみ箱に移動します。よろしいですか？')) { 

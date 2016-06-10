@@ -89,59 +89,72 @@
 <script type="text/javascript">
 //<![CDATA[
 $(function() {
-  var groupingView = <%= 
+  var addressView = <%= 
     g1 = address_view_model('All', 'すべて', @items)
     g2 = address_view_model('0', '検索結果', @s_items) if @s_items.present?
     [g1, g2].compact.to_json.html_safe
   %>;
-  groupingView.loadingFlag = false;
-  groupingView.findGrouping = function(gid) {
+  addressView.loading = false;
+  addressView.findByGid = function(gid) {
     return $.grep(this, function(g) {
       return g.group_id == gid;
     })[0];
   }
-  groupingView.checkAll = function(gid, type) {
-    var grouping = this.findGrouping(gid);
+  addressView.checkAll = function(idx, type) {
+    var grouping = this[idx];
     var flag = !grouping.checked[type]
     $.observable(grouping).setProperty('checked.' + type, flag);
     $.each(grouping.addresses, function() {
       $.observable(this).setProperty('checked.' + type, flag);
     });
   }
-  groupingView.sortAddresses = function(gid, key) {
-    var grouping = this.findGrouping(gid);
+  addressView.sortAddresses = function(idx, key) {
+    var grouping = this[idx];
     var order = grouping.sort_order.match(/▲/) ? '▼' : '▲';
     $.observable(grouping).setProperty({sort_key: key, sort_order: order});
-    $.observable(grouping.addresses).refresh(
-      grouping.addresses.sort(function(a, b) {
-        if (order == '▲') {
-          return a[key] > b[key];
-        } else {
-          return a[key] < b[key];
-        }
-      })
-    );
+    var addresses = grouping.addresses.sort(function(a, b) {
+      if (order == '▲') {
+        return a[key] > b[key] ? 1 : -1;
+      } else {
+        return a[key] < b[key] ? 1 : -1;
+      }
+    });
+    $.observable(grouping.addresses).refresh(addresses);
   }
-  groupingView.loadAddresses = function(gid) {
-    if (this.loadingFlag == true) return;
+  addressView.loadAddresses = function(gid) {
+    if (addressView.loading == true) return;
     $('[id^="group"][data-gid]').removeClass('current')
       .filter('[data-gid="' + gid + '"]')
       .addClass('current');
     $('[id^=addresses][data-gid]').hide();
-    var grouping = this.findGrouping(gid);
+    var grouping = this.findByGid(gid);
     if (grouping) {
       $('#addresses' + gid).show();
     } else {
-      groupingView.loadingFlag = true;
+      addressView.loading = true;
       $.get('<%= gw_webmail_address_groups_path %>/' + gid + '.json').done(function(data) {
-        $.observable(groupingView).insert(data);
+        $.observable(addressView).insert(data);
         $('#addresses' + gid).show();
-        groupingView.loadingFlag = false;
+        addressView.loading = false;
       });
     }
   }
 
-  $.templates("#addressesTemplate").link('#addresses', groupingView);
+  $.templates("#addressesTemplate")
+    .link('#addresses', addressView)
+    .on('click', 'a[href="#checkAll"]', function() {
+      var i = $.view(this).index;
+      var type = $(this).attr('data-type');
+      addressView.checkAll(i, type);
+      return false;
+    })
+    .on('click', 'a[href="#sortAddresses"]', function() {
+      var i = $.view(this).index;
+      var key = $(this).attr('data-key');
+      addressView.sortAddresses(i, key);
+      return false;
+    });
+
   <% if @s_items.present? %>
   $('#addressesAll').hide();
   $('#addresses0').show();
@@ -149,22 +162,10 @@ $(function() {
 
   $('a[href="#loadAddresses"]').on('click', function() {
     var gid = $(this).attr('data-gid')
-    groupingView.loadAddresses(gid);
+    addressView.loadAddresses(gid);
     return false;
   });
-  $(document).on('click', 'a[href="#checkAll"]', function() {
-    var gid = $(this).parents('[data-gid]:first').attr('data-gid');
-    var type = $(this).attr('data-type');
-    groupingView.checkAll(gid, type);
-    return false;
-  })
-  .on('click', 'a[href="#sortAddresses"]', function() {
-    var gid = $(this).parents('[data-gid]:first').attr('data-gid');
-    var key = $(this).attr('data-key');
-    groupingView.sortAddresses(gid, key);
-    return false;
-  })
-  .on('click', 'a[href="#createMail"]', function() {
+  $(document).on('click', 'a[href="#createMail"]', function() {
     var num = {
       to: $('input[name^="to"]:checked').length,
       cc: $('input[name^="cc"]:checked').length,
@@ -185,7 +186,7 @@ $(function() {
       form.submit();
     }
     return false;
-  })
+  });
 });
 //]]>
 </script>

@@ -15,6 +15,8 @@
         </script>
       </ul>
     </li>
+  </ul>
+  <ul class="root" id="folderRoot">
     <% @groups.each do |group| %>
       <li class="folder">
         <% if group.enabled_children.count > 0 %>
@@ -155,55 +157,55 @@
     </tbody>
   </table>
 </div>
-<!-- end #sysAddresses --></div>
 <div id="sysAddress" style="display:none;">
 </div>
 <% end %>
 
+<!-- end #sysAddresses --></div>
 <!-- end #addressContent --></div><!-- end #webmailContainer --></td></table>
 
 <script type="text/javascript">
 //<![CDATA[
 $(function() {
-  var groupingView = [];
-  groupingView.loadingFlag = false;
-  groupingView.searchCount = 0;
-  groupingView.find = function(gid) {
+  var addressView = [];
+  addressView.loading = false;
+  addressView.searchCount = 0;
+  addressView.findByGid = function(gid) {
     return $.grep(this, function(g) {
       return g.group_id == gid;
     })[0];
   }
-  groupingView.removeData = function(gid) {
+  addressView.removeData = function(gid) {
     $.each(this, function(i) {
       if (this.group_id == gid) {
-        $.observable(groupingView).remove(i);
+        $.observable(addressView).remove(i);
         return;
       }
     });
   }
-  groupingView.checkAll = function(gid, type) {
-    var grouping = this.find(gid);
+  addressView.checkAll = function(idx, type) {
+    var grouping = this[idx];
     var flag = !grouping.checked[type]
     $.observable(grouping).setProperty('checked.' + type, flag);
     $.each(grouping.users, function() {
       $.observable(this).setProperty('checked.' + type, flag);
     });
   }
-  groupingView.sortAddresses = function(gid, key) {
-    var grouping = this.find(gid);
+  addressView.sortAddresses = function(idx, key) {
+    var grouping = this[idx];
     var order = grouping.sort_order.match(/▲/) ? '▼' : '▲';
     $.observable(grouping).setProperty({sort_key: key, sort_order: order});
     $.observable(grouping.users).refresh(
       grouping.users.sort(function(a, b) {
         if (order == '▲') {
-          return a[key] > b[key];
+          return a[key] > b[key] ? 1 : -1;
         } else {
-          return a[key] < b[key];
+          return a[key] < b[key] ? 1 : -1;
         }
       })
     );
   }
-  groupingView.searchAddresses = function(name_or_kana, email) {
+  addressView.searchAddresses = function(name_or_kana, email) {
     this.searchCount++;
     this.loadAddresses('Search' + this.searchCount, {
       search: 'on',
@@ -214,8 +216,9 @@ $(function() {
       s_email: email
     });
   }
-  groupingView.loadAddresses = function(gid, params = {}) {
-    if (this.loadingFlag) return;
+  addressView.loadAddresses = function(gid, params) {
+    params = params || {};
+    if (addressView.loading) return;
     $('[id^="group"][data-gid]').removeClass('current')
       .filter('[data-gid="' + gid + '"]')
       .addClass('current');
@@ -224,25 +227,25 @@ $(function() {
     if (gid == 'Search') {
       $('#addressesSearch').show();
     } else {
-      var grouping = this.find(gid);
+      var grouping = this.findByGid(gid);
       if (grouping) {
         $('#addresses' + gid).show();
       } else {
-        groupingView.loadingFlag = true;
+        addressView.loading = true;
         $.get(gid.match(/^Search/) ?
           '<%= gw_webmail_sys_addresses_path %>.json' :
           '<%= gw_webmail_sys_addresses_path %>/' + gid + '/child_users.json',
           params
         )
         .done(function(data) {
-          $.observable(groupingView).insert(data);
+          $.observable(addressView).insert(data);
           if (gid.match(/^Search/)) {
             searchGroupView.addData(params);
             searchCondView.addData(params);
             $('#resultSearch').show();
             $('#group' + gid).addClass('current');
           }
-          groupingView.loadingFlag = false;
+          addressView.loading = false;
         });
         if ($('#toggleGroup' + gid).text() == '+') {
           toggleGroup(gid);
@@ -251,7 +254,7 @@ $(function() {
     }
   }
   var searchCondView = [];
-  searchCondView.addData = function(data = {}) {
+  searchCondView.addData = function(data) {
     $.observable(this).insert({
       gid: data.gid,
       gname: data.gname,
@@ -268,7 +271,7 @@ $(function() {
     });
   }
   var searchGroupView = [];
-  searchGroupView.addData = function(data = {}) {
+  searchGroupView.addData = function(data) {
     $.observable(this).insert({
       gid: data.gid,
       gname: data.gname
@@ -285,7 +288,19 @@ $(function() {
 
   var togglingFlag = false;
 
-  $.templates("#addressesTemplate").link('#addresses', groupingView);
+  $.templates("#addressesTemplate").link('#addresses', addressView)
+    .on('click', 'a[href="#checkAll"]', function() {
+      var idx = $.view(this).index;
+      var type = $(this).attr('data-type');
+      addressView.checkAll(idx, type);
+      return false;
+    })
+    .on('click', 'a[href="#sortAddresses"]', function() {
+      var idx = $.view(this).index;
+      var key = $(this).attr('data-key');
+      addressView.sortAddresses(idx, key);
+      return false;
+    });
   $.templates("#searchResultListTemplate").link('#searchResultList', searchCondView);
   $.templates("#childGroupsSearchTemplate").link('#childGroupsSearch', searchGroupView);
 
@@ -297,26 +312,14 @@ $(function() {
   .on('click', 'a[href="#loadAddresses"]', function() {
     var gid = $(this).attr('data-gid');
     returnToAddresses();
-    groupingView.loadAddresses(gid);
-    return false;
-  })
-  .on('click', 'a[href="#checkAll"]', function() {
-    var gid = $(this).parents('[data-gid]:first').attr('data-gid');
-    var type = $(this).attr('data-type');
-    groupingView.checkAll(gid, type);
-    return false;
-  })
-  .on('click', 'a[href="#sortAddresses"]', function() {
-    var gid = $(this).parents('[data-gid]:first').attr('data-gid');
-    var key = $(this).attr('data-key');
-    groupingView.sortAddresses(gid, key);
+    addressView.loadAddresses(gid);
     return false;
   })
   .on('click', 'a[href="#removeSearchResult"]', function() {
     var gid = $(this).parents('[data-gid]:first').attr('data-gid');
     searchGroupView.removeData(gid);
     searchCondView.removeData(gid);
-    groupingView.removeData(gid);
+    addressView.removeData(gid);
     return false;
   })
   .on('click', 'a[href="#showAddress"]', function() {
@@ -332,7 +335,7 @@ $(function() {
     return false;
   });
   $('#searchForm input[name="search"]').on('click', function() {
-    groupingView.searchAddresses($('#s_name_or_kana').val(), $('#s_email').val());
+    addressView.searchAddresses($('#s_name_or_kana').val(), $('#s_email').val());
     return false;
   });
   function toggleGroup(gid) {

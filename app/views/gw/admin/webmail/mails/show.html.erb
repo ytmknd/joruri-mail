@@ -177,9 +177,9 @@ inline_contents = @item.inline_contents
     <div class="mailViewSelector">
       <a href="#toggleView" class="textView" title="テキスト表示" data-type="text">TEXT</a>
       <a href="#toggleView" class="htmlView" title="HTML表示" data-type="html">HTML</a>
-      <%= hidden_field_tag :mail_view, @html_mail_view, id: 'currentMailView' %>
     </div>
   <% end %>
+  <%= hidden_field_tag :mail_view, @html_mail_view, id: 'currentMailView' %>
   <div id="inlineContents">
   <% mail_text_body = '' %>
   <% inline_contents.each_with_index do |inline, idx| %>
@@ -339,7 +339,6 @@ $(function() {
       url += "mail_view=" + view;
     }
     openMailForm(url, '<%=raw mail_form_style %>');
-    return false;
   });
   $('a[href="#moveMail"]').on('click', function() {
     $('#mailForm').submit();
@@ -354,7 +353,6 @@ $(function() {
       $('#mailForm').attr('action', '<%=raw escape_javascript register_spam_gw_webmail_mails_path(mailbox: @mailbox.name) %>')
         .submit();
     }
-    return false;
   });
   $('a[href="#labelMail"]').on('click', function() {
     var uid = '<%= @item.uid %>';

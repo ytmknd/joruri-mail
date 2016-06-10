@@ -1,7 +1,8 @@
+<% items = @s_items || @items %>
 <?xml version='1.0' encoding='UTF-8'?>
 <items>
-  <count><%= @s_items.size %></count>
-  <% @s_items.each do |item| %>
+  <count><%= items.size %></count>
+  <% items.each do |item| %>
   <item>
     <id><%= item.id %></id>
     <name><%= item.name %></name>

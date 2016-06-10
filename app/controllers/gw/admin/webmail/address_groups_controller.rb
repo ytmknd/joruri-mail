@@ -28,7 +28,11 @@ class Gw::Admin::Webmail::AddressGroupsController < Gw::Controller::Admin::Base
     @groups = Gw::WebmailAddressGroup.user_groups
     @root_groups = @groups.select {|i| i.parent_id == 0}
 
-    _index @s_items || @items
+    if params[:format] == 'xml'
+      render :index
+    else
+      _index @s_items || @items
+    end
   end
   
   def show

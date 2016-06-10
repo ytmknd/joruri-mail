@@ -172,10 +172,12 @@ $(function() {
   $('a[href="#showCcAddress"]').on('click', function() {
     $('#ccContainer').show();
     $(this).hide();
+    return false;
   });
   $('a[href="#showBccAddress"]').on('click', function() {
     $('#bccContainer').show();
     $(this).hide();
+    return false;
   });
 });
 $(function() {
@@ -184,7 +186,7 @@ $(function() {
   }
   $('a[href="#toggleEditor"]').on('click', function() {
     var format = $(this).attr('data-format');
-    if ($('#item_in_format').val() == format) return;
+    if ($('#item_in_format').val() == format) return false;
     switch(format) {
     case 'text':
       if (!confirm("テキスト形式に変換することにより、書式情報が失われます。よろしいですか？")) return;
@@ -217,6 +219,7 @@ $(function() {
       break;
     }
     $('#item_in_format').val(format);
+    return false;
   });
 });
 $(function() {
