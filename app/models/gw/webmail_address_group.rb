@@ -69,4 +69,8 @@ class Gw::WebmailAddressGroup < ActiveRecord::Base
       end
     end
   end
+
+  def descendant_options
+    descendants {|rel| rel.select(:id, :name, :level_no) }.map {|g| [g.nested_name, g.id] }
+  end
 end

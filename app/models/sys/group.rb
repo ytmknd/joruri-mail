@@ -33,7 +33,7 @@ class Sys::Group < Sys::ManageDatabase
   def ou_name
     "#{code}#{name}"
   end
-  
+
   def full_name
     n = name
     n = "#{parent.name}　#{n}" if parent && parent.level_no > 1
@@ -45,71 +45,47 @@ class Sys::Group < Sys::ManageDatabase
     "#{'　　'*nested_count}#{name}"
   end
 
-  def ldap_users_having_email(order = "id")
-    self.ldap_users.with_valid_email.order(order)
-  end
-
-  def count_ldap_users_having_email
-    self.ldap_users.with_valid_email.count
-  end
-  
-  def enabled_users_having_email(order = "id")
-    self.enabled_users.with_valid_email.order(order)
-  end
-  
-  def count_enabled_users_having_email
-    self.enabled_users.with_valid_email.count
-  end
-  
   def self.show_only_ldap_user
     Joruri.config.application['webmail.show_only_ldap_user'] == 1
   end
-  
-  def users_having_email(order = "id")
-    if Sys::Group.show_only_ldap_user
-      ldap_users_having_email(order)
+
+  def users_having_email
+    if self.class.show_only_ldap_user
+      ldap_users.with_valid_email
     else
-      enabled_users_having_email(order)
+      enabled_users.with_valid_email
     end
   end
-  
-  def count_users_having_email
-    if Sys::Group.show_only_ldap_user
-      count_ldap_users_having_email
-    else
-      count_enabled_users_having_email
-    end
-  end
-  
+
   def creatable?
     Core.user.has_auth?(:manager)
   end
-  
+
   def readable?
     Core.user.has_auth?(:manager)
   end
-  
+
   def editable?
     Core.user.has_auth?(:manager)
   end
-  
+
   def deletable?
     Core.user.has_auth?(:manager)
   end
-  
+
   def ldap_states
     [['同期',1],['非同期',0]]
   end
-  
+
   def web_states
     [['公開','public'],['非公開','closed']]
   end
-  
+
   def ldap_label
     ldap_states.each {|a| return a[0] if a[1] == ldap }
     return nil
   end
-  
+
   def candidate(include_top = false)
     choices = []
     
@@ -129,6 +105,10 @@ class Sys::Group < Sys::ManageDatabase
     roots.each {|i| down.call(i, 0)}
     
     choices
+  end
+
+  def ancestors_and_children_without_root_options
+    ancestors_and_children[1..-1].map { |g| [g.nested_name.sub(/　　/, ''), g.id] }
   end
 
 private

@@ -17,12 +17,12 @@ class Gw::Admin::Webmail::AddressGroupsController < Gw::Controller::Admin::Base
     @limit = 200
 
     if [:index, :show, :child_items].include? params[:action].to_sym
-      @order = Gw::WebmailSetting.user_config_value(:address_order)
+      @orders = Gw::WebmailSetting.load_address_orders
     end
   end
 
   def index
-    @items = Gw::WebmailAddress.readable.where(user_id: Core.user.id).order(get_order())
+    @items = Gw::WebmailAddress.readable.where(user_id: Core.user.id).order(@orders)
     @s_items = @items.search(params) if params[:search]
 
     @groups = Gw::WebmailAddressGroup.user_groups
@@ -39,7 +39,7 @@ class Gw::Admin::Webmail::AddressGroupsController < Gw::Controller::Admin::Base
     @item = Gw::WebmailAddressGroup.find(params[:id])
     return error_auth unless @item.readable?
 
-    @addresses = @item.addresses.order(get_order())
+    @addresses = @item.addresses.order(@orders)
 
     render layout: false if request.xhr?
   end
@@ -93,11 +93,7 @@ class Gw::Admin::Webmail::AddressGroupsController < Gw::Controller::Admin::Base
     return error_auth unless @item.readable?
 
     @groups = @item.children
-    @items = @item.addresses.order(get_order())
-
-    respond_to do |format|
-      format.xml  { }
-    end        
+    @items = @item.addresses.order(@orders)
   end
 
   private
@@ -111,10 +107,5 @@ class Gw::Admin::Webmail::AddressGroupsController < Gw::Controller::Admin::Base
     Gw::WebmailAddress.where(user_id: Core.user.id, id: ids.keys)
       .where.not(email: nil).where.not(email: '').order(:kana)
       .map {|u| %Q(#{u.name} <#{u.email}>) }
-  end
-
-  def get_order
-    rslt = (@order.presence || 'email')
-    rslt << ', id'
   end
 end

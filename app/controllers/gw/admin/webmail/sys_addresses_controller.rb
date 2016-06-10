@@ -7,7 +7,7 @@ class Gw::Admin::Webmail::SysAddressesController < Gw::Controller::Admin::Base
   def pre_dispatch
     return redirect_to action: :index if params[:reset]
     @limit = 200
-    @order = Gw::WebmailSetting.user_config_value(:sys_address_order)
+    @orders = Gw::WebmailSetting.load_sys_address_orders
   end
 
   def index
@@ -21,7 +21,7 @@ class Gw::Admin::Webmail::SysAddressesController < Gw::Controller::Admin::Base
       user = Sys::User.includes(:groups).where(state: 'enabled').with_valid_email
       user = user.where(ldap: 1) if Sys::Group.show_only_ldap_user
       user = user.search(params)
-      @users = user.order(get_orders).paginate(page: 1, per_page: @limit)
+      @users = user.order(@orders).paginate(page: 1, per_page: @limit)
       @gid = params[:gid]
       @gname = "検索結果（#{params[:index]}）"
       if params[:format] == 'json'
@@ -66,19 +66,20 @@ class Gw::Admin::Webmail::SysAddressesController < Gw::Controller::Admin::Base
 
   def child_users
     @group = Sys::Group.find(params[:id])
-    @users = @group.users_having_email(get_order).paginate(page: 1, per_page: 1000)
+    @users = @group.users_having_email.reorder(@orders).paginate(page: 1, per_page: 1000)
     @gid = @group.id
     @gname = @group.name
     render layout: false if request.xhr?
   end
 
+  def search_items
+    
+  end
+
   def child_items
     @group = Sys::Group.find(params[:id])
     @groups = @group.enabled_children
-    @users  = @group.users_having_email(get_order)
-    respond_to do |format|
-      format.xml  { }
-    end
+    @users  = @group.users_having_email.reorder(@orders)
   end
 
   private
@@ -94,16 +95,5 @@ class Gw::Admin::Webmail::SysAddressesController < Gw::Controller::Admin::Base
     item = Sys::User.where(id: ids, state: 'enabled').with_valid_email
     item = item.where(ldap: 1) if Sys::Group.show_only_ldap_user
     item.order(:email).map {|u| %Q(#{u.name} <#{u.email}>) }
-  end
-
-  def get_orders
-    orders = []
-    orders << (@order.presence || 'email')
-    orders << 'account'
-    orders
-  end
-
-  def get_order
-    get_orders.join(', ')
   end
 end

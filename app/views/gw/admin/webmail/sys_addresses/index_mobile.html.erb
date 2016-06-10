@@ -1,60 +1,17 @@
 <%
-def name_with_prefix(group)
-  "　"*(group.level_no-2) + group.name
-end
-
-def parent_groups(group)
-  parents = []
-  parent = group.parent
-  while parent && parent.level_no != 1 do
-    parents << parent
-    parent = parent.parent
-  end
-  parents.reverse!
-end
-
-def group_selection(group)
-  array = [["// 選択してください",0]]
-  parents = parent_groups(group)
-  parents.each do |parent|
-    array << [name_with_prefix(parent), parent.id]
-  end
-  if group != @root
-    array << [name_with_prefix(group), group.id]
-  end
-  group.enabled_children.each do |g|
-    array << [name_with_prefix(g), g.id]
-  end
-  array
-end
-
-def enum_selected_address
-  num = 0
-  [:to, :cc, :bcc].each do |t|
-    num += session[:mobile][t].length if session[:mobile][t]
-  end if session[:mobile]
-  num
-end
-
-def get_order
-  order = Gw::WebmailSetting.user_config_value(:sys_address_order)
-  order = order.blank? ? 'email' : order
-  order << ', id'
-end
-
 params[:group_id] = nil if params[:clear]
-
-unless params[:group_id].blank?
-  @group = Sys::Group.find_by(id: params[:group_id].to_i) || @root
+if params[:group_id].present?
+  @group = Sys::Group.find_by(id: params[:group_id]) || @root
   @groups = @group.enabled_children
 end
 
-@users = @group.users_having_email(get_order)
+@users = @group.users_having_email.reorder(Gw::WebmailSetting.load_sys_address_orders)
 %>
 
 <div class="groups"><%= Joruri.config.application['webmail.sys_address_menu'] %></div>
 <%= form_tag gw_webmail_sys_addresses_path, { id: 'groupForm', name: 'groupForm', class: 'groupForm', method: :get } do |f| %>
-  <%= select_tag :group_id, options_for_select(group_selection(@group), @group.id), class: 'selectUI' %><br/>
+  <%= select_tag :group_id, options_for_select(
+    [["// 選択してください",0]] + @group.ancestors_and_children_without_root_options, @group.id), class: 'selectUI' %><br/>
   <%= submit_tag "検索", name: 'select', class: 'menuItem' %>
   <%= submit_tag "リセット", name: 'clear', class: 'menuItem' %>
 <% end %>
@@ -85,15 +42,15 @@ end
   </div>
   <%= submit_tag 'アドレス選択', class: 'menuItem', name: 'selectAddress' %>
   <% end %>
-  <% if enum_selected_address != 0 %>
+  <% if [:to, :cc, :bcc].any? { |type| session[:mobile] && session[:mobile][type].present? } %>
   <div class="selectedTitle">選択済みアドレス</div>
   <div class="selectedAddresses">
-  <% [:to, :cc, :bcc].each do |t| %>
-    <% if session[:mobile][t].present? %>
+  <% [:to, :cc, :bcc].each do |type| %>
+    <% if session[:mobile][type].present? %>
     <div class="addresses">
-      <font class="type"><%= t.capitalize %></font>
-      <% session[:mobile][t].each_with_index do |u,idx| %>
-      <div class="address"><%= submit_tag '削除', class: 'deleteItem', name: "deleteAddress=#{t}_#{idx}" %><%= u %></div>
+      <font class="type"><%= type.capitalize %></font>
+      <% session[:mobile][type].each_with_index do |u, idx| %>
+      <div class="address"><%= submit_tag '削除', class: 'deleteItem', name: "deleteAddress=#{type}_#{idx}" %><%= u %></div>
       <% end %>
     </div>
     <% end %>
@@ -101,7 +58,7 @@ end
   </div>
   <% end %>
   <%= hidden_field_tag :group_id, params[:group_id] %>
-  <% if enum_selected_address != 0 || @users.present? %>
+  <% if [:to, :cc, :bcc].any? { |type| session[:mobile] && session[:mobile][type].present? } || @users.present? %>
   <%= submit_tag 'メール作成', class: 'menuItem', name: 'createMail' %>
   <% end %>
 <% end %>

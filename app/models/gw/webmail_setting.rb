@@ -347,4 +347,12 @@ class Gw::WebmailSetting < ActiveRecord::Base
     end
     confs
   end
+
+  def self.load_address_orders
+    [user_config_value(:address_order, 'email'), 'id']
+  end
+
+  def self.load_sys_address_orders
+    [user_config_value(:sys_address_order, 'email'), 'account']
+  end
 end

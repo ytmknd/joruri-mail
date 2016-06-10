@@ -20,6 +20,10 @@ module Sys::Model::Tree
     items
   end
 
+  def ancestors_and_children
+    (ancestors + children).uniq
+  end
+
   def root?
     parent_id == nil || parent_id == 0
   end
