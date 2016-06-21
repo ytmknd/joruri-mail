@@ -3,7 +3,8 @@ class Gw::WebmailMailbox < ActiveRecord::Base
   include Sys::Model::Base
   include Sys::Model::Auth::Free
 
-  attr_accessor :path, :path_was, :name_was
+  attr_accessor :path
+  attr_accessor :parent, :children
 
   validates :title, presence: true
   validate :validate_title
@@ -290,21 +291,6 @@ class Gw::WebmailMailbox < ActiveRecord::Base
     end
   end
 
-  def parents_count
-    name.gsub(/[^\.]/, '').length
-  end
-
-  def root?
-    parents_count == 0
-  end
-
-  def children
-    items = self.class.where(user_id: Core.current_user.id)
-      .where.not(name: name).where('name LIKE ?', "#{name}.%")
-      .order(:sort_no)
-    items.to_a.delete_if {|x| x.name =~ /#{name}\.[^\.]+\./}
-  end
-
   def path
     return @path if @path
     return "" if name !~ /\./
@@ -316,12 +302,53 @@ class Gw::WebmailMailbox < ActiveRecord::Base
   end
 
   def indented_title(char = "　 ")
-    "#{char * parents_count}#{title}"
+    "#{char * level_no}#{title}"
   end
 
   def validate_title
     if title =~ /[\.\/\#\\]/
       errors.add :title, "に半角記号（ . / # \\ ）は使用できません。"
+    end
+  end
+
+  def root?
+    parent.nil?
+  end
+
+  def parent_name
+    name.split('.')[-2]
+  end
+
+  def ancestor_name
+    ancestor_names.join('.')
+  end
+
+  def ancestor_names
+    name.split('.')[0..-2]
+  end
+
+  def level_no
+    ancestor_names.count
+  end
+
+  def self_name
+    name.split('.')[-1]
+  end
+
+  class << self
+    def make_tree(mailboxes)
+      mailboxes.each do |box|
+        box.children = []
+        box.parent = nil
+      end
+      hash = mailboxes.index_by(&:name)
+      mailboxes.each do |box|
+        if box.ancestor_name && hash[box.ancestor_name]
+          hash[box.ancestor_name].children.push(box)
+          box.parent = hash[box.ancestor_name]
+        end
+      end
+      mailboxes.select(&:root?)
     end
   end
 end

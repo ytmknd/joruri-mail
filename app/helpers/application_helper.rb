@@ -79,4 +79,14 @@ module ApplicationHelper
 ###    ruby = Page.ruby unless ruby
 ###    return ruby == true ? Cms::Lib::Navi::Ruby.convert(str) : str
 ###  end
+
+  def content_tag_if(cond, tag, options = {}, &block)
+    if cond
+      content_tag tag, options do
+        capture(&block)
+      end
+    else
+      capture(&block)
+    end
+  end
 end

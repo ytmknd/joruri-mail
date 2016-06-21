@@ -178,30 +178,6 @@ module Gw::MailHelper
     end
   end
 
-  def mailbox_mobile_image_tag(mailbox_type, options = {})
-    postfix = "-blue" if options[:blue]
-    case mailbox_type
-    when 'inbox'
-      %Q{<img src="/_common/themes/admin/gw/webmail/mobile/images/transmit#{postfix}.jpg" alt="受信トレイ" />}
-    when 'drafts'
-      %Q{<img src="/_common/themes/admin/gw/webmail/mobile/images/draft#{postfix}.jpg" alt="下書き" />}
-    when 'sent'
-      %Q{<img src="/_common/themes/admin/gw/webmail/mobile/images/mailbox#{postfix}.jpg" alt="送信トレイ" />}
-    when 'archives'
-      %Q{<img src="/_common/themes/admin/gw/webmail/mobile/images/archive#{postfix}.jpg" alt="アーカイブ" />}
-    when 'trash'
-      %Q{<img src="/_common/themes/admin/gw/webmail/mobile/images/dustbox#{postfix}.jpg" alt="ごみ箱" />}
-    when 'arvhives'
-      %Q{<img src="/_common/themes/admin/gw/webmail/mobile/images/archive#{postfix}.jpg" alt="アーカイブ" />}
-    when 'star'
-      %Q{<img src="/_common/themes/admin/gw/webmail/mobile/images/star#{postfix}.jpg" alt="スター付き" />}
-    when 'folder'
-      %Q{∟}
-    else
-      %Q{<img alt="フォルダ" src="/_common/themes/admin/gw/webmail/mobile/images/folder-white.jpg" alt="フォルダ" />}
-    end
-  end
-
   def user_agent_info(user_agent)
     [ /(MSIE) (\d+)\.(\d*)/,
       /(Trident).+rv:(\d+)\.(\d*)/,

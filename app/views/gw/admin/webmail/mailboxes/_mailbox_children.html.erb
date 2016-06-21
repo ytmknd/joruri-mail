@@ -1,0 +1,14 @@
+<% mailboxes.each do |box| %>
+  <%
+    li_class = mailbox_list_class(box)
+    nm_class = mailbox_name_class(box, @mailbox)
+  %>
+  <li class="<%= li_class %>">
+    <%= link_to h(box.title), url_for(action: :index, mailbox: box.name), class: nm_class %>
+    <% if box.children.size > 0 %>
+      <ul class="children level<%= level_no %>">
+        <%= render 'gw/admin/webmail/mails/shared/mailbox_children', mailboxes: box.children %>
+      </ul>
+    <% end %>
+  </li>
+<% end %>
