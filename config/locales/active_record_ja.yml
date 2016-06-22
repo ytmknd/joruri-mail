@@ -32,3 +32,5 @@ ja:
         email: "は正しいEメールアドレスではありません。"
         onebyte_characters: "は半角で入力してください。"
         platform_dependent_characters: "に機種依存文字が含まれています。（%{chars}）"
+        invalid_regexp: "の正規表現を正しく入力してください。（%{error}）"
+        invalid_date: "の日付を正しく入力してください。"

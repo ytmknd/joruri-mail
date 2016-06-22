@@ -5,7 +5,7 @@ class Gw::WebmailFilterCondition < ActiveRecord::Base
   belongs_to :filter, foreign_key: :filter_id, class_name: 'Gw::WebmailFilter'
 
   validates :user_id, :column, :inclusion, :value, presence: true
-  validate :validate_regexp
+  validates :value, regexp: true, if: "inclusion == '=~'"
 
   scope :readable, ->(user = Core.user) { where(user_id: user.id) }
 
@@ -33,17 +33,5 @@ class Gw::WebmailFilterCondition < ActiveRecord::Base
   def inclusion_label
     inclusion_options.each {|c| return c[0] if inclusion == c[1].to_s }
     nil
-  end
-
-  private
-
-  def validate_regexp
-    if inclusion == '=~' && value.present?
-      begin
-        Regexp.new(value)
-      rescue => e
-        errors.add(:value, "を正しく入力してください。（正規表現　/#{value}/, #{e}）")
-      end
-    end
   end
 end
