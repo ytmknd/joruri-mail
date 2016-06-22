@@ -8,7 +8,7 @@ end
 @users = @group.users_having_email.reorder(Gw::WebmailSetting.load_sys_address_orders)
 %>
 
-<div class="groups"><%= Joruri.config.application['webmail.sys_address_menu'] %></div>
+<div class="groups"><%= t('webmail.menus.sys_address') %></div>
 <%= form_tag gw_webmail_sys_addresses_path, { id: 'groupForm', name: 'groupForm', class: 'groupForm', method: :get } do |f| %>
   <%= select_tag :group_id, options_for_select(
     [["// 選択してください",0]] + @group.ancestors_and_children_without_root_options, @group.id), class: 'selectUI' %><br/>

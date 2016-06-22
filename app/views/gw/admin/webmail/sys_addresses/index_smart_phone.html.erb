@@ -9,7 +9,7 @@ end
 %>
 
 <div class="sysAddressTitle">
-  <%= Joruri.config.application['webmail.sys_address_menu'] %>
+  <%= t('webmail.menus.sys_address') %>
 </div>
 
 <%= form_tag gw_webmail_sys_addresses_path, { id: 'groupForm', name: 'groupForm', class: 'groupForm', method: :get } do |f| %>

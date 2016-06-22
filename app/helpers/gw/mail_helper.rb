@@ -237,9 +237,9 @@ module Gw::MailHelper
 
   def mail_form_download_message
     if attachment_file_downloadable?
-      Joruri.config.application['webmail.download_allow_message']
+      I18n.t('webmail.helpers.download_allow_message_html')
     else
-      Joruri.config.application['webmail.download_deny_message']
+      I18n.t('webmail.helpers.download_deny_message_html')
     end
   end
 

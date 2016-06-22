@@ -29,7 +29,7 @@
       <span class="sysLink"><a href="/_admin/sys" target="_blank">管理画面</a></span>
     <% end %>
     <span class="previousLogin">
-      前回ログイン日時　<%= Core.user && Core.user.previous_login_date ? I18n.l(Core.user.previous_login_date) : '---' %>
+      前回ログイン日時　<%= Core.user && Core.user.previous_login_date ? l(Core.user.previous_login_date) : '---' %>
     </span>
   </div>
 

@@ -6,7 +6,7 @@
     <td><%= @item.status.name if @item.status %></td>
   </tr><tr>
     <th><%= @item.class.human_attribute_name :published_at %></th>
-    <td><%= @item.published_at if @item.published_at %></td>
+    <td><%=l @item.published_at if @item.published_at %></td>
   </tr><tr>
     <th><%= @item.class.human_attribute_name :title %></th>
     <td><%= @item.title %></td>

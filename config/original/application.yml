@@ -1,8 +1,4 @@
 sys:
-  # ログイン画面フッター文字
-  login_footer: ''
-  # 携帯向けフッター文字
-  mobile_footer: ''
   # セッション保持期限（H）
   session_expiration: 24
   # 携帯向けセッション保持期限（H）
@@ -15,8 +11,6 @@ webmail:
   mailbox_quota_alert_rate: 0.85
   # 添付ファイル最大サイズ（MB）
   attachment_file_max_size: 5
-  # 組織アドレス帳名
-  sys_address_menu: "組織アドレス帳"
   # 組織アドレス帳/LDAPユーザーのみ表示
   show_only_ldap_user: 0
   # フィルタ条件最大登録件数

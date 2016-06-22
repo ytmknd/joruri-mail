@@ -8,7 +8,7 @@
     <td><%= f.collection_radio_buttons :state, @item.states, :last, :first, class: 'status' %></td>
   </tr><tr>
     <th><%= @item.class.human_attribute_name :published_at %></th>
-    <td><%= f.text_field :published_at, value: @item.published_at ? I18n.l(@item.published_at) : '', class: 'datetime pulished_at' %></td>
+    <td><%= f.text_field :published_at, value: @item.published_at ? l(@item.published_at) : '', class: 'datetime pulished_at' %></td>
   </tr><tr>
     <th><%= @item.class.human_attribute_name :sort_no %></th>
     <td><%= f.text_field :sort_no, class: 'sort_no' %></td>

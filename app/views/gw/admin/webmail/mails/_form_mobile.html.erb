@@ -21,8 +21,8 @@ attachments = Gw::WebmailMailAttachment.where(tmp_id: @item.tmp_id)
 <%= hidden_field_tag :id, params[:id] %>
 
 <div class="addressMenus">
-<%= submit_tag Joruri.config.application['webmail.sys_address_menu'], class: 'menuItem', name: 'addSysAddress' %>
-<%= submit_tag Joruri.config.application['webmail.address_group_menu'], class: 'menuItem', name: 'addPriAddress' %>
+<%= submit_tag t('webmail.menus.sys_address'), class: 'menuItem', name: 'addSysAddress' %>
+<%= submit_tag t('webmail.menus.address_group'), class: 'menuItem', name: 'addPriAddress' %>
 </div>
 
 <div class="to">宛先</div>

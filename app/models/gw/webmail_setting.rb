@@ -19,8 +19,8 @@ class Gw::WebmailSetting < ActiveRecord::Base
     ['メール読み取り', :mail_detail],
     ['メール送信', :mail_form],
     ['ラベル', :mail_label],
-    [Joruri.config.application['webmail.sys_address_menu'], :sys_address],
-    [Joruri.config.application['webmail.address_group_menu'], :address],
+    [I18n.t('webmail.menus.sys_address'), :sys_address],
+    [I18n.t('webmail.menus.address_group'), :address],
     ['携帯端末', :mobile]
   ]
   

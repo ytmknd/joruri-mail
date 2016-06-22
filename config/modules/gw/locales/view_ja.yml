@@ -1,0 +1,17 @@
+ja:
+  webmail:
+    menus:
+      mail: メール
+      mailbox: フォルダ
+      sys_address: 組織アドレス帳
+      address_group: 個人アドレス帳
+      filter: フィルタ
+      template: テンプレート
+      sign: 署名
+      memo: メモ
+      tool: ツール
+      setting: 設定
+      doc: ヘルプ
+    helpers:
+      download_allow_message_html: ''
+      download_deny_message_html: ''

@@ -13,11 +13,8 @@
 <%= hidden_field_tag :uri, h(@uri) %>
 
 <div class="box">
-
   <h1>Joruri</h1>
-
   <div class="notice"><%= flash[:notice] %></div>
-
   <div class="fields">
     <span class="head">ユーザID</span><%= text_field_tag 'account', '' %>
     <br />
@@ -25,16 +22,13 @@
     <span class="head">パスワード</span><%= password_field_tag 'password', '' %>
     <br />
   </div>
-
   <% 
-    footer = Joruri.config.application['sys.login_footer']
-    if footer == ""
-      submitter_style = "margin-top:14px"
-    end
+    footer = t('sys.shared.login_footer_html')
+    submitter_style = 'margin-top:14px' if footer.blank?
   %>
   <div class="submitters">
     <input class="login" type="image" src="/_common/images/blank.gif" alt="ログイン" value="" name="commit" style="<%= submitter_style %>" />
-    <%=raw footer %>
+    <%= footer %>
   </div>
 </div>
 
