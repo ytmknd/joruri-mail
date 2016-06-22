@@ -28,13 +28,9 @@ class Gw::Admin::Webmail::AddressGroupsController < Gw::Controller::Admin::Base
     @groups = Gw::WebmailAddressGroup.user_groups
     @root_groups = @groups.select {|i| i.parent_id == 0}
 
-    if params[:format] == 'xml'
-      render :index
-    else
-      _index @s_items || @items
-    end
+    _index @s_items || @items
   end
-  
+
   def show
     @item = Gw::WebmailAddressGroup.find(params[:id])
     return error_auth unless @item.readable?
@@ -86,14 +82,6 @@ class Gw::Admin::Webmail::AddressGroupsController < Gw::Controller::Admin::Base
     flash[:mail_cc]  = cc.join(', ')  if cc.size  > 0
     flash[:mail_bcc] = bcc.join(', ') if bcc.size > 0
     redirect_to new_gw_webmail_mail_path('INBOX')
-  end
-
-  def child_items
-    @item = Gw::WebmailAddressGroup.find(params[:id])
-    return error_auth unless @item.readable?
-
-    @groups = @item.children
-    @items = @item.addresses.order(@orders)
   end
 
   private

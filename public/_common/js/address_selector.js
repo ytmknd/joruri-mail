@@ -1,8 +1,7 @@
 //Constructor
 function AddressSelector() {
   this.parseAddressURI = null;
-  this.sysAddressesURI = null;
-  this.priAddressesURI = null;
+  this.addressesURI = {};
   this._addressBook = null;
   this._callBack = null;
   this._loadingGroupIds = {'sys':{}, 'pri':{}};
@@ -97,30 +96,18 @@ AddressSelector.prototype.loadItems = function(prefix, gid, opt) {
   if (!search && !toggleElm) return;
   this._loadingGroupIds[prefix][gid] = true;
   var uri = null;
-  switch(prefix) {
-  case 'sys':
-    if (search) {
-      uri = this.sysAddressesURI + ".xml";
-    } else {
-      uri = this.sysAddressesURI + "/" + gid + "/child_items.xml";  
-    }
-    break;
-  case 'pri':
-    if (search || gid == 0) {
-      uri = this.priAddressesURI + ".xml";
-    } else {
-      uri = this.priAddressesURI + "/" + gid + "/child_items.xml";  
-    }    
-    break;  
+  if (search || gid == 0) {
+    uri = this.addressesURI[prefix] + ".json";
+  } else {
+    uri = this.addressesURI[prefix] + "/" + gid + ".json";  
   }
   var self = this;
   var requestOptions = {
     type: 'get',
-    dataType: 'xml',
-    success: function(xml){
-      var xml = jQuery(xml).get(0);
-      if (search) self.showSearchGroup(xml, prefix);
-      self.showItems(xml, prefix, gid);
+    dataType: 'json',
+    success: function(data) {
+      if (search) self.showSearchGroup(data, prefix);
+      self.showItems(data, prefix, gid);
     },
     error: function() {
       delete self._loadingGroupIds[prefix][gid];
@@ -132,35 +119,23 @@ AddressSelector.prototype.loadItems = function(prefix, gid, opt) {
   }
   jQuery.ajax(uri, requestOptions);
 };
-AddressSelector.prototype.getNodeValue = function(node, name) {
-    var elem = node.getElementsByTagName(name);
-    if (elem.length > 0 && elem[0].firstChild != null) { return elem[0].firstChild.nodeValue; }
-    return null;
-};
-AddressSelector.prototype.showItems = function(xml, prefix, parent_id) {
-  var groups = xml.getElementsByTagName("group");
-  var items = xml.getElementsByTagName("item");
+AddressSelector.prototype.showItems = function(data, prefix, parent_id) {
   var parentElm = document.getElementById(prefix + 'Group' + parent_id);
   var ul = document.createElement('ul');
   ul.id = prefix + 'ChildItems' + parent_id;
   ul.className = 'children';
-  for (var i = 0; i < groups.length; i++) {
-    var group  = groups[i];
-    var id    = this.getNodeValue(group, 'id');
-    var name  = this.getNodeValue(group, 'name');
-    var hasChildren = this.getNodeValue(group, 'has_children');    
-    ul.appendChild(this.makeGroupElement(prefix, id, name, hasChildren == '1'));
+  if (data.groups) {
+    for (var i=0; i<data.groups.length; i++) {
+      var group = data.groups[i];
+      ul.appendChild(this.makeGroupElement(prefix, group.id, group.name, group.has_children));
+    }
   }
-  if (items.length > 0) {
+  if (data.items.length > 0) {
     ul.appendChild(this.makeAddressElement(prefix, parent_id, '0', '（すべてをチェックする）', '', null));
   }
-  for (var i = 0; i < items.length; i++) {
-    var item  = items[i];
-    var id    = this.getNodeValue(item, 'id');
-    var name  = this.getNodeValue(item, 'name');
-    var email  = this.getNodeValue(item, 'email');
-    var groupName = this.getNodeValue(item, 'group_name');
-    ul.appendChild(this.makeAddressElement(prefix, parent_id, id, name, email, groupName));
+  for (var i=0; i<data.items.length; i++) {
+    var item  = data.items[i];
+    ul.appendChild(this.makeAddressElement(prefix, parent_id, item.id, item.name, item.email, item.group_name));
   }
   if (ul.childNodes.length > 0) parentElm.appendChild(ul);
 
@@ -214,22 +189,19 @@ AddressSelector.prototype.makeAddressElement = function(prefix, gid, id, name, e
   li.innerHTML = html;
   return li;
 };
-AddressSelector.prototype.showSearchGroup = function(xml, prefix) {
-  var items = xml.getElementsByTagName("items")[0];
-  var count = this.getNodeValue(items, "count");
-  var total = this.getNodeValue(items, "total");
+AddressSelector.prototype.showSearchGroup = function(data, prefix) {
   var name = '検索結果';
-  if (total != null && total > count) {
-    name += '（' + total + ' 件中 ' + count + ' 件を表示）';
+  if (data.total != null && data.total > data.count) {
+    name += '（' + data.total + ' 件中 ' + data.count + ' 件を表示）';
   }
-  var rsltElm = this.makeGroupElement(prefix, 'Search', name, count > 0);
+  var rsltElm = this.makeGroupElement(prefix, 'Search', name, data.count > 0);
   var rootElm = document.getElementById(prefix + 'AddressesRoot');
   if (rootElm.firstChild) {
     rootElm.insertBefore(rsltElm, rootElm.firstChild);    
   } else {
     rootElm.appendChild(rsltElm);
   }
-  return count;
+  return data.count;
 };
 AddressSelector.prototype.removeSearchGroup = function(prefix) {
   var rsltElm = document.getElementById(prefix + 'GroupSearch');

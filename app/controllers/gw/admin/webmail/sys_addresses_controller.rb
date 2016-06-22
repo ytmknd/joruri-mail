@@ -24,11 +24,7 @@ class Gw::Admin::Webmail::SysAddressesController < Gw::Controller::Admin::Base
       @users = user.order(@orders).paginate(page: 1, per_page: @limit)
       @gid = params[:gid]
       @gname = "検索結果（#{params[:index]}）"
-      if params[:format] == 'json'
-        return render :child_users, layout: false
-      else
-        return render :index, layout: false
-      end
+      return render :child_users, layout: false
     end
   end
 
@@ -70,16 +66,6 @@ class Gw::Admin::Webmail::SysAddressesController < Gw::Controller::Admin::Base
     @gid = @group.id
     @gname = @group.name
     render layout: false if request.xhr?
-  end
-
-  def search_items
-    
-  end
-
-  def child_items
-    @group = Sys::Group.find(params[:id])
-    @groups = @group.enabled_children
-    @users  = @group.users_having_email.reorder(@orders)
   end
 
   private

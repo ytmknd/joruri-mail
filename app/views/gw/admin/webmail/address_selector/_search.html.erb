@@ -91,9 +91,9 @@ pri_search_field_options = [['名前', 's_name_or_kana'], ['メールアドレ�
 
 <script type="text/javascript">
 //<![CDATA[
-AddressSelector.instance.parseAddressURI = '<%= url_for(controller: "gw/admin/webmail/address_selector", action: "parse_address", format: "js", authenticity_token: form_authenticity_token) %>';
-AddressSelector.instance.sysAddressesURI = '<%= gw_webmail_sys_addresses_path %>';
-AddressSelector.instance.priAddressesURI = '<%= gw_webmail_address_groups_path %>';
+AddressSelector.instance.parseAddressURI = '<%= url_for(controller: 'gw/admin/webmail/address_selector', action: :parse_address, format: :js) %>';
+AddressSelector.instance.addressesURI['sys'] = '<%= url_for(controller: 'gw/admin/webmail/address_selector/sys_addresses') %>';
+AddressSelector.instance.addressesURI['pri'] = '<%= url_for(controller: 'gw/admin/webmail/address_selector/addresses') %>';
 
 $(function() {
   $('#addressSearchKeyword').on('keypress', function(event) {

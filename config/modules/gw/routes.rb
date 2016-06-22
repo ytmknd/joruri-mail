@@ -42,7 +42,7 @@ Joruri::Application.routes.draw do
           :controller => "webmail/sys_addresses",
           :path => "webmail_sys_addresses" do
             member do
-              get :child_groups, :child_users, :child_items, :create_mail
+              get :child_groups, :child_users, :create_mail
             end
             collection do
               post :mobile_manage
@@ -64,9 +64,6 @@ Joruri::Application.routes.draw do
           :path => "webmail_address_groups" do
             collection do
               post :create_mail, :mobile_manage
-            end
-            member do
-              get :child_items
             end
           end
         resources "webmail_signs",
@@ -100,12 +97,16 @@ Joruri::Application.routes.draw do
         resources "webmail_docs",
           :controller => "webmail/docs",
           :path => "webmail/docs"
+        namespace "webmail" do
+          post "address_selector/parse_address" => "address_selector#parse_address"
+          namespace "address_selector" do
+            resources :sys_addresses, only: [:index, :show]
+            resources :addresses, only: [:index, :show]
+          end
+        end
       end
     end
   end
-
-  match "_admin/#{mod}/webmail/address_selector/parse_address(.:format)" =>
-    "gw/admin/webmail/address_selector#parse_address", via: [:get, :post]
 
   match "_admin/#{mod}/siteinfo" => "gw/admin/siteinfo#index", via: :get
 
