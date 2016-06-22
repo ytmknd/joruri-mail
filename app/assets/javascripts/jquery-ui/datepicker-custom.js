@@ -6,7 +6,7 @@
       //buttonImageOnly: true,
       changeYear: true,
       changeMonth: true,
-      dateFormat: 'yy/mm/dd',
+      dateFormat: 'yy-mm-dd',
       showAnim: false,
       showButtonPanel: true,
       //showOn: 'button',

@@ -4,7 +4,7 @@ class Gw::WebmailToolBatchDeleteSetting < Sys::Model::ActiveModel
 
   validates :mailbox_id, presence: true
   validates_each :start_date, :end_date do |model, attr, value|
-    if value !~ /^\d{4}\/\d{2}\/\d{2}$/
+    if value !~ /^\d{4}-\d{2}-\d{2}$/
       model.errors.add(attr, 'のフォーマットが不正です。')
     else
       DateTime.parse(value) rescue model.errors.add(attr, 'の日付が不正です。')
