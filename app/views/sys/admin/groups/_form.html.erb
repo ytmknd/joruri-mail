@@ -8,7 +8,7 @@
     <td><%= f.collection_radio_buttons :state, @item.states, :last, :first, class: 'status' %></td>
   </tr><tr>
     <th><%= @item.class.human_attribute_name :parent_id %></th>
-    <td><%= f.select :parent_id, Sys::Group.select_options_except(@item) %></td>
+    <td><%= f.select :parent_id, @item.root? ? [['', 0]] : Sys::Group.select_options_except(@item) %></td>
   </tr><tr>
     <th><%= @item.class.human_attribute_name :code %></th>
     <td><%= f.text_field :code, class: 'id' %></td>
