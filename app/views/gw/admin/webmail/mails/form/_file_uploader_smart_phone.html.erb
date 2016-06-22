@@ -32,9 +32,9 @@
       <td>
         {{if downloadable}}
           {{if image_is == 1}}
-            <a href="<%= gw_webmail_attachments_path %>/{{:id}}?tmp_id={{:tmp_id}}&filename={{:name}}" class="uploadedFileName {{:css_class}}" target="_blank">{{>title}}</a>
+            <a href="<%= gw_webmail_mail_attachments_path %>/{{:id}}?tmp_id={{:tmp_id}}&filename={{:name}}" class="uploadedFileName {{:css_class}}" target="_blank">{{>title}}</a>
           {{else}}
-            <a href="<%= gw_webmail_attachments_path %>/{{:id}}?tmp_id={{:tmp_id}}&filename={{:name}}" class="uploadedFileName {{:css_class}}">{{>title}}</a>
+            <a href="<%= gw_webmail_mail_attachments_path %>/{{:id}}?tmp_id={{:tmp_id}}&filename={{:name}}" class="uploadedFileName {{:css_class}}">{{>title}}</a>
           {{/if}}
         {{else}}
           {{>title}}
@@ -84,7 +84,7 @@ $(function() {
   });
   $('a[href="#deleteUploadedFile"]').on('click', function() {
     var id = $(this).attr('data-id')
-    $.post('<%= gw_webmail_attachments_path %>/' + id, {
+    $.post('<%= gw_webmail_mail_attachments_path %>/' + id, {
       _method: 'delete',
       authenticity_token: '<%= form_authenticity_token %>',
       tmp_id: '<%= @item.tmp_id %>'

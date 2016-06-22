@@ -29,9 +29,9 @@
   <script id="uploadFileTemplate" type="text/x-jsrender">
     <span class="uploadedFile" id="uploadedFile{{:id}}">
       {{if image_is == 1}}
-        <a href="<%= gw_webmail_attachments_path %>/{{:id}}?tmp_id={{:tmp_id}}&filename={{:name}}" class="uploadedFileName {{:css_class}}" target="_blank">{{>title}}</a>
+        <a href="<%= gw_webmail_mail_attachments_path %>/{{:id}}?tmp_id={{:tmp_id}}&filename={{:name}}" class="uploadedFileName {{:css_class}}" target="_blank">{{>title}}</a>
       {{else}}
-        <a href="<%= gw_webmail_attachments_path %>/{{:id}}?tmp_id={{:tmp_id}}&filename={{:name}}" class="uploadedFileName {{:css_class}}">{{>title}}</a>
+        <a href="<%= gw_webmail_mail_attachments_path %>/{{:id}}?tmp_id={{:tmp_id}}&filename={{:name}}" class="uploadedFileName {{:css_class}}">{{>title}}</a>
       {{/if}}
       <a href="#deleteUploadedFile" data-id="{{:id}}" class="deleteUploadedFile" title="削除">x</a>
       <input type="hidden" value="{{:id}}" name="item[tmp_attachment_ids][]">
@@ -76,7 +76,7 @@ $(function() {
   $('#uploadedFiles').append( $('#uploadFileTemplate').render(tmp_attachments) );
 
   var swfu = new SWFUpload({
-    upload_url: '<%= gw_webmail_attachments_path(format: :json) %>',
+    upload_url: '<%= gw_webmail_mail_attachments_path(format: :json) %>',
     post_params: {
       //authenticity_token: '<%= form_authenticity_token %>',
       tmp_id: '<%= @item.tmp_id %>',
@@ -135,7 +135,7 @@ $(function() {
   });
   $(document).on('click', 'a[href="#deleteUploadedFile"]', function() {
     var id = $(this).attr('data-id');
-    $.post('<%= gw_webmail_attachments_path %>/' + id, {
+    $.post('<%= gw_webmail_mail_attachments_path %>/' + id, {
       _method: 'delete',
       authenticity_token: '<%= form_authenticity_token %>',
       tmp_id: '<%= @item.tmp_id %>'
