@@ -112,14 +112,15 @@ $(function() {
     var grouping = this[idx];
     var order = grouping.sort_order.match(/▲/) ? '▼' : '▲';
     $.observable(grouping).setProperty({sort_key: key, sort_order: order});
-    var addresses = grouping.addresses.sort(function(a, b) {
-      if (order == '▲') {
-        return a[key] > b[key] ? 1 : -1;
-      } else {
-        return a[key] < b[key] ? 1 : -1;
-      }
-    });
-    $.observable(grouping.addresses).refresh(addresses);
+    $.observable(grouping.addresses).refresh(
+      grouping.addresses.sort(function(a, b) {
+        if (order == '▲') {
+          return a[key] > b[key] ? 1 : -1;
+        } else {
+          return a[key] < b[key] ? 1 : -1;
+        }
+      })
+    );
   }
   addressView.loadAddresses = function(gid) {
     if (addressView.loading == true) return;
@@ -140,8 +141,7 @@ $(function() {
     }
   }
 
-  $.templates("#addressesTemplate")
-    .link('#addresses', addressView)
+  $.templates("#addressesTemplate").link('#addresses', addressView)
     .on('click', 'a[href="#checkAll"]', function() {
       var i = $.view(this).index;
       var type = $(this).attr('data-type');
