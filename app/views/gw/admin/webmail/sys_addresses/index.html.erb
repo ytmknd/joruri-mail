@@ -31,7 +31,7 @@
       <ul class="children" id="childGroups{{:id}}">
         {{for children}}
           <li class="folder">
-            {{if hasChildren}}
+            {{if has_children}}
               <a href="#toggleGroups" id="toggleGroup{{:id}}" data-gid="{{:id}}" class="toggleGroups toggleGroupsClose">+</a>
             {{else}}
               <a href="#" class="toggleGroups" style="visibility:hidden;">+</a>
