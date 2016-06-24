@@ -144,7 +144,8 @@ $(function() {
     }
     return false;
   });
-  $('a[href="#labelMails"]').on('click', function() {
+  $('a[href="#labelMails"]').on('click', function(e) {
+    e.preventDefault();
     var labelID = $(this).attr('data-label-id');
     $('#mails input:checked').each(function() {
       var uid = $(this).attr('data-uid');

@@ -327,7 +327,8 @@ $(function() {
   $('a[href="#showLabelMenu"]').popupMenu({ menu: '#labelMenu' });
   $('a[href="#showOtherMenu"]').popupMenu({ menu: '#otherMenu' });
 
-  $('a[href="#editMail"]').on('click', function() {
+  $('a[href="#editMail"]').on('click', function(e) {
+    e.preventDefault();
     var url = $(this).attr('data-url');
     var view = $('#currentMailView').val();
     if (view != "") {
@@ -354,7 +355,8 @@ $(function() {
         .submit();
     }
   });
-  $('a[href="#labelMail"]').on('click', function() {
+  $('a[href="#labelMail"]').on('click', function(e) {
+    e.preventDefault();
     var uid = '<%= @item.uid %>';
     var labelElems = $('#mail_' + uid + '_labels, #mail_' + uid + '_label_loading');
 
@@ -373,7 +375,8 @@ $(function() {
       labelElems.toggle();
     });
   });
-  $('a[href="#starMail"]').on('click', function() {
+  $('a[href="#starMail"]').on('click', function(e) {
+    e.preventDefault();
     var uid = '<%= @item.uid %>';
     var elem = $('#mail_star_' + uid);
     var beforeClass = elem.hasClass('starOn') ? 'starOn' : 'starOff';
