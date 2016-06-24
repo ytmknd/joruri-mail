@@ -10,7 +10,7 @@ module Joruri
         "sys.force_site"                         => "",
         "webmail.mailbox_quota_alert_rate"       => 0.85,
         "webmail.attachment_file_max_size"       => 5,
-        "webmail.attachment_file_upload_method"  => "flash",
+        "webmail.attachment_file_upload_method"  => 'auto',
         "webmail.show_only_ldap_user"            => 1,
         "webmail.filter_condition_max_count"     => 100,
         "webmail.mail_address_history_max_count" => 100,

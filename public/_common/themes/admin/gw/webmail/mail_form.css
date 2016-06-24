@@ -169,6 +169,7 @@ a.scheduleLink {
   border: 1px solid #bbb;
   background-color: #fff;
   line-height: 1.5;
+  min-height: 1.5em;
 }
 #uploadedFiles .uploadedFile {
   display: block;
@@ -199,6 +200,12 @@ a.scheduleLink {
 }
 #uploadedFiles a.deleteUploadedFile:hover {
   background-position: 0px 0px;
+}
+#uploadedFiles .dropZoneNotice {
+  color: #aaa;
+}
+#uploadedFiles.hover {
+  background-color: #fdb;
 }
 
 #swfupButtons {

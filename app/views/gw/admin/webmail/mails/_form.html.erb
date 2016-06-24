@@ -37,7 +37,7 @@
   </tr><tr>
     <th>添付 ：</th>
     <td>
-      <%= render layout: 'gw/admin/webmail/mails/form/file_uploader', locals: { f: f } do %>
+      <%= render layout: mail_form_file_uploader_path, locals: { f: f } do %>
         <div class="editorMenu">
           <div class="formatSelector">
             <%= link_to 'TEXT', '#toggleEditor', data: { format: 'text' }, title: 'TEXT形式' %>

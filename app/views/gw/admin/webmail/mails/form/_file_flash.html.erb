@@ -1,22 +1,15 @@
-<%= content_for :head do %>
-  <script type="text/javascript" src="/_common/js/swfupload/swfupload.js"></script>
-  <script type="text/javascript" src="/_common/js/swfupload/plugins/swfupload.queue.js"></script>
-  <script type="text/javascript" src="/_common/js/swfupload/plugins/fileprogress.js"></script>
-  <script type="text/javascript" src="/_common/js/swfupload/plugins/handlers.js"></script>
-<% end %>
-
 <table style="width: 100%;">
   <tr>
     <td>
       <div id="flashUploader" style="display: none;">
         <div id="swfupButtons">
-          <span id="spanButtonPlaceHolder"></span
-          ><input id="btnCancel" type="button" value="キャンセル" disabled="disabled" />
+          <span id="spanButtonPlaceHolder"></span>
+          <input id="btnCancel" type="button" value="キャンセル" disabled="disabled" />
         </div>
       </div>
       <div id="defaultUploader" style="display: none;">
         <%= f.file_field :in_files, name: 'item[in_files][]', size: 90, style: 'width: 300px;', class: 'file' %><br />
-        <%= tag :input, type: 'button', value: '選択したファイルを添付', id: 'commit_file', name: 'commit_file', style: 'display: none;' %>
+        <input type="button" value="選択したファイルを添付" id="commit_file" name="commit_file" style="display: none;" />
       </div>
     </td>
     <td style="vertical-align: bottom;">
@@ -25,62 +18,71 @@
   </tr>
 </table>
 
-<div id="uploadedFiles" style="<%= 'display: none;' if @item.tmp_attachments.blank? %>">
-  <script id="uploadFileTemplate" type="text/x-jsrender">
-    <span class="uploadedFile" id="uploadedFile{{:id}}">
-      {{if image_is == 1}}
-        <a href="<%= gw_webmail_mail_attachments_path %>/{{:id}}?tmp_id={{:tmp_id}}&filename={{:name}}" class="uploadedFileName {{:css_class}}" target="_blank">{{>title}}</a>
-      {{else}}
-        <a href="<%= gw_webmail_mail_attachments_path %>/{{:id}}?tmp_id={{:tmp_id}}&filename={{:name}}" class="uploadedFileName {{:css_class}}">{{>title}}</a>
-      {{/if}}
-      <a href="#deleteUploadedFile" data-id="{{:id}}" class="deleteUploadedFile" title="削除">x</a>
-      <input type="hidden" value="{{:id}}" name="item[tmp_attachment_ids][]">
-    </span>
-  </script>
-</div>
+<div id="uploadedFiles" style="<%= 'display: none;' if @item.tmp_attachments.blank? %>"></div>
+<script id="uploadedFilesTemplate" type="text/x-jsrender">
+  <span class="uploadedFile" id="uploadedFile{{:id}}">
+    {{if image_is == 1}}
+      <a href="<%= gw_webmail_mail_attachments_path %>/{{:id}}?tmp_id={{:tmp_id}}&filename={{:name}}" class="uploadedFileName {{:css_class}}" target="_blank">{{>title}}</a>
+    {{else}}
+      <a href="<%= gw_webmail_mail_attachments_path %>/{{:id}}?tmp_id={{:tmp_id}}&filename={{:name}}" class="uploadedFileName {{:css_class}}">{{>title}}</a>
+    {{/if}}
+    <a href="#deleteUploadedFile" data-id="{{:id}}" class="deleteUploadedFile" title="削除">x</a>
+    <input type="hidden" value="{{:id}}" name="item[tmp_attachment_ids][]">
+  </span>
+</script>
+
 <div id="divStatus"></div>
 <div id="fsUploadProgress"></div>
-<div id="defaultUploaderProgress" style="display:none;">
+<div id="fileUploaderProgress" style="display:none;">
   <div class="progressWrapper">
-    <div class="progressContainer red">
-      <div id="defaultUploaderProgressName" class="progressName"></div>
+    <div class="progressContainer">
+      <div class="progressBarName"></div>
       <div class="progressBarStatus">uploading...</div>
     </div>
   </div>
 </div>
 
+<%= content_for :head do %>
+<script type="text/javascript" src="/_common/js/swfupload/swfupload.js"></script>
+<script type="text/javascript" src="/_common/js/swfupload/plugins/swfupload.queue.js"></script>
+<script type="text/javascript" src="/_common/js/swfupload/plugins/fileprogress.js"></script>
+<script type="text/javascript" src="/_common/js/swfupload/plugins/handlers.js"></script>
+<% end %>
 <%
 attachment_file_max_size = Joruri.config.application['webmail.attachment_file_max_size']
 %>
 <script type="text/javascript">
 //<![CDATA[
+function isFlashInstalled() {
+  if (navigator.plugins['Shockwave Flash']) {
+    return true;
+  }
+  try {
+    new ActiveXObject('ShockwaveFlash.ShockwaveFlash');
+  } catch (e) {
+    return false;
+  }
+  return true;
+}
 $(function() {
-  <% case Joruri.config.application['webmail.attachment_file_upload_method'] %>
-  <% when 'auto' %>
-    if (isFlashInstalled()) {
-      $('#flashUploader').show();
-    } else {
-      $('#defaultUploader').show();
-    }
-  <% when 'flash' %>
-    $('#flashUploader').show();
-  <% else %>
-    $('#defaultUploader').show();
-  <% end %>
-
   var tmp_attachments = <%=
     @item.tmp_attachments.map { |at|
       mail_attachment_view_model(at, tmp_id: @item.tmp_id)
     }.to_json.html_safe
   %>
-  $('#uploadedFiles').append( $('#uploadFileTemplate').render(tmp_attachments) );
+  $('#uploadedFiles').append( $('#uploadedFilesTemplate').render(tmp_attachments) );
+
+  if (isFlashInstalled()) {
+    $('#flashUploader').show();
+  } else {
+    $('#defaultUploader').show();
+  }
 
   var swfu = new SWFUpload({
-    upload_url: '<%= gw_webmail_mail_attachments_path(format: :json) %>',
+    upload_url: '<%= gw_webmail_mail_attachments_path %>',
     post_params: {
       //authenticity_token: '<%= form_authenticity_token %>',
       tmp_id: '<%= @item.tmp_id %>',
-      total_size_limit: '<%= attachment_file_max_size %> MB'
     },
     flash_url: '/_common/js/swfupload/swfupload.swf',
     file_post_name: 'file',
@@ -118,7 +120,7 @@ $(function() {
     if (data.status == 'Error') { 
       alert(data.message);
     } else {
-      $('#uploadedFiles').append( $('#uploadFileTemplate').render(data) );
+      $('#uploadedFiles').append( $('#uploadedFilesTemplate').render(data) );
       toggleUploadedFiles(data);
     }
   }
@@ -145,25 +147,26 @@ $(function() {
       toggleUploadedFiles();
     });
     return false;
-  });
-  $(document).on('click', 'a.uploadedFileName', function() {
+  })
+  .on('click', 'a.uploadedFileName', function() {
     if ($(this).attr('target') == '_blank') return;
     $(window).off('beforeunload');
     window.location.href = this.href;
     $(window).on('beforeunload', checkFormChanged);
     return false;
   });
+
   $('#item_in_files').on('change', function() {
-    var maxsize = <%= attachment_file_max_size %>*1024*1024;
     if (this.value == '') { return; }
     if (this.files) {
-      if (this.files[0].size > maxsize) {
-        alert('ファイルサイズが容量制限（<%= attachment_file_max_size %>MB）を超えています。');
+      var maxsize = <%= attachment_file_max_size %>;
+      if (this.files[0].size > maxsize*1024*1024) {
+        alert('ファイルサイズが容量制限（' + maxsize + ' MB）を超えています。');
         return;
       }
+      $('#fileUploaderProgress .progressBarName').text(this.files[0].name);
     }
-    $('#defaultUploaderProgressName').html(elm.val());
-    $('#defaultUploaderProgress').show();
+    $('#fileUploaderProgress').show();
     $('#commit_file').click();
   });
   $('#commit_file').on('click', function() {

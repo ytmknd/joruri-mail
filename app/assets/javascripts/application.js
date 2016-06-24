@@ -24,6 +24,10 @@
 //= require jqueryui-timepicker-addon/dist/i18n/jquery-ui-timepicker-ja
 //= require simple-color-picker/jquery.simple-color-picker
 //= require jsviews/jsviews.min
+//= require jquery-file-upload
+//= require jquery-file-upload/js/jquery.fileupload-process
+//= require jquery-file-upload/js/jquery.fileupload-validate
+//= require jquery-file-upload/js/jquery.iframe-transport
 //  require turbolinks
 //= require_tree ./jquery-ui
 //= require_tree ./gw

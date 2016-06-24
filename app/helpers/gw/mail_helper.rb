@@ -250,4 +250,13 @@ module Gw::MailHelper
 
     ips.include?(request.env[key].to_s.split(',').last.to_s.strip)
   end
+
+  def mail_form_file_uploader_path
+    case Joruri.config.application['webmail.attachment_file_upload_method']
+    when 'flash'
+      'gw/admin/webmail/mails/form/file_flash'
+    else
+      'gw/admin/webmail/mails/form/file'
+    end
+  end
 end

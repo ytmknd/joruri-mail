@@ -4,12 +4,12 @@
     <td>
       <div id="defaultUploader">
         <%= f.file_field :in_files, name: 'item[in_files][]', size: 90, class: 'file' %><br />
-        <%= tag :input, type: 'button', value: '選択したファイルを添付', id: 'commit_file', name: 'commit_file', style: 'display: none;' %>
+        <input type="button" value="選択したファイルを添付" id="commit_file" name="commit_file" style="display: none;" />
       </div>
-      <div id="defaultUploaderProgress" style="display:none;">
+      <div id="fileUploaderProgress" style="display:none;">
         <div class="progressWrapper">
-          <div class="progressContainer red">
-            <div id="defaultUploaderProgressName" class="progressName"></div>
+          <div class="progressContainer">
+            <div class="progressBarName"></div>
             <div class="progressBarStatus">uploading...</div>
           </div>
         </div>
@@ -27,32 +27,50 @@
     </td>
   </tr>
   <% end %>
-  <script id="uploadFileTemplate" type="text/x-jsrender">
-    <tr class="uploadedFile" id="uploadedFile{{:id}}">
-      <td>
-        {{if downloadable}}
-          {{if image_is == 1}}
-            <a href="<%= gw_webmail_mail_attachments_path %>/{{:id}}?tmp_id={{:tmp_id}}&filename={{:name}}" class="uploadedFileName {{:css_class}}" target="_blank">{{>title}}</a>
-          {{else}}
-            <a href="<%= gw_webmail_mail_attachments_path %>/{{:id}}?tmp_id={{:tmp_id}}&filename={{:name}}" class="uploadedFileName {{:css_class}}">{{>title}}</a>
-          {{/if}}
-        {{else}}
-          {{>title}}
-        {{/if}}
-      </td>
-      <td>
-        <a href="#deleteUploadedFile" data-id="{{:id}}" class="deleteUploadedFile" title="削除">x</a>
-        <input type="hidden" value="{{:id}}" name="item[tmp_attachment_ids][]">
-      </td>
-    </tr>
-  </script>
 </table>
+<script id="uploadFileTemplate" type="text/x-jsrender">
+  <tr class="uploadedFile" id="uploadedFile{{:id}}">
+    <td>
+      {{if downloadable}}
+        {{if image_is == 1}}
+          <a href="<%= gw_webmail_mail_attachments_path %>/{{:id}}?tmp_id={{:tmp_id}}&filename={{:name}}" class="uploadedFileName {{:css_class}}" target="_blank">{{>title}}</a>
+        {{else}}
+          <a href="<%= gw_webmail_mail_attachments_path %>/{{:id}}?tmp_id={{:tmp_id}}&filename={{:name}}" class="uploadedFileName {{:css_class}}">{{>title}}</a>
+        {{/if}}
+      {{else}}
+        {{>title}}
+      {{/if}}
+    </td>
+    <td>
+      <a href="#deleteUploadedFile" data-id="{{:id}}" class="deleteUploadedFile" title="削除">x</a>
+      <input type="hidden" value="{{:id}}" name="item[tmp_attachment_ids][]">
+    </td>
+  </tr>
+</script>
 
 <%
 attachment_file_max_size = Joruri.config.application['webmail.attachment_file_max_size']
 %>
 <script type="text/javascript">
 //<![CDATA[
+function isFileUploadSupported() {
+  try {
+    var input = document.createElement('input');
+    input.type = 'file';
+    input.style.display = 'none';
+    document.getElementsByTagName('body')[0].appendChild(input);
+    if (input.disabled) {
+      return false;
+    }
+  } catch(ex){
+     return false;
+  } finally {
+    if (input) {
+      input.parentNode.removeChild(input);
+    }
+  }
+  return true;
+}
 $(function() {
   var attachments = <%=
     @item.tmp_attachments.map {|at|
@@ -74,8 +92,8 @@ $(function() {
         return;
       }
     }
-    $('#defaultUploaderProgressName').html(this.value);
-    $('#defaultUploaderProgress').show();
+    $('#fileUploaderProgress .progressBarName').text(this.value);
+    $('#fileUploaderProgress').show();
     $('#commit_file').click();
   });
   $('#commit_file').on('click', function() {

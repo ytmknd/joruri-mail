@@ -24,11 +24,9 @@ class Gw::Admin::Webmail::MailAttachmentsController < ApplicationController#Gw::
     total_size = params[:file].size
     Gw::WebmailMailAttachment.where(cond).each {|c| total_size += c.size.to_i }
     
-    total_size_limit = params[:total_size_limit] || "5 MB"
-    limit_value      = total_size_limit.gsub(/(.*?)[^0-9].*/, '\\1').to_i * (1024**2)
-
-    if total_size > limit_value
-      raise "容量制限を超えています。＜#{total_size_limit}＞"
+    total_size_limit = Joruri.config.application['webmail.attachment_file_max_size']
+    if total_size > total_size_limit * (1024**2)
+      raise "容量制限を超えています。＜#{total_size_limit} MB＞"
     end
 
     item = Gw::WebmailMailAttachment.new(cond)
@@ -40,9 +38,9 @@ class Gw::Admin::Webmail::MailAttachmentsController < ApplicationController#Gw::
     raise item.errors.full_messages.join("\n") unless rs
     raise "ファイルが存在しません。(#{item.upload_path})" unless FileTest.file?(item.upload_path)
 
-    render json: view_context.mail_attachment_view_model(item, tmp_id: params[:tmp_id], status: 'OK')
+    render text: view_context.mail_attachment_view_model(item, tmp_id: params[:tmp_id], status: 'OK').to_json
   rescue => e
-    render json: { status: 'Error', message: e.to_s }
+    render text: { status: 'Error', message: e.to_s }.to_json
   end
 
   def destroy
