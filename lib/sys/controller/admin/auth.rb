@@ -47,8 +47,10 @@ protected
   def current_user
     unless @@current_user
       return false if (!session[ACCOUNT_KEY] || !session[PASSWD_KEY])
-      unless user = Sys::User.authenticate(session[ACCOUNT_KEY], session[PASSWD_KEY], true)
-        return false
+      unless user = Sys::User.where(state: 'enabled', account: session[ACCOUNT_KEY]).first
+        unless user = Sys::User.authenticate(session[ACCOUNT_KEY], session[PASSWD_KEY], true)
+          return false
+        end
       end
       @@current_user = user
     end
