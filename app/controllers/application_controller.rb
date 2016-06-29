@@ -27,7 +27,7 @@ class ApplicationController < ActionController::Base
   end
 
   def inline_css_for_mobile
-    if request.mobile? && !request.smart_phone?
+    if request.mobile?
       begin
         require 'tamtam'
         response.body = TamTam.inline(
@@ -73,7 +73,7 @@ class ApplicationController < ActionController::Base
   end
 
   def set_content_type_for_mobile
-    if request.mobile? && !request.smart_phone?
+    if request.mobile?
       case request.mobile
       when Jpmobile::Mobile::Docomo
         if request.mobile.imode_browser_version == '1.0'

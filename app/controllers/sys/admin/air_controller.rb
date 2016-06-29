@@ -9,7 +9,7 @@ class Sys::Admin::AirController < ApplicationController
 
   def login
     @admin_uri = params[:path] || '/_admin/gw/webmail/INBOX/mails'
-    @admin_uri += '?mobile=top' if request.mobile?
+    @admin_uri += '?mobile=top' if request.mobile? || request.smart_phone?
 
     if params[:account] && params[:password]
       return air_token(params[:account], params[:password], params[:mobile_password])

@@ -26,7 +26,7 @@ class Sys::Admin::AccountController < Sys::Controller::Admin::Base
       end
     end
 
-    if request.mobile?
+    if request.mobile? || request.smart_phone?
       login_ok = new_login_mobile(params[:account], params[:password], params[:mobile_password])
     else
       login_ok = new_login(params[:account], params[:password])

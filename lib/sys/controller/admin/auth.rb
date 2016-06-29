@@ -9,7 +9,7 @@ protected
       reset_session
       return false
     end
-    if request.mobile?
+    if request.mobile? || request.smart_phone?
       expiration = Joruri.config.application['sys.session_expiration_for_mobile']
     else
       expiration = Joruri.config.application['sys.session_expiration']

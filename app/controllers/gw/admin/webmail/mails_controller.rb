@@ -885,7 +885,7 @@ class Gw::Admin::Webmail::MailsController < Gw::Controller::Admin::Base
     reset_mailboxes([:all])
     reset_starred_mails(changed_mailbox_uids)
 
-    if request.mobile? && !request.smart_phone?
+    if request.mobile?
       s_params = make_search_params
       if params[:from] == 'list' || @mailbox.name =~ /^(Star)$/
         redirect_to url_for(s_params.merge(action: :index, id: params[:id], mailbox: @mailbox.name, mobile: :list))
@@ -972,7 +972,7 @@ class Gw::Admin::Webmail::MailsController < Gw::Controller::Admin::Base
 
   def default_sign_body
     return @default_sign.body if @default_sign
-    if request.mobile?
+    if request.mobile? || request.smart_phone?
       @default_sign = Gw::WebmailSign.new
     else
       @default_sign = (Gw::WebmailSign.default_sign || Gw::WebmailSign.new)
@@ -982,7 +982,7 @@ class Gw::Admin::Webmail::MailsController < Gw::Controller::Admin::Base
 
   def default_template
     return @default_template if @default_template
-    if request.mobile?
+    if request.mobile? || request.smart_phone?
       @default_template = Gw::WebmailTemplate.new
     else
       @default_template = (Gw::WebmailTemplate.default_template || Gw::WebmailTemplate.new)

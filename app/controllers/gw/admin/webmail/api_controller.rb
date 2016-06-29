@@ -21,7 +21,7 @@ class Gw::Admin::Webmail::ApiController < ApplicationController
   private
   
   def login_temporarily(account, password, mobile_password)
-    if request.mobile?
+    if request.mobile? || request.smart_phone?
       login_ok = new_login_mobile(account, password, mobile_password)
     else
       login_ok = new_login(account, password)
