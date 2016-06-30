@@ -9,7 +9,7 @@
 <div class="headerTitle">
   <%= @item.subject %>
   <% if @item.has_attachments? %>
-  <img src="/_common/themes/admin/gw/webmail/mobile/images/clip-lightblue.jpg" alt="[有]">
+  <img src="/_common/themes/admin/gw/webmail/mobile/images/clip-lightblue.jpg" alt="[有]" />
   <% end %>
   <%= link_to image_tag(mail_star_image_path(@item)), star_gw_webmail_mails_path(@s_params.merge(mailbox: @mailbox.name, id: @item.uid, from: :show)) %>
 </div>
@@ -67,7 +67,7 @@
 
 <% if @item.has_attachments? %>
 <div class="attachmentFile">
-<div class="title"><img src="/_common/themes/admin/gw/webmail/mobile/images/clip-glay.jpg" alt="[有]">添付ファイル</div>
+<div class="title"><img src="/_common/themes/admin/gw/webmail/mobile/images/clip-glay.jpg" alt="[有]" />添付ファイル</div>
 <% if (message = mail_form_download_message).present? %>
 <div class="attention">
   <%= message %>
