@@ -32,8 +32,6 @@ gem 'sdoc', '~> 0.4.0', group: :doc
 # Use Capistrano for deployment
 # gem 'capistrano-rails', group: :development
 
-gem 'bower-rails', '~> 0.10.0'
-
 gem 'activerecord-session_store', '~> 0.1.2'
 gem 'active_hash', '~> 1.4.1'
 gem 'ruby-ldap', '~> 0.9.11'
@@ -48,9 +46,12 @@ gem 'shared-mime-info', '~> 0.2.5'
 gem 'mail', '2.6.4.rc2'
 gem 'mail-iso-2022-jp', '2.0.5.rc1'
 gem 'charlock_holmes', '~> 0.7.3'
-gem 'whenever', '~> 0.9.4', require: false
 
 gem 'dynamic_form', '~> 1.1.4'
+gem 'jquery-ui-rails', '~> 5.0.5'
+
+gem 'bower-rails', '~> 0.10.0'
+gem 'whenever', '~> 0.9.4', require: false
 
 group :development, :test do
   # Call 'byebug' anywhere in the code to stop execution and get a debugger console
