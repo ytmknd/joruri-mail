@@ -35,7 +35,7 @@ module Util::String
         '&nbsp;' * m.length
       end
       #line << '&nbsp;' if line.blank?
-      rslt << %Q(<p style="margin:0px; padding:0px;">#{line}</p>\n)
+      rslt << %Q(<p>#{line}</p>\n)
     end
     rslt
   end

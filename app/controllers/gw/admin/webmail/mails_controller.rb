@@ -328,7 +328,7 @@ class Gw::Admin::Webmail::MailsController < Gw::Controller::Admin::Base
     @item.in_subject = "Re: " + @ref.subject
 
     if params[:mail_view] == Gw::WebmailMail::FORMAT_HTML && @ref.html_mail?
-      quot_body = "<p style=\"margin:0px; padding:0px;\"></p>#{@ref.referenced_html_body}" if params[:qt]
+      quot_body = "<p></p>#{@ref.referenced_html_body}" if params[:qt]
       sign_body = Util::String.text_to_html("\n" + default_sign_body) if default_sign_body
       @item.in_html_body = concat_mail_body(quot_body, sign_body)
       @item.in_format = Gw::WebmailMail::FORMAT_HTML
@@ -373,7 +373,7 @@ class Gw::Admin::Webmail::MailsController < Gw::Controller::Admin::Base
     @item.in_subject  = "Fw: " + @ref.subject
 
     if params[:mail_view] == Gw::WebmailMail::FORMAT_HTML && @ref.html_mail?
-      quot_body = "<p style=\"margin:0px; padding:0px;\"></p>#{@ref.referenced_html_body(:forward)}"
+      quot_body = "<p></p>#{@ref.referenced_html_body(:forward)}"
       sign_body = Util::String.text_to_html("\n" + default_sign_body) if default_sign_body  
       @item.in_html_body = concat_mail_body(quot_body, sign_body)
       @item.in_format = Gw::WebmailMail::FORMAT_HTML    

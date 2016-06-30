@@ -71,7 +71,7 @@
 </div>
 
 <%= javascript_include_tag("/_common/js/tiny_mce/tiny_mce.js") %>
-<%= javascript_include_tag("/_common/js/tiny_mce/init_html_mail.js") %>
+<%= javascript_include_tag("/_common/js/tiny_mce_config/init_html_mail.js") %>
 <script type="text/javascript">
 //<![CDATA[
 function convertTextToHtml(text) {
@@ -87,7 +87,7 @@ function convertTextToHtml(text) {
       return nbsp + p2;
     });
     //if (line == '') line = '&nbsp;';
-    rslt += '<p style="margin: 0px; padding: 0px;">' + line + "</p>\n";
+    rslt += '<p>' + line + "</p>\n";
   }
   return rslt;
 }

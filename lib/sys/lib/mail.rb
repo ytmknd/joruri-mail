@@ -291,7 +291,7 @@ module Sys::Lib::Mail
       parent.parts.each do |p|
         if p.mime_type == "text/html" && !p.attachment?
           html ||= '' 
-          html += "<p style=\"margin:0px; padding:0px;\">#{decode_html_part(p, options)}</p>"
+          html += "<p>#{decode_html_part(p, options)}</p>"
         end
       end
       html
@@ -585,7 +585,7 @@ module Sys::Lib::Mail
   end
 
   def block_quote(html)
-    %Q(<blockquote style="margin: 2px 0px 2px 5px; padding: 0px 0px 0px 5px; border-left-style: solid; border-left-width: 2px; border-left-color: silver;">#{html}</blockquote>\n)
+    %Q(<blockquote>#{html}</blockquote>\n)
   end
 
 ##  def decode_uuencode(body)

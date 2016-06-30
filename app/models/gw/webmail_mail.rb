@@ -420,16 +420,20 @@ class Gw::WebmailMail
   end
 
   def modify_html_body(html, charset = 'utf-8')
-    %Q(<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">) +
-    %Q(<html><head><meta http-equiv="content-type" content="text/html; charset=#{charset}"></head>) +
-    %Q(<body>#{html}</body></html>)
+    html =
+      %Q(<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">) +
+      %Q(<html><head>) +
+      %Q(<meta http-equiv="content-type" content="text/html; charset=UTF-8">) +
+      %Q(<link rel="stylesheet" media="all" href="file://#{Rails.root.join('public/_common/js/tiny_mce_config/content_html_mail.css')}" />) +
+      %Q(</head><body>#{html}</body></html>)
+    pm = Premailer.new(html, with_html_string: true, input_encoding: 'utf-8', adapter: :hpricot)
+    pm.to_inline_css.sub(/charset=UTF-8/i, "charset=#{charset}")
   end
 
   def make_html_part(body, charset = @charset)
     part = Mail::Part.new
     part.content_type %Q(text/html; charset="#{charset}")
-##    body = encode_text_body(modify_html_body(body, charset), charset)
-    body = modify_html_body(body, charset)
+    body = encode_text_body(modify_html_body(body, charset), charset)
     part.body body
     part
   end
@@ -437,8 +441,7 @@ class Gw::WebmailMail
   def make_text_part(body, charset = @charset)
     part = Mail::Part.new
     part.content_type %Q(text/plain; charset="#{charset}")
-##    body = encode_text_body(body, charset)
-    part.body body
+    part.body encode_text_body(body, charset)
     part
   end
 

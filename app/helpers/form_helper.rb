@@ -9,7 +9,7 @@ module FormHelper
     end
     [
       javascript_include_tag("/_common/js/tiny_mce/tiny_mce.js"),
-      javascript_include_tag("/_common/js/tiny_mce/init.js"),
+      javascript_include_tag("/_common/js/tiny_mce_config/init.js"),
       javascript_tag("initTinyMCE({#{settings.join(',')}});")
     ].join("\n")
   end
