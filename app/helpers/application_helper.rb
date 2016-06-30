@@ -47,7 +47,7 @@ module ApplicationHelper
       params:         p,
       previous_label: '前のページ',
       next_label:     '次のページ',
-      separator:      '<span class="separator"> | </span' + "\n" + '>'
+      link_separator: '<span class="separator"> | </span>'
     }
     if request.mobile?
       defaults[:page_links]     = false
