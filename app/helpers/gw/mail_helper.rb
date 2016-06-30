@@ -157,6 +157,7 @@ module Gw::MailHelper
         if options[:wrap]
           from = mail_text_wrap(from)
         end
+        to = to.encode(request.mobile.default_charset, invalid: :replace, undef: :replace, replace: ' ') if request.mobile?
         from = link_to(from, new_gw_webmail_mail_path(to: to))
       end
       from
