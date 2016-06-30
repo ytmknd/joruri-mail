@@ -26,7 +26,6 @@ ssopts = [["",""],["スター付き優先","1"]]
     <%= select_tag :sort_order, options_for_select(soopts, params[:sort_order]) %>
     <%= select_tag :sort_starred, options_for_select(ssopts, params[:sort_starred]) %>
   </div>
-  </tr>
   <div class="submitters">
     <%= submit_tag '検索', name: :search %>
     <%= submit_tag 'リセット', name: :reset %>
