@@ -26,54 +26,31 @@ class ApplicationController < ActionController::Base
     Sys::Lib::Mail::Base.deliver_default(mail_fr, mail_to, subject, message)
   end
 
+  def response_html?
+    response.content_type =~ Regexp.union(%r|text/html|, %r|application/xhtml\+xml|)
+  end
+
   def inline_css_for_mobile
-    if request.mobile?
+    if request.mobile? && response_html?
+      css_files = Nokogiri::HTML(response.body).xpath('//head/link[@rel="stylesheet"]/@href')
+        .map {|href| Rails.root.join("public/#{href}").to_s }
       begin
-        require 'tamtam'
-        response.body = TamTam.inline(
-          css:  tamtam_css(response.body),
-          body: response.body
+        pm = Premailer.new(response.body,
+          with_html_string: true,
+          preserve_styles: true,
+          input_encoding: 'utf-8',
+          adapter: :hpricot,
+          css: css_files
         )
-      rescue Exception => e #InvalidStyleException
+        response.body = pm.to_inline_css.sub(/charset=UTF-8/i, "charset=#{request.mobile.default_charset}")
+      rescue => e
         error_log(e)
       end
     end
   end
 
-  def tamtam_css(body)
-    css = ''
-    body.scan(/<link [^>]*?rel="stylesheet"[^>]*?>/i) do |m|
-      css += %Q(@import "#{m.gsub(/.*href="(.*?)".*/, '\1')}";\n)
-    end
-    4.times do
-      css = convert_css_for_tamtam(css)
-    end
-    css.gsub!(/^@.*/, '')
-    css.gsub!(/[a-z]:after/i, '-after')
-    css
-  end
-
-  def convert_css_for_tamtam(css)
-    css.gsub(/^@import .*/) do |m|
-      path = m.gsub(/^@import ['"](.*?)['"];/, '\1').gsub(/([^\?]+)\?.[^\?]+/, '\1')
-      dir  = (path =~ /^\/_common\//) ? "#{Rails.root}/public" : site.public_path
-      file = "#{dir}#{path}"
-      if FileTest.exist?(file)
-        m = ::File.new(file).read.gsub(/(\r\n|\n|\r)/, "\n").gsub(/^@import ['"](.*?)['"];/) do |m2|
-          p = m2.gsub(/.*?["'](.*?)["'].*/, '\1')
-          p = ::File.expand_path(p, ::File.dirname(path)) if p =~ /^\./
-          %Q(@import "#{p}";)
-        end
-      else
-        m = ''
-      end
-      m.gsub!(/url\(\.\/(.+)\);/, "url(#{File.dirname(path)}/\\1);")
-      m
-    end
-  end
-
   def set_content_type_for_mobile
-    if request.mobile?
+    if request.mobile? && response_html?
       case request.mobile
       when Jpmobile::Mobile::Docomo
         if request.mobile.imode_browser_version == '1.0'

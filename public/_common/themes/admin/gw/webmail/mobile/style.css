@@ -1,6 +1,110 @@
 ﻿@charset "UTF-8";
-@import "./base/style.css";
-@import "./base/col-1.css";
+
+/* =========================================================
+   Layout 1 Columns
+========================================================= */
+
+/* body
+----------------------------------------------- */
+body {
+  width: 100%;
+  margin: 0px;
+  padding: 0px;
+  border: 0px;
+}
+
+/* container
+----------------------------------------------- */
+#container {
+  width: auto;
+  margin: 0px auto;
+  text-aling: center;
+}
+/* login-container
+----------------------------------------------- */
+.login {
+  width: auto;
+  margin: 0px auto;
+  text-aling: center;
+}
+.copyright {
+  width: auto;
+  margin: 0px auto;
+  text-aling: center;
+}
+.login .submitters .login {
+  width: 100px;
+}
+
+/* header
+----------------------------------------------- */
+#header {
+  clear: both;
+  width: 100%;
+  margin-bottom: 5px;
+}
+
+/* banner
+----------------------------------------------- */
+#banner {
+  width: 100%;
+  margin: 0px auto;
+}
+
+/* navi
+----------------------------------------------- */
+#navi {
+  clear: both;
+  width: 100%;
+  margin: 0px auto;
+}
+
+/* main
+----------------------------------------------- */
+#main {
+  clear: both;
+  width: 100%;
+  margin:0px auto;
+}
+
+/* content
+----------------------------------------------- */
+#content {
+  width: 100%;
+  margin: 0 0 5px 0;
+}
+
+/* footer
+----------------------------------------------- */
+#footer {
+  clear: both;
+  width: 100%;
+  padding: 0px;
+}
+
+/* elements
+----------------------------------------------- */
+/*
+a:link {
+  color: #3366CC;
+  text-decoration: underline;
+}
+a:visited {
+  color: #330066;
+}
+a:focus {
+  color: #FFF7A4;
+  background-color:#3366CC;
+}
+a:hover {
+  color: #FFF7A4;
+  background-color:#3366CC;
+}
+a:visited:hover {
+  background-color:#330066;
+  color: #FFF7A4;
+}
+*/
 
 /* =========================================================
    Webメール / 携帯
