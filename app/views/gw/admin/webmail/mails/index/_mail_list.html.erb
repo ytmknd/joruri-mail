@@ -52,7 +52,7 @@ subject_wrap = @mail_list_subject.blank? ? '' : 'autoWrap'
               <% end %>
             </span>
             <span id="mail_<%= item.uid %>_label_loading" class="loading" style="display:none;"></span>
-            <%= mail_text_wrap(truncate(item.subject, length: 70).presence || ' ') %>
+            <%= mail_text_wrap(truncate(item.subject, length: 70, escape: false).presence || ' ') %>
           </a>
         </span>
       </td>

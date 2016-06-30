@@ -15,7 +15,7 @@ module Gw::MailHelper
       from = mail.friendly_from_addr
       s_from = mail.friendly_from_addr
     end
-    from_tooltip = truncate(mail.subject, length: 70)
+    from_tooltip = truncate(mail.subject, length: 70, escape: false)
     from, from_tooltip = omit_from_address_in_mail_list(from) if omit
     return from, s_from, from_tooltip
   end

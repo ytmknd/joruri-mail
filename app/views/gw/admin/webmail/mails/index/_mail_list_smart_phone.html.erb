@@ -21,7 +21,7 @@ subject_wrap = @mail_list_subject.blank? ? '' : 'autoWrap'
                 <% end %>
               <% end %>
             </span>
-            <span class="text"><%= mail_text_wrap(truncate(item.subject, length: 70).presence || ' ') %></span>
+            <span class="text"><%= mail_text_wrap(truncate(item.subject, length: 70, escape: false).presence || ' ') %></span>
           </span>
           <% if @mailbox.name =~ /^(Star)$/ %>
             <span class="mailbox"> 
