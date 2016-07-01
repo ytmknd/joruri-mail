@@ -2,8 +2,9 @@
   <tr>
     <td>
       <div id="jqueryFileUploader" style="display: none;">
-        <%= file_field_tag 'file', multiple: true, id: 'fileupload' %>
-        <button type="button" id="cancelUploads">キャンセル</button>
+        <%= file_field_tag 'file', multiple: true, id: 'fileupload', style: 'display: none;' %>
+        <label for="fileupload" class="labelButton">ファイル選択...</label>
+        <label id="cancelUploads" class="labelButton">キャンセル</label>
       </div>
       <div id="defaultUploader" style="display: none;">
         <%= f.file_field :in_files, name: 'item[in_files][]', size: 90, style: 'width: 300px;', class: 'file', multiple: true %><br />
@@ -108,9 +109,6 @@ $(function() {
     }
   });
 
-  $('#selectFiles').on('click', function(e) {
-    $('#fileupload').click();
-  });
   $('#cancelUploads').on('click', function(e) {
     $.each(jqXHR, function(i, xhr) {
       if (xhr) { xhr.abort(); }

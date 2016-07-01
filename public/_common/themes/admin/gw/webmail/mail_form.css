@@ -215,7 +215,8 @@ a.scheduleLink {
   margin-right: 5px;
   vertical-align: bottom;
 }
-#btnCancel {
+#btnCancel,
+#jqueryFileUploader .labelButton {
   display: inline-block;
   width: 80px;
   border: 1px solid #aaa;
@@ -226,6 +227,14 @@ a.scheduleLink {
   text-align: center;
   line-height: 22px;
   height: 24px;
+}
+#jqueryFileUploader .labelButton {
+  width: auto;
+  padding: 0px 10px;
+}
+#jqueryFileUploader .labelButton:hover {
+  background-image: none;
+  color: #444;
 }
 #divStatus {
   display: none;
