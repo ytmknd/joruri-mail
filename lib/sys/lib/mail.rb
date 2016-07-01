@@ -503,33 +503,20 @@ module Sys::Lib::Mail
   end
 
   def secure_html_body(html_body, options = {})
-    show_image = false
-    html_doc = Hpricot(html_body)
-    remove_elms = Hpricot::Elements[]
-    body_elm = nil
-    #style tag to inline style.
-    body_elm = html_doc.search('//body').first
-    if body_elm
-      body_text = body_elm.to_html
-      style_text = html_doc.search('//style/').map do |elm|
-        if elm.comment?
-          st = elm.to_html.gsub(/<!--(.*?)-->/m, '\1')
-        else
-          st = elm.inner_text
-        end
-        st.gsub!(/\/\*.*?\*\//m, ' ')
-        st.gsub!(/@(import|charset)\s+(url\(.*?\)|["'].*?["'])(\s+.*?)?;/im, ' ')
-        st.gsub!(/@(font-face|page)(\s+[^\{]+)?\s*\{[^\}]*\}/im, ' ')
-        st
-      end.join("\n").strip
-      begin
-        body_text = TamTam.inline(:css => style_text, :body => body_text)
-      rescue InvalidStyleException => e
-        error_log(e)
-      end      
-      html_doc = Hpricot(body_text).search('/body').first
+    # inline styles
+    css = Nokogiri::HTML(html_body).xpath('//style').map(&:text).join("\n")
+    if css.present?
+      html_body = Premailer.new(html_body,
+        with_html_string: true,
+        input_encoding: 'utf-8',
+        css_string: css,
+        adapter: :hpricot
+      ).to_inline_css
     end
 
+    show_image = false
+    remove_elms = Hpricot::Elements[]
+    html_doc = Hpricot(html_body)
     html_doc.search('//').each do |elm|
       if elm.doctype? || elm.comment? || elm.class == Hpricot::CData
         remove_elms << elm
