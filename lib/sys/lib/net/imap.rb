@@ -16,7 +16,7 @@ module Sys::Lib::Net::Imap
     begin
       username = Core.current_user.account
       password = Core.current_user.password
-      timeout(3) do
+      Timeout.timeout(3) do
         imap = Net::IMAP.new(config[:address], config[:port], config[:usessl])
         imap.login(username, password)
       end

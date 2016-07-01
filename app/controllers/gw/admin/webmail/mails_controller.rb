@@ -520,7 +520,7 @@ class Gw::Admin::Webmail::MailsController < Gw::Controller::Admin::Base
       imap.create("Sent") unless imap.list("", "Sent") rescue nil
       #imap.create("Sent") unless Gw::WebmailMailbox.exist?("Sent") rescue nil
       item.mail = sent
-      timeout(60) { imap.append("Sent", item.for_save.to_s, [:Seen], Time.now) }
+      Timeout.timeout(60) { imap.append("Sent", item.for_save.to_s, [:Seen], Time.now) }
     rescue => e
       #flash[:notice] += "<br />送信トレイへの保存に失敗しました。（#{e}）".html_safe
       flash[:error] = "メールは送信できましたが、送信トレイへの保存に失敗しました。（#{e}）"
@@ -544,7 +544,7 @@ class Gw::Admin::Webmail::MailsController < Gw::Controller::Admin::Base
       item.mail = mail
       flags = [:Seen, :Draft]
       flags << :Flagged if ref && ref.starred?
-      timeout(30) { imap.append("Drafts", item.for_save.to_s, flags, Time.now) }
+      Timeout.timeout(30) { imap.append("Drafts", item.for_save.to_s, flags, Time.now) }
       item.delete_tmp_attachments
 
       ## save bcc
