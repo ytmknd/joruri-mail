@@ -34,9 +34,11 @@ Gw::WebmailFilter.create(
   :action           => "delete",
   :mailbox          => "",
   :conditions_chain => "and",
-  :in_columns       => {"0" => "subject"},
-  :in_inclusions    => {"0" => "<"},
-  :in_values        => {"0" => "広告"}
+  :conditions_attributes => [
+    :column       => "subject",
+    :inclusion    => "<",
+    :value        => "広告"
+  ]
 )
 
 Gw::WebmailDoc.create(
