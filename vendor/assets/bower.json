@@ -3,7 +3,6 @@
   "dependencies": {
     "jquery": "~> 2.2.4",
     "jquery-ujs": "~> 1.2.0",
-    "jquery-ui": "~> 1.9.2",
     "jqueryui-timepicker-addon": "~> 1.6.3",
     "jquery-cookie": "~> 1.4.1",
     "simple-color-picker": "git://github.com/rachel-carvalho/simple-color-picker#3d4b89bea216afef8e95151edc9e54edbf2963f4",
