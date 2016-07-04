@@ -16,7 +16,6 @@ class Sys::Admin::Groups::ImportController < Sys::Controller::Admin::Base
 
     @results = [0, 0, 0]
 
-    require 'nkf'
     csv = NKF.nkf('-w', params[:item][:file].read)
 
     if params[:do] == 'groups'

@@ -14,7 +14,6 @@ class Sys::Admin::SwitchUsersController < Sys::Controller::Admin::Base
       return redirect_to(action: :index)
     end
 
-    require 'nkf'
     csv = NKF.nkf('-w', params[:item][:file].read)
 
     results = import_switch_users(csv)

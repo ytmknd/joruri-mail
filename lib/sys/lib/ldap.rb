@@ -51,7 +51,6 @@ class Sys::Lib::Ldap
   ## Bind.
   def bind(dn, pass)
     if(RUBY_PLATFORM.downcase =~ /mswin(?!ce)|mingw|bccwin/)
-      require 'nkf'
       dn = NKF.nkf('-s -W', dn)
     end
     return connection.bind(dn, pass)

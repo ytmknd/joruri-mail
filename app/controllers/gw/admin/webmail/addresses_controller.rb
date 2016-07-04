@@ -57,8 +57,6 @@ class Gw::Admin::Webmail::AddressesController < Gw::Controller::Admin::Base
   def candidate_import
     return redirect_to action: :import unless params[:import_file]
 
-    require 'nkf'
-
     @success_items = []
     @error_items = []
     
