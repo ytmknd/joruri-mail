@@ -137,9 +137,9 @@ class Gw::WebmailMail
     mail = Mail.new
     mail.charset     = @charset
     mail.from        = @in_from_addr[0]
-    mail.to          = @in_to_addrs.join(',')
-    mail.cc          = @in_cc_addrs.join(',')
-    mail.bcc         = @in_bcc_addrs.join(',')
+    mail.to          = @in_to_addrs.join(', ')
+    mail.cc          = @in_cc_addrs.join(', ')
+    mail.bcc         = @in_bcc_addrs.join(', ')
     mail.subject     = in_subject.gsub(/\r\n|\n/, ' ')
     #mail.body    = in_body
 
