@@ -184,7 +184,7 @@ module Sys::Lib::Mail
   def referenced_html_body(type = :answer)
     body = ""
     if type == :answer
-      body << block_quote(html_body_for_edit.to_s.gsub(/\r\n/, "\n"))
+      body << %Q(<blockquote>#{html_body_for_edit.to_s.gsub(/\r\n/, "\n")}</blockquote>\n)
     elsif type == :forward
       body << referenced_body_for_forward(:html)
     end
@@ -502,77 +502,50 @@ module Sys::Lib::Mail
     "# read failed: #{e}"
   end
 
-  def secure_html_body(html_body, options = {})
-    # inline styles
-    css = Nokogiri::HTML(html_body).xpath('//style').map(&:text).join("\n")
-    if css.present?
-      html_body = Premailer.new(html_body,
-        with_html_string: true,
-        input_encoding: 'utf-8',
-        css_string: css,
-        adapter: :hpricot
-      ).to_inline_css
-    end
-
-    show_image = false
-    remove_elms = Hpricot::Elements[]
-    html_doc = Hpricot(html_body)
-    html_doc.search('//').each do |elm|
-      if elm.doctype? || elm.comment? || elm.class == Hpricot::CData
-        remove_elms << elm
-        next        
-      end
-      next unless elm.elem?
-      style = elm['style']
-      if style
-        elm['style'] = style = style.gsub(/\/\*.*?\*\//m, ' ').gsub(/[\r\n]/, ' ').strip
-        if style =~ /[:\s]expression\(/i || style =~ /(^|;)[^:]*?behavior\s*:/i
-          elm.remove_attribute('style')
-        end
-      end
-      if style = elm['style']
-        style.gsub!(/(\A|\s)((position|top|left|display)\s*:\s*\w+\s*;)/i, '\1')
-        elm.set_attribute('style', style)
-      end
-      elm.attributes.to_hash.each do |k, v|
-        elm.remove_attribute(k) if k =~ /^on/i          
-      end
-      elm.remove_attribute('id') if elm['id']
-      elm.remove_attribute('class') if elm['class']
-      case elm.pathname
-      when 'applet', 'base', 'button', 'bgsound', 'embed', 'form', 'frame', 'frameset', 'head', 'iframe',
-        'input', 'isindex', 'link', 'meta', 'object', 'optgroup', 'option', 'param',
-        'script', 'select', 'style', 'textarea', 'title'
-        remove_elms << elm
-        next
-      when 'a', 'area'
-        elm['target'] = '_blank'
-        elm.remove_attribute('href') if elm['href'] && elm['href'].strip =~ /^\w+?script:/i 
-      when 'img'
-        elm.remove_attribute('src') if elm['src'] && elm['src'].strip =~ /^\w+?script:/i
-      end
-      unless options[:show_image]
-        style = elm['style']
-        elm['style'] = style.gsub(/([:\s])url\(.*?\)/i) do |match|
-          show_image = true
-          "#{$1}url()"
-        end if style       
-        case elm.pathname
-        when 'img'
-          if elm['src']
-            show_image = true
-            elm.remove_attribute('src')
-          end
-        end
-      end
-    end
-    remove_elms.remove
-
-    [html_doc.inner_html, show_image]
+  def secure_html_body(html, options = {})
+    sanitize_html(inline_css(html), options)
   end
 
-  def block_quote(html)
-    %Q(<blockquote>#{html}</blockquote>\n)
+  def inline_css(html)
+    css = Nokogiri::HTML5(html).xpath('//style').map(&:text).join("\n")
+    if css.present?
+      Premailer.new(html, with_html_string: true, input_encoding: 'utf-8', css_string: css).to_inline_css
+    else
+      html
+    end
+  end
+
+  def sanitize_html(html, options = {})
+    sanitize_image = false
+    relaxed = Sanitize::Config::RELAXED
+    html = Sanitize.document(html, Sanitize::Config.merge(relaxed,
+      attributes: {
+        'th' => relaxed[:attributes]['th'] + %w(bgcolor),
+        'td' => relaxed[:attributes]['td'] + %w(bgcolor),
+      },
+      protocols: {
+        'img' => { 'src' => relaxed[:protocols]['img']['src'] + %w(cid) }
+      },
+      css: {
+        properties: relaxed[:css][:properties] - %w(position top bottom left right)
+      },
+      transformers: options[:show_image] ? [] : lambda do |env|
+        node = env[:node]
+        node_name = env[:node_name]
+        if node_name == 'img' && node[:src]
+          sanitize_image = true
+          node[:src] = ''
+        end
+        if node[:style] && node[:style] =~ /url/
+          sanitize_image = true
+          tree = Crass.parse_properties(node[:style]).select do |prop|
+            !(prop[:children] && prop[:children].any? {|c| c[:node] == :function && c[:name] == 'url' })
+          end
+          node[:style] = Crass::Parser.stringify(tree)
+        end
+      end
+    ))
+    [Nokogiri::HTML5(html).xpath('//body').inner_html, sanitize_image]
   end
 
 ##  def decode_uuencode(body)
