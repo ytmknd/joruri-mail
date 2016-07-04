@@ -140,9 +140,12 @@ class Gw::WebmailMail
     mail.to          = @in_to_addrs.join(',')
     mail.cc          = @in_cc_addrs.join(',')
     mail.bcc         = @in_bcc_addrs.join(',')
+    mail.subject     = in_subject.gsub(/\r\n|\n/, ' ')
     #mail.body    = in_body
+
     mail.header["X-Mailer"] = "Joruri Mail ver. #{Joruri.version}"
     mail.header["User-Agent"] = request.user_agent.force_encoding('us-ascii') if request
+    mail.header["Disposition-Notification-To"] = @in_from_addr[0].to_s if self.request_mdn?
 
     if @reference ## for answer
       references = []
@@ -158,21 +161,12 @@ class Gw::WebmailMail
       mail.references("<#{references.join('> <')}>") if references.size > 0
     end
 
-##    mail.subject = mime_encode(in_subject.gsub(/\r\n|\n/, ' '), false)
-    mail.subject = in_subject.gsub(/\r\n|\n/, ' ')
-
-    if self.request_mdn?
-##      extend_header_fields(mail.header_fields)
-      #mail["Disposition-Notification-To"] = @in_from_addr[0].raw
-      mail["Disposition-Notification-To"] = @in_from_addr[0].to_s
-    end
-
     if tmp_attachments.size == 0
       if self.in_format == FORMAT_HTML
         mail.html_part = make_html_part(self.in_html_body)
         mail.text_part = make_text_part(self.in_body)
       else
-##        mail.body = encode_text_body(self.in_body)
+        #mail.body = encode_text_body(self.in_body)
         mail.body = self.in_body
       end
     else
@@ -197,7 +191,6 @@ class Gw::WebmailMail
           encoding: 'base64'
         }
       end
-##      mail.attachments.each {|p| extend_content_type_field(p['content-type'].field) }
     end
     mail
   end
@@ -208,12 +201,10 @@ class Gw::WebmailMail
     from = parse_address(in_from)[0]
     mail.from = from
     mail.to = original.disposition_notification_to_addrs[0]
+    mail.subject = "開封済み : #{original.subject.gsub(/\r\n|\n/, ' ')}"
     mail.content_type = "multipart/report; report-type=disposition-notification"
     mail.header["X-Mailer"]  = "Joruri Mail ver. #{Joruri.version}"
     mail.header["User-Agent"] = request.user_agent.force_encoding('us-ascii') if request
-
-##    mail.subject = mime_encode("開封済み : #{original.subject.gsub(/\r\n|\n/, ' ')}", false)
-    mail.subject = "開封済み : #{original.subject.gsub(/\r\n|\n/, ' ')}"
 
     #第１パート
     body1 = "次のユーザーに送信されたメッセージの開封確認です:\r\n" +
@@ -379,7 +370,6 @@ class Gw::WebmailMail
 
   def for_save
     return nil unless @mail
-##    extend_bcc_field(@mail.header['bcc'].field)
     @mail.header[:bcc].include_in_headers = true
     @mail  
   end

@@ -21,9 +21,6 @@ module Sys::Lib::Mail
 
   def friendly_from_addr
     field = @mail.header[:from]
-##    field.value = correct_shift_jis(field.value)
-##    return field.to_s if field.to_s.encoding.name == 'UTF-8' rescue nil ##
-##    field.blank? ? 'unknown' : decode(field.value)
     field ? field.decoded : 'unknown'
   rescue => e
     "#read failed: #{e}" rescue ''
@@ -67,7 +64,6 @@ module Sys::Lib::Mail
 
   def sender
     field = @mail.header[:sender]
-##    field.blank? ? friendly_from_addr : decode(field.value)
     field ? field.decoded : friendly_from_addr 
   rescue => e
     "#read failed: #{e}" rescue ''
@@ -75,16 +71,6 @@ module Sys::Lib::Mail
 
   def subject
     field = @mail.header[:subject]
-##    return decode(field.to_s) if field.to_s.encoding.name == 'UTF-8' rescue nil ##
-##    encoding = field.value.match(/=\?(.+?)\?B\?/)[1] rescue 'US-ASCII'
-##    if valid_encodings.find{|enc| enc == encoding.downcase}
-##      decode(field.value)
-##    else
-##      lang = I18n.t(encoding.downcase, scope: :language)
-##      prefix = "非対応"
-##      prefix << (lang !~ /^translation missing/ ? "/#{lang}(#{encoding})" : "(#{encoding})")
-##      "【#{prefix}】#{decode(field.value)}"
-##    end
     return 'no subject' unless field
     if (lang = subject_language) && lang.present?
       "【#{lang}】#{field.decoded}"
@@ -111,16 +97,6 @@ module Sys::Lib::Mail
   end
 
   def disposition_notification_to_addrs
-##    field = @mail.header[:disposition_notification_to]
-##    return nil if field.blank?
-##    value = correct_shift_jis(field.value)
-##    begin
-##      field.field = Mail::DispositionNotificationToField.new(value)
-##      return field.addrs
-##    rescue => e
-##      error_log(e)
-##      return nil
-##    end  
     disposition_notification_to = @mail.header[:disposition_notification_to]
     if disposition_notification_to && disposition_notification_to.field
       begin
@@ -219,8 +195,6 @@ module Sys::Lib::Mail
     attached_files = lambda do |part, level|
       if part.attachment? && part.filename.present?
         seqno = @attachments.size
-##        body = part.body.decoded rescue part.body.raw_source
-##        body = decode_uuencode(body) if part.content_transfer_encoding =~ /uuencode/i
         body = part.decoded
         @attachments << Sys::Lib::Mail::Attachment.new(
           seqno:             seqno,
@@ -237,12 +211,6 @@ module Sys::Lib::Mail
         attached_files.call(mail, 0)
       end
     end
-
-##    @mail.parts.each_with_index do |p, i|
-##      if @mail.mime_type == "multipart/report" && i > 0
-##        p = extend_report_part(p, i + 1)
-##      end
-##    end
 
     attached_files.call(@mail, 0)
 
@@ -384,11 +352,6 @@ module Sys::Lib::Mail
   private
 
   def decode(str, charset = nil)
-##    if charset && charset.downcase == 'unicode-1-1-utf-7'
-##      str = Net::IMAP.decode_utf7(str.gsub(/\+([\w\+\/]+)-/, '&\1-'))
-##    else
-##      ::NKF::nkf('-wx --cp932', str).gsub(/\0/, "")
-##    end
     if charset
       case charset.downcase
       when /^unicode-1-1-utf-7$/
@@ -403,20 +366,8 @@ module Sys::Lib::Mail
     end
   end
 
-##  def correct_shift_jis(str)
-##    str = str.gsub(/(=\?)SHIFT-JIS(\?[BQ]\?.+?\?=)/i, '\1' + 'Shift_JIS' +'\2')
-##  end
-  
-##  def correct_utf7(str)
-##    if match = str.match(/(=\?)unicode-1-1-utf-7(\?[BQ]\?)(.+?)(\?=)/i)
-##      str = Net::IMAP.decode_utf7(match[3].gsub(/\+([\w\+\/]+)-/, '&\1-'))
-##    end
-##    str
-##  end
-
   def collect_addrs(fields)
     return [] unless fields
-##    fields.value = correct_shift_jis(fields.value)
     addrs = []
     if fields.respond_to?(:each)
       fields.each {|f| addrs << (f.name ? "#{decode(f.name)} <#{f.address}>" : f.address) }
@@ -454,7 +405,6 @@ module Sys::Lib::Mail
   end
 
   def decode_text_part(part)
-##    decode(part.body.decoded, part.charset)
     if part.charset.present?
       part.decoded.force_encoding('utf-8')
     else
@@ -465,7 +415,6 @@ module Sys::Lib::Mail
   end
 
   def decode_html_part(part, options = {})
-##    body = decode(part.body.decoded, part.charset)
     if part.charset.present?
       body = part.decoded.force_encoding('utf-8')
     else
@@ -547,71 +496,6 @@ module Sys::Lib::Mail
     ))
     [Nokogiri::HTML5(html).xpath('//body').inner_html, sanitize_image]
   end
-
-##  def decode_uuencode(body)
-##    if match = body.gsub("\r\n", "\n").match(/^begin.*?\n([ \t].*?\n)*(.*)\n[ `]+\nend/m) 
-##      dec = match[2].unpack('u').first
-##      body = dec if dec.present?
-##    end   
-##    body
-##  end
-
-##  def extend_report_part(part, number)
-##    class << part
-##      def _report_part_sequence_number=(val)
-##        @_report_part_sequence_number = val
-##      end
-##
-##      def find_attachment
-##        _rslt = super
-##        return _rslt if _rslt 
-##        return "ReportPart#{@_report_part_sequence_number}.txt" if mime_type =~ /^(text|message)\/.+$/
-##        nil
-##      end
-##    end
-##    part._report_part_sequence_number = number
-##    part
-##  end
-
-##  def extend_content_type_field(field)
-##    class << field
-##      def encoded
-##        parameters.delete :charset
-##        super
-##      end
-##    end
-##    field
-##  end
-
-##  def extend_bcc_field(field)
-##    class << field
-##      def encoded
-##        do_encode(CAPITALIZED_FIELD)
-##      end
-##    end
-##  end
-  
-##  def extend_subject_field(field)
-##    class << field
-##      def encoded
-##        enc = "#{name}: #{value}"
-##        enc.gsub!(/^(.+)\r?\n\s*$/m, '\1')
-##        "#{enc}\r\n"
-##      end
-##    end
-##  end
-
-##  def extend_header_fields(header_fields)
-##    #Extend Mail::FieldList
-##    class << header_fields
-##      def <<(new_field)
-##        if new_field.name.downcase == Mail::DispositionNotificationToField::FIELD_NAME
-##          new_field.field = Mail::DispositionNotificationToField.new(new_field.value, new_field.charset)
-##        end
-##        super(new_field)
-##      end
-##    end    
-##  end
 
   def convert_html_to_text(html)
     text = html.gsub(/[\r\n]/, "").gsub(/<br\s*\/?>/, "\n").gsub(/<[^>]*>/, "")
