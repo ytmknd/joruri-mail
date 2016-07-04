@@ -7,7 +7,7 @@
     <%= link_to h(box.title), url_for(action: :index, mailbox: box.name), class: nm_class %>
     <% if box.children.size > 0 %>
       <ul class="children level<%= level_no %>">
-        <%= render 'gw/admin/webmail/mails/shared/mailbox_children', mailboxes: box.children %>
+        <%= render 'mailbox_children', mailboxes: box.children, level_no: level_no %>
       </ul>
     <% end %>
   </li>
