@@ -231,6 +231,7 @@ a.scheduleLink {
 #jqueryFileUploader .labelButton {
   width: auto;
   padding: 0px 10px;
+  line-height: 24px;
 }
 #jqueryFileUploader .labelButton:hover {
   background-image: none;
