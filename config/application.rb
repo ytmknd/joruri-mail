@@ -38,14 +38,5 @@ module Joruri
     config.action_view.field_error_proc = proc { |html_tag, instance|
       %Q|<span class="field_with_errors">#{html_tag}</span>|.html_safe
     }
-
-    # Load settings
-    def load_settings(filename)
-      file = Rails.root.join(filename)
-      YAML::load(ERB.new(File.read(file)).result)[Rails.env].with_indifferent_access if File.exist?(file)
-    end
-    config.action_mailer.smtp_settings = load_settings('config/smtp.yml')
-    Joruri.config.imap_settings = load_settings('config/imap.yml')
-    Joruri.config.sso_settings = load_settings('config/sso.yml')
   end
 end
