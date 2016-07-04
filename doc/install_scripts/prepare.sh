@@ -1,6 +1,5 @@
 #!/bin/bash
 
-EPEL_RPM_URL="http://dl.fedoraproject.org/pub/epel/6/`uname -i`/epel-release-6-8.noarch.rpm"
 INSTALL_SCRIPTS_URL='https://raw.githubusercontent.com/joruri/joruri-mail/master/doc/install_scripts'
 # INSTALL_SCRIPTS_URL='https://raw.githubusercontent.com/joruri/joruri-mail/develop/doc/install_scripts'
 
@@ -13,8 +12,8 @@ ubuntu() {
 centos() {
   echo "It's CentOS6!"
 
-  rpm -ivh $EPEL_RPM_URL
-  yum install -y wget git
+  yum install -y epel-release
+  yum install -y wget git patch
 
   cd /usr/local/src
 
@@ -54,8 +53,9 @@ echo "
     mysql> SET PASSWORD FOR joruri@localhost = PASSWORD('pass');
     また、変更時には /var/share/jorurimail/config/database.yml も合わせて変更してください。
     # vi /var/share/jorurimail/config/database.yml
-３．メールサーバとの接続設定を行ってください。
-    # vi /var/share/jorurimail/config/enviroments/production.rb
+３．メールサーバの接続情報を設定してください。
+    # vi /var/share/jorurimail/config/smtp.yml
+    # vi /var/share/jorurimail/config/imap.yml
 ４．メールアカウントのドメインを設定してください。
     # vi /var/share/jorurimail/config/core.yml
 

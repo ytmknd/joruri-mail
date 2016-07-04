@@ -13,21 +13,23 @@ ubuntu() {
 centos() {
   echo "It's CentOS!"
 
-  if [ -d /var/share/jorurigw ]; then
+  if [ -d /var/share/jorurimail ]; then
     echo 'Joruri is already installed.'
     exit
   fi
 
   id joruri || useradd -m joruri
 
-  yum install -y ImageMagick-devel libxml2-devel libxslt-devel mysql-devel openldap-devel
+  yum install -y ImageMagick-devel libjpeg-devel libpng-devel librsvg2-devel
+  yum install -y libxml2-devel libxslt-devel mysql-devel openldap-devel shared-mime-info libicu-devel npm
+  npm install bower -g
 
   git clone https://github.com/joruri/joruri-mail.git /var/share/jorurimail
   # git clone -b develop https://github.com/joruri/joruri-mail.git /var/share/jorurimail
 
+  cd /var/share/jorurimail && bundle install --path vendor/bundle --without development test
+  cp /var/share/jorurimail/config/original/*.yml && /var/share/jorurimail/config/
   chown -R joruri:joruri /var/share/jorurimail
-  cd /var/share/jorurimail && bundle install --without development test
-
 }
 
 others() {

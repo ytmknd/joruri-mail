@@ -46,7 +46,6 @@ def centos
     system 'service mysqld start'
     sleep 1 until system 'mysqladmin ping' # Not required to connect
     system "mysqladmin -u root password 'pass'"
-    system %q!mysql -u root -ppass -e "GRANT ALL ON jorurimail.* TO joruri@localhost IDENTIFIED BY 'pass'"!
     system 'service mysqld stop'
   end
 end

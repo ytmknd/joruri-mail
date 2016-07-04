@@ -1,4 +1,4 @@
-## Joruri Mail v2.0.0 インストールマニュアル                2016.05.16
+## Joruri Mail v2.0.0 インストールマニュアル                2016.07.04
 
 **********************************************************************
  1 想定環境
@@ -35,7 +35,7 @@ rootユーザに変更します。
 必要なパッケージをインストールします。
 
   # yum -y install epel-release
-  # yum -y install wget git npm
+  # yum -y install wget git
 
 **********************************************************************
  4 Ruby のインストール
@@ -43,8 +43,8 @@ rootユーザに変更します。
 
 依存パッケージをインストールします。
 
-  # yum -y install make automake gcc-c++ glibc-headers glibc-devel autoconf patch \
-      libyaml-devel readline-devel zlib-devel libffi-devel openssl-devel libtool bison
+  # yum -y install make gcc-c++ patch bzip2 openssl-devel libyaml-devel libffi-devel \
+      readline-devel zlib-devel gdbm-devel ncurses-devel
 
 Rubyをインストールします。
 
@@ -57,7 +57,7 @@ Rubyをインストールします。
 
 bundler をインストールします。
 
-  # gem install bundler
+  # gem install bundler -v 1.11.2
 
 **********************************************************************
  5 Joruri Mail のインストール
@@ -65,7 +65,9 @@ bundler をインストールします。
 
 依存パッケージをインストールします。
 
-  # yum -y install libjpeg-devel libpng-devel ImageMagick-devel shared-mime-info libicu-devel
+  # yum -y install ImageMagick-devel libjpeg-devel libpng-devel librsvg2-devel
+  # yum -y install libxml2-devel libxslt-devel mysql-devel openldap-devel shared-mime-info libicu-devel npm
+  # npm install bower -g
 
 Joruriユーザを作成します。
 
@@ -128,7 +130,7 @@ Apacheに設定を追加します。
 
 MySQLをインストールします。
 
-  # yum -y install mysql-server mysql-devel
+  # yum -y install mysql-server
 
 文字エンコーディングの標準を UTF-8 に設定します。
 
@@ -174,8 +176,7 @@ Joruriユーザに変更します。
 
 必要ライブラリをインストールします。
 
-  $ bundle install --without development test
-  $ bundle exec bower:install RAILS_ENV=production
+  $ bundle install --path vendor/bundle --without development test
 
 ======================================================================
  8.2 設定ファイルの変更
@@ -224,7 +225,7 @@ secret keyを設定します。
   $ vi config/secrets.yml
   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   production:
-    secret_key_base: ( コピーしたシークレットキーをペーストします )
+    secret_key_base: ( コピーしたシークレットキーを貼り付けます )
   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 ======================================================================
@@ -248,11 +249,12 @@ secret keyを設定します。
   $ bundle exec rake db:seed:demo RAILS_ENV=production
 
 ======================================================================
- 8.4 assets のコンパイル
+ 8.4 assets のインストールとコンパイル
 ======================================================================
 
-assetsをコンパイルします。
+assetsをインストールしてコンパイルします。
 
+  $ bundle exec bower:install RAILS_ENV=production
   $ bundle exec rake assets:precompile RAILS_ENV=production
 
 ======================================================================
@@ -261,7 +263,7 @@ assetsをコンパイルします。
 
 cron タスクを登録します。
 
-  $ bundle exec whenever -i
+  $ bundle exec whenever -i -s 'environment=production'
 
 ======================================================================
  8.6 VirtualHost の反映
