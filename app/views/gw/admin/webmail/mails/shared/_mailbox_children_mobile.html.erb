@@ -14,7 +14,7 @@
       <%= link_to '≫空にする', empty_gw_webmail_mails_path(box.name), class: 'empty' %>
     <% end %>
     <% if box.children.size > 0 %>
-      <div class="children level<%= level_no %>">
+      <div class="children level<%= box.level_no %>">
         <%= render 'gw/admin/webmail/mails/shared/mailbox_children', mailboxes: box.children %>
       </div>
     <% end %>
