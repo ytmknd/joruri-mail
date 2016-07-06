@@ -18,4 +18,7 @@ class Sys::Lib::Mail::Inline
     @attachment
   end
 
+  def display_as_html?
+    (alternative? && html_body.present?) || content_type == 'text/html'
+  end
 end

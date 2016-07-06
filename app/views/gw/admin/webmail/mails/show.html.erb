@@ -1,7 +1,3 @@
-<%
-inline_contents = @item.inline_contents
-%>
-
 <table id="webmailContainer"><tr>
 <% unless @new_window %>
 <td id="webmailMenu"><div id="webmailMenuContainer">
@@ -181,14 +177,9 @@ inline_contents = @item.inline_contents
   <% end %>
   <%= hidden_field_tag :mail_view, @html_mail_view, id: 'currentMailView' %>
   <div id="inlineContents">
-  <% mail_text_body = '' %>
-  <% inline_contents.each_with_index do |inline, idx| %>
-    <%
-    cls = idx > 0 ? "inlineContent" : ""
-    mail_text_body << "#{inline.text_body}\n\n"
-    %>
-    <div id="inlineContent_<%= inline.seqno %>" class="<%= cls %>">
-      <% if ((inline.alternative? && inline.html_body.present?) || inline.content_type == "text/html") %>
+  <% @item.inline_contents.each_with_index do |inline, idx| %>
+    <div id="inlineContent_<%= inline.seqno %>" class="<%= 'inlineContent' if idx > 0 %>">
+      <% if inline.display_as_html? %>
         <div id="textBody_<%= inline.seqno %>" class="autoWrap mailBodyText" style="<%= 'display:none;' if @html_mail_view != 'text' %>">
           <%= mail_text_wrap(inline.text_body, 10, auto_link: true) %>
         </div>
@@ -210,7 +201,7 @@ inline_contents = @item.inline_contents
         <%= hidden_field_tag :to, 'gw' %>
         <%= hidden_field_tag :path, '/gw/schedules/new', id: 'schedule_path' %>
         <%= hidden_field_tag 'item[title]', @item.subject, id: 'schedule_title'  %>
-        <%= hidden_field_tag 'item[memo]', mail_text_body, id: 'schedule_memo'  %>
+        <%= hidden_field_tag 'item[memo]', @item.inline_contents.map(&:text_body).join("\n\n"), id: 'schedule_memo'  %>
       <% end %>
     </div>
   <% end %>

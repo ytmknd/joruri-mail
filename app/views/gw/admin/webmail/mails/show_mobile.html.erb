@@ -48,14 +48,13 @@
 <div class="body">
   <div id="inlineContents">
   <% @item.inline_contents.each_with_index do |inline, idx| %>
-    <%
-    cls = idx > 0 ? "inlineContent" : ""
-    %>
-    <div id="inlineContent_<%= inline.seqno %>" class="<%= cls %>">
-      <% if @html_mail_view == 'html' && (inline.alternative? || inline.content_type == "text/html") %>
+    <div id="inlineContent_<%= inline.seqno %>" class="<%= 'inlineContent' if idx > 0 %>">
+      <% if @html_mail_view == 'html' && inline.display_as_html? %>
         <div id="htmlPreview_<%= inline.seqno %>"><%=raw inline.html_body %></div>
       <% else %>
-        <div id="textBody_<%= inline.seqno %>" class="autoWrap mailBodyText"><%= mail_text_wrap(inline.text_body, 1000, auto_link: true) %></div>
+        <div id="textBody_<%= inline.seqno %>" class="autoWrap mailBodyText">
+          <%= mail_text_wrap(inline.text_body, 1000, auto_link: true) %>
+        </div>
       <% end %>
     </div>
   <% end %>
