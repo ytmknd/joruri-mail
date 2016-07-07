@@ -4,8 +4,8 @@ Joruri Mail (Japan Originated Ruby-based RESTful and Integrated Mail) is a web m
 
 Features:
 * Simple and intuitive UI
-* User customizable settings (filters, templates, signs, labels and more)
-* Multilingual mail (especially japanese proper decoding)
+* User customizable settings (filters, templates, signatures, labels and more)
+* Multilingual mail decoding (especially japanese proper decoding)
 * Drag and drop file attachment
 * Request for mail delivery receipt
 * Optimized UI for feature phone and smartphone
@@ -17,7 +17,7 @@ Supported imap servers:
 
 ## Demo
 
-<a href="http://joruri.org/demo/jorurimail/" target="_blank">http://joruri.org/demo/jorurimail/</a>
+[http://joruri.org/demo/jorurimail/](http://joruri.org/demo/jorurimail/)
 
 ## Quick install
 
@@ -39,7 +39,7 @@ Supported imap servers:
 
 GNU GENERAL PUBLIC LICENSE Version 3
 
-[LICENCE](LICENCE)
+[LICENSE](LICENSE)
 
 Copyright (C) Tokushima Prefectural Government, IDS Inc., SiteBridge Inc.
 

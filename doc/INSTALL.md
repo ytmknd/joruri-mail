@@ -3,20 +3,22 @@
 ## 想定環境
 
 [システム]
-|Software|Version|
-|:---|:---|
-|OS|CentOS 6.7 (64bit)|
-|Webサーバ|Apache 2.2|
-|DBシステム|MySQL 5|
-|Ruby|2.3.1|
-|Rails|4.2.6|
-|Mailサーバ|SMTP, IMAP4|
+
+| Software | Version |
+| :--- | :--- |
+| OS | CentOS 6.7 (64bit) |
+| Webサーバ | Apache 2.2 |
+| DBシステム | MySQL 5 |
+| Ruby | 2.3.1 |
+| Rails | 4.2.6 |
+| Mailサーバ | SMTP, IMAP4 |
 
 [ネットワーク関連設定]
-|項目|設定|
-|:---|:---|
-|IPアドレス|192.168.0.2|
-|メールドメイン|localhost.localdomain.jp|
+
+| 項目 | 設定 |
+| :--- |:--- |
+| IPアドレス | 192.168.0.2 |
+| メールドメイン | localhost.localdomain.jp |
 
 ## CentOS のインストール
 
