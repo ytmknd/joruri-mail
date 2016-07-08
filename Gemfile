@@ -51,7 +51,6 @@ gem 'mail-iso-2022-jp', '2.0.5.rc1'
 gem 'charlock_holmes', '~> 0.7.3'
 
 gem 'dynamic_form', '~> 1.1.4'
-gem 'jquery-ui-rails', '~> 5.0.5'
 
 gem 'bower-rails', '~> 0.10.0'
 gem 'whenever', '~> 0.9.4', require: false
