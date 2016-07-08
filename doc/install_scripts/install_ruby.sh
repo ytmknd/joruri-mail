@@ -1,10 +1,7 @@
 #!/bin/bash
 DONE_FLAG="/tmp/$0_done"
 
-RUBY_VERSION='ruby-2.3.1'
-RUBY_SOURCE_URL="http://cache.ruby-lang.org/pub/ruby/2.3/$RUBY_VERSION.tar.bz2"
-
-echo "#### Install $RUBY_VERSION ####"
+echo "#### Install Ruby ####"
 if [ -f $DONE_FLAG ]; then exit; fi
 echo '-- PRESS ENTER KEY --'
 read KEY
@@ -18,14 +15,18 @@ centos() {
 
   yum install -y make gcc-c++ bzip2 openssl-devel libyaml-devel libffi-devel readline-devel zlib-devel gdbm-devel ncurses-devel
 
-  cd /usr/local/src
-  rm -rf $RUBY_VERSION.tar.bz2 $RUBY_VERSION
-  wget $RUBY_SOURCE_URL
-  tar jxf $RUBY_VERSION.tar.bz2
+  git clone git://github.com/sstephenson/rbenv.git /usr/local/rbenv
+  git clone git://github.com/sstephenson/ruby-build.git /usr/local/rbenv/plugins/ruby-build
 
-  # ruby make install
-  cd /usr/local/src
-  cd $RUBY_VERSION && ./configure && make && make install
+  echo 'export RBENV_ROOT="/usr/local/rbenv"' >> /etc/profile.d/rbenv.sh
+  echo 'export PATH="${RBENV_ROOT}/bin:${PATH}"' >> /etc/profile.d/rbenv.sh
+  echo 'eval "$(rbenv init -)"' >> /etc/profile.d/rbenv.sh
+  source /etc/profile.d/rbenv.sh
+
+  rbenv install 2.3.1
+  rbenv global 2.3.1
+  rbenv rehash
+  ruby -v
 
   # bundler
   gem install bundler -v 1.11.2
