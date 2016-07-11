@@ -5,8 +5,8 @@
 **********************************************************************
 
 [システム]
-OS         : CentOS 6.7 (64bit)
-Webサーバ  : Apache 2.2
+OS         : CentOS 6.8 (64bit), CentOS 7.2 (64bit)
+Webサーバ  : Apache 2.2, Apache 2.4
 DBシステム : MySQL 5.6
 Ruby       : 2.3.1
 Rails      : 4.2.6
@@ -46,7 +46,7 @@ rootユーザに変更します。
 
   # yum -y install make gcc-c++ patch bzip2 openssl-devel libyaml-devel libffi-devel readline-devel zlib-devel gdbm-devel ncurses-devel
 
-Rubyをインストールします。
+rbenvをインストールします。
 
   # git clone git://github.com/sstephenson/rbenv.git /usr/local/rbenv
   # git clone git://github.com/sstephenson/ruby-build.git /usr/local/rbenv/plugins/ruby-build
@@ -55,6 +55,8 @@ Rubyをインストールします。
   # echo 'export PATH="${RBENV_ROOT}/bin:${PATH}"' >> /etc/profile.d/rbenv.sh
   # echo 'eval "$(rbenv init -)"' >> /etc/profile.d/rbenv.sh
   # source /etc/profile.d/rbenv.sh
+
+rubyをインストールします。
 
   # rbenv install 2.3.1
   # rbenv global 2.3.1
@@ -72,7 +74,7 @@ bundler をインストールします。
 Apacheをインストールします。
 
   # yum -y install httpd-devel
-  
+
  設定ファイルを編集します。
 
   # vi /etc/httpd/conf/httpd.conf
@@ -82,7 +84,8 @@ Apacheをインストールします。
 
 自動起動に設定します。
 
-  # /sbin/chkconfig httpd on
+  # chkconfig httpd on        <- CentOS 6
+  # systemctl enable httpd    <- CentOS 7
 
 **********************************************************************
  6 Passenger のインストール
@@ -118,12 +121,13 @@ MySQLをインストールします。
 MySQLを起動します。
 
   # /usr/bin/mysql_install_db --user=mysql
-  # /sbin/service mysqld start
+  # service mysqld start         <- CentOS 6
+  # systemctl start mysqld       <- CentOS 7
 
 自動起動に設定します。
 
-  # /sbin/chkconfig mysqld on
-  
+  # chkconfig mysqld on
+
 rootユーザのパスワードを設定します。
 
   # /usr/bin/mysqladmin -u root password "pass"
@@ -159,7 +163,7 @@ Joruriユーザに変更します。
 必要ライブラリをインストールします。
 
   $ bundle install --path vendor/bundle --without development test
-  $ bundle exec bower:install RAILS_ENV=production
+  $ bundle exec rake bower:install RAILS_ENV=production
 
 **********************************************************************
  9 Joruri Mail の設定
@@ -258,8 +262,9 @@ Apacheに設定を追加します。
 
 Apache を起動します。
 
-  # /sbin/service httpd configtest
-  # /sbin/service httpd start
+  # service httpd configtest
+  # service httpd start        <- CentOS 6
+  # systemctl start httpd      <- CentOS 7
 
 **********************************************************************
  11 画面確認
