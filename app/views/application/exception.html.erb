@@ -1,6 +1,6 @@
 <div style="padding: 15px 20px; color: #e00; font-weight: bold; line-height: 1.8;">
   エラーが発生しました。<br />
-  <%= "#{@exception} <#{@exception.class}>" %>
+  <%= "#{@exception.to_s.force_encoding('utf-8')} <#{@exception.class}>" %>
 </div>
 <% if Rails.env != 'production' %>
   <div style="padding: 15px 20px; border-top: 1px solid #ccc; color: #800; line-height: 1.4;">
