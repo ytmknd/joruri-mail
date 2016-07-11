@@ -25,15 +25,15 @@ Supported imap servers:
 
 ## Manual install
 
-[doc/INSTALL.md](doc/INSTALL.md)
+[doc/INSTALL.txt](doc/INSTALL.txt)
 
 ## Changelog
 
-[doc/CHANGES.md](doc/CHANGES.md)
+[doc/CHANGES.txt](doc/CHANGES.txt)
 
 ## DB Changelog
 
-[doc/DB_CHANGES.md](doc/DB_CHANGES.md)
+[doc/DB_CHANGES.txt](doc/DB_CHANGES.txt)
 
 ## License
 
