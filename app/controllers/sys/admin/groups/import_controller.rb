@@ -18,21 +18,22 @@ class Sys::Admin::Groups::ImportController < Sys::Controller::Admin::Base
 
     csv = NKF.nkf('-w', params[:item][:file].read)
 
+    messages = []
     if params[:do] == 'groups'
-      Core.messages << "インポート： グループ"
+      messages << "インポート： グループ"
       import_groups(csv)
     elsif params[:do] == 'users'
-      Core.messages << "インポート： ユーザ"
+      messages << "インポート： ユーザ"
       import_users(csv)
     else
       return redirect_to(action: :index)
     end
 
-    Core.messages << "-- 追加 #{@results[0]}件"
-    Core.messages << "-- 更新 #{@results[1]}件"
-    Core.messages << "-- 失敗 #{@results[2]}件"
+    messages << "-- 追加 #{@results[0]}件"
+    messages << "-- 更新 #{@results[1]}件"
+    messages << "-- 失敗 #{@results[2]}件"
 
-    flash[:notice] = "インポートが終了しました。<br />#{Core.messages.join('<br />')}".html_safe
+    flash[:notice] = "インポートが終了しました。<br />#{messages.join('<br />')}".html_safe
     return redirect_to(action: :index)
   end
 

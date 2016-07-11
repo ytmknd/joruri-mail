@@ -67,18 +67,6 @@ module ApplicationHelper
     end
     links.html_safe
   end
-  
-###  ## Emoji
-###  def emoji(name)
-###    require 'jpmobile'
-###    return Cms::Lib::Mobile::Emoji.convert(name, request.mobile)
-###  end
-###  
-###  ## Furigana
-###  def ruby(str, ruby = nil)
-###    ruby = Page.ruby unless ruby
-###    return ruby == true ? Cms::Lib::Navi::Ruby.convert(str) : str
-###  end
 
   def content_tag_if(cond, tag, options = {}, &block)
     if cond
