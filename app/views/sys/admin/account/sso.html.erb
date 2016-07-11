@@ -14,7 +14,7 @@ window.onload = function() {
 //]]>
 </script>
 
-<%= form_tag @uri, name: 'form' do %>
+<%= form_tag @uri.to_s, name: 'form' do %>
   <%= hidden_field_tag :account, Core.user.account %>
   <%= hidden_field_tag :token, @token %>
   <%= hidden_field_tag :path, params[:path] if params[:path] %>

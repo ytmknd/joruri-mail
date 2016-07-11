@@ -1,8 +1,8 @@
 class Sys::Admin::AccountController < Sys::Controller::Admin::Base
   protect_from_forgery except: [:login]
+  layout 'base'
 
   def login
-    skip_layout
     admin_uri = '/_admin/gw/webmail/INBOX/mails'
 
     #return redirect_to(admin_uri) if logged_in?
@@ -69,8 +69,6 @@ class Sys::Admin::AccountController < Sys::Controller::Admin::Base
   end
 
   def info
-    skip_layout
-
     respond_to do |format|
       format.html { render }
       format.xml  { render :xml => Core.user.to_xml(:root => 'item', :include => :groups) }
@@ -78,12 +76,14 @@ class Sys::Admin::AccountController < Sys::Controller::Admin::Base
   end
 
   def sso
-    skip_layout
-
     params[:to] ||= 'gw'
     raise 'SSOの設定がありません。' unless config = Joruri.config.sso_settings[params[:to].to_sym]
 
-    @uri = "#{config[:usessl] ? "https" : "http"}://#{config[:host]}:#{config[:port]}/"
+    @uri = URI::HTTP.build(
+      scheme: config[:usessl] ? 'https' : 'http',
+      host: config[:host],
+      port: config[:port],
+    )
 
     require 'net/http'
     Net::HTTP.version_1_2
@@ -94,18 +94,24 @@ class Sys::Admin::AccountController < Sys::Controller::Admin::Base
     end
 
     http.start do |agent|
-      parameters = "account=#{Core.user.account}&password=#{CGI.escape(Core.user.password.to_s)}&mobile_password=#{CGI.escape(Core.user.mobile_password.to_s)}"
-      response = agent.post("/#{config[:path]}", parameters)
+      response = agent.post(config[:path], {
+        account: Core.user.account,
+        password: Core.user.password,
+        mobile_password: Core.user.mobile_password
+      }.to_query)
       @token = response.body =~ /^OK/i ? response.body.gsub(/^OK /i, '') : nil
     end
 
-    return redirect_to @uri unless @token
+    return redirect_to @uri.to_s unless @token
 
-    @uri << "#{config[:path]}"
+    @uri.path = config[:path]
     if request.get?
-      @uri << "?account=#{Core.user.account}&token=#{@token}"
-      @uri << "&path=#{CGI.escape(params[:path])}" if params[:path]
-      return redirect_to @uri
+      @uri.query = Hash.new.tap { |h|
+        h[:account] = Core.user.account
+        h[:token] = @token
+        h[:path] = params[:path] if params[:path].present?
+      }.to_query
+      return redirect_to @uri.to_s
     end
   end
 end

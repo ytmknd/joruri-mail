@@ -12,20 +12,6 @@ class ApplicationController < ActionController::Base
     return Core.dispatched
   end
 
-  def skip_layout
-    self.class.layout 'base'
-  end
-
-  def query(params = nil)
-    Util::Http::QueryString.get_query(params)
-  end
-
-  def send_mail(mail_fr, mail_to, subject, message)
-    return false if mail_fr.blank?
-    return false if mail_to.blank?
-    Sys::Lib::Mail::Base.deliver_default(mail_fr, mail_to, subject, message)
-  end
-
   def response_html?
     response.content_type =~ Regexp.union(%r|text/html|, %r|application/xhtml\+xml|)
   end
@@ -74,72 +60,30 @@ class ApplicationController < ActionController::Base
     super(data, options)
   end
 
-private
+  private
+
   def rescue_exception(exception)
-    Core.terminate
-
-    log  = exception.to_s
-    log += "\n" + exception.backtrace.join("\n") if Rails.env.to_s == 'production'
-    error_log(log)
-
-    html  = %Q(<div style="padding: 15px 20px; color: #e00; font-weight: bold; line-height: 1.8;">)
-    case
-    when exception.is_a?(Sys::Lib::Net::Imap::Error)
-      html += %Q(#{exception})
-    else
-      html += %Q(エラーが発生しました。<br />#{exception} &lt;#{exception.class}&gt;)
-    end
-    html += %Q(</div>)
-    if Rails.env.to_s != 'production'
-      html += %Q(<div style="padding: 15px 20px; border-top: 1px solid #ccc; color: #800; line-height: 1.4;">)
-      html += exception.backtrace.join("<br />")
-      html += %Q(</div>)
-    end
-    render inline: html, layout: true, status: 500
-  end
-
-  def rescue_action(error)
-    case error
-    when ActionController::InvalidAuthenticityToken
-      http_error(422, error.to_s)
-    else
-      Core.terminate
-      super
-    end
-  end
-
-  ## Production && local
-  def rescue_action_in_public(exception)
-    #exception.each{}
-    http_error(500, nil)
+    @exception = exception
+    error_log("#{@exception}\n" + @exception.backtrace.join("\n")) if Rails.env == 'production'
+    render template: 'application/exception', layout: true, status: 500
   end
 
   def http_error(status, message = nil)
-    Core.terminate
-    
-###    Page.error = status
-    
-    ## errors.log
     if status != 404
       error_log("#{status} #{request.fullpath} #{message.to_s.gsub(/\n/, ' ')}")
     end
 
-    ## Render
-    file = "#{Rails.public_path}/500.html"
-###    if Page.site && FileTest.exist?("#{Page.site.public_path}/#{status}.html")
-###      file = "#{Page.site.public_path}/#{status}.html"
-###    elsif Core.site && FileTest.exist?("#{Core.site.public_path}/#{status}.html")
-###      file = "#{Core.site.public_path}/#{status}.html"
-###    els
-    if FileTest.exist?("#{Rails.public_path}/#{status}.html")
-      file = "#{Rails.public_path}/#{status}.html"
-    end
+    file =
+      if FileTest.exist?("#{Rails.public_path}/#{status}.html")
+        "#{Rails.public_path}/#{status}.html"
+      else
+        "#{Rails.public_path}/500.html"
+      end
 
     @message = message
     return respond_to do |format|
-      #render :text => "<html><body><h1>#{message}</h1></body></html>"
-      format.html { render(:status => status, :file => file, :layout => false) }
-      format.xml  { render :xml => "<errors><error>#{status} #{message}</error></errors>" }
+      format.html { render file: file, layout: false, status: status }
+      format.xml  { render xml: "<errors><error>#{status} #{message}</error></errors>" }
     end
   end
 end

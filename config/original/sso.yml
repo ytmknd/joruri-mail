@@ -3,18 +3,18 @@ development:
     host: localhost
     port: 80
     usessl: false
-    path: api/air_sso
+    path: /api/air_sso
 
 test:
   gw:
     host: localhost
     port: 80
     usessl: false
-    path: api/air_sso
+    path: /api/air_sso
 
 production:
   gw:
     host: localhost
     port: 80
     usessl: false
-    path: api/air_sso
+    path: /api/air_sso
