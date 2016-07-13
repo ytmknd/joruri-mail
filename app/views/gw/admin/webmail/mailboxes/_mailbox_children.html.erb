@@ -4,7 +4,10 @@
     nm_class = mailbox_name_class(box, @mailbox)
   %>
   <li class="<%= li_class %>">
-    <%= link_to h(box.title), url_for(action: :index, mailbox: box.name), class: nm_class %>
+    <% if box.editable_box? %>
+      <span class="draggable">&nbsp;</span>
+    <% end %>
+    <%= link_to h(box.title), url_for(action: :index, mailbox: box.name), class: nm_class, data: { mailbox: box.name } %>
     <% if box.children.size > 0 %>
       <ul class="children level<%= box.level_no %>">
         <%= render 'mailbox_children', mailboxes: box.children %>
