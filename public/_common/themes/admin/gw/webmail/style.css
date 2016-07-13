@@ -343,6 +343,13 @@ form.search td input.email {
   background-image: url(../images/mailoption/star_on.gif);
   background-position: 5px 5px;
 }
+#webmailMenu .mailbox li.virtual a {
+  background-image: url(../images/tree/transmit_open.gif);
+}
+#webmailMenu .mailbox li.flagged a {
+  background-image: url(../images/mailoption/star_on.gif);
+  background-position: 5px 5px;
+}
 #webmailMenu .mailbox li.folder a {
   background-image: url(../images/tree/folder_close.gif);
 }

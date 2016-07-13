@@ -31,8 +31,8 @@ class Gw::Admin::Webmail::MailsController < Gw::Controller::Admin::Base
     Gw::WebmailMailbox.load_mailboxes(reload)
   end
 
-  def reset_mailboxes(mailboxes = [:all])
-    flash[:gw_webmail_load_mailboxes] = mailboxes.uniq
+  def reset_mailboxes(mailboxes = :all)
+    flash[:gw_webmail_load_mailboxes] = mailboxes
   end
 
   def load_starred_mails
@@ -78,7 +78,7 @@ class Gw::Admin::Webmail::MailsController < Gw::Controller::Admin::Base
 
     ## apply filters
     last_uid, recent, error = Gw::WebmailFilter.apply_recents
-    reset_mailboxes([:all]) if recent
+    reset_mailboxes if recent
     if @mailbox.name == "INBOX"
       @filter += ["UID", "1:#{last_uid}"] # slows a little
     end
@@ -160,19 +160,15 @@ class Gw::Admin::Webmail::MailsController < Gw::Controller::Admin::Base
     end
 
     if @item.unseen?
-      changed_mailboxes = []
       mailbox_uids = get_mailbox_uids(@mailbox, @item.uid)
       mailbox_uids.each do |mailbox, uids|
-        num = Gw::WebmailMail.seen_all(mailbox, uids)
-        if num > 0
-          changed_mailboxes << mailbox
-        end
+        Gw::WebmailMail.seen_all(mailbox, uids)
       end
-      reset_mailboxes(changed_mailboxes)
+      reset_mailboxes
 
       @seen_flagged = true
 
-      if @item.has_disposition_notification_to? && !@item.notified? && !@mailbox.draft_box?(:all) && !@mailbox.sent_box?(:all)
+      if @item.has_disposition_notification_to? && !@item.notified? && !@mailbox.draft_box? && !@mailbox.sent_box?
         @mdnRequest = mdn_request_mode
         if @mdnRequest == :auto
           begin
@@ -433,7 +429,7 @@ class Gw::Admin::Webmail::MailsController < Gw::Controller::Admin::Base
 
     @item = Gw::WebmailMail.new(params[:item])
     send_message(@item, @ref) do
-      if !params[:remain_draft] && @ref && (@mailbox.draft_box?(:all) || @mailbox.star_box?)
+      if !params[:remain_draft] && @ref && (@mailbox.draft_box? || @mailbox.star_box?)
         mailbox_uids = get_mailbox_uids(@mailbox, @ref.uid)
         mailbox_uids.each do |mailbox, uids|
           num = Gw::WebmailMail.delete_all(mailbox, uids, true)
@@ -518,7 +514,6 @@ class Gw::Admin::Webmail::MailsController < Gw::Controller::Admin::Base
     begin
       imap = Core.imap
       imap.create("Sent") unless imap.list("", "Sent") rescue nil
-      #imap.create("Sent") unless Gw::WebmailMailbox.exist?("Sent") rescue nil
       item.mail = sent
       Timeout.timeout(60) { imap.append("Sent", item.for_save.to_s, [:Seen], Time.now) }
     rescue => e
@@ -539,7 +534,6 @@ class Gw::Admin::Webmail::MailsController < Gw::Controller::Admin::Base
       mail = item.prepare_mail(request)
       imap = Core.imap
       imap.create("Drafts") unless imap.list("", "Drafts") rescue nil
-      #imap.create("Drafts") unless Gw::WebmailMailbox.exist?("Drafts") rescue nil
       #next_uid = imap.status("Drafts", ["UIDNEXT"])["UIDNEXT"]
       item.mail = mail
       flags = [:Seen, :Draft]
@@ -594,7 +588,7 @@ class Gw::Admin::Webmail::MailsController < Gw::Controller::Admin::Base
     end
 
     if changed_num > 0
-      reset_mailboxes([:all])
+      reset_mailboxes
       reset_starred_mails(changed_mailbox_uids) if @item.starred?
 
       flash[:notice] = 'メールを削除しました。' unless @new_window
@@ -661,7 +655,7 @@ class Gw::Admin::Webmail::MailsController < Gw::Controller::Admin::Base
       end
     end
 
-    reset_mailboxes([:all])
+    reset_mailboxes
     reset_starred_mails(changed_mailbox_uids) if include_starred_uid
 
 #    num = 0
@@ -696,7 +690,7 @@ class Gw::Admin::Webmail::MailsController < Gw::Controller::Admin::Base
       changed_num += num if mailbox !~ /^(Star)$/
     end
 
-    reset_mailboxes([:all])
+    reset_mailboxes
     reset_starred_mails(changed_mailbox_uids) if include_starred_uid
 
 #    Gw::WebmailMail.find(:all, :select => @mailbox.name, :conditions => cond).each do |item|
@@ -715,19 +709,13 @@ class Gw::Admin::Webmail::MailsController < Gw::Controller::Admin::Base
     uids = params[:item][:ids].collect{|k, v| k.to_s =~ /^[0-9]+$/ ? k.to_i : nil }
 
     changed_num = 0
-    changed_mailboxes = []
-
     mailbox_uids = get_mailbox_uids(@mailbox, uids)
     mailbox_uids.each do |mailbox, uids|
       num = Gw::WebmailMail.seen_all(mailbox, uids)
-      if num > 0
-        changed_mailboxes << mailbox
-        changed_mailboxes << 'Star'
-      end
       changed_num += num if mailbox !~ /^(Star)$/
     end
 
-    reset_mailboxes(changed_mailboxes)
+    reset_mailboxes
 
     flash[:notice] = "#{changed_num}件のメールを既読にしました。"
     redirect_to url_for(action: :index, page: params[:page])
@@ -741,25 +729,19 @@ class Gw::Admin::Webmail::MailsController < Gw::Controller::Admin::Base
     uids = params[:item][:ids].collect{|k, v| k.to_s =~ /^[0-9]+$/ ? k.to_i : nil }
 
     changed_num = 0
-    changed_mailboxes = []
-
     mailbox_uids = get_mailbox_uids(@mailbox, uids)
     mailbox_uids.each do |mailbox, uids|
       num = Gw::WebmailMail.unseen_all(mailbox, uids)
-      if num > 0
-        changed_mailboxes << mailbox
-      end
       changed_num += num if mailbox !~ /^(Star)$/
     end
 
-    reset_mailboxes(changed_mailboxes)
+    reset_mailboxes
 
     flash[:notice] = "#{changed_num}件のメールを未読にしました。"
     redirect_to url_for(action: :index, page: params[:page])
   end
 
   def empty
-    reset_mailboxes([:all])
     changed_mailbox_uids = {}
 
     mailboxes = load_mailboxes
@@ -792,7 +774,7 @@ class Gw::Admin::Webmail::MailsController < Gw::Controller::Admin::Base
       end
     end
 
-    reset_mailboxes([:all])
+    reset_mailboxes
     reset_starred_mails(changed_mailbox_uids)
 
     flash[:notice] = "ごみ箱を空にしました。"
@@ -856,7 +838,7 @@ class Gw::Admin::Webmail::MailsController < Gw::Controller::Admin::Base
       changed_num += num if mailbox !~ /^(Star)$/
     end
 
-    reset_mailboxes([:all])
+    reset_mailboxes
     reset_starred_mails(changed_mailbox_uids) if include_starred_uid
 
     flash[:notice] = "#{items.count}件のメールを迷惑メールに登録しました。"
@@ -882,12 +864,12 @@ class Gw::Admin::Webmail::MailsController < Gw::Controller::Admin::Base
       end
     end
 
-    reset_mailboxes([:all])
+    reset_mailboxes
     reset_starred_mails(changed_mailbox_uids)
 
     if request.mobile?
       s_params = make_search_params
-      if params[:from] == 'list' || @mailbox.name =~ /^(Star)$/
+      if params[:from] == 'list' || @mailbox.star_box?
         redirect_to url_for(s_params.merge(action: :index, id: params[:id], mailbox: @mailbox.name, mobile: :list))
       else
         redirect_to url_for(s_params.merge(action: :show, id: params[:id], mailbox: @mailbox.name))
@@ -1111,7 +1093,7 @@ class Gw::Admin::Webmail::MailsController < Gw::Controller::Admin::Base
       rescue => ex
         from_addr = nil
       end
-      field = @mailbox.name =~ /^(Sent|Drafts)(\.|$)/ ? "TO" : "FROM"
+      field = @mailbox.sent_box? || @mailbox.draft_box? ? "TO" : "FROM"
       filter += [field, "\"#{from_addr.gsub(/"/, '')}\""] if from_addr
     end
 

@@ -15,3 +15,13 @@ ja:
     helpers:
       download_allow_message_html: ''
       download_deny_message_html: ''
+    mailbox:
+      titles:
+        INBOX: 受信トレイ
+        Drafts: 下書き
+        Sent: 送信トレイ
+        Archives: アーカイブ
+        Star: スター付き
+        Trash: ごみ箱
+        virtual.All: すべてのメール
+        virtual.Flagged: スター付き

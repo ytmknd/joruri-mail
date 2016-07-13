@@ -37,7 +37,7 @@
       %><%= link_to '転送', '#editMail', class: 'forward', title: '転送', target: '_blank',
         data: { url: forward_gw_webmail_mail_path(@mailbox.name, @item.uid) }
       %><%= link_to '編集', '#editMail', class: 'edit', title: '編集', target: '_blank',
-        data: { url: resend_gw_webmail_mail_path(@mailbox.name, @item.uid) } if @mailbox.name =~ /^Sent(\.|$)/
+        data: { url: resend_gw_webmail_mail_path(@mailbox.name, @item.uid) } if @mailbox.sent_box?
       %><%= link_to '移動', '#moveMail', class: 'move', title: '移動'
       %><%= link_to 'コピー', '#copyMail', class: 'copy', title: 'コピー'
       %><%= link_to '削除', url_for(action: :destroy, new_window: @new_window), method: :delete, class: :delete, title: '削除'
@@ -146,7 +146,7 @@
     </tr>
   </table>
 <% end %>
-<% if @mdnRequest == :manual && !@mailbox.draft_box?(:all) && !@mailbox.sent_box?(:all) %>
+<% if @mdnRequest == :manual && !@mailbox.draft_box? && !@mailbox.sent_box? %>
   <table id="mdnRequest" class="mailAttention">
     <tr>
       <td class="message">メッセージ送信者は、開封確認を要求しています。開封確認のメールを送信しますか？</td>

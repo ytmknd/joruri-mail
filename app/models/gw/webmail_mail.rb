@@ -252,7 +252,7 @@ class Gw::WebmailMail
 
     imap.examine(mailbox)
 
-    ## load cache
+    ## load from db cache
     if use_cache
       nodes = Gw::WebmailMailNode.where(user_id: Core.current_user.id, mailbox: mailbox, uid: uids).all
       if nodes.size > 0
@@ -270,45 +270,49 @@ class Gw::WebmailMail
       return items if uids.blank?
     end
 
-    ## load imap
-    #fields = ["UID", "FLAGS", "RFC822.SIZE", "BODY.PEEK[HEADER.FIELDS (DATE FROM TO CC BCC SUBJECT CONTENT-TYPE CONTENT-DISPOSITION DISPOSITION-NOTIFICATION-TO)]", "BODYSTRUCTURE"]
-    fields = ["UID", "FLAGS", "RFC822.SIZE", "BODY.PEEK[HEADER.FIELDS (DATE FROM TO CC BCC SUBJECT CONTENT-TYPE CONTENT-DISPOSITION DISPOSITION-NOTIFICATION-TO)]"]
-    msgs   = imap.uid_fetch(uids, fields)
+    ## load from imap
+    header_fields = 'HEADER.FIELDS (DATE FROM TO CC BCC SUBJECT CONTENT-TYPE CONTENT-DISPOSITION DISPOSITION-NOTIFICATION-TO)'
+    fields = ['UID', 'FLAGS', 'RFC822.SIZE', "BODY.PEEK[#{header_fields}]"]
+    fields += ['X-MAILBOX', 'X-REAL-UID'] if mailbox =~ /^virtual/
+    msgs = Array(imap.uid_fetch(uids, fields))
     msgs.each do |msg|
       item = self.new
-      header = msg.attr["BODY[HEADER.FIELDS (DATE FROM TO CC BCC SUBJECT CONTENT-TYPE CONTENT-DISPOSITION DISPOSITION-NOTIFICATION-TO)]"]
-      #structure = self.encode_body_structure(msg.attr["BODYSTRUCTURE"], 0)
-      #item.parse("#{header}#{structure}")
-      item.parse("#{header}")
-      item.uid     = msg.attr["UID"].to_i
-      item.mailbox = mailbox
-      item.size    = msg.attr['RFC822.SIZE']
-      item.flags   = msg.attr["FLAGS"]
+      item.parse(msg.attr["BODY[#{header_fields}]"])
+      item.uid        = msg.attr['UID'].to_i
+      item.mailbox    = mailbox
+      item.size       = msg.attr['RFC822.SIZE']
+      item.flags      = msg.attr['FLAGS']
+      item.x_mailbox  = msg.attr['X-MAILBOX']
+      item.x_real_uid = msg.attr['X-REAL-UID']
       if !use_cache
         items << item
         next
       end
 
       ## save cache
-      node = Gw::WebmailMailNode.new({
-        user_id:         Core.current_user.id,
-        uid:             item.uid,
-        mailbox:         mailbox,
-        message_date:    item.date,
-        from:            item.friendly_from_addr,
-        to:              item.friendly_to_addrs.join("\n"),
-        cc:              item.friendly_cc_addrs.join("\n"),
-        bcc:             item.friendly_bcc_addrs.join("\n"),
-        subject:         item.subject,
-        has_attachments: item.has_attachments?,
-        size:            item.size,
-        has_disposition_notification_to: item.has_disposition_notification_to?
-      })
+      node = Gw::WebmailMailNode.new do |n|
+        n.user_id          = Core.current_user.id
+        n.uid              = item.uid
+        n.mailbox          = mailbox
+        n.message_date     = item.date
+        n.from             = item.friendly_from_addr
+        n.to               = item.friendly_to_addrs.join("\n")
+        n.cc               = item.friendly_cc_addrs.join("\n")
+        n.bcc              = item.friendly_bcc_addrs.join("\n")
+        n.subject          = item.subject
+        n.has_attachments  = item.has_attachments?
+        n.size             = item.size
+        n.has_disposition_notification_to = item.has_disposition_notification_to?
+        if mailbox =~ /^virtual/
+          n.ref_mailbox = item.x_mailbox
+          n.ref_uid     = item.x_real_uid
+        end
+      end
       node.save
       node_item = self.new(node)
       node_item.flags = item.flags
       items << node_item
-    end if msgs.present?
+    end
 
     items
   end

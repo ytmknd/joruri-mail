@@ -90,7 +90,7 @@ class Gw::Admin::Webmail::FiltersController < Gw::Controller::Admin::Base
     end
 
     Gw::WebmailMailbox.load_starred_mails(changed_mailbox_uids) if @applied > 0
-    Gw::WebmailMailbox.load_mailboxes(reload = true) if @applied > 0
+    Gw::WebmailMailbox.load_mailboxes(:all) if @applied > 0
     flash[:notice] = "#{message}#{@applied}件のメールに適用しました。".html_safe
     redirect_to action: :apply
   end

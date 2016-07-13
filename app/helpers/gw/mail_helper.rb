@@ -8,7 +8,7 @@ module Gw::MailHelper
   end
 
   def mail_from_display(mail, mailbox, omit = false)
-    if mailbox.draft_box?(:all) || mailbox.sent_box?(:all)
+    if mailbox.draft_box? || mailbox.sent_box?
       from = mail.simple_to_addr
       s_from = mail.friendly_to_addrs[0] || ''
     else
@@ -21,7 +21,7 @@ module Gw::MailHelper
   end
 
   def mail_mdn_dipslay?(mail, mailbox)
-    if mailbox.draft_box?(:all) || mailbox.sent_box?(:all)
+    if mailbox.draft_box? || mailbox.sent_box?
       mail.has_disposition_notification_to?
     else
       mail.has_disposition_notification_to? && mail.notified?

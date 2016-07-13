@@ -2,6 +2,7 @@ module Sys::Lib::Net::Imap
   require 'net/imap'
 
   attr_accessor :uid, :mailbox, :flags, :rfc822, :size, :mail
+  attr_accessor :x_mailbox, :x_real_uid
 
   def self.included(mod)
     mod.extend ClassMethods

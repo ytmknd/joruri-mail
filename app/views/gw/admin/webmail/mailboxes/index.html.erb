@@ -1,12 +1,3 @@
-<%
-path_options = []
-@mailboxes.each do |box|
-  next if box.name =~ /^(Drafts|Trash|Star)(\.|$)/
-  next if box.name == @mailbox.name
-  next if box.name.index("#{@mailbox.name}.") == 0
-  path_options << [box.slashed_title, "#{box.name}."]
-end
-%>
 <table id="webmailContainer"><tr><td id="webmailMenu">
 <div id="webmailMenuContainer">
 
@@ -24,55 +15,63 @@ end
 
 <p class="form"><%= @mailbox.title %></p>
 
-<% if @mailbox.name == 'Trash' || @mailbox.name == 'Star' || @mailbox.name =~ /^Drafts(\.|$)/ %>
+<% if !@mailbox.creatable_child_box? &&
+      !@mailbox.editable_box? &&
+      !@mailbox.deletable_box? %>
   <div style="margin-top: 10px;"><%= @mailbox.title %>は変更できません。</div>
-<% elsif @mailbox.name !~ /^Trash\./ %>
-  <%= form_for :item, url: { action: :create } do |f| %>
-  <%= f.hidden_field :path, value: "#{@item.name}." %>
-  <table class="show" style="height: 40px;"><tr>
-    <th style="">新しいフォルダの登録</th>
-    <td style="">
-      <%= f.text_field :title, value: '' %>
-      <%= f.submit '登録する' %>
-    </td>
-  </tr></table>
+<% else %>
+  <% if @mailbox.creatable_child_box? %>
+    <%= form_for :item, url: { action: :create } do |f| %>
+      <%= f.hidden_field :path, value: "#{@item.name}." %>
+      <table class="show" style="height: 40px;">
+        <tr>
+          <th style="">新しいフォルダの登録</th>
+          <td style="">
+            <%= f.text_field :title, value: '' %>
+            <%= f.submit '登録する' %>
+          </td>
+        </tr>
+      </table>
+    <% end %>
   <% end %>
-<% end %>
-  
-<% if @mailbox.name !~ /^(INBOX|Drafts|Sent|Archives|Trash|Star)$/ %>
-  <br />
-  <%= form_for :item, url: { action: :update }, html: { method: :patch } do |f| %>
+  <% if @mailbox.editable_box? %>
+    <br />
+    <%= form_for :item, url: { action: :update }, html: { method: :patch } do |f| %>
+      <table class="show" style="height: 40px;">
+        <tr>
+          <th style="">フォルダ名の変更</th>
+          <td style="">
+            <%= f.text_field :title %>
+            <%= f.submit '変更する' %>
+          </td>
+        </tr>
+      </table>
+    <% end %>
+    <br />
+    <%= form_for :item, url: { action: :update }, html: { method: :patch } do |f| %>
+      <table class="show" style="height: 40px;">
+        <tr>
+          <th style="">フォルダの移動</th>
+          <td style="">
+            <%= f.select :path, @mailboxes.select { |box| box.selectable_as_parent? && box.name != @mailbox.name && box.name.index("#{@mailbox.name}.") != 0 }
+              .map { |box| [box.slashed_title, "#{box.name}."] }, include_blank: '（ルート階層）' %>
+            <%= f.submit '移動する' %>
+          </td>
+        </tr>
+      </table>
+    <% end %>
+  <% end %>
+  <% if @mailbox.deletable_box? %>
+    <div style="height:150px"></div>
     <table class="show" style="height: 40px;">
       <tr>
-        <th style="">フォルダ名の変更</th>
+        <th style="">フォルダの削除</th>
         <td style="">
-          <%= f.text_field :title %>
-          <%= f.submit '変更する' %>
+          <%= link_to '削除する', url_for(action: :destroy), method: :delete, data: { confirm: '削除してよろしいですか？' } %>
         </td>
       </tr>
     </table>
   <% end %>
-  <br />
-  <%= form_for :item, url: { action: :update }, html: { method: :patch } do |f| %>
-    <table class="show" style="height: 40px;">
-      <tr>
-        <th style="">フォルダの移動</th>
-        <td style="">
-          <%= f.select :path, path_options, include_blank: '（ルート階層）' %>
-          <%= f.submit '移動する' %>
-        </td>
-      </tr>
-    </table>
-  <% end %>
-  <div style="height:150px"></div>
-  <table class="show" style="height: 40px;">
-    <tr>
-      <th style="">フォルダの削除</th>
-      <td style="">
-        <%= link_to '削除する', url_for(action: :destroy), method: :delete, data: { confirm: '削除してよろしいですか？' } %>
-      </td>
-    </tr>
-  </table>
 <% end %>
 
 </div><!-- end #webmailContainer --></td></table>

@@ -3,7 +3,7 @@ kopts = [["件名（Subject）","subject"],["差出人（From）","from"],["宛�
 sopts = [["すべて",""],["未読のみ","unseen"],["既読のみ","seen"]]
 disp  = params[:search] ? "block" : "none"
 
-fromto = @mailbox.name =~ /^(Sent|Drafts)(\.|$)/ ? ["受信者","to"] : ["差出人","from"]
+fromto = @mailbox.sent_box? || @mailbox.draft_box? ? ["受信者","to"] : ["差出人","from"]
 skopts = [["件名","subject"],fromto,["送信日時","date"],["サイズ","size"]]
 soopts = [["昇順",""],["降順","reverse"]]
 ssopts = [["",""],["スター付き優先","1"]]

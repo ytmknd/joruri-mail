@@ -1,17 +1,10 @@
-<%
-path_options = []
-@mailboxes.each do |box|
-  next if box.name =~ /^(Drafts|Trash|Star)(\.|$)/
-  path_options << [box.slashed_title, "#{box.name}."]
-end
-%>
-
 <%= f.error_messages %>
 
 <table class="show">
   <tr>
     <th>親フォルダ</th>
-    <td><%= f.select :path, path_options, include_blank: "（ルート階層）" %></td>
+    <td><%= f.select :path, @mailboxes.select(&:selectable_as_parent?)
+      .map {|box| [box.slashed_title, "#{box.name}."] }, include_blank: "（ルート階層）" %></td>
   </tr>
   <tr>
     <th>フォルダ名</th>

@@ -1,5 +1,5 @@
 <div id="mailboxes" class="mailbox">
   <ul class="root">
-    <%= render 'mailbox_children', mailboxes: Gw::WebmailMailbox.make_tree(@mailboxes) %>
+    <%= render 'mailbox_children', mailboxes: @mailboxes.select(&:root?) %>
   </ul>
 </div>

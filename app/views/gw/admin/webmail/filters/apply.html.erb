@@ -1,10 +1,3 @@
-<%
-mailboxes = []
-Gw::WebmailMailbox.load_mailboxes.each do |box|
-  next if box.name =~ /^(Drafts|Sent|Trash|Star)(\.|$)/
-  mailboxes << [box.slashed_title, "#{box.name}"]
-end
-%>
 <div id="signContent">
   
 <div class="actionMenu">
@@ -26,7 +19,7 @@ end
   </tr><tr>
     <th>適用するフォルダ</th>
     <td>
-      <%= f.select :mailbox, mailboxes, include_blank: true %>
+      <%= f.select :mailbox, Gw::WebmailMailbox.mailbox_options(&:filter_appliable_box?), include_blank: true %>
       <%= f.check_box :include_sub %><label for="f_item_include_sub">サブフォルダを含める</label>
     </td>
   </tr>

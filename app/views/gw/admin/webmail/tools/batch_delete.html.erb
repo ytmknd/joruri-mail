@@ -17,7 +17,8 @@
   <tr>
     <th>対象フォルダ</th>
     <td>
-      <%= f.select :mailbox_id, options_for_select([["全てのフォルダ", 0]] + mailbox_selection(@mailboxes, except: ['Star']), @item.mailbox_id.to_i) %>
+      <%= f.select :mailbox_id, options_for_select(
+        [["全てのフォルダ", 0]] + @mailboxes.select(&:batch_deletable_box?).map { |box| [box.slashed_title, box.id] }, @item.mailbox_id.to_i) %>
     </td>
   </tr>
   <tr>

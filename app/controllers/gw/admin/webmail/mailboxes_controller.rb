@@ -16,8 +16,8 @@ class Gw::Admin::Webmail::MailboxesController < Gw::Controller::Admin::Base
     Gw::WebmailMailbox.load_mailboxes(reload)
   end
 
-  def reset_mailboxes(mailboxes = [:all])
-    flash[:gw_webmail_load_mailboxes] = mailboxes.uniq
+  def reset_mailboxes(mailboxes = :all)
+    flash[:gw_webmail_load_mailboxes] = mailboxes
   end
 
   def load_starred_mails
@@ -113,7 +113,7 @@ class Gw::Admin::Webmail::MailboxesController < Gw::Controller::Admin::Base
   def _destroy(item, options = {}, &block)
     raise @item.errors.add(:base, "権限がありません。") unless @item.deletable?
 
-    delete_complete = @item.name =~ /^Trash\./
+    delete_complete = @item.trash_box?(:children)
     short_name = @item.path.blank? ? @item.name : @item.name[@item.path.size, @item.name.size]
     new_name = "Trash.#{short_name}"
     if !delete_complete && Core.imap.list('', "Trash.#{short_name}")

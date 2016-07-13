@@ -8,7 +8,7 @@
     <% if box.unseen > 0 %>
       <span class="unseenNum">(<span class="num"><%= box.unseen %></span>)</span>
     <% end %>
-    <% if box.trash_box? && (box.messages > 0 || box.children.length > 0) %>
+    <% if box.trash_box?(:root) && (box.messages > 0 || box.children.length > 0) %>
       <%= link_to '≫空にする', empty_gw_webmail_mails_path(box.name), class: 'empty', data: { confirm: '空にしてよろしいですか？' } %>
     <% end %>
     <% if box.children.size > 0 %>

@@ -1,8 +1,4 @@
-<% mailbox_type = @mailbox.name.downcase.gsub(/(.*)\.(.*)/, '\1') %>
-<% mailbox_type = "rootFolder" if mailbox_type == "folder" && @mailbox.name.index('.').nil? %>
-
 <div class="mailboxTitle">
-  <%#=raw mailbox_mobile_image_tag(mailbox_type, blue: true) %>
   <%= link_to @mailbox.title, url_for(action: :index, mailbox: @mailbox.name, mobile: :list, page: 1), class: "link" %>
 </div>
 <div class="header">
@@ -81,7 +77,7 @@
 </div>
 <% end %>
 
-<% if @mdnRequest.present? && @mdnRequest == :manual && !@item.draft? && @mailbox.name !~ /Sent(\.|$)/ %>
+<% if @mdnRequest.present? && @mdnRequest == :manual && !@item.draft? && !@mailbox.sent_box? %>
 <div class="mdnMenu">
 <div class="title">開封確認</div>
 <div class="message">メール送信者は開封確認を要求しています。開封確認のメールを送信しますか？</div>
@@ -114,7 +110,7 @@
   <%= submit_tag '編集', name: 'mobile_edit', class: 'menuItem' %>
 	<%= submit_tag '削除', name: 'mobile_delete', class: 'menuItem' %>
 <% else %>
-  <%= submit_tag '編集', name: 'mobile_resend', class: 'menuItem' if @mailbox.name =~ /^Sent(\.|$)/ %>
+  <%= submit_tag '編集', name: 'mobile_resend', class: 'menuItem' if @mailbox.sent_box? %>
   <%= submit_tag '移動', name: 'mobile_move', class: 'menuItem' %>
   <%= submit_tag 'コピー', name: 'mobile_copy', class: 'menuItem' %>
   <%= submit_tag '削除', name: 'mobile_delete', class: 'menuItem' %>

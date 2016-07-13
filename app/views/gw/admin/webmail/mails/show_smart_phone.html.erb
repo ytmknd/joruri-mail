@@ -78,7 +78,7 @@
   </tr>
 </table>
 
-<% if @mdnRequest.present? && @mdnRequest == :manual && !@item.draft? && @mailbox.name !~ /Sent(\.|$)/ %>
+<% if @mdnRequest.present? && @mdnRequest == :manual && !@item.draft? && !@mailbox.sent_box? %>
 <table id="mdnRequest" class="mailAttention">
   <tr>
     <td class="message">メッセージ送信者は、開封確認を要求しています。開封確認のメールを送信しますか？</td>
@@ -189,7 +189,7 @@
       <%= submit_tag '編集', name: 'mobile_edit', class: 'edit' %>
       <%= submit_tag '削除', name: 'mobile_delete', class: 'delete' %>
     <% else %>
-      <%= submit_tag '編集', name: 'mobile_resend', class: 'edit' if @mailbox.name =~ /^Sent(\.|$)/ %>
+      <%= submit_tag '編集', name: 'mobile_resend', class: 'edit' if @mailbox.sent_box? %>
       <%= submit_tag '移動', name: 'mobile_move', class: 'move' %>
       <%= submit_tag 'コピー', name: 'mobile_copy', class: 'copy' %>
       <%= submit_tag '削除', name: 'mobile_delete', class: 'delete' %>

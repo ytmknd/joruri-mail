@@ -23,10 +23,8 @@ subject_wrap = @mail_list_subject.blank? ? '' : 'autoWrap'
             </span>
             <span class="text"><%= mail_text_wrap(truncate(item.subject, length: 70, escape: false).presence || ' ') %></span>
           </span>
-          <% if @mailbox.name =~ /^(Star)$/ %>
-            <span class="mailbox"> 
-              <%= @mailboxes.detect {|mbox| mbox.name == item.node.ref_mailbox}.try(:title) if item.node %>
-            </span>
+          <% if @mailbox.star_box? || @mailbox.virtual_box? %>
+            <span class="mailbox"><%= item.x_mailbox_title %></span>
           <% end %>
         </a>
       </td>

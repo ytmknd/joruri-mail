@@ -1,10 +1,4 @@
-<%
-mailbox_type = @mailbox.name.downcase.gsub(/(.*)\.(.*)/, '\1')
-mailbox_type = 'rootFolder' if mailbox_type == 'folder' && @mailbox.name.index('.').nil?
-%>
-
 <div class="mailboxTitle">
-  <%#=raw mailbox_mobile_image_tag(mailbox_type, blue: true) %>
   <%= link_to @mailbox.title, url_for(mobile: :list, page: 1), class: 'link' %>
 </div>
 

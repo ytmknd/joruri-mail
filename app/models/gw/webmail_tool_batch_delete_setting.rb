@@ -14,7 +14,7 @@ class Gw::WebmailToolBatchDeleteSetting < Sys::Model::ActiveModel
     sent_before = (Time.parse(self.end_date) + 1.days).strftime("%d-%b-%Y")
 
     mailboxes.each do |box|
-      next if box.name =~ /^(Star)$/
+      next unless box.batch_deletable_box?
       next if mailbox_id != 0 && mailbox_id != box.id 
 
       condition = ['SENTSINCE', sent_since, 'SENTBEFORE', sent_before]
@@ -43,7 +43,7 @@ class Gw::WebmailToolBatchDeleteSetting < Sys::Model::ActiveModel
 
     if delete_num > 0
       Gw::WebmailMailbox.load_mailboxes(:all)
-      Gw::WebmailMailbox.load_quota(:force)
+      Gw::WebmailMailbox.load_quota(true)
     end
 
     delete_num

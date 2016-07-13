@@ -35,6 +35,18 @@ module Gw::Model::Ext::WebmailNode
     @node.has_disposition_notification_to?
   end
 
+  def x_mailbox
+    @node.ref_mailbox
+  end
+
+  def x_mailbox_title
+    Gw::WebmailMailbox.name_to_title(@node.ref_mailbox.to_s).split('.').last
+  end
+
+  def x_real_uid
+    @node.ref_uid
+  end
+
   def move(to_mailbox)
     return true if mailbox == to_mailbox
     @node.destroy if @node

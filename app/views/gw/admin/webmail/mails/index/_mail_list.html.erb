@@ -9,12 +9,12 @@ subject_wrap = @mail_list_subject.blank? ? '' : 'autoWrap'
       onclick="window.location.href='<%=raw escape_javascript url_for(@s_params.merge(sort_starred: params[:sort_starred] == '1' ? '' : '1')) %>';"></th>
     <th class="attach" title="添付ファイル">添</th>
     <th class="subject"><%= link_to_sort '件名', @s_params.merge(sort_key: :subject), class: 'sorter' %></th>
-    <% if @mailbox.name =~ /^(Star)$/ %>
+    <% if @mailbox.star_box? || @mailbox.virtual_box? %>
       <th class="mailbox"></th>
     <% end %>
     <th class="<%= @mail_list_from_address.blank? ? 'from' : 'fromOmitAddress' %>">
       <span class="caption">
-        <% if @mailbox.name =~ /^(Sent|Drafts)(\.|$)/ %>
+        <% if @mailbox.sent_box? || @mailbox.draft_box? %>
           <%= link_to_sort '受信者', @s_params.merge(sort_key: :to), class: 'sorter' %>
         <% else %>
           <%= link_to_sort '差出人', @s_params.merge(sort_key: :from), class: 'sorter' %>
@@ -56,10 +56,10 @@ subject_wrap = @mail_list_subject.blank? ? '' : 'autoWrap'
           </a>
         </span>
       </td>
-      <% if @mailbox.name =~ /^(Star)$/ %>
+      <% if @mailbox.star_box? || @mailbox.virtual_box? %>
         <td class="mailbox">
-          <span class="overflowHidden">
-            <%= @mailboxes.detect {|mbox| mbox.name == item.node.ref_mailbox }.try(:title) if item.node %>
+          <span class="overflowHidden" title="<%= item.x_mailbox_title %>">
+            <%= item.x_mailbox_title %>
           </span>
         </td>
       <% end %>

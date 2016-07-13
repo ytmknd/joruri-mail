@@ -48,7 +48,7 @@ class Gw::Admin::Webmail::ApiController < ApplicationController
         @recent = 0
         @mailboxes = Gw::WebmailMailbox.load_mailboxes(:all)
         @mailboxes.each do |box|
-          next if box.name =~ /^(Sent|Drafts|Trash|Star)(\.|$)/
+          next unless box.mail_unseen_count_box?
           @unseen += box.unseen
           @recent += box.recent
         end

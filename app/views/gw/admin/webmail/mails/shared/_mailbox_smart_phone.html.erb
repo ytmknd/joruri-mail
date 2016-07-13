@@ -8,11 +8,11 @@
       %>
       <tr class="<%= li_class %>">
         <td>
-          <%= content_tag_if box.trash_box?, :div do %> 
+          <%= content_tag_if box.trash_box?(:root), :div do %> 
             <%= content_tag_if box.unseen > 0, :b do %>
               <%= link_to "#{h(box.title)}#{unseenNum}", url_for(action: :index, mailbox: box.name), class: nm_class %>
             <% end %>
-            <% if box.trash_box? && (box.messages > 0 || box.children.length > 0) %>
+            <% if box.trash_box?(:root) && (box.messages > 0 || box.children.length > 0) %>
               <%= link_to "≫空にする", empty_gw_webmail_mails_path(box.name), class: 'empty', data: { confirm: '空にしてよろしいですか？' } %>
             <% end %>
           <% end %>

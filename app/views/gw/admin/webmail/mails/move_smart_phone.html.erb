@@ -1,12 +1,7 @@
 <%
-mailboxes = []
-Gw::WebmailMailbox.load_mailboxes.each do |box|
-  next if box.name == @mailbox.name && params[:copy].blank?
-  #next if box.name =~ /^(Drafts|Sent|Trash)(\.|$)/
-  next if box.name =~ /^(Drafts|Trash|Star)(\.|$)/
-  mailboxes << [box.slashed_title, "#{box.name}"]
+mailboxes = Gw::WebmailMailbox.mailbox_options do |box|
+  box.mail_movable_box? & !(box.name == @mailbox.name && params[:copy].blank?)
 end
-
 action_label = params[:copy].blank? ? '移動' : 'コピー'
 %>
 
