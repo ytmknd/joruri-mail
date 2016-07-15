@@ -1,22 +1,23 @@
 <%= f.error_messages %>
 
-<% case @item.input_type %>
+<% case @item.config.form_type %>
 <% when :select, :text_field, :password_field %>
   <table class="show">
     <tr>
       <th>設定名</th>
-      <td><%= @item.config_name %></td>
+      <td><%= @item.config.title %></td>
     </tr><tr>
       <th>設定値</th>
       <td>
-        <% if @item.input_type == :select %>
-          <%= f.select :value, @item.options %>
-        <% elsif @item.input_type == :text_field %>
-          <%= f.text_field :value, style: "width: 300px;" %>
-        <% elsif @item.input_type == :password_field %>
-          <%= f.password_field :value, style: "width: 300px;", value: @item.value %>
+        <% case @item.config.form_type %>
+        <% when :select %>
+          <%= f.select :value, @item.config.options %>
+        <% when :text_field %>
+          <%= f.text_field :value, style: 'width: 500px;' %>
+        <% when :password_field %>
+          <%= f.password_field :value, style: 'width: 300px;', value: @item.value %>
         <% end %>
-        <%=raw @item.message if @item.message %>
+        <%=raw @item.config.lower_text if @item.config.lower_text %>
       </td>
     </tr>
   </table>

@@ -25,3 +25,18 @@ ja:
         Trash: ごみ箱
         virtual.All: すべてのメール
         virtual.Flagged: スター付き
+    setting:
+      categories:
+        mail_list: メール一覧
+        mail_detail: メール読み取り
+        mail_form: メール送信
+        mail_label: ラベル
+        sys_address: 組織アドレス帳
+        address: 個人アドレス帳
+        mobile: 携帯端末
+        switch_user: 切替ユーザー
+      configs:
+        mobile_access:
+          lower_text_html: |
+            <p style="color:red;">※パケット定額サービスに入っていない場合、高額の通信料が発生する場合があります。</p>
+            <p style="color:red;">「許可」設定を行う場合は、この点をご理解のうえ、ご自身の責任で設定を行ってください。</p>

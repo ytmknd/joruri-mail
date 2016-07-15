@@ -66,8 +66,8 @@
       <div class="menuItem"><%= link_to @item.starred? ? 'スターをはずす' : 'スターを付ける', '#starMail' %></div>
     </div>
     <div id="labelMenu" class="popupMenu" style="display:none; width:100px;">
-      <% @label_confs.each do |label_conf| %>
-        <div class="menuItem"><%= link_to label_conf[:name], '#labelMail', data: { label_id: label_conf[:id] } %></div>
+      <% @label_confs.each do |conf| %>
+        <div class="menuItem"><%= link_to conf.name, '#labelMail', data: { label_id: conf.id } %></div>
       <% end %>
       <div class="menuItem"><hr /></div>
       <div class="menuItem"><%= link_to 'すべてはずす', '#labelMail', data: { label_id: 0 } %></div>
@@ -119,11 +119,7 @@
         class="<%= @item.starred? ? 'starOn' : 'starOff' %>" title="<%= @item.starred? ? 'スター' : '' %>"></a>
       <span id="mail_star_<%= @item.uid %>_loading" class="loading star-loading" style="display:none;"></span>
       <span id="mail_<%= @item.uid %>_labels" class="labels">
-        <% @item.labels.each do |label| %>
-          <% if label_conf = @label_confs.find{|conf| conf[:id] == label} %>
-            <span class="label" style="background-color: <%= label_conf[:color] %>;"><%= label_conf[:name] %></span>
-          <% end %>
-        <% end %>
+        <%= render 'gw/admin/webmail/mails/shared/label', labels: @item.labels, label_confs: @label_confs %>
       </span>
       <span id="mail_<%= @item.uid %>_label_loading" class="loading label-loading" style="display:none;"></span>
       <span class="subject"><%= mail_text_wrap(@item.subject) %></span>

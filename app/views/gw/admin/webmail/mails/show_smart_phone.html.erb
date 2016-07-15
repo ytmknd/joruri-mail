@@ -50,11 +50,7 @@
       <a href="#starMail" class="<%= @item.starred? ? 'starOn' : 'starOff' %>" id="mail_star_<%= @item.uid %>" data-uid="<%= @item.uid %>"></a>
       <span id="mail_<%= @item.uid %>_star_loading" class="loading star-loading" style="display:none;"></span>
       <span id="mail_<%= @item.uid %>_labels" class="labels">
-        <% @item.labels.each do |label| %>
-          <% if label_conf = @label_confs.find{|conf| conf[:id] == label} %>
-            <span class="label" style="background-color:<%= label_conf[:color] %>;"><%= label_conf[:name] %></span>
-          <% end %>
-        <% end %>
+        <%= render 'gw/admin/webmail/mails/shared/label', labels: @item.labels, label_confs: @label_confs %>
       </span>
       <span id="mail_<%= @item.uid %>_label_loading" class="loading label-loading" style="display:none;"></span>
     </td>
@@ -68,9 +64,9 @@
 </table>
 
 <table id="labelMenu" class="labelMenus" style="display:none;">
-  <% @label_confs.each_with_index do |label_conf, i| %>
+  <% @label_confs.each_with_index do |conf, i| %>
     <% if i%3 == 0 %><tr><% end %>
-    <td class="labelMenu"><%= link_to label_conf[:name], '#labelMail', data: { uid: @item.uid, label_id: label_conf[:id] } %></td>
+    <td class="labelMenu"><%= link_to conf.name, '#labelMail', data: { uid: @item.uid, label_id: conf.id } %></td>
     <% if i%3 == 2 %></tr><% end %>
   <% end %>
   <tr>

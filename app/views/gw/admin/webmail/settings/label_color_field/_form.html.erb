@@ -1,26 +1,19 @@
-<%
-if @item.value.blank? 
-  value = @item.options
-else
-  value = JSON.parse(@item.value).symbolize_keys!
-end
-%>
 <table class="show">
   <tr>
     <th>設定名</th>
-    <td><%= @item.config_name %></td>
+    <td><%= @item.config.title %></td>
   </tr><tr>
     <th>設定値</th>
     <td>
-      <%= hidden_field_tag :label_id, value[:id] %>
+      <%= hidden_field_tag 'item[value][id]', @item.decoded_value[:id] %>
       <span style="width:40px; display:inline-block;">名前</span>
-      <%= text_field_tag :name, value[:name], style: 'width: 150px;' %><br />
+      <%= text_field_tag 'item[value][name]', @item.decoded_value[:name], style: 'width: 150px;' %><br />
       <span style="width:40px; display:inline-block;">色</span>
-      <%= text_field_tag :color, value[:color], style: 'width: 150px; color: #fff;', id: 'colorPicker' %><br />
+      <%= text_field_tag 'item[value][color]', @item.decoded_value[:color], style: 'width: 150px; color: #fff;', id: 'colorPicker' %><br />
       <span style="width:40px; display:inline-block;">表示</span>
-      <%= radio_button_tag :state, 'enabled', value[:state] == 'enabled' %><%= label_tag :state_enabled, '表示する' %>
-      <%= radio_button_tag :state, 'disabled', value[:state] == 'disabled' %><%= label_tag :state_disabled, '表示しない' %> 
-      <%=raw @item.message if @item.message %>
+      <%= radio_button_tag 'item[value][state]', 'enabled', @item.decoded_value[:state] == 'enabled' %><%= label_tag :item_value_state_enabled, '表示する' %>
+      <%= radio_button_tag 'item[value][state]', 'disabled', @item.decoded_value[:state] == 'disabled' %><%= label_tag :item_value_state_disabled, '表示しない' %> 
+      <%=raw @item.config.lower_text if @item.config.lower_text %>
     </td>
   </tr>
 </table>

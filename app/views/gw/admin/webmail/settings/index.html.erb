@@ -14,11 +14,11 @@
         <th style="width: 200px;">設定名</th>
         <th style="">設定値</th>
       </tr>
-      <% category.configs.each do |conf| %>
-        <tr <%= cycle '', 'class="cycle"' %>>
-          <td style="text-align: center;"><%= link_to :edit, url_for(action: :edit, category: category.name, id: conf.name) %></td>
-          <td><%= conf.config_name %></td>
-          <td><%= conf.value_name || "未設定" %></td>
+      <% category.settings.each do |setting| %>
+        <tr>
+          <td style="text-align: center;"><%= link_to :edit, url_for(action: :edit, category: category.name, id: setting.name) %></td>
+          <td><%= setting.config.title %></td>
+          <td><%= setting.display_value || '未設定' %></td>
         </tr>
       <% end %>
     </table>

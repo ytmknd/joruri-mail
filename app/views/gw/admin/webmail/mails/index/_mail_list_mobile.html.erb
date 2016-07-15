@@ -4,9 +4,14 @@
     from, s_from, from_tooltip = mail_from_display(item, @mailbox, @mail_list_from_address.present?)
   %>
   <div class="mailItem<%= ' unseen' if item.unseen? %>">
-    <input type="checkbox" name="item[ids][<%= item.uid %>]" value="1" 
-    /><%= link_to image_tag(mail_star_image_path(item), alt: item.starred? ? 'スター' : ''), star_gw_webmail_mails_path(@s_params.merge(mailbox: @mailbox.name, id: item.uid, from: :list)) 
-    %><font class="subject <%= mail_flags(item).join(' ') %>"><%= link_to mail_text_wrap(truncate(item.subject, length: 30, escape: false).presence || ' ', 1000), url_for(@s_params.merge(action: :show, id: item.uid)) %></font>
+    <input type="checkbox" name="item[ids][<%= item.uid %>]" value="1" />
+    <%= link_to image_tag(mail_star_image_path(item), alt: item.starred? ? 'スター' : ''), star_gw_webmail_mails_path(@s_params.merge(mailbox: @mailbox.name, id: item.uid, from: :list)) %>
+    <% if item.labels.present? %>
+      <font class="labels">
+        <%= render 'gw/admin/webmail/mails/shared/label', labels: item.labels, label_confs: @label_confs %>
+      </font>
+    <% end %>
+    <font class="subject <%= mail_flags(item).join(' ') %>"><%= link_to mail_text_wrap(truncate(item.subject, length: 30, escape: false).presence || ' ', 1000), url_for(@s_params.merge(action: :show, id: item.uid)) %></font>
     <% if item.has_attachments? %>
     <img src="/_common/themes/admin/gw/webmail/mobile/images/clip.jpg" alt="[有]" />
     <% end %>

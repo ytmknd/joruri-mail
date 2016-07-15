@@ -1,5 +1,1 @@
-<% @item.labels.each do |label| %>
-  <% if label_conf = @label_confs.find{|conf| conf[:id] == label} %>
-    <span class="label" style="background-color:<%= label_conf[:color] %>;"><%= label_conf[:name] %></span>
-  <% end %>
-<% end %>
+<%= render 'gw/admin/webmail/mails/shared/label', labels: @item.labels, label_confs: @label_confs %>

@@ -6,7 +6,7 @@ fromto = @mailbox.sent_box? || @mailbox.draft_box? ? ["受信者","to"] : ["差�
 skopts = [["件名","subject"],fromto,["送信日時","date"],["サイズ","size"]]
 soopts = [["昇順",""],["降順","reverse"]]
 ssopts = [["",""],["スター付き優先","1"]]
-slopts = [["すべて",""]] + @label_confs.map{|conf| [conf[:name], conf[:id]]}
+slopts = [["すべて",""]] + @label_confs.map { |conf| [conf.name, conf.id] }
 
 disp  = params[:search] ? "block" : "none"
 %>

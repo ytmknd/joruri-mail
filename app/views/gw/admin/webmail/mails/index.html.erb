@@ -27,8 +27,8 @@
     <% end %>
     <a href="#toggleSearchForm" class="search" title="検索">検索</a>
     <div id="labelMenu" class="popupMenu" style="display:none;width:100px;">
-      <% @label_confs.each_with_index do |label_conf| %>
-        <div class="menuItem"><a href="#labelMails" data-label-id="<%= label_conf[:id] %>"><%= label_conf[:name] %></a></div>
+      <% @label_confs.each do |conf| %>
+        <div class="menuItem"><a href="#labelMails" data-label-id="<%= conf.id %>"><%= conf.name %></a></div>
       <% end %>
       <div class="menuItem"><hr /></div>
       <div class="menuItem"><a href="#labelMails" data-label-id="0">すべてはずす</a></div>

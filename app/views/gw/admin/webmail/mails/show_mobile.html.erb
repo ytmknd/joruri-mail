@@ -7,6 +7,7 @@
   <% if @item.has_attachments? %>
   <img src="/_common/themes/admin/gw/webmail/mobile/images/clip-lightblue.jpg" alt="[有]" />
   <% end %>
+  <%= render 'gw/admin/webmail/mails/shared/label', labels: @item.labels, label_confs: @label_confs %>
   <%= link_to image_tag(mail_star_image_path(@item)), star_gw_webmail_mails_path(@s_params.merge(mailbox: @mailbox.name, id: @item.uid, from: :show)) %>
 </div>
 <div class="showItem">

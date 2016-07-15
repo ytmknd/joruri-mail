@@ -1,0 +1,6 @@
+<% label_confs = label_confs.index_by(&:id) %>
+<% labels.each do |label| %>
+  <% if conf = label_confs[label] %>
+    <%= "[#{conf.name}]" %>
+  <% end %>
+<% end %>
