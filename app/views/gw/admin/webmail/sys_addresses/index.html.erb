@@ -196,7 +196,7 @@ $(function() {
     var order = grouping.sort_order.match(/▲/) ? '▼' : '▲';
     $.observable(grouping).setProperty({sort_key: key, sort_order: order});
     $.observable(grouping.users).refresh(
-      grouping.users.sort(function(a, b) {
+      grouping.users.slice().sort(function(a, b) {
         if (order == '▲') {
           return a[key] > b[key] ? 1 : -1;
         } else {

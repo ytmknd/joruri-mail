@@ -91,7 +91,7 @@
 $(function() {
   var addressView = <%= 
     g1 = address_view_model('All', 'すべて', @items)
-    g2 = address_view_model('0', '検索結果', @s_items) if @s_items.present?
+    g2 = address_view_model('0', '検索結果', @s_items) if params[:search]
     [g1, g2].compact.to_json.html_safe
   %>;
   addressView.loading = false;
@@ -113,7 +113,7 @@ $(function() {
     var order = grouping.sort_order.match(/▲/) ? '▼' : '▲';
     $.observable(grouping).setProperty({sort_key: key, sort_order: order});
     $.observable(grouping.addresses).refresh(
-      grouping.addresses.sort(function(a, b) {
+      grouping.addresses.slice().sort(function(a, b) {
         if (order == '▲') {
           return a[key] > b[key] ? 1 : -1;
         } else {
@@ -155,7 +155,7 @@ $(function() {
       return false;
     });
 
-  <% if @s_items.present? %>
+  <% if params[:search] %>
   $('#addressesAll').hide();
   $('#addresses0').show();
   <% end %>
