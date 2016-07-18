@@ -28,7 +28,7 @@
       </div>
       <%= link_to '追加', '#addCondition'%>
       <script id="conditionTemplate" type="text/x-jsrender">
-        <%= render 'form_conditions', f: f, conditions: [@item.conditions.engine.new], options: { child_index: '{{:index}}' } %>
+        <%= render 'form_conditions', f: f, conditions: [@item.conditions.first.class.new], options: { child_index: '{{:index}}' } %>
       </script>
     </td>
   </tr>
