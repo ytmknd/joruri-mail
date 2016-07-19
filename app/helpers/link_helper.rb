@@ -44,7 +44,6 @@ module LinkHelper
       disable:   '無効化',
       recognize: '承認',
       publish:   '公開',
-      close:     '非公開'
     }
     params[0] = labels[params[0]] if labels.key?(params[0])
 
