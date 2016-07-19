@@ -2,22 +2,27 @@ class Gw::WebmailAddress < ActiveRecord::Base
   include Sys::Model::Base
   include Sys::Model::Auth::Free
 
+  NO_GROUP = 'no_group'
+
+  attr_accessor :easy_entry
+
   has_many :groupings, foreign_key: :address_id, class_name: 'Gw::WebmailAddressGrouping',
     dependent: :destroy
   has_many :groups, -> { order(:name, :id) }, through: :groupings
 
-  attr_accessor :easy_entry, :escaped
+  validates :user_id, :name, presence: true
+  validates :email, presence: true, email: { only_address: true }
+  validate :validate_email_parsing
 
-  validates :user_id, :name, :email, presence: true
-  validate :validate_attributes
-
-  before_save :replace_name
   before_save :replace_kana
 
-  #CONSTANTS
-  NO_GROUP = 'no_group'
+  with_options if: :easy_entry do
+    validates :email, uniqueness: { scope: :user_id }
+    before_validation :unquote_name
+  end
 
   scope :readable, ->(user = Core.user) { where(user_id: user.id) }
+  scope :user_addresses, ->(user = Core.user) { where(user_id: user.id) }
   scope :search, ->(params) {
     rel = all
     params.each do |k, vs|
@@ -43,8 +48,8 @@ class Gw::WebmailAddress < ActiveRecord::Base
     rel
   }
 
-  def self.user_addresses
-    self.where(user_id: Core.user.id)  
+  def email_format
+    "#{Email.quote_phrase(name)} <#{email}>"
   end
 
   def editable?
@@ -70,27 +75,103 @@ class Gw::WebmailAddress < ActiveRecord::Base
 
   private
 
-  def validate_attributes
-    if easy_entry # from Ajax
-      if email.present? && name.present?
-        if self.class.where(user_id: Core.user.id, email: email).first
-          errors.add(:base, "既に登録されています。")
-        else
-          self.name  = CGI.unescapeHTML(name.to_s) if escaped
-          self.name  = name.gsub(/^"(.*)"$/, '\\1')
-          self.email = email
-        end
+  def validate_email_parsing
+    if name.present? && email.present? && errors.blank?
+      unless Email.parse(email_format)
+        errors.add(:name, "またはメールアドレスに使用できない文字が含まれています。（#{email_format}）")
       end
     end
   end
 
-  def replace_name
-    self.name = name.gsub(/["<>]/, '') if name.present?
+  def unquote_name
+    self.name = Email.unquote(name) if name.present?
   end
 
   def replace_kana
     to_kana = lambda {|str| str.to_s.tr("ぁ-ん", "ァ-ン") }
     self.kana = to_kana.call(kana) if kana.present?
     self.company_kana = to_kana.call(company_kana) if company_kana.present?
+  end
+
+  class << self
+    def to_csv(items)
+      CSV.generate(encoding: 'utf-8', force_quotes: true) do |csv|
+        csv <<  [
+          '表示名', '電子メール アドレス', '自宅の郵便番号', '自宅の都道府県', '自宅の市区町村',
+          '自宅の番地', '自宅電話番号 :', '自宅ファックス', '携帯電話 ', '個人 Web ページ',
+          '勤務先の郵便番号', '勤務先の都道府県', '勤務先の市区町村', '勤務先の番地', '勤務先電話番号',
+          '勤務先ファックス', '会社名', '役職', 'メモ'
+        ]
+        items.each do |item|
+          address = split_address(item.address)
+          company_address = split_address(item.company_address)
+          csv << [
+            item.name,               #表示名
+            item.email,              #電子メールアドレス
+            item.zip_code,           #自宅の郵便番号
+            address[0],              #自宅の都道府県
+            address[1],              #自宅の市区町村
+            address[2],              #自宅の番地
+            item.tel,                #自宅電話番号
+            item.fax,                #自宅ファックス
+            item.mobile_tel,         #携帯電話
+            item.uri,                #個人 Web ページ
+            item.company_zip_code,   #勤務先の郵便番号
+            company_address[0],      #勤務先の都道府県
+            company_address[1],      #勤務先の市区町村
+            company_address[2],      #勤務先の番地
+            item.company_tel,        #勤務先電話番号
+            item.company_fax,        #勤務先ファックス
+            item.company_name,       #会社名
+            item.official_position,  #役職
+            item.memo,               #メモ
+          ] 
+        end
+      end
+    end
+
+    def from_csv(csv)
+      items = []
+      CSV.parse(csv, headers: true) do |data|
+        item = self.new(
+          user_id:           Core.user.id,
+          name:              data['表示名'].presence || [data['姓'], data['ミドル ネーム'], data['名']].join(' '),
+          email:             data['電子メール アドレス'],
+          zip_code:          data['自宅の郵便番号'],
+          address:           [data['自宅の都道府県'], data['自宅の市区町村'], data['自宅の番地']].join,
+          tel:               data['自宅電話番号 :'],
+          fax:               data['自宅ファックス'],
+          mobile_tel:        data['携帯電話 '],
+          uri:               data['個人 Web ページ'],
+          company_zip_code:  data['勤務先の郵便番号'],
+          company_address:   [data['勤務先の都道府県'], data['勤務先の市区町村'], data['勤務先の番地']].join,
+          company_tel:       data['勤務先電話番号'],
+          company_fax:       data['勤務先ファックス'],
+          company_name:      data['会社名'],
+          official_position: data['役職'],
+          memo:              data['メモ'],
+          kana:              "",
+          company_kana:      "",
+        )
+        item.valid?
+        items << item
+      end
+      items
+    end
+
+    private
+
+    def split_address(address)
+      pref_regexp = ".+[都|道|府|県]"
+      city_regexp = ".+[市|区|町|村]"
+      addr = address.to_s
+      if (match = addr.scan(/(#{pref_regexp})(#{city_regexp})(.*)/)) && match[0] && match[0].length == 3
+        match[0]
+      elsif (match = addr.scan(/(#{city_regexp})(.*)/)) && match[0] && match[0].length == 2
+        ['', match[0][0], match[0][1]]
+      else
+        ['', '', addr]
+      end
+    end
   end
 end

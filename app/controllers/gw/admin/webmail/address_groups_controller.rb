@@ -94,6 +94,6 @@ class Gw::Admin::Webmail::AddressGroupsController < Gw::Controller::Admin::Base
     return [] if ids.blank? || !ids.is_a?(Hash)
     Gw::WebmailAddress.where(user_id: Core.user.id, id: ids.keys)
       .where.not(email: nil).where.not(email: '').order(:kana)
-      .map {|u| %Q(#{u.name} <#{u.email}>) }
+      .map(&:email_format)
   end
 end

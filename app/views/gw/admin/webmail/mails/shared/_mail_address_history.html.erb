@@ -3,16 +3,8 @@
 <ul>
 <% @addr_histories.each do |history| %>
   <li>
-    <%
-      if history.display_name
-        name = history.display_name
-        address = "#{history.display_name} <#{history.address}>"
-      else
-        name = history.address
-        address = history.address
-      end
-    %>
-    <%= link_to name, "#", title: history.address, onclick: open_mail_form(new_gw_webmail_mail_path('INBOX', to: address)) %>
+    <%= link_to history.display_name.presence || history.address, "#", title: history.email_format,
+      onclick: open_mail_form(new_gw_webmail_mail_path('INBOX', to: history.email_format)) %>
   </li>
 <% end %>
 </ul>

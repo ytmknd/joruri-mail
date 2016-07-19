@@ -3,6 +3,7 @@ class Gw::WebmailTemplate < ActiveRecord::Base
   include Sys::Model::Auth::Free
 
   validates :user_id, :name, presence: true
+  validates :to, :cc, :bcc, email_list: true
 
   after_save :uniq_default_flag, if: %Q(default_flag == 1)
 

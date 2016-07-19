@@ -21,7 +21,7 @@ module Sys::Lib::Mail
 
   def friendly_from_addr
     field = @mail.header[:from]
-    field ? field.decoded : 'unknown'
+    field ? collect_addrs(field).first : 'unknown'
   rescue => e
     "#read failed: #{e}" rescue ''
   end
@@ -366,13 +366,11 @@ module Sys::Lib::Mail
     end
   end
 
-  def collect_addrs(fields)
-    return [] unless fields
-    addrs = []
-    if fields.respond_to?(:each)
-      fields.each {|f| addrs << (f.name ? "#{decode(f.name)} <#{f.address}>" : f.address) }
+  def collect_addrs(field)
+    return [] unless field
+    field.address_list.addresses.map do |addr|
+      addr.name ? "#{Email.quote_phrase(addr.name)} <#{addr.address}>" : addr.address
     end
-    addrs
   end
 
   def uniq_addrs(addrs)

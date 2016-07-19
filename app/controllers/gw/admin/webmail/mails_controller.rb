@@ -94,7 +94,7 @@ class Gw::Admin::Webmail::MailsController < Gw::Controller::Admin::Base
 
     @mailboxes = load_mailboxes
     @quota = load_quota
-    @addr_histories = load_address_histories(@mail_address_history) if @mail_address_history != 0
+    @addr_histories = Gw::WebmailMailAddressHistory.load_user_histories(@mail_address_history) if @mail_address_history != 0
 
     @items = Gw::WebmailMail.find(:all, select: @mailbox.name, conditions: filter,
       sort: @sort, page: params[:page], limit: @limit)
@@ -149,11 +149,11 @@ class Gw::Admin::Webmail::MailsController < Gw::Controller::Admin::Base
       @html_mail_view = Gw::WebmailSetting.user_config_value(:html_mail_view, 'html')
     end
 
-    if from = @item.parse_address(@item.friendly_from_addr).first
+    if from = Email.parse(@item.friendly_from_addr)
       @from_addr = CGI.escapeHTML(from.address)
       @from_name = ::NKF::nkf('-wx --cp932', from.name).gsub(/\0/, "") if from.name rescue nil
-      @from_name = CGI.escapeHTML(@from_name || @from_addr)
-    end rescue nil
+      @from_name = @from_name || @from_addr
+    end
 
     if @item.draft? && @item.mail.header[:bcc].blank? && @item.node
       @item.mail.header[:bcc] = @item.node.bcc
@@ -189,7 +189,7 @@ class Gw::Admin::Webmail::MailsController < Gw::Controller::Admin::Base
     @pagination = @item.single_pagination(params[:id],
       select: @mailbox.name, conditions: filter, sort: @sort, sort_starred: params[:sort_starred])
 
-    @addr_histories = load_address_histories(@mail_address_history) if @mail_address_history != 0
+    @addr_histories = Gw::WebmailMailAddressHistory.load_user_histories(@mail_address_history) if @mail_address_history != 0
 
     _show @item
   end
@@ -276,9 +276,9 @@ class Gw::Admin::Webmail::MailsController < Gw::Controller::Admin::Base
 
     @item = Gw::WebmailMail.new(params[:item])
     @item.tmp_id     = Sys::File.new_tmp_id
-    @item.in_to      = @ref.friendly_to_addrs.join(',')
-    @item.in_cc      = @ref.friendly_cc_addrs.join(',')
-    @item.in_bcc     = @ref.friendly_bcc_addrs.join(',')
+    @item.in_to      = @ref.friendly_to_addrs.join(', ')
+    @item.in_cc      = @ref.friendly_cc_addrs.join(', ')
+    @item.in_bcc     = @ref.friendly_bcc_addrs.join(', ')
     @item.in_bcc     = ref_node.bcc if @item.in_bcc.blank? && ref_node 
     @item.in_subject = @ref.subject
     if params[:mail_view] == Gw::WebmailMail::FORMAT_HTML && @ref.html_mail?
@@ -495,11 +495,7 @@ class Gw::Admin::Webmail::MailsController < Gw::Controller::Admin::Base
       mail = item.prepare_mail(request)
       mail.delivery_method(:smtp, ActionMailer::Base.smtp_settings)
       sent = mail.deliver
-      item.delete_tmp_attachments
-      item.save_address_history
-      #flash[:notice] = 'メールを送信しました。'.html_safe
     rescue => e
-      #@mailboxes  = load_mailboxes
       flash.now[:error] = "メールの送信に失敗しました。（#{e}）"
       respond_to do |format|
         format.html { render :action => :new }
@@ -508,16 +504,16 @@ class Gw::Admin::Webmail::MailsController < Gw::Controller::Admin::Base
       return
     end
 
+    item.delete_tmp_attachments
+    Gw::WebmailMailAddressHistory.save_user_histories(item.in_to_addrs)
+
     yield if block_given?
 
     ## save to 'Sent'
     begin
-      imap = Core.imap
-      imap.create("Sent") unless imap.list("", "Sent") rescue nil
       item.mail = sent
-      Timeout.timeout(60) { imap.append("Sent", item.for_save.to_s, [:Seen], Time.now) }
+      Timeout.timeout(60) { Core.imap.append('Sent', item.for_save.to_s, [:Seen], Time.now) }
     rescue => e
-      #flash[:notice] += "<br />送信トレイへの保存に失敗しました。（#{e}）".html_safe
       flash[:error] = "メールは送信できましたが、送信トレイへの保存に失敗しました。（#{e}）"
     end
 
@@ -624,7 +620,7 @@ class Gw::Admin::Webmail::MailsController < Gw::Controller::Admin::Base
 
       confs = Gw::WebmailSetting.user_config_values([:mail_address_history])
       @mail_address_history = confs[:mail_address_history].blank? ? 10 : confs[:mail_address_history].to_i
-      @addr_histories = load_address_histories(@mail_address_history) if @mail_address_history != 0
+      @addr_histories = Gw::WebmailMailAddressHistory.load_user_histories(@mail_address_history) if @mail_address_history != 0
 
       return render template: 'gw/admin/webmail/mails/move'
     end
@@ -1004,7 +1000,7 @@ class Gw::Admin::Webmail::MailsController < Gw::Controller::Admin::Base
 
   def send_mdn_message(mdn_mode)
     mdn = Gw::WebmailMail.new
-    mdn.in_from ||= %Q(#{Core.current_user.name} <#{Core.current_user.email}>)
+    mdn.in_from ||= Core.current_user.email_format
     mail = mdn.prepare_mdn(@item, mdn_mode.to_s, request)
     mail.delivery_method(:smtp, ActionMailer::Base.smtp_settings)
     mail.deliver
@@ -1086,15 +1082,10 @@ class Gw::Admin::Webmail::MailsController < Gw::Controller::Admin::Base
     end
 
     if params[:s_from]
-      begin
-        from_addr = nil
-        from = Gw::WebmailMail.new.parse_address(params[:s_from]).first
-        from_addr = from.address if from
-      rescue => ex
-        from_addr = nil
+      if from_addr = Email.parse(params[:s_from]).try(:address)
+        field = (@mailbox.sent_box? || @mailbox.draft_box? ? 'TO' : 'FROM')
+        filter += [field, %Q|"#{from_addr}"|]
       end
-      field = @mailbox.sent_box? || @mailbox.draft_box? ? "TO" : "FROM"
-      filter += [field, "\"#{from_addr.gsub(/"/, '')}\""] if from_addr
     end
 
     filter.join(' ')
@@ -1133,33 +1124,6 @@ class Gw::Admin::Webmail::MailsController < Gw::Controller::Admin::Base
       end
     end
     mailto_params
-  end
-
-  def load_address_histories(history_count)
-    histories = Gw::WebmailMailAddressHistory
-      .select('count(*) as cnt, address, friendly_address')
-      .where(user_id: Core.current_user.id)
-      .group(:address)
-      .limit(history_count)
-      .order('cnt DESC, created_at DESC')
-
-    emails = histories.map(&:address)
-
-    domain = Core.config['mail_domain'] || ''
-    sys_emails = histories.select{|x| x.address =~ /[@\.]#{Regexp.escape(domain)}$/i}.map{|x| x.address}
-
-    addresses = Gw::WebmailAddress.select('email, name').where(email: emails, user_id: Core.current_user.id)
-    sys_addresses = Sys::User.select('email, name').where(email: sys_emails)
-
-    histories.each do |history|
-      if addr = addresses.find {|a| a.email == history.address }
-        history.display_name = addr.name
-      elsif addr = sys_addresses.find { |sa| sa.email == history.address }
-        history.display_name = addr.name
-      end
-    end
-
-    histories
   end
 
   def get_mailbox_uids(mailbox, uids)

@@ -1,5 +1,7 @@
-<% @addresses.each do |key, v| %>
-  <% v.each do |addr| %>
-    AddressSelector.instance.add('<%= key %>', '<%=raw escape_javascript NKF.nkf("-w", "#{addr[:name]}") %>', '<%=raw escape_javascript addr[:email] %>');
+<% @addresses.each do |key, addrs| %>
+  <% addrs.each do |addr| %>
+    AddressSelector.instance.add('<%= key %>',
+      '<%=raw escape_javascript addr.display_name %>',
+      '<%=raw escape_javascript addr.address %>');
   <% end %>
 <% end %>

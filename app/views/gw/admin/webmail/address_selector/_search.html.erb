@@ -40,7 +40,7 @@ pri_search_field_options = [['名前', 's_name_or_kana'], ['メールアドレ�
         <div id="priAddresses" class="addresses" style="display:none">
           <ul id="priAddressesRoot">
             <li class="group" id="priGroup0">
-            <% if (addresses = Gw::WebmailAddress.user_addresses).size > 0 %>
+            <% if Gw::WebmailAddress.user_addresses.size > 0 %>
               <%= link_to '+', '#', id: "priToggleItems0", class: "toggleItems toggleItemsClose",
                 onclick: "AddressSelector.instance.loadItems('pri', '0');return false" %>
             <% else %>

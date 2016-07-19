@@ -3,7 +3,7 @@ class Gw::WebmailToolBatchDeleteSetting < Sys::Model::ActiveModel
   attr_accessor :include_starred
 
   validates :mailbox_id, presence: true
-  validates :start_date, :end_date, format: { with: /\A\d{4}-\d{2}-\d{2}\z/ }, date: true
+  validates :start_date, :end_date, format: { with: /\A\d{4}-\d{2}-\d{2}\z/ }, date_time: true
 
   def batch_delete_mails(mailboxes)
     delete_num = 0

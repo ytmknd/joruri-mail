@@ -7,6 +7,7 @@ class Gw::WebmailMail
 
   attr_accessor :charset, :in_to, :in_cc, :in_bcc, :in_from, :in_sender,
     :in_subject, :in_body, :in_html_body, :in_format, :in_files, :tmp_id, :tmp_attachment_ids, :request_mdn
+  attr_reader :in_to_addrs, :in_cc_addrs, :in_bcc_addrs
 
   def initialize(attributes = nil)
     @charset = Gw::WebmailSetting.user_config_value(:mail_encoding, "ISO-2022-JP")
@@ -29,7 +30,6 @@ class Gw::WebmailMail
 
   def node
     @node ||= find_node 
-    @node
   end
 
   def find_node
@@ -59,10 +59,10 @@ class Gw::WebmailMail
   end
 
   def valid?(mode = :send)
-    @in_from_addr     = parse_address(in_from)
-    @in_to_addrs      = parse_address(in_to)
-    @in_cc_addrs      = parse_address(in_cc)
-    @in_bcc_addrs     = parse_address(in_bcc)
+    @in_from_addr     = Email.parse_list(in_from)
+    @in_to_addrs      = Email.parse_list(in_to)
+    @in_cc_addrs      = Email.parse_list(in_cc)
+    @in_bcc_addrs     = Email.parse_list(in_bcc)
     self.in_subject   = NKF.nkf('-Ww --no-best-fit-chars', in_subject) if in_subject.present?
     self.in_body      = NKF.nkf('-Ww --no-best-fit-chars', in_body) if in_body.present?
     self.in_html_body = NKF.nkf('-Ww --no-best-fit-chars', in_html_body) if in_html_body.present?
@@ -198,7 +198,7 @@ class Gw::WebmailMail
   def prepare_mdn(original, send_mode = 'manual', request = nil)
     mail = Mail.new    
     mail.charset = @charset
-    from = parse_address(in_from)[0]
+    from = Email.parse_list(in_from)[0]
     mail.from = from
     mail.to = original.disposition_notification_to_addrs[0]
     mail.subject = "開封済み : #{original.subject.gsub(/\r\n|\n/, ' ')}"
@@ -337,81 +337,13 @@ class Gw::WebmailMail
     items
   end
 
-  def parse_address(address)
-    return [] if address.class != String
-    addrs = []
-    address.split(/\n|\t|,|;|、|，/).each do |a|
-      next if (a = a.strip).blank?
-      if pos = a.rindex('<')
-        name = a.slice(0, pos).strip
-        addr = a.slice(pos, a.size).strip
-        ma = Mail::Address.new
-        (ma.address = addr) rescue next
-        ma.display_name = mime_encode(name, charset = @charset)
-        addrs << ma rescue nil
-      else
-        addrs << Mail::Address.new(a) rescue nil
-      end
-    end
-    addrs
-  end
-
-  def parse_raw_address(address)
-    return [] if address.class != String
-    addrs = []
-    address.split(/\n|\t|,|;|、|，/).each do |a|
-      if pos = a.rindex('<')
-        name = a.slice(0, pos).strip
-        addr = a.slice(pos, a.size).strip.gsub(/[<>]/, '')
-        addrs << { name: name, address: addr, friendly_address: a.strip } if addr.present?
-      else
-        addr = a.strip
-        addrs << { name: "", address: addr, friendly_address: addr } if addr.present?
-      end
-    end
-    addrs
-  end
-
   def for_save
     return nil unless @mail
     @mail.header[:bcc].include_in_headers = true
     @mail  
   end
 
-  def save_address_history
-    addrs  = parse_raw_address(in_to)
-    #addrs += parse_raw_address(in_cc)
-    #addrs += parse_raw_address(in_bcc)
-
-    addrs.each do |addr|
-      item = Gw::WebmailMailAddressHistory.new(
-        user_id: Core.current_user.id, 
-        address: addr[:address], 
-        friendly_address: addr[:friendly_address]
-      )
-      item.save
-    end
-
-    max_count = Joruri.config.application['webmail.mail_address_history_max_count']
-    curr_count = Gw::WebmailMailAddressHistory.where(user_id: Core.current_user.id).count
-
-    if curr_count > max_count
-      Gw::WebmailMailAddressHistory.connection.execute(
-        "DELETE FROM gw_webmail_mail_address_histories 
-          WHERE user_id = #{Core.current_user.id} ORDER BY created_at LIMIT #{curr_count - max_count}"
-      )
-    end
-  end
-
   private
-
-  def mime_encode(str, omit_space = true, charset = @charset)
-    mime = nil
-    mime = NKF.nkf('-WjM', str) if charset.downcase == 'iso-2022-jp'
-    mime = NKF.nkf('-WwM', str) if charset.downcase == 'utf-8'
-    mime = mime.split.join if mime && omit_space
-    mime
-  end
 
   def modify_html_body(html, charset = 'utf-8')
     html =

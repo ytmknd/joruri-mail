@@ -235,10 +235,19 @@ AddressSelector.prototype.addAddresses = function(type) {
     inputs[i].checked = false;
   }
 };
+AddressSelector.prototype.quote = function(name) {
+  if (name.match(/[()<>\[\]:;@\\,."]/)) {
+    var quoted = name.replace(/[\\"]/g, function(match) {
+      return '\\' + match;
+    });
+    return '"' + quoted + '"';
+  }
+  return name;
+};
 AddressSelector.prototype.add = function(type, name, email) {
   var address = email;
   if (name) {
-    address = name + ' <' + email + '>';
+    address = this.quote(name) + ' <' + email + '>';
   }
   var newAddress = false;
   var elm = null;

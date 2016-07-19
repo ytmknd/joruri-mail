@@ -30,8 +30,8 @@
     </tr>
     <% @success_items.each do |item| %>
       <tr <%= cycle '', 'class="cycle"' %>>
-        <td><%= item[:name] %></td>
-        <td><%= item[:email] %></td>
+        <td><%= item.name %></td>
+        <td><%= item.email %></td>
       </tr>
     <% end %>
   </table>
@@ -43,11 +43,13 @@
     <tr>
       <th style="width: 30%;">名前</th>
       <th>メールアドレス</th>
+      <th>エラー内容</th>
     </tr>
     <% @error_items.each do |item| %>
       <tr <%= cycle '', 'class="cycle"' %>>
-        <td><%= item[:name] %></td>
-        <td><%= item[:email] %></td>
+        <td><%= item.name %></td>
+        <td><%= item.email %></td>
+        <td><%= item.errors.full_messages.join(', ') %></td>
       </tr>
     <% end %>
   </table>

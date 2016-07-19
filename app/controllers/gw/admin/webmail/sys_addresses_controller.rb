@@ -80,6 +80,6 @@ class Gw::Admin::Webmail::SysAddressesController < Gw::Controller::Admin::Base
     end
     item = Sys::User.where(id: ids, state: 'enabled').with_valid_email
     item = item.where(ldap: 1) if Sys::Group.show_only_ldap_user
-    item.order(:email).map {|u| %Q(#{u.name} <#{u.email}>) }
+    item.order(:email).map(&:email_format)
   end
 end

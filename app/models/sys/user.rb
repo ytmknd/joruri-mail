@@ -130,6 +130,10 @@ class Sys::User < Sys::ManageDatabase
     "#{name}（#{account}）"
   end
 
+  def email_format
+    "#{Email.quote_phrase(name)} <#{email}>"
+  end
+
   def label(name)
     case name; when nil; end
   end

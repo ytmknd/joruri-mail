@@ -3,26 +3,21 @@ class Gw::Admin::Webmail::AddressSelectorController < Gw::Controller::Admin::Bas
   def parse_address
     mail = Gw::WebmailMail.new
     mail.charset = 'utf-8'
-    @addresses = {}
-    @addresses[:to] = extract_addresses(mail.parse_address(params[:to]))
-    @addresses[:cc] = extract_addresses(mail.parse_address(params[:cc]))
-    @addresses[:bcc] = extract_addresses(mail.parse_address(params[:bcc]))
-  end
 
-  private
+    @addresses = {
+      to: Email.parse_list(params[:to]),
+      cc: Email.parse_list(params[:cc]),
+      bcc: Email.parse_list(params[:bcc])
+    }
 
-  def extract_addresses(addrs)
-    rtn = []
-    addrs.each do |addr|
-      begin
-        rtn << {
-          name: addr.display_name,
-          email: addr.address
-        }
-      rescue
-        #例外発生時は無視
+    @addresses.each do |_, addrs|
+      addrs.each do |addr|
+        if addr.display_name
+          name = addr.display_name
+          name = '"' + name + '"' if name !~ /\"(.+)"$/
+          addr.display_name = Email.unquote(name)
+        end
       end
     end
-    rtn
   end
 end
