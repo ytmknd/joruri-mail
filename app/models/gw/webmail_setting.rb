@@ -191,10 +191,6 @@ class Gw::WebmailSetting < ActiveRecord::Base
 
   scope :readable, ->(user = Core.user) { where(user_id: user.id) }
 
-  def config
-    Config.find_by(name: name.to_sym) || Config.new(name: name.to_sym)
-  end
-
   def initialize(attributes = nil)
     super
     if name
@@ -217,6 +213,10 @@ class Gw::WebmailSetting < ActiveRecord::Base
     else
       super
     end
+  end
+
+  def config
+    @config ||= Config.find_by(name: name.to_sym) || Config.new(name: name.to_sym)
   end
 
   def display_value
@@ -285,9 +285,10 @@ class Gw::WebmailSetting < ActiveRecord::Base
     end
 
     def user_config_values(names)
-      self.where(user_id: Core.user.id, name: names).each_with_object(HashWithIndifferentAccess.new) do |setting, hash|
-        hash[setting.name] = setting.decoded_value
+      values = self.select(:name, :value).where(user_id: Core.user.id, name: names).map do |setting|
+        [setting.name, setting.decoded_value]
       end
+      Hash[*values.flatten].with_indifferent_access
     end
 
     def load_address_orders

@@ -45,7 +45,7 @@ subject_wrap = @mail_list_subject.blank? ? '' : 'autoWrap'
         <span class="overflowHidden <%= subject_wrap %>" title="<%= item.subject %>">
           <a href="<%= url_for(action: :show, id: item.uid) %>" style="float:left;">
             <span id="mail_<%= item.uid %>_labels" class="labels" style="<%= 'display:none;' if item.labels.count == 0 %>">
-              <%= render 'gw/admin/webmail/mails/shared/label', labels: item.labels, label_confs: @label_confs %>
+              <%= render 'gw/admin/webmail/mails/shared/label', labels: item.labels, label_confs: @label_confs if item.labels.present? %>
             </span>
             <span id="mail_<%= item.uid %>_label_loading" class="loading" style="display:none;"></span>
             <%= mail_text_wrap(truncate(item.subject, length: 70, escape: false).presence || ' ') %>
