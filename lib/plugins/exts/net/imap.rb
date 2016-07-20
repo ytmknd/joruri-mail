@@ -1,6 +1,22 @@
 require 'net/imap'
 module Net
   class IMAP
+    # CAPABILITY cache
+    def capabilities
+      @capabilities ||= capability
+    end
+
+    # LIST-STATUS [RFC5819]
+    def list_status(refname, mailbox, status)
+      synchronize do
+        send_command("LIST", refname, mailbox, RawData.new("RETURN (STATUS (#{status.join(' ')}))"))
+        list_responses = @responses.delete("LIST")
+        status_responses = @responses.delete("STATUS")
+        return list_responses, status_responses
+      end
+    end
+
+    # X-MAILBOX and X-REAL-UID response for virtual mailboxes
     class ResponseParser
       private
       def msg_att(n)

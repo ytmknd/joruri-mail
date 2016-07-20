@@ -3,6 +3,9 @@ class Gw::WebmailMailbox < ActiveRecord::Base
   include Sys::Model::Base
   include Sys::Model::Auth::Free
 
+  DEFAULTS = %w(Drafts Sent Archives Trash Star)
+  ORDERS = %w(INBOX Star Drafts Sent Archives virtual _etc Trash)
+
   attr_accessor :path
   attr_accessor :parent, :children
 
@@ -171,29 +174,56 @@ class Gw::WebmailMailbox < ActiveRecord::Base
       name
     end
 
-    def imap_mailboxes
-      boxes = imap_mailboxes_with_default_creation
-        .reject { |box| box.name == 'virtual' }
-        .sort { |a, b| name_to_title(a.name).downcase <=> name_to_title(b.name).downcase }
-      boxes = boxes.group_by do |box|
-        name = box.name.split('.').first.to_sym
-        name.in?([:INBOX, :Star, :Drafts, :Sent, :Archives, :virtual, :Trash]) ? name : :Etc
+    def imap_sorted_list_and_status(status_mailboxes = [:all], returns = ['MESSAGES', 'UNSEEN', 'RECENT'])
+      boxes, statuses = imap_list_status(status_mailboxes, returns)
+
+      need_boxes = DEFAULTS - boxes.map(&:name)
+      if need_boxes.size > 0
+        need_boxes.each { |box| imap.create(box) }
+        imap_sorted_list_and_status(status_mailboxes, returns)
       end
-      [:INBOX, :Star, :Drafts, :Sent, :Archives, :virtual, :Etc, :Trash].map { |name| boxes[name] }.compact.flatten
+
+      return sort_list(boxes), statuses
     end
 
-    def imap_mailboxes_with_default_creation
-      boxes = imap.list('', '*')
-      need_boxes = %w(Drafts Sent Archives Trash Star) - boxes.map(&:name)
-      return boxes if need_boxes.size == 0
+    def imap_list_status(status_mailboxes = [:all], returns = ['MESSAGES', 'UNSEEN', 'RECENT'])
+      nonexistent_or_noselect = ->(attr) {
+        attr.in?([:Nonexistent, :Noselect])
+      }
 
-      need_boxes.each { |box| imap.create(box) }
-      imap.list('', '*')
+      if imap.capabilities.include?('LIST-STATUS')
+        boxes, statuses = imap.list_status('', '*', returns)
+        boxes.reject! { |box| box.attr.any?(&nonexistent_or_noselect) }
+        statuses.reject! {|status| !status_mailboxes.include?(status.mailbox) } unless status_mailboxes.include?(:all)
+      else
+        boxes = imap.list('', '*')
+        boxes.reject! { |box| box.attr.any?(&nonexistent_or_noselect) }
+        statuses = []
+        boxes.each do |box|
+          if status_mailboxes.include?(:all) || status_mailboxes.include?(box.name)
+            status = imap.status(box.name, returns)
+            statuses << Net::IMAP::StatusData.new(box.name, status)
+          end
+        end
+      end
+      return boxes, statuses
+    end
+
+    def sort_list(boxes)
+      boxes = boxes.sort { |a, b| name_to_title(a.name).downcase <=> name_to_title(b.name).downcase }
+      boxes = boxes.group_by do |box|
+        name = box.name.split('.').first
+        name.in?(ORDERS) ? name : '_etc'
+      end
+      ORDERS.map { |name| boxes[name] }.compact.flatten
     end
 
     def load_mailbox(mailbox)
-      sync_mailboxes([mailbox])
-      self.where(user_id: Core.current_user.id, name: mailbox).first
+      unless box = self.find_by(user_id: Core.current_user.id, name: mailbox)
+        sync_mailboxes([mailbox])
+        box = self.find_by(user_id: Core.current_user.id, name: mailbox)
+      end
+      box
     end
 
     def load_mailboxes(reloads = nil)
@@ -212,26 +242,27 @@ class Gw::WebmailMailbox < ActiveRecord::Base
 
     def sync_mailboxes(reloads = [:all])
       boxes = self.where(user_id: Core.current_user.id).order(:sort_no)
-      iboxes = imap_mailboxes
+      list_boxes, statuses = imap_sorted_list_and_status(reloads)
 
-      deleted_boxes = boxes.map(&:name) - iboxes.map(&:name)
-      boxes.select { |box| box.name.in?(deleted_boxes) }.each(&:destroy)
+      status_by_name = statuses.index_by(&:mailbox)
+      box_by_name = boxes.index_by(&:name)
 
-      boxes = boxes.index_by(&:name)
-      iboxes.each_with_index do |ibox, idx|
-        if reloads.include?(:all) || reloads.include?(ibox.name)
-          status = imap.status(ibox.name, ['MESSAGES', 'UNSEEN', 'RECENT'])
-          item = boxes[ibox.name] || self.new
-          item.attributes = {
+      deleted_box_names = boxes.map(&:name) - list_boxes.map(&:name)
+      deleted_box_names.each { |name| box_by_name[name].destroy if box_by_name[name] }
+
+      list_boxes.each_with_index do |list_box, idx|
+        if status = status_by_name[list_box.name]
+          box = box_by_name[list_box.name]  || self.new
+          box.attributes = {
             user_id:  Core.current_user.id,
             sort_no:  idx + 1,
-            name:     ibox.name,
-            title:    name_to_title(ibox.name).split('.').last,
-            messages: status['MESSAGES'],
-            unseen:   status['UNSEEN'],
-            recent:   status['RECENT']
+            name:     list_box.name,
+            title:    name_to_title(list_box.name).split('.').last,
+            messages: status.attr['MESSAGES'],
+            unseen:   status.attr['UNSEEN'],
+            recent:   status.attr['RECENT']
           }
-          item.save(validate: false) if item.changed?
+          box.save(validate: false) if box.changed?
         end
       end
     end
@@ -297,7 +328,7 @@ class Gw::WebmailMailbox < ActiveRecord::Base
     end
 
     def get_quota_info
-      return unless imap.capability.include?('QUOTA')
+      return unless imap.capabilities.include?('QUOTA')
 
       res = imap.getquotaroot('INBOX')[1]
       return unless res
