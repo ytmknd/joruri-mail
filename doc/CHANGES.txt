@@ -7,7 +7,7 @@
   * HTMLメールセキュリティ強化
   * メールアドレスチェック強化
   * 携帯画面のラベル表示
-  * IMAP LIST-STATUS コマンド対応
+  * IMAP LIST-STATUS, MOVE コマンド対応
   * imap/smtp/sso設定をconfigディレクトリに移動
   * 表示文言設定をconfig/modules下に移動
   * 不要データを削除するcronタスクを追加

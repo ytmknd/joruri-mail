@@ -1,13 +1,13 @@
 # Joruri Mail
 
-Joruri Mail (Japan Originated Ruby-based RESTful and Integrated Mail) is a webmail IMAP client software.
+Joruri Mail (Japan Originated Ruby-based RESTful and Integrated Mail) is a browser-based IMAP client software.
 
 Features:
 * Simple and intuitive UI
 * User customizable settings (filters, templates, signatures, labels and more)
 * Multilingual mail decoding (especially japanese proper decoding)
 * Drag and drop features (local files, mails and mailboxes) 
-* Request for mail delivery receipt
+* Secure structure not to save emails in application
 * Optimized UI for feature phone and smartphone
 * Cooperation with [Joruri Gw](https://github.com/joruri/joruri-gw) (single sign-on, schedule registration)
 
@@ -16,6 +16,7 @@ IMAP servers with following capabilities are supported:
 * SORT: [RFC5256](https://www.ietf.org/rfc/rfc5256.txt)
 * QUOTA: [RFC2087](https://www.ietf.org/rfc/rfc2087.txt) (recommended)
 * LIST-STATUS: [RFC5819](https://www.ietf.org/rfc/rfc5819.txt) (recommended)
+* MOVE: [RFC6851](https://www.ietf.org/rfc/rfc6851.txt) (recommended)
 
 ## Demo
 

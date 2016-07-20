@@ -95,38 +95,28 @@ module Sys::Lib::Net::Imap
   end
 
   def labels
-    labeled = []
-    flags.each{|v| labeled << v.gsub(/^\$label([0-9]+)$/, '\1') if v =~ /^\$label[0-9]+$/}
-    labeled.sort
+    labels = flags.select { |flag| flag =~ /^\$label\d+$/ }
+    labels.map { |flag| flag.gsub(/^\$label/, '') }.sort
   end
 
   def destroy(complete = false)
     imap.select(mailbox)
     if mailbox !~ /^Trash(\.|$)/ && !complete
-      imap.create("Trash") unless imap.list("", "Trash")
-      response = imap.uid_copy(uid, 'Trash') rescue nil
-      return false if !response || response.name != "OK"
+      num = self.class.move_to('Trash', [uid])
+      num == 1
+    else
+      num = imap.uid_store(uid, "+FLAGS", [:Deleted]).try(:size)
+      imap.expunge
+      num == 1
     end
-    imap.uid_store(uid, "+FLAGS", [:Deleted])
-    imap.expunge
-    return true
   end
 
   def move(to_mailbox)
     return true if mailbox == to_mailbox
 
-    next_uid = imap.status(to_mailbox, ["UIDNEXT"])["UIDNEXT"]
-
     imap.select(mailbox)
-    response = imap.uid_copy(uid, to_mailbox) rescue nil
-    return false if !response || response.name != "OK"
-    imap.uid_store(uid, "+FLAGS", [:Deleted])
-    imap.expunge
-
-    imap.select(to_mailbox)
-    imap.uid_search(["UID", next_uid], "utf-8")
-
-    return true
+    num = self.class.move_to(to_mailbox, [uid])
+    num == 1
   end
 
   module ClassMethods
@@ -261,87 +251,82 @@ module Sys::Lib::Net::Imap
       return 0 if from_mailbox == to_mailbox
       return 0 if uids.size == 0
 
-      num = 0
-      imap.select(from_mailbox) rescue return 0
-      Util::Database.lock_by_name(Core.current_user.account) do
-        res = imap.uid_copy(uids, to_mailbox) rescue nil
-        return 0 if !res || res.name != "OK"
-        num = imap.uid_store(uids, "+FLAGS", [:Deleted]).size rescue 0
-      end
-      imap.expunge
-      num
+      imap.select(from_mailbox)
+      move_to(to_mailbox, uids)
     end
 
     def copy_all(from_mailbox, to_mailbox, uids)
-      return 0 if uids.size == 0
+      return 0 if uids.blank?
 
       imap.select(from_mailbox)
-      res = imap.uid_copy(uids, to_mailbox) rescue nil
-      return 0 if !res || res.name != "OK"
-
-      uids.size
+      res = imap.uid_copy(uids, to_mailbox)
+      res.name == 'OK' ? uids.size : 0
     end
 
     def delete_all(mailbox, uids, complete = false)
-      return 0 if uids.size == 0
+      return 0 if uids.blank?
 
-      num = 0
-      imap.select(mailbox) rescue return 0
-      Util::Database.lock_by_name(Core.current_user.account) do
-        if mailbox !~ /^Trash(\.|$)/ && mailbox !~ /^Star(\.|$)/ && !complete
-          unless imap.list("", "Trash")
-            res = imap.create("Trash")
-            return 0 if res.name != "OK"
-          end
-          res = imap.uid_copy(uids, 'Trash') rescue nil
-          return 0 if !res || res.name != "OK"
-        end
-        num = imap.uid_store(uids, "+FLAGS", [:Deleted]).size rescue 0
+      imap.select(mailbox)
+      if mailbox !~ /^Trash(\.|$)/ && mailbox !~ /^Star(\.|$)/ && !complete
+        move_to('Trash', uids)
+      else
+        num = imap.uid_store(uids, "+FLAGS", [:Deleted]).try(:size).to_i
+        imap.expunge
+        num
       end
-      imap.expunge
-      num
     end
 
     def seen_all(mailbox, uids)
-      imap.select(mailbox) rescue return 0
-      imap.uid_store(uids, "+FLAGS", [:Seen]).size rescue 0
+      imap.select(mailbox)
+      imap.uid_store(uids, "+FLAGS", [:Seen]).try(:size).to_i
     end
 
     def unseen_all(mailbox, uids)
-      imap.select(mailbox) rescue return 0
-      imap.uid_store(uids, "-FLAGS", [:Seen]).size rescue 0
+      imap.select(mailbox)
+      imap.uid_store(uids, "-FLAGS", [:Seen]).try(:size).to_i
     end
 
     def star_all(mailbox, uids)
-      imap.select(mailbox) rescue return 0
-      imap.uid_store(uids, "+FLAGS", [:Flagged]).size rescue 0
+      imap.select(mailbox)
+      imap.uid_store(uids, "+FLAGS", [:Flagged]).try(:size).to_i
     end
 
     def unstar_all(mailbox, uids)
-      imap.select(mailbox) rescue return 0
-      imap.uid_store(uids, "-FLAGS", [:Flagged]).size rescue 0
+      imap.select(mailbox)
+      imap.uid_store(uids, "-FLAGS", [:Flagged]).try(:size).to_i
     end
-   
+
     def include_starred_uid?(mailbox, uids)
-      imap.select(mailbox) rescue return 0
+      imap.select(mailbox)
       starred_uids = imap.uid_search(['UID', uids, 'UNDELETED', 'FLAGGED'], 'utf-8')
       uids.inject(false){|result,x| result || starred_uids.include?(x)}
     end
 
     def label_all(mailbox, uids, label_id)
-      imap.select(mailbox) rescue return 0
-      imap.uid_store(uids, "+FLAGS", ["$label#{label_id}"]).size rescue 0
+      imap.select(mailbox)
+      imap.uid_store(uids, "+FLAGS", ["$label#{label_id}"]).try(:size).to_i
     end
 
     def unlabel_all(mailbox, uids, label_id = nil)
-      labels = []
-      if label_id
-        labels << "$label#{label_id}"
+      labels = label_id ? ["$label#{label_id}"] : (1..9).map { |id| "$label#{id}" }
+      imap.select(mailbox)
+      imap.uid_store(uids, "-FLAGS", labels).try(:size).to_i
+    end
+
+    def move_to(mailbox, uids)
+      if imap.capabilities.include?('MOVE')
+        res = imap.uid_move(uids, mailbox)
+        res.name == 'OK' ? uids.size : 0
       else
-        (0..9).each{|label_id| labels << "$label#{label_id}"}
+        res = imap.uid_copy(uids, mailbox)
+        if res.name == 'OK'
+          num = imap.uid_store(uids, "+FLAGS", [:Deleted]).try(:size).to_i
+          imap.expunge
+          num
+        else
+          0
+        end
       end
-      imap.select(mailbox) rescue return 0
-      imap.uid_store(uids, "-FLAGS", labels).size rescue 0
     end
   end
 end
