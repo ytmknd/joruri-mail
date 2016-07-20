@@ -10,8 +10,6 @@ class Gw::WebmailMail
   attr_reader :in_to_addrs, :in_cc_addrs, :in_bcc_addrs
 
   def initialize(attributes = nil)
-    @charset = Gw::WebmailSetting.user_config_value(:mail_encoding, "ISO-2022-JP")
-
     if attributes.class == Gw::WebmailMailNode
       @node = attributes
       self.uid     = @node.uid
@@ -26,6 +24,10 @@ class Gw::WebmailMail
     attributes.each do |key, val|
       self.send("#{key}=", val)
     end
+  end
+
+  def charset
+    @charset ||= Gw::WebmailSetting.user_config_value(:mail_encoding, 'ISO-2022-JP')
   end
 
   def node
@@ -135,7 +137,7 @@ class Gw::WebmailMail
 
   def prepare_mail(request = nil)
     mail = Mail.new
-    mail.charset     = @charset
+    mail.charset     = charset
     mail.from        = @in_from_addr[0]
     mail.to          = @in_to_addrs.join(', ')
     mail.cc          = @in_cc_addrs.join(', ')
@@ -183,8 +185,8 @@ class Gw::WebmailMail
       end
       tmp_attachments.each do |f|
         name = f.name
-        name = NKF.nkf('-WjM', name).split.join if @charset.downcase == 'iso-2022-jp'
-        name = NKF.nkf('-WwM', name).split.join if @charset.downcase == 'utf-8'
+        name = NKF.nkf('-WjM', name).split.join if charset.downcase == 'iso-2022-jp'
+        name = NKF.nkf('-WwM', name).split.join if charset.downcase == 'utf-8'
         mail.attachments[name] = {
           content: [f.read].pack('m'),
           content_type: %Q(#{f.mime_type}; name="#{name}"),
@@ -197,7 +199,7 @@ class Gw::WebmailMail
 
   def prepare_mdn(original, send_mode = 'manual', request = nil)
     mail = Mail.new    
-    mail.charset = @charset
+    mail.charset = charset
     from = Email.parse_list(in_from)[0]
     mail.from = from
     mail.to = original.disposition_notification_to_addrs[0]
@@ -356,22 +358,22 @@ class Gw::WebmailMail
     pm.to_inline_css.sub(/charset=UTF-8/i, "charset=#{charset}")
   end
 
-  def make_html_part(body, charset = @charset)
+  def make_html_part(body)
     part = Mail::Part.new
     part.content_type %Q(text/html; charset="#{charset}")
-    body = encode_text_body(modify_html_body(body, charset), charset)
+    body = encode_text_body(modify_html_body(body, charset))
     part.body body
     part
   end
 
-  def make_text_part(body, charset = @charset)
+  def make_text_part(body)
     part = Mail::Part.new
     part.content_type %Q(text/plain; charset="#{charset}")
-    part.body encode_text_body(body, charset)
+    part.body encode_text_body(body)
     part
   end
 
-  def encode_text_body(body, charset = @charset)
+  def encode_text_body(body)
     return NKF.nkf("-Wj", body).force_encoding('us-ascii') if charset.downcase == 'iso-2022-jp'
     body
   end

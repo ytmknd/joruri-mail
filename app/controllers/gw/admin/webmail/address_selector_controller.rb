@@ -1,9 +1,6 @@
 class Gw::Admin::Webmail::AddressSelectorController < Gw::Controller::Admin::Base
 
   def parse_address
-    mail = Gw::WebmailMail.new
-    mail.charset = 'utf-8'
-
     @addresses = {
       to: Email.parse_list(params[:to]),
       cc: Email.parse_list(params[:cc]),
