@@ -1,4 +1,4 @@
-<% if maintenance = recent_maintenance() %>
+<% if maintenance = Sys::Maintenance.latest_maintenance %>
 <div id="maintenance">
 <div class="showItem">
   <font class="title">タイトル</font>

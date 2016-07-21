@@ -44,10 +44,6 @@ module Gw::MailHelper
     end
   end
 
-  def recent_maintenance
-    Sys::Maintenance.state_public.order(published_at: :desc).first
-  end
-
   def mail_form_style
     @mail_form_size = Gw::WebmailSetting.user_config_value(:mail_form_size, 'medium') unless @mail_form_size
     "resizable=yes,scrollbars=yes,width=#{mail_form_size(@mail_form_size)[:window]}"

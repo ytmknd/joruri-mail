@@ -1,4 +1,4 @@
-<% if maintenance = recent_maintenance %>
+<% if maintenance = Sys::Maintenance.latest_maintenance %>
 <div id="maintenance">
   <%= link_to "#{maintenance.title} #{l(maintenance.published_at)}", gw_webmail_mails_path('INBOX', mobile: :maintenance), class: 'maintenanceLink' %>
 </div>
