@@ -173,12 +173,10 @@ class Gw::WebmailMail
       end
     else
       if self.in_format == FORMAT_HTML
-        html_part = make_html_part(self.in_html_body) 
-        text_part = make_text_part(self.in_body)
         alt_part = Mail::Part.new
         alt_part.content_type "multipart/alternative"
-        alt_part.add_part(html_part)
-        alt_part.add_part(text_part)
+        alt_part.add_part(make_html_part(self.in_html_body))
+        alt_part.add_part(make_text_part(self.in_body))
         mail.add_part(alt_part)
       else
         mail.text_part = make_text_part(self.in_body)
@@ -245,100 +243,6 @@ class Gw::WebmailMail
     mail
   end
 
-  def self.fetch(uids, mailbox, options = {})
-    items = options[:items] || []
-    return items if uids.blank?
-
-    uids = [uids] if uids.class == Fixnum
-    use_cache = options[:use_cache] || true
-
-    imap.examine(mailbox)
-
-    ## load from db cache
-    if use_cache
-      nodes = Gw::WebmailMailNode.where(user_id: Core.current_user.id, mailbox: mailbox, uid: uids).all
-      if nodes.size > 0
-        nuids = nodes.collect {|n| n.uid }
-        flags = {}
-        msgs  = imap.uid_fetch(nuids, ["UID", "FLAGS"])
-        msgs.each { |msg| flags[msg.attr['UID']] = msg.attr['FLAGS'] } if msgs.present?
-        nodes.each do |n|
-          item = self.new(n)
-          item.flags = flags[n.uid]
-          items << item
-          uids.delete(n.uid)
-        end
-      end
-      return items if uids.blank?
-    end
-
-    ## load from imap
-    header_fields = 'HEADER.FIELDS (DATE FROM TO CC BCC SUBJECT CONTENT-TYPE CONTENT-DISPOSITION DISPOSITION-NOTIFICATION-TO)'
-    fields = ['UID', 'FLAGS', 'RFC822.SIZE', "BODY.PEEK[#{header_fields}]"]
-    fields += ['X-MAILBOX', 'X-REAL-UID'] if mailbox =~ /^virtual/
-    msgs = Array(imap.uid_fetch(uids, fields))
-    msgs.each do |msg|
-      item = self.new
-      item.parse(msg.attr["BODY[#{header_fields}]"])
-      item.uid        = msg.attr['UID'].to_i
-      item.mailbox    = mailbox
-      item.size       = msg.attr['RFC822.SIZE']
-      item.flags      = msg.attr['FLAGS']
-      item.x_mailbox  = msg.attr['X-MAILBOX']
-      item.x_real_uid = msg.attr['X-REAL-UID']
-      if !use_cache
-        items << item
-        next
-      end
-
-      ## save cache
-      node = Gw::WebmailMailNode.new do |n|
-        n.user_id          = Core.current_user.id
-        n.uid              = item.uid
-        n.mailbox          = mailbox
-        n.message_date     = item.date
-        n.from             = item.friendly_from_addr
-        n.to               = item.friendly_to_addrs.join("\n")
-        n.cc               = item.friendly_cc_addrs.join("\n")
-        n.bcc              = item.friendly_bcc_addrs.join("\n")
-        n.subject          = item.subject
-        n.has_attachments  = item.has_attachments?
-        n.size             = item.size
-        n.has_disposition_notification_to = item.has_disposition_notification_to?
-        if mailbox =~ /^virtual/
-          n.ref_mailbox = item.x_mailbox
-          n.ref_uid     = item.x_real_uid
-        end
-      end
-      node.save
-      node_item = self.new(node)
-      node_item.flags = item.flags
-      items << node_item
-    end
-
-    items
-  end
-
-  def self.fetch_for_filter(uids, mailbox, options = {})
-    items = []
-    return items if uids.blank?
-
-    uids = [uids] if uids.class == Fixnum
-    imap.examine(mailbox)
-
-    ## load imap
-    fields = ["UID", "BODY.PEEK[HEADER.FIELDS (FROM TO SUBJECT)]"]
-    msgs   = imap.uid_fetch(uids, fields)
-    msgs.each do |msg|
-      item = self.new
-      item.parse(msg.attr["BODY[HEADER.FIELDS (FROM TO SUBJECT)]"])
-      item.uid     = msg.attr["UID"].to_i
-      item.mailbox = mailbox
-      items << item
-    end if msgs.present?    
-    items
-  end
-
   def for_save
     return nil unless @mail
     @mail.header[:bcc].include_in_headers = true
@@ -361,8 +265,7 @@ class Gw::WebmailMail
   def make_html_part(body)
     part = Mail::Part.new
     part.content_type %Q(text/html; charset="#{charset}")
-    body = encode_text_body(modify_html_body(body, charset))
-    part.body body
+    part.body encode_text_body(modify_html_body(body, charset))
     part
   end
 
@@ -378,36 +281,126 @@ class Gw::WebmailMail
     body
   end
 
-  def self.encode_body_structure(struct, lv)
-    return "" if !struct || lv > 5
+  class << self
+    def fetch(uids, mailbox, use_cache: true, items: [])
+      uids = Array(uids)
+      return items if uids.blank?
 
-    msg = ""
-    if lv != 0 && struct.media_type && struct.subtype
-      msg += "Content-Type: #{struct.media_type.downcase}/#{struct.subtype.downcase}"
-      msg += ";" unless struct.param
-      msg += "\r\n"
-      if struct.param
-        struct.param.each_with_index do |(key, value), index|
-          if key == "BOUNDARY" || key == "NAME"
-            msg += " #{key.downcase}=\"#{value}\""
-          else
-            msg += " #{key.downcase}=#{value}"
+      imap.examine(mailbox)
+
+      ## load from db cache
+      if use_cache
+        nodes = Gw::WebmailMailNode.where(user_id: Core.current_user.id, mailbox: mailbox, uid: uids).all
+        node_uids = nodes.map(&:uid)
+        if nodes.size > 0
+          flags = {}
+          msgs = imap.uid_fetch(node_uids, ["UID", "FLAGS"]).to_a
+          msgs.each { |msg| flags[msg.attr['UID']] = msg.attr['FLAGS'] } if msgs.present?
+          nodes.each do |n|
+            item = self.new(n)
+            item.flags = flags[n.uid]
+            items << item
           end
-          msg += ";" if index != struct.param.size - 1
+        end
+        fetch_uids = uids - node_uids
+        return items if fetch_uids.blank?
+      else
+        fetch_uids = uids
+      end
+
+      ## load from imap
+      header_fields = 'HEADER.FIELDS (DATE FROM TO CC BCC SUBJECT CONTENT-TYPE CONTENT-DISPOSITION DISPOSITION-NOTIFICATION-TO)'
+      fields = ['UID', 'FLAGS', 'RFC822.SIZE', "BODY.PEEK[#{header_fields}]"]
+      fields += ['X-MAILBOX', 'X-REAL-UID'] if mailbox =~ /^virtual/
+      imap.uid_fetch(fetch_uids, fields).to_a.each do |msg|
+        item = self.new
+        item.parse(msg.attr["BODY[#{header_fields}]"])
+        item.uid        = msg.attr['UID'].to_i
+        item.mailbox    = mailbox
+        item.size       = msg.attr['RFC822.SIZE']
+        item.flags      = msg.attr['FLAGS']
+        item.x_mailbox  = msg.attr['X-MAILBOX']
+        item.x_real_uid = msg.attr['X-REAL-UID']
+        if !use_cache
+          items << item
+          next
+        end
+
+        ## save cache
+        node = Gw::WebmailMailNode.new do |n|
+          n.user_id          = Core.current_user.id
+          n.uid              = item.uid
+          n.mailbox          = mailbox
+          n.message_date     = item.date
+          n.from             = item.friendly_from_addr
+          n.to               = item.friendly_to_addrs.join("\n")
+          n.cc               = item.friendly_cc_addrs.join("\n")
+          n.bcc              = item.friendly_bcc_addrs.join("\n")
+          n.subject          = item.subject
+          n.has_attachments  = item.has_attachments?
+          n.size             = item.size
+          n.has_disposition_notification_to = item.has_disposition_notification_to?
+          if mailbox =~ /^virtual/
+            n.ref_mailbox = item.x_mailbox
+            n.ref_uid     = item.x_real_uid
+          end
+        end
+        node.save
+        node_item = self.new(node)
+        node_item.flags = item.flags
+        items << node_item
+      end
+
+      items
+    end
+
+    def fetch_for_filter(uids, mailbox, options = {})
+      uids = Array(uids)
+      return [] if uids.blank?
+
+      imap.examine(mailbox)
+
+      fields = ["UID", "BODY.PEEK[HEADER.FIELDS (FROM TO SUBJECT)]"]
+      imap.uid_fetch(uids, fields).to_a.map do |msg|
+        item = self.new
+        item.parse(msg.attr["BODY[HEADER.FIELDS (FROM TO SUBJECT)]"])
+        item.uid     = msg.attr["UID"].to_i
+        item.mailbox = mailbox
+        item
+      end    
+    end
+
+    def encode_body_structure(struct, lv)
+      return "" if !struct || lv > 5
+
+      msg = ""
+      if lv != 0 && struct.media_type && struct.subtype
+        msg += "Content-Type: #{struct.media_type.downcase}/#{struct.subtype.downcase}"
+        msg += ";" unless struct.param
+        msg += "\r\n"
+        if struct.param
+          struct.param.each_with_index do |(key, value), index|
+            if key == "BOUNDARY" || key == "NAME"
+              msg += " #{key.downcase}=\"#{value}\""
+            else
+              msg += " #{key.downcase}=#{value}"
+            end
+            msg += ";" if index != struct.param.size - 1
+            msg += "\r\n"
+          end
           msg += "\r\n"
         end
-        msg += "\r\n"
       end
-    end
-    if struct.multipart? && struct.parts && struct.param
-      boundary = struct.param["BOUNDARY"]
-      struct.parts.each do |part|
-        msg += "--#{boundary}\r\n"
-        msg += encode_body_structure(part, lv + 1)
-        msg += "\r\n"
+      if struct.multipart? && struct.parts && struct.param
+        boundary = struct.param["BOUNDARY"]
+        struct.parts.each do |part|
+          msg += "--#{boundary}\r\n"
+          msg += encode_body_structure(part, lv + 1)
+          msg += "\r\n"
+        end
+        msg += "--#{boundary}--\r\n\r\n"
       end
-      msg += "--#{boundary}--\r\n\r\n"
+      msg
     end
-    msg
   end
 end

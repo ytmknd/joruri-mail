@@ -17,6 +17,7 @@ IMAP servers with following capabilities are supported:
 * QUOTA: [RFC2087](https://www.ietf.org/rfc/rfc2087.txt) (recommended)
 * LIST-STATUS: [RFC5819](https://www.ietf.org/rfc/rfc5819.txt) (recommended)
 * MOVE: [RFC6851](https://www.ietf.org/rfc/rfc6851.txt) (recommended)
+* ESORT: [RFC5267](https://www.ietf.org/rfc/rfc5267.txt) (recommended)
 
 ## Demo
 

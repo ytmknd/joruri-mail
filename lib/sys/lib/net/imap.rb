@@ -105,7 +105,7 @@ module Sys::Lib::Net::Imap
       num = self.class.move_to('Trash', [uid])
       num == 1
     else
-      num = imap.uid_store(uid, "+FLAGS", [:Deleted]).try(:size)
+      num = imap.uid_store(uid, '+FLAGS', [:Deleted]).to_a.size
       imap.expunge
       num == 1
     end
@@ -124,94 +124,62 @@ module Sys::Lib::Net::Imap
       Core.imap
     end
 
-    def disconnect
-      if Core.imap
-        Core.imap.logout()
-        Core.imap.disconnect()
-      end
+    def find_uids(select: 'INBOX', conditions: ['ALL'])
+      imap.examine(select)
+      imap.uid_search(conditions, 'utf-8')
     end
 
-    def status(mailbox, attr)
-      Core.imap.status(mailbox, attr)
-    end
-
-    def find_by_uid(uid, params = {})
-      return nil if uid !~ /^\d+$/
-
-      select = params[:select] || 'INBOX'
-      filter = params[:conditions] || []
+    def find_by_uid(uid, select: 'INBOX', conditions: [])
+      uid = uid.to_i
+      return nil if uid == 0
 
       imap.examine(select)
-      imap.uid_search(["UID", uid] + filter, "utf-8").each do |id|
-        msg = imap.uid_fetch(id, ["FLAGS", "RFC822"])
-        next if msg.size == 0
-        item = self.new
-        item.parse(msg.first.attr['RFC822'])
-        item.uid     = uid.to_i
-        item.mailbox = select
-        item.flags   = msg.first.attr['FLAGS']
-        return item
-      end
-      return nil
+      search_uid = imap.uid_search(['UID', uid] + conditions, 'utf-8').first
+      return nil unless search_uid
+
+      msg = imap.uid_fetch(search_uid, ['FLAGS', 'RFC822']).to_a.first
+      return nil unless msg
+
+      item = self.new
+      item.parse(msg.attr['RFC822'])
+      item.uid     = uid
+      item.mailbox = select
+      item.flags   = msg.attr['FLAGS']
+      item
     end
 
-    def find_uid(key, params = {})
-      return find_by_uid(key, params) if key != :all ##
-
-      mailbox = params[:select] || 'INBOX'
-      filter  = params[:conditions] || []
-      sort    = params[:sort]
-      page    = params[:page]
-      limit   = params[:limit]
-
-      imap.select(mailbox)
-      sort ? imap.uid_sort(sort, filter, "utf-8") : imap.uid_search(filter, "utf-8")
-    end
-
-    def find(key, params = {})
-      return find_by_uid(key, params) if key != :all
-
-      mailbox = params[:select] || 'INBOX'
-      filter  = params[:conditions] || []
-      sort    = params[:sort]
-      page    = params[:page]
-      limit   = params[:limit]
-
-      imap.select(mailbox)
-      uids  = (sort ? imap.uid_sort(sort, filter, "utf-8") : imap.uid_search(filter, "utf-8"))
-      total = uids.size
-
-      if limit
-        page   = page.to_s =~ /^[0-9]+$/ ? page.to_i : 1
-        limit  = limit.to_s =~ /^[1-9][0-9]*$/ ? limit.to_i : 30
-        if uids.present?
-          ## v1
-          #uids   = uids.reverse
-          offset = (page - 1) * limit
-          uids   = uids.slice(offset, limit) || []
-#          ## v2
-#          lim2 = limit
-#          if (offset = total - (page - 1) * lim2 - lim2) < 0
-#            lim2   += offset
-#            offset  = 0
-#          end
-#          uids   = uids.slice(offset, lim2).reverse
+    def find(select: 'INBOX', conditions: ['ALL'], sort: nil)
+      imap.examine(select)
+      uids =
+        if sort && imap.capabilities.include?('SORT')
+          imap.uid_sort(sort, conditions, 'utf-8')
+        else
+          imap.uid_search(conditions, 'utf-8')
         end
-      end
-      uids_original = uids.dup
 
-      items = limit.nil? ? [] : Sys::Lib::Net::Imap::MailPaginate.new
-      temps = []
-      fetch(uids, mailbox).each do |item|
-        idx = uids_original.index(item.uid)
-        idx ? items[idx] = item : temps << item
-      end
-      items.unshift(*temps)
-      items.delete(nil)
+      items = fetch(uids, select)
+      items.sort { |a, b| uids.index(a.uid) <=> uids.index(b.uid) }
+    end
 
-      ## pagination
-      items.make_pagination(page: page, per_page: limit, total: total) if limit
-      return items
+    def paginate(select: 'INBOX', conditions: ['ALL'], sort: ['REVERSE', 'DATE'], page: 1, limit: 20)
+      page = (page.presence || 1).to_i
+      limit = (limit.presence || 20).to_i
+
+      uids, total_count =
+        if imap.capabilities.include?('ESORT')
+          paginate_uids_by_esort(select: select, conditions: conditions, sort: sort, page: page, limit: limit)
+        elsif imap.capabilities.include?('SORT')
+          paginate_uids_by_sort(select: select, conditions: conditions, sort: sort, page: page, limit: limit)
+        else
+          paginate_uids_by_search(select: select, conditions: conditions, page: page, limit: limit)
+        end
+
+      items = fetch(uids, select)
+      items.sort! { |a, b| uids.index(a.uid) <=> uids.index(b.uid) }
+
+      WillPaginate::Collection.create(page, limit, total_count) do |pager|
+        pager.replace(items)
+      end
     end
 
     def fetch(uids, mailbox, options = {})
@@ -270,7 +238,7 @@ module Sys::Lib::Net::Imap
       if mailbox !~ /^Trash(\.|$)/ && mailbox !~ /^Star(\.|$)/ && !complete
         move_to('Trash', uids)
       else
-        num = imap.uid_store(uids, "+FLAGS", [:Deleted]).try(:size).to_i
+        num = imap.uid_store(uids, "+FLAGS", [:Deleted]).to_a.size
         imap.expunge
         num
       end
@@ -278,22 +246,22 @@ module Sys::Lib::Net::Imap
 
     def seen_all(mailbox, uids)
       imap.select(mailbox)
-      imap.uid_store(uids, "+FLAGS", [:Seen]).try(:size).to_i
+      imap.uid_store(uids, "+FLAGS", [:Seen]).to_a.size
     end
 
     def unseen_all(mailbox, uids)
       imap.select(mailbox)
-      imap.uid_store(uids, "-FLAGS", [:Seen]).try(:size).to_i
+      imap.uid_store(uids, "-FLAGS", [:Seen]).to_a.size
     end
 
     def star_all(mailbox, uids)
       imap.select(mailbox)
-      imap.uid_store(uids, "+FLAGS", [:Flagged]).try(:size).to_i
+      imap.uid_store(uids, "+FLAGS", [:Flagged]).to_a.size
     end
 
     def unstar_all(mailbox, uids)
       imap.select(mailbox)
-      imap.uid_store(uids, "-FLAGS", [:Flagged]).try(:size).to_i
+      imap.uid_store(uids, "-FLAGS", [:Flagged]).to_a.size
     end
 
     def include_starred_uid?(mailbox, uids)
@@ -304,28 +272,69 @@ module Sys::Lib::Net::Imap
 
     def label_all(mailbox, uids, label_id)
       imap.select(mailbox)
-      imap.uid_store(uids, "+FLAGS", ["$label#{label_id}"]).try(:size).to_i
+      imap.uid_store(uids, "+FLAGS", ["$label#{label_id}"]).to_a.size
     end
 
     def unlabel_all(mailbox, uids, label_id = nil)
       labels = label_id ? ["$label#{label_id}"] : (1..9).map { |id| "$label#{id}" }
       imap.select(mailbox)
-      imap.uid_store(uids, "-FLAGS", labels).try(:size).to_i
+      imap.uid_store(uids, "-FLAGS", labels).to_a.size
     end
 
     def move_to(mailbox, uids)
       if imap.capabilities.include?('MOVE')
-        res = imap.uid_move(uids, mailbox)
-        res.name == 'OK' ? uids.size : 0
+        move_to_by_move(mailbox, uids)
       else
-        res = imap.uid_copy(uids, mailbox)
-        if res.name == 'OK'
-          num = imap.uid_store(uids, "+FLAGS", [:Deleted]).try(:size).to_i
-          imap.expunge
-          num
-        else
-          0
-        end
+        move_to_by_copy(mailbox, uids)
+      end
+    end
+
+    private
+
+    def paginate_uids_by_esort(select:, conditions:, sort:, page:, limit:)
+      st = limit * (page - 1) + 1
+      ed = limit * page
+
+      imap.examine(select)
+      ret = imap.uid_esort(sort, conditions, 'utf-8', "PARTIAL #{st}:#{ed} COUNT")
+      if st > ret['COUNT']
+        return [], ret['COUNT']
+      else
+        return ret['PARTIAL'], ret['COUNT']
+      end
+    end
+
+    def paginate_uids_by_sort(select:, conditions:, sort:, page:, limit:)
+      offset = [0, page - 1].max * limit
+
+      imap.examine(select)
+      total_uids = imap.uid_sort(sort, conditions, 'utf-8')
+      page_uids = total_uids.slice(offset, limit).to_a
+      return page_uids, total_uids.size
+    end
+
+    def paginate_uids_by_search(select:, conditions:, page:, limit:)
+      offset = [0, page - 1].max * limit
+
+      imap.examine(select)
+      total_uids = imap.uid_search(conditions, 'utf-8')
+      page_uids = total_uids.slice(offset, limit).to_a
+      return page_uids, total_uids.size
+    end
+
+    def move_to_by_move(mailbox, uids)
+      res = imap.uid_move(uids, mailbox)
+      res.name == 'OK' ? uids.size : 0
+    end
+
+    def move_to_by_copy(mailbox, uids)
+      res = imap.uid_copy(uids, mailbox)
+      if res.name == 'OK'
+        num = imap.uid_store(uids, "+FLAGS", [:Deleted]).to_a.size
+        imap.expunge
+        num
+      else
+        0
       end
     end
   end

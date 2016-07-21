@@ -68,7 +68,7 @@ class Gw::WebmailFilter < ActiveRecord::Base
     applied_uids = []
     idx = 0
     params[:filter] = self
-    uids = Gw::WebmailMail.find_uid(:all, select: params[:select], conditions: params[:conditions])
+    uids = Gw::WebmailMail.find_uids(select: params[:select], conditions: params[:conditions])
     while (filtered = uids[idx, NUMBER_OF_FILTERED_UIDS]) && filtered.size > 0
       params[:timeout].check 
       applied_uids += self.class.apply_uids(filtered, params)
@@ -100,7 +100,7 @@ class Gw::WebmailFilter < ActiveRecord::Base
       if filters.size > 0
         idx = 0
         timeout = Sys::Lib::Timeout.new(60)
-        uids = Gw::WebmailMail.find_uid(:all, select: 'INBOX', conditions: imap_cnd)
+        uids = Gw::WebmailMail.find_uids(select: 'INBOX', conditions: imap_cnd)
         while (filtered = uids[idx, NUMBER_OF_FILTERED_UIDS]) && filtered.size > 0
           timeout.check
           apply_uids(filtered, select: 'INBOX', filters: filters)

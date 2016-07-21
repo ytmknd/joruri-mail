@@ -16,6 +16,41 @@ module Net
       end
     end
 
+    # ESORT [RFC5267]
+    def uid_esort(sort_keys, search_keys, charset, returns)
+      if search_keys.instance_of?(String)
+        search_keys = [RawData.new(search_keys)]
+      else
+        normalize_searching_criteria(search_keys)
+      end
+      normalize_searching_criteria(search_keys)
+
+      synchronize do
+        send_command("UID SORT", Net::IMAP::RawData.new("RETURN (#{returns})"), sort_keys, charset, *search_keys)
+        response = @responses.delete("ESEARCH")[0]
+        matches = response.scan(/UID\s+(?=.*(COUNT)\s(\d+))?(?=.*(MIN)\s(\d+))?(?=.*(MAX)\s(\d+))?(?=.*(PARTIAL)\s\(([^)]+)\))?/).first.compact
+        if matches.size > 0
+          hash = Hash[*matches]
+          hash['PARTIAL'] = extend_partial_uids(hash['PARTIAL'].split(' ')[1]) if hash['PARTIAL']
+          ['COUNT', 'MIN', 'MAX'].each { |key| hash[key] = hash[key].to_i if hash[key] }  
+          return hash
+        else
+          raise ResponseParseError, format("invalid esearch result - %s", response)
+        end
+      end
+    end
+
+    def extend_partial_uids(str)
+      return [] if str.nil? || str.empty?
+      uids = []
+      str.split(',').each do |value|
+        next if value == 'NIL'
+        array = value.split(':').map(&:to_i)
+        uids += Range.new(array[0], array[-1]).to_a
+      end
+      uids
+    end
+
     # X-MAILBOX and X-REAL-UID response for virtual mailboxes
     class ResponseParser
       private

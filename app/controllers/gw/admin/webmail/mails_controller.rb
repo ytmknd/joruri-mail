@@ -96,14 +96,14 @@ class Gw::Admin::Webmail::MailsController < Gw::Controller::Admin::Base
     @quota = load_quota
     @addr_histories = Gw::WebmailMailAddressHistory.load_user_histories(@mail_address_history) if @mail_address_history != 0
 
-    @items = Gw::WebmailMail.find(:all, select: @mailbox.name, conditions: filter,
+    @items = Gw::WebmailMail.paginate(select: @mailbox.name, conditions: filter,
       sort: @sort, page: params[:page], limit: @limit)
 
     if params[:sort_starred] == '1'
-      @starred_items = Gw::WebmailMail.find(:all, select: @mailbox.name, conditions: filter + " FLAGGED",
+      @starred_items = Gw::WebmailMail.paginate(select: @mailbox.name, conditions: filter + " FLAGGED",
         sort: @sort, page: params[:page], limit: @limit)
       if @starred_items.size < @limit
-        @unstarred_items = Gw::WebmailMail.find(:all, select: @mailbox.name, conditions: filter + " UNFLAGGED",
+        @unstarred_items = Gw::WebmailMail.paginate(select: @mailbox.name, conditions: filter + " UNFLAGGED",
           sort: @sort, page: params[:page], limit: @limit - @starred_items.size)
       else
         @unstarred_items = []
@@ -537,14 +537,6 @@ class Gw::Admin::Webmail::MailsController < Gw::Controller::Admin::Base
       Timeout.timeout(30) { imap.append("Drafts", item.for_save.to_s, flags, Time.now) }
       item.delete_tmp_attachments
 
-      ## save bcc
-      #if mail = Gw::WebmailMail.find(:all, select: "Drafts", conditions: ["UID", next_uid]).first
-      #  if mail.node.subject == item.in_subject && item.in_bcc.present?
-      #    mail.node.bcc = item.in_bcc
-      #    mail.node.save
-      #  end
-      #end
-
       yield if block_given?
     rescue => error
       #@mailboxes  = load_mailboxes
@@ -615,7 +607,7 @@ class Gw::Admin::Webmail::MailsController < Gw::Controller::Admin::Base
     cond = ["UID", uids] + @filter
 
     if !params[:item][:mailbox]
-      @items = Gw::WebmailMail.find(:all, select: @mailbox.name, conditions: cond)
+      @items = Gw::WebmailMail.find(select: @mailbox.name, conditions: cond, sort: @sort)
       @mailboxes = load_mailboxes
 
       confs = Gw::WebmailSetting.user_config_values([:mail_address_history])
@@ -655,7 +647,7 @@ class Gw::Admin::Webmail::MailsController < Gw::Controller::Admin::Base
     reset_starred_mails(changed_mailbox_uids) if include_starred_uid
 
 #    num = 0
-#    Gw::WebmailMail.find(:all, :select => @mailbox.name, :conditions => cond).each do |item|
+#    Gw::WebmailMail.find(select: @mailbox.name, conditions: cond).each do |item|
 #      num += 1 if item.move(params[:item][:mailbox])
 #    end
 
@@ -689,7 +681,7 @@ class Gw::Admin::Webmail::MailsController < Gw::Controller::Admin::Base
     reset_mailboxes
     reset_starred_mails(changed_mailbox_uids) if include_starred_uid
 
-#    Gw::WebmailMail.find(:all, :select => @mailbox.name, :conditions => cond).each do |item|
+#    Gw::WebmailMail.find(select: @mailbox.name, conditions: cond).each do |item|
 #      num += 1 if item.destroy
 #    end
 
@@ -812,7 +804,7 @@ class Gw::Admin::Webmail::MailsController < Gw::Controller::Admin::Base
 
     uids = params[:item][:ids].collect{|k, v| k.to_s =~ /^[0-9]+$/ ? k.to_i : nil }
     cond = ["UID", uids] + @filter
-    items = Gw::WebmailMail.find(:all, select: @mailbox.name, conditions: cond, sort: @sort)
+    items = Gw::WebmailMail.find(select: @mailbox.name, conditions: cond, sort: @sort)
 
     if items.count == 0
       return redirect_to url_for(action: :index, page: params[:page])

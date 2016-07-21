@@ -270,21 +270,22 @@ class Gw::WebmailMailbox < ActiveRecord::Base
     def load_starred_mails(mailbox_uids = nil)
       return if mailbox_uids == nil
 
-      imap.create('Star') unless imap.list('', 'Star')
-
-      imap.select('Star') rescue return
+      imap.select('Star')
       unstarred_uids = imap.uid_search(['UNDELETED', 'UNFLAGGED'])
-      num = imap.uid_store(unstarred_uids, '+FLAGS', [:Deleted]).size rescue 0
-      imap.expunge if num > 0
-
-      Gw::WebmailMailNode.delete_nodes('Star', unstarred_uids) if num > 0
+      if unstarred_uids.present?
+        num = imap.uid_store(unstarred_uids, '+FLAGS', [:Deleted]).to_a.size
+        if num > 0
+          imap.expunge
+          Gw::WebmailMailNode.delete_nodes('Star', unstarred_uids)
+        end
+      end
 
       mailbox_uids.each do |mailbox, uids|
         next if mailbox =~ /^(Star)$/
 
         current_starred_uids = Gw::WebmailMailNode.find_ref_nodes(mailbox).map{|x| x.ref_uid}
 
-        imap.select(mailbox) rescue next
+        imap.select(mailbox)
         if uids.empty? || uids.include?('all') ||  uids.include?(:all)
           new_starred_uids = imap.uid_search(['UNDELETED', 'FLAGGED'])
         else
@@ -293,15 +294,15 @@ class Gw::WebmailMailbox < ActiveRecord::Base
         new_starred_uids = new_starred_uids.select{|x| !current_starred_uids.include?(x) }
         next if new_starred_uids.blank?
 
-        imap.select('Star') rescue next
+        imap.select('Star')
         next_uid = imap.status('Star', ['UIDNEXT'])['UIDNEXT']
 
-        imap.select(mailbox) rescue next
-        res = imap.uid_copy(new_starred_uids, 'Star') rescue next
+        imap.select(mailbox)
+        res = imap.uid_copy(new_starred_uids, 'Star')
         next if res.name != 'OK'
 
         # create cache
-        items = Gw::WebmailMail.fetch((next_uid..next_uid+new_starred_uids.size).to_a, 'Star', use_cache: false)
+        items = Gw::WebmailMail.fetch((next_uid..next_uid+new_starred_uids.size).to_a, 'Star')
         items.each_with_index do |item, i|
           if item.node
             item.node.ref_mailbox = mailbox
