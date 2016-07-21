@@ -278,6 +278,34 @@ class Gw::WebmailMail
   end
 
   class << self
+    def check_server_status
+      { imap: check_imap_status, smtp: check_smtp_status }
+    end
+
+    def check_imap_status
+      begin
+        imap_settings = Joruri.config.imap_settings
+        imap_sock = TCPSocket.open(imap_settings[:address], imap_settings[:port])
+        true
+      rescue => e
+        false
+      ensure
+        imap_sock.close if imap_sock
+      end
+    end
+
+    def check_smtp_status
+      smtp_settings = ActionMailer::Base.smtp_settings
+      begin
+        smtp_sock = TCPSocket.open(smtp_settings[:address], smtp_settings[:port])
+        true
+      rescue => e
+        false
+      ensure
+        smtp_sock.close if smtp_sock
+      end
+    end
+
     def fetch(uids, mailbox, use_cache: true, items: [])
       uids = Array(uids)
       return items if uids.blank?

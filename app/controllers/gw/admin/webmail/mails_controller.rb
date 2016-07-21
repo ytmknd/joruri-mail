@@ -860,24 +860,11 @@ class Gw::Admin::Webmail::MailsController < Gw::Controller::Admin::Base
   end
 
   def status
-    imap_settings = Joruri.config.imap_settings
-    smtp_settings = ActionMailer::Base.smtp_settings
-
-    begin
-      imap_sock = TCPSocket.open(imap_settings[:address], imap_settings[:port])
-      smtp_sock = TCPSocket.open(smtp_settings[:address], smtp_settings[:port])
-      if imap_sock && smtp_sock
-        if protect_against_forgery? && params[:authenticity_token] != form_authenticity_param
-          status = "NG TokenError"
-        else
-          status = "OK"
-        end
-      end
-    rescue => e
-      status = "NG"
-    ensure
-      imap_sock.close if imap_sock
-      smtp_sock.close if smtp_sock
+    if protect_against_forgery? && params[:authenticity_token] != form_authenticity_param
+      status = 'NG TokenError'
+    else
+      states = Gw::WebmailMail.check_server_status
+      status = states[:imap] && states[:smtp] ? 'OK' : 'NG'
     end
 
     _show status: status
