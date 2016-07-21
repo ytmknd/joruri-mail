@@ -115,7 +115,9 @@ class Gw::Admin::Webmail::MailsController < Gw::Controller::Admin::Base
       msg = @item.rfc822 || @item.mail.to_s
       return send_data(msg, filename: filename, type: 'message/rfc822', disposition: 'attachment')
     elsif params[:download] == 'all'
-      return download_all_attachments
+      filename = sprintf("%07d_%s.zip", @item.uid, Util::File.filesystemize(@item.subject, length: 100))
+      zipdata = @item.zip_attachments(encoding: request.user_agent =~ /Windows/ ? 'shift_jis' : 'utf-8')
+      return send_data(zipdata, type: 'application/zip', filename: filename, disposition: 'attachment')
     elsif params[:download]
       return download_attachment(params[:download])
     elsif params[:header]
@@ -181,29 +183,6 @@ class Gw::Admin::Webmail::MailsController < Gw::Controller::Admin::Base
     @addr_histories = Gw::WebmailMailAddressHistory.load_user_histories(@mail_address_history) if @mail_address_history != 0
 
     _show @item
-  end
-
-  def download_all_attachments
-    zipdata = ""
-    Zip::Archive.open_buffer(zipdata, Zip::CREATE, Zip::NO_COMPRESSION) do |ar|
-      filenames = @item.attachments.map {|at| at.name}
-      filenames = unique_filenames(filenames)
-      @item.attachments.each_with_index do |at, i|
-        begin
-          filename = filenames[i]
-          filename = filename.gsub(/[\/\<\>\|:;"\?\*\\]/, '_')
-          filename = filename.encode(Encoding::Windows_31J, invalid: :replace, undef: :replace, replace: '_') if request.user_agent =~ /Windows/
-          ar.add_buffer(filename, at.body)
-        rescue Zip::Error => e
-          # e
-        end
-      end
-    end
-
-    subject = @item.subject.gsub(/[\/\<\>\|:;"\?\*\\\r\n]/, '_')
-    subject = subject.match(/^.{100}/).to_s if subject.length > 100
-    filename = sprintf("%07d_%s.zip", @item.uid, subject)
-    send_data(zipdata, type: 'application/zip', filename: filename, disposition: 'attachment')
   end
 
   def download_attachment(no)
@@ -1066,23 +1045,6 @@ class Gw::Admin::Webmail::MailsController < Gw::Controller::Admin::Base
     end
 
     filter
-  end
-
-  def unique_filenames(filenames)
-    uniques = []
-    filenames.each do |filename|
-      if uniques.include?(filename)
-        for n in 1..255
-          seq_filename = "#{File.basename(filename, ".*")}_#{n}#{File.extname(filename)}"
-          unless uniques.include?(seq_filename)
-            filename = seq_filename
-            break
-          end
-        end
-      end
-      uniques << filename
-    end
-    return uniques
   end
 
   def parse_mailto(uri)

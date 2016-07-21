@@ -223,6 +223,28 @@ class Gw::WebmailMail
     @mail  
   end
 
+  def zip_attachments(encoding: 'utf-8')
+    filenames = attachments.map do |at|
+      name = at.name
+      name = name.encode(Encoding::Windows_31J, invalid: :replace, undef: :replace, replace: '_') if encoding == 'shift_jis'
+      name = Util::File.filesystemize(name, byte_size: 250, keep_ext: true)
+      name
+    end
+    filenames = Util::File.unique_filenames(filenames)
+
+    data = ""
+    Zip::Archive.open_buffer(data, Zip::CREATE, Zip::NO_COMPRESSION) do |ar|
+      attachments.each_with_index do |at, i|
+        begin
+          ar.add_buffer(filenames[i], at.body)
+        rescue Zip::Error => e
+          # e
+        end
+      end
+    end
+    data
+  end
+
   private
 
   def modify_html_body(html, charset = 'utf-8')
