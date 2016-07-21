@@ -124,9 +124,13 @@ module Sys::Lib::Net::Imap
       Core.imap
     end
 
-    def find_uids(select: 'INBOX', conditions: ['ALL'])
+    def find_uids(select: 'INBOX', conditions: ['ALL'], sort: nil)
       imap.examine(select)
-      imap.uid_search(conditions, 'utf-8')
+      if sort && imap.capabilities.include?('SORT')
+        imap.uid_sort(sort, conditions, 'utf-8')
+      else
+        imap.uid_search(conditions, 'utf-8')
+      end
     end
 
     def find_by_uid(uid, select: 'INBOX', conditions: [])
@@ -161,17 +165,15 @@ module Sys::Lib::Net::Imap
       items.sort { |a, b| uids.index(a.uid) <=> uids.index(b.uid) }
     end
 
-    def paginate(select: 'INBOX', conditions: ['ALL'], sort: ['REVERSE', 'DATE'], page: 1, limit: 20)
+    def paginate(select: 'INBOX', conditions: ['ALL'], sort: ['REVERSE', 'DATE'], page: 1, limit: 20, starred: nil)
       page = (page.presence || 1).to_i
       limit = (limit.presence || 20).to_i
 
       uids, total_count =
-        if imap.capabilities.include?('ESORT')
+        if imap.capabilities.include?('ESORT') && starred != '1'
           paginate_uids_by_esort(select: select, conditions: conditions, sort: sort, page: page, limit: limit)
-        elsif imap.capabilities.include?('SORT')
-          paginate_uids_by_sort(select: select, conditions: conditions, sort: sort, page: page, limit: limit)
         else
-          paginate_uids_by_search(select: select, conditions: conditions, page: page, limit: limit)
+          paginate_uids_by_sort(select: select, conditions: conditions, sort: sort, page: page, limit: limit, starred: starred)
         end
 
       items = fetch(uids, select)
@@ -180,6 +182,24 @@ module Sys::Lib::Net::Imap
       WillPaginate::Collection.create(page, limit, total_count) do |pager|
         pager.replace(items)
       end
+    end
+
+    def paginate_uid(uid, select: 'INBOX', conditions: ['ALL'], sort: ['REVERSE', 'DATE'], starred: nil)
+      uids =
+        if starred == '1'
+          find_uids(select: select, conditions: conditions + ['FLAGGED'], sort: sort) +
+          find_uids(select: select, conditions: conditions + ['UNFLAGGED'], sort: sort)
+        else
+          find_uids(select: select, conditions: conditions, sort: sort)
+        end
+
+      idx = uids.index(uid.to_i)
+      attr = {}
+      attr[:total_items]  = uids.size
+      attr[:prev_uid]     = uids[idx - 1] if idx && idx > 0
+      attr[:next_uid]     = uids[idx + 1] if idx &&idx < uids.size - 1
+      attr[:current_page] = idx + 1 if idx
+      attr
     end
 
     def fetch(uids, mailbox, options = {})
@@ -304,20 +324,17 @@ module Sys::Lib::Net::Imap
       end
     end
 
-    def paginate_uids_by_sort(select:, conditions:, sort:, page:, limit:)
+    def paginate_uids_by_sort(select:, conditions:, sort:, page:, limit:, starred:)
       offset = [0, page - 1].max * limit
 
       imap.examine(select)
-      total_uids = imap.uid_sort(sort, conditions, 'utf-8')
-      page_uids = total_uids.slice(offset, limit).to_a
-      return page_uids, total_uids.size
-    end
-
-    def paginate_uids_by_search(select:, conditions:, page:, limit:)
-      offset = [0, page - 1].max * limit
-
-      imap.examine(select)
-      total_uids = imap.uid_search(conditions, 'utf-8')
+      total_uids =
+        if starred == '1'
+          find_uids(select: select, conditions: conditions + ['FLAGGED'], sort: sort) +
+          find_uids(select: select, conditions: conditions + ['UNFLAGGED'], sort: sort)
+        else
+          find_uids(select: select, conditions: conditions, sort: sort)
+        end
       page_uids = total_uids.slice(offset, limit).to_a
       return page_uids, total_uids.size
     end

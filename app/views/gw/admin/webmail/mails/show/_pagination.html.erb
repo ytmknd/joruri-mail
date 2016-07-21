@@ -1,0 +1,5 @@
+<div class="simplePagination">
+<%= link_to '≪前', url_for(@s_params.merge(mailbox: @mailbox.name, id: @pagination[:prev_uid], new_window: @new_window)) if @pagination[:prev_uid] %>
+<span><b><%= @pagination[:current_page] %></b>/<b><%= @pagination[:total_items] %></b></span>
+<%= link_to '次≫', url_for(@s_params.merge(mailbox: @mailbox.name, id: @pagination[:next_uid], new_window: @new_window)) if @pagination[:next_uid] %>
+</div>

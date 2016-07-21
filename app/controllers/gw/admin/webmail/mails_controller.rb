@@ -97,18 +97,7 @@ class Gw::Admin::Webmail::MailsController < Gw::Controller::Admin::Base
     @addr_histories = Gw::WebmailMailAddressHistory.load_user_histories(@mail_address_history) if @mail_address_history != 0
 
     @items = Gw::WebmailMail.paginate(select: @mailbox.name, conditions: filter,
-      sort: @sort, page: params[:page], limit: @limit)
-
-    if params[:sort_starred] == '1'
-      @starred_items = Gw::WebmailMail.paginate(select: @mailbox.name, conditions: filter + " FLAGGED",
-        sort: @sort, page: params[:page], limit: @limit)
-      if @starred_items.size < @limit
-        @unstarred_items = Gw::WebmailMail.paginate(select: @mailbox.name, conditions: filter + " UNFLAGGED",
-          sort: @sort, page: params[:page], limit: @limit - @starred_items.size)
-      else
-        @unstarred_items = []
-      end
-    end
+      sort: @sort, page: params[:page], limit: @limit, starred: params[:sort_starred])
   end
 
   def show
@@ -186,8 +175,8 @@ class Gw::Admin::Webmail::MailsController < Gw::Controller::Admin::Base
 
     @s_params = make_search_params
 
-    @pagination = @item.single_pagination(params[:id],
-      select: @mailbox.name, conditions: filter, sort: @sort, sort_starred: params[:sort_starred])
+    @pagination = Gw::WebmailMail.paginate_uid(params[:id],
+      select: @mailbox.name, conditions: filter, sort: @sort, starred: params[:sort_starred])
 
     @addr_histories = Gw::WebmailMailAddressHistory.load_user_histories(@mail_address_history) if @mail_address_history != 0
 
@@ -1050,37 +1039,33 @@ class Gw::Admin::Webmail::MailsController < Gw::Controller::Admin::Base
 
     if params[:search]
       if params[:s_status].present?
-        filter += ["UNSEEN"] if params[:s_status] == "unseen"
-        filter += ["SEEN"]   if params[:s_status] == "seen"
+        filter += ['UNSEEN'] if params[:s_status] == 'unseen'
+        filter += ['SEEN']   if params[:s_status] == 'seen'
       end
-      if params[:s_column].present? && params[:s_keyword].strip.present?
-        #keywords = []
-        params[:s_keyword].gsub("　", " ").split(/ +/).each do |w|
-          next if w.strip.blank?
-          #keywords << %Q(#{params[:s_column]} "#{w.gsub('"', '\\"')}")
-          filter << "#{params[:s_column].upcase}"
-          filter << "\"#{w.gsub('"', '\\"')}\""
+      if params[:s_column].present? && params[:s_keyword].present?
+        params[:s_keyword].split(/[ 　]+/).each do |w|
+          next if w.blank?
+          filter += [params[:s_column].upcase, Net::IMAP::QuotedString.new(w)] 
         end
-        #filter = filter.join(' ') + " " + keywords.join(' ')
       end
       if params[:s_label].present?
-        filter += ["KEYWORD $label#{params[:s_label]}"]
+        filter += ['KEYWORD', "$label#{params[:s_label]}"]
       end
     end
 
     if params[:s_flag].present?
-      filter += ["FLAGGED"]   if params[:s_flag] == "starred"
-      filter += ["UNFLAGGED"] if params[:s_flag] == "unstarred"
+      filter += ['FLAGGED']   if params[:s_flag] == 'starred'
+      filter += ['UNFLAGGED'] if params[:s_flag] == 'unstarred'
     end
 
     if params[:s_from]
       if from_addr = Email.parse(params[:s_from]).try(:address)
         field = (@mailbox.sent_box? || @mailbox.draft_box? ? 'TO' : 'FROM')
-        filter += [field, %Q|"#{from_addr}"|]
+        filter += [field, Net::IMAP::QuotedString.new(from_addr)]
       end
     end
 
-    filter.join(' ')
+    filter
   end
 
   def unique_filenames(filenames)

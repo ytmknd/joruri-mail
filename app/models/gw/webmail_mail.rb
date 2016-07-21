@@ -109,32 +109,6 @@ class Gw::WebmailMail
     return errors.size == 0
   end
 
-  def single_pagination(id, params = {})
-    attr     = {}
-    last_uid = nil
-
-    imap.select(params[:select])
-    if params[:sort_starred] == '1' 
-      uids  = imap.uid_sort(params[:sort], params[:conditions] + " FLAGGED", "utf-8")
-      uids += imap.uid_sort(params[:sort], params[:conditions] + " UNFLAGGED", "utf-8")
-    else
-      uids = imap.uid_sort(params[:sort], params[:conditions], "utf-8")
-    end
-    uids.each_with_index do |uid, idx|
-      if uid == id.to_i
-        attr[:total_items]  = uids.size
-        attr[:prev_uid]     = last_uid
-        attr[:next_uid]     = uids[idx + 1]
-        attr[:current_page] = idx + 1
-        attr[:prev_page]    = idx if idx > 0
-        attr[:next_page]    = idx + 2 if attr[:next_uid]
-        break
-      end
-      last_uid = uid
-    end
-    attr
-  end
-
   def prepare_mail(request = nil)
     mail = Mail.new
     mail.charset     = charset

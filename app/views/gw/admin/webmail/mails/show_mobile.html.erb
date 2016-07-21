@@ -120,13 +120,7 @@
 </div>
 
 <div class="pagination">
-  <% if @pagination[:prev_uid] %>
-    <%= link_to '<<*前へ', url_for(@s_params.merge(mailbox: @mailbox.name, id: @pagination[:prev_uid])), accesskey: '*' %>
-  <% else %>&lt;&lt;*前へ<% end %>
-  <span class="separator"> | </span> 
-  <% if @pagination[:next_uid] %>
-    <%= link_to '次へ#>>', url_for(@s_params.merge(mailbox: @mailbox.name, id: @pagination[:next_uid])), accesskey: '#' %>
-  <% else %>次へ#&gt;&gt;<% end %>
+  <%= render 'gw/admin/webmail/mails/show/pagination' %>
   <br />
 </div>
 

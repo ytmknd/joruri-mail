@@ -4,11 +4,7 @@
 
 <%= form_for :item, url: mobile_manage_gw_webmail_mails_path(@mailbox.name), html: { id: 'mailsForm', name: 'mailsForm', class: 'mailsForm' } do |f| %>
 <input type="hidden" name="page" value="<%= params[:page] %>" />
-<% if params[:sort_starred] == '1' %>
-  <%= render 'gw/admin/webmail/mails/index/mail_list', items: @starred_items + @unstarred_items %>
-<% else %>
-  <%= render 'gw/admin/webmail/mails/index/mail_list', items: @items %>
-<% end %>
+<%= render 'gw/admin/webmail/mails/index/mail_list', items: @items %>
 
 <%= paginate @items, inner_window: 0, outer_window: 0, previous_label: '前', next_label: '次' %>
 

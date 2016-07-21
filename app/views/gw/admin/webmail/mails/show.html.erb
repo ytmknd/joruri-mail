@@ -73,11 +73,7 @@
       <div class="menuItem"><%= link_to 'すべてはずす', '#labelMail', data: { label_id: 0 } %></div>
     </div>
   </div>
-  <div class="simplePagination">
-    <%= link_to '≪前', url_for(@s_params.merge(mailbox: @mailbox.name, id: @pagination[:prev_uid], new_window: @new_window)) if @pagination[:prev_uid]
-    %><span><b><%= @pagination[:current_page] %></b>/<b><%= @pagination[:total_items] %></b></span
-    ><%= link_to '次≫', url_for(@s_params.merge(mailbox: @mailbox.name, id: @pagination[:next_uid], new_window: @new_window)) if @pagination[:next_uid] %>
-  </div>
+  <%= render 'gw/admin/webmail/mails/show/pagination' %>
 </div>
 
 <%= form_for :item, url: move_gw_webmail_mails_path(@mailbox.name), html: { id: 'mailForm' } do |f| %>
@@ -273,11 +269,7 @@
     <%= link_to '≪一覧へ戻る', gw_webmail_mails_path(@s_params.merge(mailbox: @mailbox.name)), class: 'index' %>
     <% end %>
   </div>
-  <div class="simplePagination">
-    <%= link_to '≪前', url_for(@s_params.merge(id: @pagination[:prev_uid], new_window: @new_window)) if @pagination[:prev_uid]
-    %><span><b><%= @pagination[:current_page] %></b>/<b><%= @pagination[:total_items] %></b></span
-    ><%= link_to '次≫', url_for(@s_params.merge(id: @pagination[:next_uid], new_window: @new_window)) if @pagination[:next_uid] %>
-  </div>
+  <%= render 'gw/admin/webmail/mails/show/pagination' %>
 </div>
 
 <!-- end #webmailContainer --></td></table>

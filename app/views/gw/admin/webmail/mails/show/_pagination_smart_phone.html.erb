@@ -1,0 +1,9 @@
+<span class="previous">
+  <%= link_to '前へ', url_for(@s_params.merge(mailbox: @mailbox.name, id: @pagination[:prev_uid])) if @pagination[:prev_uid] %>
+</span>
+<span class="index">
+  <%= link_to '一覧へ戻る', url_for(@s_params.merge(action: :index, mailbox: @mailbox.name, mobile: :list)), class: 'back' %>
+</span>
+<span class="next">
+  <%= link_to '次へ', url_for(@s_params.merge(mailbox: @mailbox.name, id: @pagination[:next_uid])) if @pagination[:next_uid] %>
+</span>
