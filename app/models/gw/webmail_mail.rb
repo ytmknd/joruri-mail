@@ -10,11 +10,13 @@ class Gw::WebmailMail
   attr_reader :in_to_addrs, :in_cc_addrs, :in_bcc_addrs
 
   def initialize(attributes = nil)
-    if attributes.class == Gw::WebmailMailNode
+    if attributes.is_a?(Gw::WebmailMailNode)
       @node = attributes
       self.uid     = @node.uid
       self.mailbox = @node.mailbox
       self.extend Gw::Model::Ext::WebmailNode
+    elsif attributes.is_a?(String)
+      parse(attributes)
     elsif attributes
       self.attributes = attributes
     end
@@ -35,7 +37,7 @@ class Gw::WebmailMail
   end
 
   def find_node
-    Gw::WebmailMailNode.where(user_id: Core.current_user.id, uid: uid, mailbox: mailbox).first
+    Gw::WebmailMailNode.where(user_id: Core.current_user.id, mailbox: mailbox, uid: uid).first
   end
 
   def request_mdn?
@@ -306,73 +308,76 @@ class Gw::WebmailMail
       end
     end
 
-    def fetch(uids, mailbox, use_cache: true, items: [])
+    def load_from_cache(mailbox, uids)
+      nodes = Gw::WebmailMailNode.where(user_id: Core.current_user.id, mailbox: mailbox, uid: uids).all
+      return [] if nodes.blank?
+
+      msgs = imap.uid_fetch(nodes.map(&:uid), ['UID', 'FLAGS']).to_a
+      msgs = msgs.map { |msg| [msg.attr['UID'], msg.attr['FLAGS']] }.flatten(1)
+      flags = Hash[*msgs]
+      nodes.map do |node|
+        item = self.new(node)
+        item.flags = flags[node.uid]
+        item
+      end
+    end
+
+    def fetch(uids, mailbox, use_cache: true)
       uids = Array(uids)
-      return items if uids.blank?
+      return [] if uids.blank?
 
       imap.examine(mailbox)
 
-      ## load from db cache
+      # load from db cache
       if use_cache
-        nodes = Gw::WebmailMailNode.where(user_id: Core.current_user.id, mailbox: mailbox, uid: uids).all
-        node_uids = nodes.map(&:uid)
-        if nodes.size > 0
-          flags = {}
-          msgs = imap.uid_fetch(node_uids, ["UID", "FLAGS"]).to_a
-          msgs.each { |msg| flags[msg.attr['UID']] = msg.attr['FLAGS'] } if msgs.present?
-          nodes.each do |n|
-            item = self.new(n)
-            item.flags = flags[n.uid]
-            items << item
-          end
-        end
-        fetch_uids = uids - node_uids
+        items = load_from_cache(mailbox, uids)
+        fetch_uids = uids - items.map(&:uid)
         return items if fetch_uids.blank?
       else
+        items = []
         fetch_uids = uids
       end
 
-      ## load from imap
+      # load from imap
       header_fields = 'HEADER.FIELDS (DATE FROM TO CC BCC SUBJECT CONTENT-TYPE CONTENT-DISPOSITION DISPOSITION-NOTIFICATION-TO)'
       fields = ['UID', 'FLAGS', 'RFC822.SIZE', "BODY.PEEK[#{header_fields}]"]
       fields += ['X-MAILBOX', 'X-REAL-UID'] if mailbox =~ /^virtual/
       imap.uid_fetch(fetch_uids, fields).to_a.each do |msg|
-        item = self.new
-        item.parse(msg.attr["BODY[#{header_fields}]"])
+        item = self.new(msg.attr["BODY[#{header_fields}]"])
         item.uid        = msg.attr['UID'].to_i
         item.mailbox    = mailbox
         item.size       = msg.attr['RFC822.SIZE']
         item.flags      = msg.attr['FLAGS']
         item.x_mailbox  = msg.attr['X-MAILBOX']
         item.x_real_uid = msg.attr['X-REAL-UID']
-        if !use_cache
-          items << item
-          next
-        end
+        items << item
+      end
 
-        ## save cache
-        node = Gw::WebmailMailNode.new do |n|
-          n.user_id          = Core.current_user.id
-          n.uid              = item.uid
-          n.mailbox          = mailbox
-          n.message_date     = item.date
-          n.from             = item.friendly_from_addr
-          n.to               = item.friendly_to_addrs.join("\n")
-          n.cc               = item.friendly_cc_addrs.join("\n")
-          n.bcc              = item.friendly_bcc_addrs.join("\n")
-          n.subject          = item.subject
-          n.has_attachments  = item.has_attachments?
-          n.size             = item.size
-          n.has_disposition_notification_to = item.has_disposition_notification_to?
-          if mailbox =~ /^virtual/
-            n.ref_mailbox = item.x_mailbox
-            n.ref_uid     = item.x_real_uid
+      # save db cache
+      if use_cache
+        nodes = []
+        items.each do |item|
+          next unless fetch_uids.include?(item.uid)
+          nodes << Gw::WebmailMailNode.new do |n|
+            n.user_id          = Core.current_user.id
+            n.uid              = item.uid
+            n.mailbox          = mailbox
+            n.message_date     = item.date
+            n.from             = item.friendly_from_addr
+            n.to               = item.friendly_to_addrs.join("\n")
+            n.cc               = item.friendly_cc_addrs.join("\n")
+            n.bcc              = item.friendly_bcc_addrs.join("\n")
+            n.subject          = item.subject
+            n.has_attachments  = item.has_attachments?
+            n.size             = item.size
+            n.has_disposition_notification_to = item.has_disposition_notification_to?
+            if mailbox =~ /^virtual/
+              n.ref_mailbox = item.x_mailbox
+              n.ref_uid     = item.x_real_uid
+            end
           end
         end
-        node.save
-        node_item = self.new(node)
-        node_item.flags = item.flags
-        items << node_item
+        Gw::WebmailMailNode.import(nodes)
       end
 
       items
@@ -384,15 +389,16 @@ class Gw::WebmailMail
 
       imap.examine(mailbox)
 
-      fields = ["UID", "BODY.PEEK[HEADER.FIELDS (FROM TO SUBJECT)]"]
+      fields = ['UID', 'BODY.PEEK[HEADER.FIELDS (FROM TO SUBJECT)]']
       imap.uid_fetch(uids, fields).to_a.map do |msg|
-        item = self.new
-        item.parse(msg.attr["BODY[HEADER.FIELDS (FROM TO SUBJECT)]"])
-        item.uid     = msg.attr["UID"].to_i
+        item = self.new(msg.attr['BODY[HEADER.FIELDS (FROM TO SUBJECT)]'])
+        item.uid     = msg.attr['UID'].to_i
         item.mailbox = mailbox
         item
-      end    
+      end
     end
+
+    private
 
     def encode_body_structure(struct, lv)
       return "" if !struct || lv > 5

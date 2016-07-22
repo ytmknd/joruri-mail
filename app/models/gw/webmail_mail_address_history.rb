@@ -28,7 +28,7 @@ class Gw::WebmailMailAddressHistory < ActiveRecord::Base
 
     def delete_exceeded_histories
       max_count = Joruri.config.application['webmail.mail_address_history_max_count']
-      curr_count = Gw::WebmailMailAddressHistory.where(user_id: Core.current_user.id).count
+      curr_count = self.where(user_id: Core.current_user.id).count
 
       if curr_count > max_count
         self.connection.execute(

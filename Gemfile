@@ -32,6 +32,7 @@ gem 'sdoc', '~> 0.4.0', group: :doc
 # Use Capistrano for deployment
 # gem 'capistrano-rails', group: :development
 
+gem 'activerecord-import', '~> 0.15.0'
 gem 'activerecord-session_store', '~> 1.0.0'
 gem 'active_hash', '~> 1.4.1'
 gem 'ruby-ldap', '~> 0.9.11'

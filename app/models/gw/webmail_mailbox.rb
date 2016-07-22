@@ -303,12 +303,12 @@ class Gw::WebmailMailbox < ActiveRecord::Base
         next if res.name != 'OK'
 
         # create cache
-        items = Gw::WebmailMail.fetch((next_uid..next_uid+new_starred_uids.size).to_a, 'Star')
+        items = Gw::WebmailMail.fetch((next_uid...next_uid+new_starred_uids.size).to_a, 'Star')
         items.each_with_index do |item, i|
-          if item.node
-            item.node.ref_mailbox = mailbox
-            item.node.ref_uid = new_starred_uids[i]
-            item.node.save
+          if node = item.node
+            node.ref_mailbox = mailbox
+            node.ref_uid = new_starred_uids[i]
+            node.save
           end
         end
       end
