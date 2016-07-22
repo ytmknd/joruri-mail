@@ -2,7 +2,7 @@ class Gw::WebmailFilter < ActiveRecord::Base
   include Sys::Model::Base
   include Sys::Model::Auth::Free
 
-  NUMBER_OF_FILTERED_UIDS = 256
+  NUMBER_OF_SLICE_UIDS = 256
 
   belongs_to_active_hash :status, foreign_key: :state, class_name: 'Sys::Base::Status'
 
@@ -12,6 +12,7 @@ class Gw::WebmailFilter < ActiveRecord::Base
   accepts_nested_attributes_for :conditions, allow_destroy: true
 
   attr_accessor :include_sub
+  attr_accessor :matched_uids
   attr_reader :applied
 
   validates :user_id, :state, :name, :conditions_chain, :action, presence: true
@@ -63,29 +64,28 @@ class Gw::WebmailFilter < ActiveRecord::Base
     nil
   end
 
-  def apply(params)
+  def apply(select:, conditions:, timeout:)
     @applied = 0
     applied_uids = []
-    idx = 0
-    params[:filter] = self
 
-    uids = Gw::WebmailMail.find_uids(select: params[:select], conditions: params[:conditions])
-    while (filtered = uids[idx, NUMBER_OF_FILTERED_UIDS]) && filtered.size > 0
-      params[:timeout].check 
-      applied_uids += self.class.apply_uids(filtered, params)
-      idx += filtered.size
+    uids = Gw::WebmailMail.find_uids(select: select, conditions: conditions)
+    uids.each_slice(NUMBER_OF_SLICE_UIDS) do |slice_uids|
+      timeout.check 
+      applied_uids += self.class.apply_uids([self], select, slice_uids, delete_cache: true)
+      @applied = applied_uids.size
     end
-    @applied = applied_uids.size
-
-    starred_uids = Gw::WebmailMailNode.find_ref_nodes(params[:select], applied_uids).map{|x| x.uid}
-    Core.imap.select('Star')
-    num = Core.imap.uid_store(starred_uids, "+FLAGS", [:Deleted]).size rescue 0
-    Core.imap.expunge
-    if num > 0
-      Gw::WebmailMailNode.delete_nodes('Star', starred_uids)
+  ensure
+    if applied_uids.size > 0
+      starred_uids = Gw::WebmailMailNode.find_ref_nodes(select, applied_uids).map{|x| x.uid}
+      if starred_uids.present?
+        Core.imap.select('Star')
+        num = Core.imap.uid_store(starred_uids, '+FLAGS', [:Deleted]).to_a.size
+        Core.imap.expunge
+        if num > 0
+          Gw::WebmailMailNode.delete_nodes('Star', starred_uids)
+        end
+      end
     end
-    
-    return @applied
   end
 
   def delete_exceeded_conditions
@@ -95,6 +95,33 @@ class Gw::WebmailFilter < ActiveRecord::Base
       ids = conditions.limit(curr_count - max_count).pluck(:id)
       conditions.where(id: ids).delete_all
     end
+  end
+
+  def match?(mail_data = {})
+    case conditions_chain
+    when 'or'
+      conditions.any? { |c| c.match?(mail_data) }
+    when 'and'
+      conditions.all? { |c| c.match?(mail_data) }
+    else
+      false
+    end
+  end
+
+  def perform_action(target_mailbox, uids, options = {})
+    case action
+    when 'move'
+      Gw::WebmailMail.move_all(target_mailbox, mailbox, uids)
+    when 'delete'
+      Gw::WebmailMail.delete_all(target_mailbox, uids)
+    else
+      uids = []
+    end
+    Gw::WebmailMailNode.delete_nodes(target_mailbox, uids) if options[:delete_cache]
+    uids
+  rescue => e
+    error_log(e)
+    []
   end
 
   private
@@ -130,124 +157,63 @@ class Gw::WebmailFilter < ActiveRecord::Base
 
   class << self
     def apply_recents
-      filters = Gw::WebmailFilter.where(user_id: Core.current_user.id, state: 'enabled').order(:sort_no, :id)
       st = Gw::WebmailSetting.where(user_id: Core.current_user.id, name: 'last_uid').first_or_initialize
-
       next_uid = Core.imap.status('INBOX', ['UIDNEXT'])['UIDNEXT']
       last_uid = (next_uid > 1) ? next_uid - 1 : 1
       imap_cnd = st.value.blank? ? ['RECENT'] : ['UID', "#{st.value.to_i + 1}:#{last_uid}", 'UNSEEN']
 
-      error = nil
-      begin
-        if filters.size > 0
-          idx = 0
-          timeout = Sys::Lib::Timeout.new(60)
-          uids = Gw::WebmailMail.find_uids(select: 'INBOX', conditions: imap_cnd)
-          while (filtered = uids[idx, NUMBER_OF_FILTERED_UIDS]) && filtered.size > 0
+      filters = self.where(user_id: Core.current_user.id, state: 'enabled')
+        .order(:sort_no, :id)
+        .preload(:conditions)
+
+      if filters.size > 0
+        timeout = Sys::Lib::Timeout.new(60)
+        uids = Gw::WebmailMail.find_uids(select: 'INBOX', conditions: imap_cnd)
+        begin
+          uids.each_slice(NUMBER_OF_SLICE_UIDS) do |slice_uids|
             timeout.check
-            apply_uids(filtered, select: 'INBOX', filters: filters)
-            idx += filtered.size
-          end        
-        end
-      rescue Sys::Lib::Timeout::Error => ex
-        error = ex
+            apply_uids(filters, 'INBOX', slice_uids)
+          end
+        rescue Sys::Lib::Timeout::Error => e
+          error = e
+        end        
       end
 
-      if last_uid.to_s != st.value.to_s
+      if last_uid != st.value.to_i
         st.value = last_uid
         st.save(validate: false)
-        return last_uid, true, error
+        recent = true
+      else
+        recent = false
       end
-      return last_uid, false, error
+      return last_uid, recent, error
     end
 
-    def apply_uids(uids, params)
-      applied_uids = []
-      matched = []
-      mails = Gw::WebmailMail.fetch_for_filter(uids, params[:select])
-
-      filters = params[:filters] || [params[:filter]]
-      filters.each { |filter| matched << { filter: filter, uids: [] } }
-
+    def apply_uids(filters, mailbox, uids, options = {})
+      filters = Array(filters)
+      mails = Gw::WebmailMail.fetch_for_filter(uids, mailbox)
       mails.each do |mail|
+        mail_data = {
+          subject: [mail.subject],
+          from: [mail.friendly_from_addr],
+          to: mail.friendly_to_addrs
+        }
         filters.each_with_index do |filter, idx|
-          filter_matched = false
-          begin
-            filter.conditions.each do |c|
-              values = []
-              case c.column
-              when 'subject'
-                values += [mail.subject]
-              when 'from'
-                values += [mail.friendly_from_addr]
-              when 'to'
-                values += mail.friendly_to_addrs
-              end
-
-              syntax = nil
-              case c.inclusion
-              when '<'
-                syntax = '!( value =~ /#{Regexp.quote(c.value)}/i ).nil?'
-              when '!<'
-                syntax = '( value =~ /#{Regexp.quote(c.value)}/i ).nil?'
-              when '=='
-                syntax = '( value == c.value )'
-              when '=~'
-                syntax = '( value.to_s =~ /#{c.value}/im )'
-              end
-              next unless syntax
-
-              m = false
-              values.each do |value|
-                if eval(syntax)
-                  m = true
-                  break
-                end
-              end
-
-              if m == true
-                filter_matched = true
-                break if filter.conditions_chain == 'or'
-              else
-                filter_matched = false
-                break if filter.conditions_chain == 'and'
-              end
-            end #/filter.conditions
-
-            if filter_matched
-              matched[idx][:uids] << mail.uid
-              break
-            end
-          rescue => e
-            error_log(e)  
+          if filter.match?(mail_data)
+            filter.matched_uids ||= []
+            filter.matched_uids << mail.uid
+            break
           end
-        end #/filters
-      end #/mails
-
-      matched.each do |m|
-        next unless m[:uids].size > 0
-        begin
-          Gw::WebmailMailNode.delete_nodes(params[:select], m[:uids]) if params[:delete_cache]
-          case m[:filter].action
-          when "move"
-            if Gw::WebmailMail.move_all(params[:select], m[:filter].mailbox, m[:uids])
-              applied_uids += m[:uids]
-            end
-          when "delete"
-            if Gw::WebmailMail.delete_all(params[:select], m[:uids])
-              applied_uids += m[:uids]
-            end
-          end
-        rescue => e
-          error_log(e)
-          next
         end
       end
 
-      return applied_uids
-    rescue => e
-      error_log(e)
-      return []
+      applied_uids = []
+      filters.each do |filter|
+        if filter.matched_uids.present?
+          applied_uids += filter.perform_action(mailbox, filter.matched_uids, options)
+        end
+      end
+      applied_uids
     end
 
     def load_spam_filter

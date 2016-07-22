@@ -65,33 +65,30 @@ class Gw::Admin::Webmail::FiltersController < Gw::Controller::Admin::Base
     @f_item.errors.add :base, "適用する条件が見つかりません。" if @item.conditions.size == 0
     return false if @f_item.errors.size > 0
 
-    @applied = 0
-    message  = ""
-    changed_mailbox_uids = {}
-
     begin
       timeout = Sys::Lib::Timeout.new(60)
-      if @f_item.include_sub == "1"
-        mailboxes = Core.imap.list('', "#{@f_item.mailbox}.*") || []
-        mailboxes.each do |mailbox|
-          apply_mailbox(mailbox.name, timeout)
-        end
+      mailboxes = [@f_item.mailbox]
+      mailboxes += Core.imap.list('', "#{@f_item.mailbox}.*").to_a.map(&:name) if @f_item.include_sub == '1'
+      mailboxes.each do |mailbox|
+        @item.apply(select: mailbox, conditions: ['NOT', 'DELETED'], timeout: timeout)
       end
-      apply_mailbox(@f_item.mailbox, timeout)
-    rescue Sys::Lib::Timeout::Error => ex 
-      message = "タイムアウトしました。（#{ex.second}秒）<br />"
+    rescue Sys::Lib::Timeout::Error => e
+      flash[:error] = "フィルタ処理がタイムアウトしました。（#{e.second}秒）"
     end
 
-    case @item.action
-    when 'move'
-      changed_mailbox_uids[@item.mailbox] = [:all]
-    when 'delete'
-      changed_mailbox_uids['Trash'] = [:all]
+    if @item.applied > 0
+      changed_mailbox_uids = {}
+      case @item.action
+      when 'move'
+        changed_mailbox_uids[@item.mailbox] = [:all]
+      when 'delete'
+        changed_mailbox_uids['Trash'] = [:all]
+      end
+      Gw::WebmailMailbox.load_starred_mails(changed_mailbox_uids)
+      Gw::WebmailMailbox.load_mailboxes(:all)
     end
 
-    Gw::WebmailMailbox.load_starred_mails(changed_mailbox_uids) if @applied > 0
-    Gw::WebmailMailbox.load_mailboxes(:all) if @applied > 0
-    flash[:notice] = "#{message}#{@applied}件のメールに適用しました。".html_safe
+    flash[:notice] = "#{@item.applied}件のメールに適用しました。"
     redirect_to action: :apply
   end
 
@@ -104,13 +101,5 @@ class Gw::Admin::Webmail::FiltersController < Gw::Controller::Admin::Base
 
   def f_item_params
     params.require(:f_item).permit(:mailbox, :include_sub)
-  end
-
-  def apply_mailbox(mailbox, timeout)
-    begin
-      @item.apply(select: mailbox, conditions: ["NOT", "DELETED"], delete_cache: true, timeout: timeout)
-    ensure
-      @applied += @item.applied
-    end
   end
 end

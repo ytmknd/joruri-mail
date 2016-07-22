@@ -34,4 +34,21 @@ class Gw::WebmailFilterCondition < ActiveRecord::Base
     inclusion_options.each {|c| return c[0] if inclusion == c[1].to_s }
     nil
   end
+
+  def match?(data = {})
+    texts = data[column.to_sym].to_a
+
+    case inclusion
+    when '<'
+      texts.any? { |text| !( text =~ /#{Regexp.quote(value)}/i ).nil? }
+    when '!<'
+      texts.any? { |text| ( text =~ /#{Regexp.quote(value)}/i ).nil? }
+    when '=='
+      texts.any? { |text| text == value }
+    when '=~'
+      texts.any? { |text| ( text =~ /#{value}/im ) }
+    else
+      false
+    end
+  end
 end
