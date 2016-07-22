@@ -229,8 +229,9 @@ class Gw::WebmailMailbox < ActiveRecord::Base
     def load_mailboxes(reloads = nil)
       reloads = Array(reloads)
       boxes = self.where(user_id: Core.current_user.id).order(:sort_no)
+      reloads << :all if boxes.size < DEFAULTS.size
 
-      if reloads.present? || boxes.size == 0
+      if reloads.present?
         Util::Database.lock_by_name(Core.current_user.account) do
           sync_mailboxes(reloads)
         end
@@ -252,7 +253,7 @@ class Gw::WebmailMailbox < ActiveRecord::Base
 
       list_boxes.each_with_index do |list_box, idx|
         if status = status_by_name[list_box.name]
-          box = box_by_name[list_box.name]  || self.new
+          box = box_by_name[list_box.name] || self.new
           box.attributes = {
             user_id:  Core.current_user.id,
             sort_no:  idx + 1,
