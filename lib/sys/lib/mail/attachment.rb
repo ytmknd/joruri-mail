@@ -88,9 +88,8 @@ class Sys::Lib::Mail::Attachment
   rescue
     return 'iconFile'
   end
-  
+
   def eng_unit
-    return @eng_unit if @eng_unit
-    @eng_unit = "#{Util::Unit.eng_unit(@size, "Bytes")}"
+    @eng_unit ||= ApplicationController.helpers.number_to_human_size(@size, precision: 0, locale: :en)
   end
 end
