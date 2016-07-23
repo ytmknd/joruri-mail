@@ -1,6 +1,5 @@
 class Gw::Admin::Webmail::SettingsController < Gw::Controller::Admin::Base
   include Sys::Controller::Scaffold::Base
-  helper Gw::MailHelper
   layout "admin/gw/webmail"
 
   def pre_dispatch

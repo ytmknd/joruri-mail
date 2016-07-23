@@ -1,7 +1,6 @@
 class Gw::Admin::Webmail::SysAddressesController < Gw::Controller::Admin::Base
   include Sys::Controller::Scaffold::Base
   include Gw::Controller::Admin::Mobile::Address
-  helper Gw::MailHelper
   layout "admin/gw/webmail"
 
   def pre_dispatch

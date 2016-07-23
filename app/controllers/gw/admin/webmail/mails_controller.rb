@@ -1,7 +1,6 @@
 class Gw::Admin::Webmail::MailsController < Gw::Controller::Admin::Base
   include Sys::Controller::Scaffold::Base
   include Gw::Controller::Admin::Mobile::Mail
-  helper Gw::MailHelper
   layout :select_layout
 
   def pre_dispatch
