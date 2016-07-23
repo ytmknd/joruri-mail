@@ -3,14 +3,12 @@ class Gw::Admin::Webmail::MailsController < Gw::Controller::Admin::Base
   include Gw::Controller::Admin::Mobile::Mail
   layout :select_layout
 
+  before_action :check_user_email, only: [:new, :create, :edit, :update, :answer, :forward, :resend] 
+  before_action :handle_mailto_scheme, if: -> { params[:src] == 'mailto' }
+
   def pre_dispatch
     return if params[:action] == 'status'
     return redirect_to action: 'index' if params[:reset]
-
-    if params[:src] == 'mailto'
-      mailto = parse_mailto(params[:uri])
-      return redirect_to new_gw_webmail_mail_path(mailto.merge(mailbox: 'INBOX'))
-    end
 
     @limit = 20
     @new_window = params[:new_window].blank? ? nil : 1
@@ -63,8 +61,6 @@ class Gw::Admin::Webmail::MailsController < Gw::Controller::Admin::Base
   end
 
   def index
-    return empty if params[:do] == 'empty'
-
     confs = Gw::WebmailSetting.user_config_values(
       [:mails_per_page, :mail_form_size, :mail_list_from_address, :mail_list_subject, :mail_open_window, :mail_address_history])
     @limit = confs[:mails_per_page].blank? ? 20 : confs[:mails_per_page].to_i if !request.mobile?
@@ -145,10 +141,6 @@ class Gw::Admin::Webmail::MailsController < Gw::Controller::Admin::Base
       @from_name = @from_name || @from_addr
     end
 
-    if @item.draft? && @item.mail.header[:bcc].blank? && @item.node
-      @item.mail.header[:bcc] = @item.node.bcc
-    end
-
     if @item.unseen?
       mailbox_uids = get_mailbox_uids(@mailbox, @item.uid)
       mailbox_uids.each do |mailbox, uids|
@@ -202,7 +194,6 @@ class Gw::Admin::Webmail::MailsController < Gw::Controller::Admin::Base
   end
 
   def new
-    return false if no_email?
     @form_action = "create"
 
     @item = Gw::WebmailMail.new
@@ -233,7 +224,6 @@ class Gw::Admin::Webmail::MailsController < Gw::Controller::Admin::Base
   end
 
   def edit
-    return false if no_email?
     @form_action = "update"
     @form_method = "patch"
 
@@ -246,7 +236,6 @@ class Gw::Admin::Webmail::MailsController < Gw::Controller::Admin::Base
     @item.in_to      = @ref.friendly_to_addrs.join(', ')
     @item.in_cc      = @ref.friendly_cc_addrs.join(', ')
     @item.in_bcc     = @ref.friendly_bcc_addrs.join(', ')
-    @item.in_bcc     = ref_node.bcc if @item.in_bcc.blank? && ref_node 
     @item.in_subject = @ref.subject
     if params[:mail_view] == Gw::WebmailMail::FORMAT_HTML && @ref.html_mail?
       @item.in_html_body = @ref.html_body_for_edit
@@ -266,8 +255,6 @@ class Gw::Admin::Webmail::MailsController < Gw::Controller::Admin::Base
   end
 
   def answer
-    return false if no_email?
-
     @form_action = "answer"
 
     @ref = Gw::WebmailMail.find_by_uid(params[:id], select: @mailbox.name, conditions: @filter)
@@ -313,8 +300,6 @@ class Gw::Admin::Webmail::MailsController < Gw::Controller::Admin::Base
   end
 
   def forward
-    return false if no_email?
-
     @form_action = "forward"
 
     @ref = Gw::WebmailMail.find_by_uid(params[:id], select: @mailbox.name, conditions: @filter)
@@ -356,8 +341,6 @@ class Gw::Admin::Webmail::MailsController < Gw::Controller::Admin::Base
   end
 
   def resend
-    return false if no_email?
-
     @form_action = "create"
 
     @ref = Gw::WebmailMail.find_by_uid(params[:id], select: @mailbox.name, conditions: @filter)
@@ -386,7 +369,6 @@ class Gw::Admin::Webmail::MailsController < Gw::Controller::Admin::Base
   end
 
   def create
-    return false if no_email?
     @form_action = "create"
 
     if params[:id] && params[:id] != '0' 
@@ -409,7 +391,6 @@ class Gw::Admin::Webmail::MailsController < Gw::Controller::Admin::Base
   end
 
   def update
-    return false if no_email?
     @form_action = "update"
     @form_method = "patch"
 
@@ -886,12 +867,16 @@ class Gw::Admin::Webmail::MailsController < Gw::Controller::Admin::Base
     end
   end
 
-  def no_email?
+  def check_user_email
     if Core.current_user.email.blank?
-      render text: "メールアドレスが登録されていません。", layout: true
-      return true
+      return render text: "メールアドレスが登録されていません。", layout: true
     end
-    return nil
+  end
+
+  def handle_mailto_scheme
+    mailto = Util::Mailto.parse(params[:uri])
+    [:to, :cc, :bcc, :subject, :body].each { |k| mailto[k] = params[k] if params[k] }
+    redirect_to new_gw_webmail_mail_path(mailto.merge(mailbox: 'INBOX'))
   end
 
   def default_sign_body
@@ -1031,24 +1016,6 @@ class Gw::Admin::Webmail::MailsController < Gw::Controller::Admin::Base
     end
 
     filter
-  end
-
-  def parse_mailto(uri)
-    mailto_params = Hash.new
-    if uri
-      begin
-        [:to, :cc, :bcc, :subject, :body].each{|k| uri += "&#{k}=#{params[k]}" if params[k]}
-        mailto = URI.parse(URI.escape(NKF::nkf('-w', uri)))
-        if mailto.is_a?(URI::MailTo)
-          mailto_params[:to] = URI.unescape(mailto.to)
-          mailto.headers.each do |header|
-            mailto_params[header[0].to_sym] = URI.unescape(header[1])
-          end
-        end
-      rescue
-      end
-    end
-    mailto_params
   end
 
   def get_mailbox_uids(mailbox, uids)
