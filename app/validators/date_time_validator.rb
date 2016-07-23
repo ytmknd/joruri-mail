@@ -3,7 +3,7 @@ class DateTimeValidator < ActiveModel::EachValidator
     if value.present?
       begin
         DateTime.parse(value)
-      rescue
+      rescue ArgumentError => e
         record.errors.add(attr, :invalid_datetime)
       end
     end

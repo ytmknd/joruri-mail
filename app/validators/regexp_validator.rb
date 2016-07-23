@@ -3,7 +3,7 @@ class RegexpValidator < ActiveModel::EachValidator
     if value.present?
       begin
         Regexp.new(value)
-      rescue => e
+      rescue RegexpError => e
         record.errors.add(attr, :invalid_regexp, error: e.to_s)
       end
     end
