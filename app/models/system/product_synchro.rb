@@ -143,4 +143,14 @@ class System::ProductSynchro < System::Database
     ## next
     group.ldap_children.each { |g| copy_ldap_temporaries(g, sg) }
   end
+
+  class << self
+    def check
+      item = System::ProductSynchro.joins(:product)
+        .where('system_products.product_type = ?', 'mail')
+        .where(state: 'start')
+        .order(:created_at).first
+      item.execute if item
+    end
+  end
 end

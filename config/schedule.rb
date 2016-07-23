@@ -25,3 +25,7 @@ set :output, 'log/cron.log'
 every 1.day, at: '3:00 am' do
   rake 'webmail:cleanup'
 end
+
+#every 10.minutes do
+#  rake 'system:product_synchro:check'
+#end
