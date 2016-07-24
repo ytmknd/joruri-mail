@@ -3,7 +3,7 @@
 </div>
 
 <%= error_messages_for 'item' %>
-<%= form_for :item, url: mobile_send_gw_webmail_mail_path(params[:mailbox], params[:id].to_i),
+<%= form_for :item, url: { action: :mobile_send, id: params[:id].to_i },
   html: { id: 'item_form', class: 'newForm', name: 'newForm', method: :post, multipart: true } do |f| %>
   <%= render 'form_smart_phone', f: f %>
   <div class="submitters">

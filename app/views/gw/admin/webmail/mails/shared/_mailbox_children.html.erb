@@ -4,12 +4,12 @@
     nm_class = mailbox_name_class(box, @mailbox)
   %>
   <li class="<%= li_class %>">
-    <%= link_to h(box.title), url_for(action: :index, mailbox: box.name), class: nm_class, id: "mailbox_#{box.name}", data: { mailbox: box.name } %>
+    <%= link_to h(box.title), { action: :index, mailbox: box.name }, class: nm_class, id: "mailbox_#{box.name}", data: { mailbox: box.name } %>
     <% if box.unseen > 0 %>
       <span class="unseenNum">(<span class="num"><%= box.unseen %></span>)</span>
     <% end %>
     <% if box.trash_box?(:root) && (box.messages > 0 || box.children.length > 0) %>
-      <%= link_to '≫空にする', empty_gw_webmail_mails_path(box.name), class: 'empty', data: { confirm: '空にしてよろしいですか？' } %>
+      <%= link_to '≫空にする', { action: :empty, mailbox: box.name }, class: 'empty', data: { confirm: '空にしてよろしいですか？' } %>
     <% end %>
     <% if box.children.size > 0 %>
       <ul class="children level<%= box.level_no %>">

@@ -4,7 +4,7 @@
 </div>
 
 <div class="mailboxTitle">
-  <%= link_to @mailbox.title, url_for(action: :index, mailbox: @mailbox.name, mobile: :list, page: 1), class: "link" %>
+  <%= link_to @mailbox.title, { action: :index, mobile: :list, page: 1 }, class: 'link' %>
 </div>
 
 <div id="mailContent">
@@ -71,7 +71,7 @@
   </tr>
   <tr>
     <td class="actions">
-    <%= form_for :item, url: send_mdn_gw_webmail_mail_path(@mailbox.name, @item.uid), html: { id: "mail", name: "mdnForm", class: "mdnForm" } do |f| %>
+    <%= form_for :item, url: { action: :send_mdn }, html: { id: 'mail', name: 'mdnForm', class: 'mdnForm' } do |f| %>
       <%= hidden_field_tag :mobile, 1 %>
       <%= hidden_field_tag :send_mode, 'manual' %>
       <div class="submitters">
@@ -131,7 +131,7 @@
   <tr>
     <td id="showNormalArea">
       <% @item.attachments.each do |at| %>
-        <%= link_to_if attachment_file_downloadable?, mail_text_wrap("#{at.name}(#{at.eng_unit})"), url_for(download: at.seqno, size: at.size),
+        <%= link_to_if attachment_file_downloadable?, mail_text_wrap("#{at.name}(#{at.eng_unit})"), { download: at.seqno, size: at.size },
           target: (at.image? ? '_blank' : nil), class: at.css_class %>
       <% end %>
     </td>
@@ -145,23 +145,23 @@
 <div class="title"><span>返信メニュー</span></div>
 <div class="menus">
   <span class="answer">
-    <%= link_to '送信者に返信', answer_gw_webmail_mail_path(@mailbox.name, @item.uid) %>
+    <%= link_to '送信者に返信', { action: :answer } %>
   </span>
   <% if false %>
   <span class="answerWithQuot">
-    <%= link_to '送信者に返信（引用有り）', answer_gw_webmail_mail_path(@mailbox.name, @item.uid, qt: 1) %>
+    <%= link_to '送信者に返信（引用有り）', { action: :answer, qt: 1 } %>
   </span>
   <% end %>
   <span class="answerToAll">
-    <%= link_to '全員に返信', answer_gw_webmail_mail_path(@mailbox.name, @item.uid, all: 1), class: 'menuItemLink' %>
+    <%= link_to '全員に返信', { action: :answer, all: 1 }, class: 'menuItemLink' %>
   </span>
   <% if false %>
   <span class="answerToAllWithQuot">
-    <%= link_to '全員に返信（引用有り）', answer_gw_webmail_mail_path(@mailbox.name, @item.uid, all: 1, qt: 1) %>
+    <%= link_to '全員に返信（引用有り）', { action: :answer, all: 1, qt: 1 } %>
   </span>
   <% end %>
   <span class="forward">
-    <%= link_to '転送', forward_gw_webmail_mail_path(@mailbox.name, @item.uid) %>
+    <%= link_to '転送', { action: :forward } %>
   </span>
 </div>
 </div>
@@ -169,7 +169,7 @@
 <div class="managementMenu">
 <div class="title"><span>管理メニュー</span></div>
 <div class="menus">
-  <%= form_for :item, url: mobile_manage_gw_webmail_mails_path(@mailbox.name, id: @item.uid), html: { id: 'managementForm', name: 'managementForm', class: 'managementForm' } do |f| %>
+  <%= form_for :item, url: { action: :mobile_manage, id: @item.uid }, html: { id: 'managementForm', name: 'managementForm', class: 'managementForm' } do |f| %>
     <input type="hidden" name="item[ids][<%= @item.uid %>]" value="1" />
     <% if @item.draft? %>
       <%= submit_tag '編集', name: 'mobile_edit', class: 'edit' %>

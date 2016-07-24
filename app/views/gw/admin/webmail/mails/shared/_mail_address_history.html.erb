@@ -11,7 +11,7 @@
 
 <% if @addr_histories.size > 0 %>
 <div class="reset">
-  <%= link_to '≫履歴をリセットする', reset_address_history_gw_webmail_mails_path(mailbox: @mailbox.name, page: params[:page]), class: 'reset', 
+  <%= link_to '≫履歴をリセットする', { action: :reset_address_history }, class: 'reset', 
     data: { confirm: 'クイックアドレス帳をリセットします。よろしいですか？' } %>
 </div>
 <% end %>

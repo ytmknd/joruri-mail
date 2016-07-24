@@ -8,7 +8,7 @@ class Gw::Admin::Webmail::MailsController < Gw::Controller::Admin::Base
 
   def pre_dispatch
     return if params[:action] == 'status'
-    return redirect_to action: 'index' if params[:reset]
+    return redirect_to action: :index, mailbox: params[:mailbox] if params[:reset]
 
     @limit = 20
     @new_window = params[:new_window].blank? ? nil : 1
@@ -84,8 +84,6 @@ class Gw::Admin::Webmail::MailsController < Gw::Controller::Admin::Base
 
     ## search
     filter = make_search_filter
-
-    @s_params = make_search_params
 
     @mailboxes = load_mailboxes
     @quota = load_quota
@@ -165,8 +163,6 @@ class Gw::Admin::Webmail::MailsController < Gw::Controller::Admin::Base
     @mailboxes  = load_mailboxes
 
     filter = make_search_filter
-
-    @s_params = make_search_params
 
     @pagination = Gw::WebmailMail.paginate_uid(params[:id],
       select: @mailbox.name, conditions: filter, sort: @sort, starred: params[:sort_starred])
@@ -530,7 +526,7 @@ class Gw::Admin::Webmail::MailsController < Gw::Controller::Admin::Base
       flash[:notice] = 'メールを削除しました。' unless @new_window
       respond_to do |format|
         format.html do
-          redirect_to url_for(action: @new_window ? :close : :index)
+          redirect_to action: @new_window ? :close : :index
         end
         format.xml  { head :ok }
       end
@@ -538,7 +534,7 @@ class Gw::Admin::Webmail::MailsController < Gw::Controller::Admin::Base
       flash[:error] = 'メールの削除に失敗しました。'
       respond_to do |format|
         format.html do
-          redirect_to url_for(action: @new_window ? :close : :index)
+          redirect_to action: @new_window ? :close : :index
         end
         format.xml  { render :xml => @item.errors, :status => :unprocessable_entity }
       end
@@ -548,7 +544,7 @@ class Gw::Admin::Webmail::MailsController < Gw::Controller::Admin::Base
   ## move_all or move_one
   def move
     if !params[:item] || !params[:item][:ids]
-      return redirect_to url_for(action: :index, page: params[:page])
+      return redirect_to action: :index
     end
 
     uids = params[:item][:ids].collect{|k, v| k.to_s =~ /^[0-9]+$/ ? k.to_i : nil }
@@ -601,13 +597,13 @@ class Gw::Admin::Webmail::MailsController < Gw::Controller::Admin::Base
 
     label = params[:copy].blank? ? '移動' : 'コピー'
     flash[:notice] = "#{changed_num}件のメールを#{label}しました。" unless @new_window
-    redirect_to url_for(action: @new_window ? :close : :index, page: params[:page])
+    redirect_to action: @new_window ? :close : :index
   end
 
   ## destroy_all
   def delete
     if !params[:item] || !params[:item][:ids]
-      return redirect_to url_for(action: :index, page: params[:page])
+      return redirect_to action: :index
     end
 
     uids = params[:item][:ids].collect{|k, v| k.to_s =~ /^[0-9]+$/ ? k.to_i : nil }
@@ -634,12 +630,12 @@ class Gw::Admin::Webmail::MailsController < Gw::Controller::Admin::Base
 #    end
 
     flash[:notice] = "#{changed_num}件のメールを削除しました。"
-    redirect_to url_for(action: :index, page: 1) #params[:page]
+    redirect_to action: :index
   end
 
   def seen
     if !params[:item] || !params[:item][:ids]
-      return redirect_to url_for(action: :index, page: params[:page])
+      return redirect_to action: :index
     end
 
     uids = params[:item][:ids].collect{|k, v| k.to_s =~ /^[0-9]+$/ ? k.to_i : nil }
@@ -654,12 +650,12 @@ class Gw::Admin::Webmail::MailsController < Gw::Controller::Admin::Base
     reset_mailboxes
 
     flash[:notice] = "#{changed_num}件のメールを既読にしました。"
-    redirect_to url_for(action: :index, page: params[:page])
+    redirect_to action: :index
   end
 
   def unseen
     if !params[:item] || !params[:item][:ids]
-      return redirect_to url_for(action: :index, page: params[:page])
+      return redirect_to action: :index
     end
 
     uids = params[:item][:ids].collect{|k, v| k.to_s =~ /^[0-9]+$/ ? k.to_i : nil }
@@ -674,7 +670,7 @@ class Gw::Admin::Webmail::MailsController < Gw::Controller::Admin::Base
     reset_mailboxes
 
     flash[:notice] = "#{changed_num}件のメールを未読にしました。"
-    redirect_to url_for(action: :index, page: params[:page])
+    redirect_to action: :index
   end
 
   def empty
@@ -715,7 +711,7 @@ class Gw::Admin::Webmail::MailsController < Gw::Controller::Admin::Base
 
     flash[:notice] = "ごみ箱を空にしました。"
     respond_to do |format|
-      format.html { redirect_to url_for(action: :index) }
+      format.html { redirect_to action: :index }
       format.xml  { head :ok }
     end
   end
@@ -734,7 +730,7 @@ class Gw::Admin::Webmail::MailsController < Gw::Controller::Admin::Base
       rescue => e
         flash[:notice] = "開封確認メールの送信に失敗しました。"
       end
-      return redirect_to url_for(action: :show)
+      return redirect_to action: :show
     end
   end
 
@@ -742,12 +738,12 @@ class Gw::Admin::Webmail::MailsController < Gw::Controller::Admin::Base
     Gw::WebmailMailAddressHistory.where(user_id: Core.current_user.id).delete_all
 
     flash[:notice] = 'クイックアドレス帳をリセットしました。'
-    redirect_to url_for(action: :index, page: params[:page])
+    redirect_to action: :index
   end
 
   def register_spam
     if !params[:item] || !params[:item][:ids]
-      return redirect_to url_for(action: :index, page: params[:page])
+      return redirect_to action: :index
     end
 
     uids = params[:item][:ids].collect{|k, v| k.to_s =~ /^[0-9]+$/ ? k.to_i : nil }
@@ -755,7 +751,7 @@ class Gw::Admin::Webmail::MailsController < Gw::Controller::Admin::Base
     items = Gw::WebmailMail.find(select: @mailbox.name, conditions: cond, sort: @sort)
 
     if items.count == 0
-      return redirect_to url_for(action: :index, page: params[:page])
+      return redirect_to action: :index
     end
 
     Gw::WebmailFilter.register_spams(items)
@@ -778,7 +774,7 @@ class Gw::Admin::Webmail::MailsController < Gw::Controller::Admin::Base
     reset_starred_mails(changed_mailbox_uids) if include_starred_uid
 
     flash[:notice] = "#{items.count}件のメールを迷惑メールに登録しました。"
-    redirect_to url_for(action: :index, page: params[:page])
+    redirect_to action: :index
   end
 
   def star
@@ -804,11 +800,10 @@ class Gw::Admin::Webmail::MailsController < Gw::Controller::Admin::Base
     reset_starred_mails(changed_mailbox_uids)
 
     if request.mobile?
-      s_params = make_search_params
       if params[:from] == 'list' || @mailbox.star_box?
-        redirect_to url_for(s_params.merge(action: :index, id: params[:id], mailbox: @mailbox.name, mobile: :list))
+        redirect_to action: :index, id: params[:id], mobile: :list
       else
-        redirect_to url_for(s_params.merge(action: :show, id: params[:id], mailbox: @mailbox.name))
+        redirect_to action: :show, id: params[:id]
       end
     else
       render text: "OK"
@@ -865,6 +860,15 @@ class Gw::Admin::Webmail::MailsController < Gw::Controller::Admin::Base
     else
       "admin/gw/webmail"
     end
+  end
+
+  def keep_params(options = {})
+    if options[:mailbox].blank? &&
+       (options[:controller].blank? || options[:controller].in?([controller_name, controller_path]))
+      keeps = params.slice(:page, :search, :s_keyword, :s_column, :s_status, :s_label, :sort_key, :sort_order, :sort_starred)
+      options = options.reverse_merge(keeps)
+    end
+    options
   end
 
   def check_user_email
@@ -976,12 +980,6 @@ class Gw::Admin::Webmail::MailsController < Gw::Controller::Admin::Base
     sort_params += [key.upcase]
     sort_params += ['REVERSE', 'DATE'] if key != 'date'
     sort_params
-  end
-
-  def make_search_params
-    s_params = params.dup
-    [:controller, :action, :mailbox].each {|n| s_params.delete(n) }
-    s_params
   end
 
   def make_search_filter

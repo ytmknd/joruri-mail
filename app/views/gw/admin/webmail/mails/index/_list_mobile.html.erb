@@ -1,8 +1,8 @@
 <div class="mailboxTitle">
-  <%= link_to @mailbox.title, url_for(mobile: :list, page: 1), class: 'link' %>
+  <%= link_to @mailbox.title, { mobile: :list, page: 1 }, class: 'link' %>
 </div>
 
-<%= form_for :item, url: mobile_manage_gw_webmail_mails_path(@mailbox.name), html: { id: 'mailForm', name: 'mailForm', class: 'mailForm' } do |f| %>
+<%= form_for :item, url: { action: :mobile_manage }, html: { id: 'mailForm', name: 'mailForm', class: 'mailForm' } do |f| %>
 <input type="hidden" name="page" value="<%= params[:page] %>" />
 <%= render 'gw/admin/webmail/mails/index/mail_list', items: @items %>
 

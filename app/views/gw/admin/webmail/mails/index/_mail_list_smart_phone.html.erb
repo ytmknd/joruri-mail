@@ -10,7 +10,7 @@ subject_wrap = @mail_list_subject.blank? ? '' : 'autoWrap'
       <td class="check"><input type="checkbox" name="item[ids][<%= item.uid %>]" value="1" class="checkUI" /></td>
       <td class="star <%= item.starred? ? 'starOn' : 'starOff' %>" id="mail_star_<%= item.uid %>" title="<%= 'スター' if item.starred? %>" data-uid="<%= item.uid %>">&nbsp;</td>
       <td class="attach subject from date <%= mail_flags(item).join(' ') %> <%= subject_wrap %>">
-        <a href="<%= url_for(@s_params.merge(action: :show, id: item.uid, new_window: (@mail_open_window.blank? ? nil : 1))) %>">
+        <a href="<%= url_for(action: :show, id: item.uid, new_window: (@mail_open_window.blank? ? nil : 1)) %>">
           <span class="date"><%= item.date %></span>
           <span class="from"><%= mail_text_wrap(from) %></span><br />
           <span class="subject overflowHidden <%= subject_wrap %>" title="<%= item.subject %>">

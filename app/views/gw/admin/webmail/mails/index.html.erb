@@ -35,9 +35,9 @@
     </div>
   </div>
   <div class="simplePagination">
-    <%= link_to '≪前', url_for(@s_params.merge(page: @items.previous_page)) if @items.previous_page
+    <%= link_to '≪前', { page: @items.previous_page } if @items.previous_page
     %><span><b><%= @items.current_page %></b>/<b><%= @items.total_pages %></b></span
-    ><%= link_to '次≫', url_for(@s_params.merge(page: @items.next_page)) if @items.next_page
+    ><%= link_to '次≫', { page: @items.next_page } if @items.next_page
     %><%#= paginate @items, page_links: false, previous_label: "≪前", next_label: "次≫" %>
   </div>
 </div>
@@ -108,28 +108,28 @@ $(function() {
     $('#mailsForm').attr('action', action).submit();
   }
   $('a[href="#moveMails"]').on('click', function() {
-    post('<%=raw escape_javascript move_gw_webmail_mails_path(@mailbox.name) %>');
+    post('<%=raw escape_javascript url_for(action: :move) %>');
     return false;
   });
   $('a[href="#copyMails"]').on('click', function() {
-    post('<%=raw escape_javascript move_gw_webmail_mails_path(@mailbox.name, copy: 1) %>');
+    post('<%=raw escape_javascript url_for(action: :move, copy: 1) %>');
     return false;
   });
   $('a[href="#deleteMails"]').on('click', function() {
-    post('<%=raw escape_javascript delete_gw_webmail_mails_path(@mailbox.name) %>');
+    post('<%=raw escape_javascript url_for(action: :delete) %>');
     return false;
   });
   $('a[href="#seenMails"]').on('click', function() {
-    post('<%=raw escape_javascript seen_gw_webmail_mails_path(@mailbox.name) %>');
+    post('<%=raw escape_javascript url_for(action: :seen) %>');
     return false;
   });
   $('a[href="#unseenMails"]').on('click', function() {
-    post('<%=raw escape_javascript unseen_gw_webmail_mails_path(@mailbox.name) %>');
+    post('<%=raw escape_javascript url_for(action: :unseen) %>');
     return false;
   });
   $('a[href="#registerSpamMails"]').on('click', function() {
     if (confirm('迷惑メールに登録した後、ごみ箱に移動します。よろしいですか？')) { 
-      post('<%=raw escape_javascript register_spam_gw_webmail_mails_path(@mailbox.name) %>');
+      post('<%=raw escape_javascript url_for(action: :register_spam) %>');
     }
     return false;
   });
@@ -230,7 +230,7 @@ $(function() {
       $('#mailsForm')
         .append( $('<input />').attr({ type: 'hidden', name: 'item[mailbox]', value: mailbox }) )
         .append( $('<input />').attr({ type: 'hidden', name: 'item[ids][' + uid + ']', value: 1 }) )
-        .attr('action', '<%=raw escape_javascript move_gw_webmail_mails_path(@mailbox.name) %>')
+        .attr('action', '<%=raw escape_javascript url_for(action: :move) %>')
         .submit();
     }
   });

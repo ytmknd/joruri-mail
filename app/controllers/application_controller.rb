@@ -1,5 +1,6 @@
 class ApplicationController < ActionController::Base
   include Jpmobile::ViewSelector
+  include ParamsKeeper
   protect_from_forgery #:secret => '1f0d667235154ecf25eaf90055d99e99'
   before_action :initialize_application
   after_action :inline_css_for_mobile

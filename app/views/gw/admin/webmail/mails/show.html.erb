@@ -20,27 +20,27 @@
   <div class="leftMenu" style="position:relative;">
     <% if @item.draft? %>
       <% unless @new_window %>
-      <%= link_to '≪一覧へ戻る', gw_webmail_mails_path(@s_params.merge(mailbox: @mailbox.name)), class: 'index'
+      <%= link_to '≪一覧へ戻る', { action: :index }, class: 'index'
       %><span class="separator">|</span
       ><% end %><%= link_to '編集', '#editMail', class: 'edit', title: '編集', target: '_blank',
-        data: { url: resend_gw_webmail_mail_path(@mailbox.name, @item.uid) }
-      %><%= link_to '削除', url_for(action: :destroy, new_window: @new_window), method: :delete, class: :delete, title: '削除'
+        data: { url: url_for(action: :resend) }
+      %><%= link_to '削除', { action: :destroy, new_window: @new_window }, method: :delete, class: :delete, title: '削除'
       %><span class="separator">|</span
       ><%= link_to 'ラベル', '#showLabelMenu', class: 'label', title: 'ラベル'
       %><%= link_to 'その他', '#showOtherMenu', class: 'etc', title: 'その他'
       %><%= link_to '印刷', '#', onclick: 'window.print(); return false;', class: 'print', title: '印刷' %>
     <% else %>
       <% unless @new_window %>
-      <%= link_to '≪一覧へ戻る', gw_webmail_mails_path(@s_params.merge(mailbox: @mailbox.name)), class: 'index'
+      <%= link_to '≪一覧へ戻る', { action: :index }, class: 'index'
       %><span class="separator">|</span
       ><% end %><%= link_to '返信', '#showAnswerMenu', class: 'answer', title: '返信'
       %><%= link_to '転送', '#editMail', class: 'forward', title: '転送', target: '_blank',
-        data: { url: forward_gw_webmail_mail_path(@mailbox.name, @item.uid) }
+        data: { url: url_for(action: :forward) }
       %><%= link_to '編集', '#editMail', class: 'edit', title: '編集', target: '_blank',
-        data: { url: resend_gw_webmail_mail_path(@mailbox.name, @item.uid) } if @mailbox.sent_box?
+        data: { url: url_for(action: :resend) } if @mailbox.sent_box?
       %><%= link_to '移動', '#moveMail', class: 'move', title: '移動'
       %><%= link_to 'コピー', '#copyMail', class: 'copy', title: 'コピー'
-      %><%= link_to '削除', url_for(action: :destroy, new_window: @new_window), method: :delete, class: :delete, title: '削除'
+      %><%= link_to '削除', { action: :destroy, new_window: @new_window }, method: :delete, class: :delete, title: '削除'
       %><span class="separator">|</span
       ><%= link_to 'ラベル', '#showLabelMenu', class: 'label', title: 'ラベル'
       %><%= link_to 'その他', '#showOtherMenu', class: 'etc', title: 'その他'
@@ -48,18 +48,18 @@
     <% end %>
     <div id="answerMenu" class="popupMenu" style="display:none; width:140px">
       <div class="menuItem"><%= link_to '送信者に返信', '#editMail',
-        data: { url: answer_gw_webmail_mail_path(@mailbox.name, @item.uid) } %></div>
+        data: { url: url_for(action: :answer) } %></div>
       <div class="menuItem"><%= link_to '送信者に返信（引用あり）', '#editMail',
-        data: { url: answer_gw_webmail_mail_path(@mailbox.name, @item.uid, qt: 1) } %></div>
+        data: { url: url_for(action: :answer, qt: 1) } %></div>
       <div class="menuItem"><%= link_to '全員に返信', '#editMail',
-        data: { url: answer_gw_webmail_mail_path(@mailbox.name, @item.uid, all: 1) } %></div>
+        data: { url: url_for(action: :answer, all: 1) } %></div>
       <div class="menuItem"><%= link_to '全員に返信（引用あり）', '#editMail',
-        data: { url: answer_gw_webmail_mail_path(@mailbox.name, @item.uid, all: 1, qt: 1) } %></div>
+        data: { url: url_for(action: :answer, all: 1, qt: 1) } %></div>
     </div>
     <div id="otherMenu" class="popupMenu" style="display:none; width:100px">
       <div class="menuItem"><%= link_to 'ローカル保存', { download: 'eml'} %></div>
-      <div class="menuItem"><%= link_to 'ヘッダ表示', '?header=1', target: '_blank' %></div>
-      <div class="menuItem"><%= link_to 'ソース表示', '?source=1', target: '_blank' %></div>
+      <div class="menuItem"><%= link_to 'ヘッダ表示', { header: 1 }, target: '_blank' %></div>
+      <div class="menuItem"><%= link_to 'ソース表示', { source: 1 }, target: '_blank' %></div>
       <% if Core.current_user.id == Core.user.id %>
       <div class="menuItem"><%= link_to '迷惑メール登録', '#registerSpamMail' %></div>
       <% end %>
@@ -76,7 +76,7 @@
   <%= render 'gw/admin/webmail/mails/show/pagination' %>
 </div>
 
-<%= form_for :item, url: move_gw_webmail_mails_path(@mailbox.name), html: { id: 'mailForm' } do |f| %>
+<%= form_for :item, url: { action: :move }, html: { id: 'mailForm' } do |f| %>
 <input type="hidden" name="id" value="<%= @item.uid %>" />
 <input type="hidden" name="item[ids][<%= @item.uid %>]" value="1" />
 <input type="hidden" name="new_window" value="<%= @new_window %>" />
@@ -252,7 +252,7 @@
       <% else %>
         <td id="normalArea">
           <% @item.attachments.each do |at| %>
-            <%= link_to h("#{at.name}(#{at.eng_unit})"), url_for(download: at.seqno, size: at.size),
+            <%= link_to h("#{at.name}(#{at.eng_unit})"), { download: at.seqno, size: at.size },
               target: (at.image? ? '_blank' : nil), class: at.css_class %>
           <% end %>
         </td>
@@ -266,7 +266,7 @@
 <div class="menu">
   <div class="leftMenu">
     <% unless @new_window %>
-    <%= link_to '≪一覧へ戻る', gw_webmail_mails_path(@s_params.merge(mailbox: @mailbox.name)), class: 'index' %>
+    <%= link_to '≪一覧へ戻る', { action: :index }, class: 'index' %>
     <% end %>
   </div>
   <%= render 'gw/admin/webmail/mails/show/pagination' %>
@@ -330,7 +330,7 @@ $(function() {
   });
   $('a[href="#registerSpamMail"]').on('click', function() {
     if (confirm('迷惑メールに登録した後、ごみ箱に移動します。よろしいですか？')) {
-      $('#mailForm').attr('action', '<%=raw escape_javascript register_spam_gw_webmail_mails_path(mailbox: @mailbox.name) %>')
+      $('#mailForm').attr('action', '<%=raw escape_javascript url_for(action: :register_spam) %>')
         .submit();
     }
   });

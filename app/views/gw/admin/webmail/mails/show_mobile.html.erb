@@ -1,5 +1,5 @@
 <div class="mailboxTitle">
-  <%= link_to @mailbox.title, url_for(action: :index, mailbox: @mailbox.name, mobile: :list, page: 1), class: "link" %>
+  <%= link_to @mailbox.title, { action: :index, mobile: :list, page: 1 }, class: "link" %>
 </div>
 <div class="header">
 <div class="headerTitle">
@@ -8,7 +8,7 @@
   <img src="/_common/themes/admin/gw/webmail/mobile/images/clip-lightblue.jpg" alt="[有]" />
   <% end %>
   <%= render 'gw/admin/webmail/mails/shared/label', labels: @item.labels, label_confs: @label_confs %>
-  <%= link_to image_tag(mail_star_image_path(@item)), star_gw_webmail_mails_path(@s_params.merge(mailbox: @mailbox.name, id: @item.uid, from: :show)) %>
+  <%= link_to image_tag(mail_star_image_path(@item)), { action: :star, id: @item.uid, from: :show } %>
 </div>
 <div class="showItem">
   <font class="field">送信者</font>
@@ -71,7 +71,7 @@
 <% end %>
 <div class="files">
 <% @item.attachments.each do |at| %>
-  <div class="file"><%= link_to_if attachment_file_downloadable?, h("#{at.name}"), url_for(download: at.seqno, size: at.size),
+  <div class="file"><%= link_to_if attachment_file_downloadable?, h("#{at.name}"), { download: at.seqno, size: at.size },
     target: (at.image? ? '_blank' : nil), class: at.css_class %> (<%= h("#{at.eng_unit.gsub(/Bytes/,'B')}") %>)</div>
 <% end %>
 </div>
@@ -82,7 +82,7 @@
 <div class="mdnMenu">
 <div class="title">開封確認</div>
 <div class="message">メール送信者は開封確認を要求しています。開封確認のメールを送信しますか？</div>
-<%= form_for :item, url: send_mdn_gw_webmail_mail_path(@mailbox.name, @item.uid), html: { id: "mail", name: "mdnForm", class: "mdnForm" } do |f| %>
+<%= form_for :item, url: { action: :send_mdn }, html: { id: 'mail', name: 'mdnForm', class: 'mdnForm' } do |f| %>
   <%= hidden_field_tag :mobile, 1 %>
   <%= hidden_field_tag :send_mode, 'manual' %>
   <%= submit_tag '送信', name: 'send', class: 'menuItem' %>
@@ -92,20 +92,20 @@
 
 <div class="replyMenu">
 <div class="title"><img src="/_common/themes/admin/gw/webmail/mobile/images/reply-menu-lightblue.jpg" alt="返信メニュー"/>返信メニュー</div>
-<div class="menuItem"><%= link_to '送信者に返信', answer_gw_webmail_mail_path(@mailbox.name, @item.uid), class: 'menuItemLink', accesskey: '1' %></div>
-<!--
-<div class="menuItem"><%= link_to '送信者に返信（引用有り）', answer_gw_webmail_mail_path(@mailbox.name, @item.uid, qt: 1), class: 'menuItemLink', accesskey: '2' %></div>
--->
-<div class="menuItem"><%= link_to '全員に返信', answer_gw_webmail_mail_path(@mailbox.name, @item.uid, all: 1), class: 'menuItemLink', accesskey: '3' %></div>
-<!--
-<div class="menuItem"><%= link_to '全員に返信（引用有り）', answer_gw_webmail_mail_path(@mailbox.name, @item.uid, all: 1, qt: 1), class: 'menuItemLink', accesskey: '4' %></div>
--->
-<div class="menuItem"><%= link_to '転送', forward_gw_webmail_mail_path(@mailbox.name, @item.uid), class: 'menuItemLink', accesskey: '5' %></div>
+<div class="menuItem"><%= link_to '送信者に返信', { action: :answer }, class: 'menuItemLink', accesskey: '1' %></div>
+<% if false %>
+<div class="menuItem"><%= link_to '送信者に返信（引用有り）', { action: :answer, qt: 1 }, class: 'menuItemLink', accesskey: '2' %></div>
+<% end %>
+<div class="menuItem"><%= link_to '全員に返信', { action: :answer, all: 1 }, class: 'menuItemLink', accesskey: '3' %></div>
+<% if false %>
+<div class="menuItem"><%= link_to '全員に返信（引用有り）', { action: :answer, all: 1, qt: 1 }, class: 'menuItemLink', accesskey: '4' %></div>
+<% end %>
+<div class="menuItem"><%= link_to '転送', { action: :forward }, class: 'menuItemLink', accesskey: '5' %></div>
 </div>
 
 <div class="managementMenu">
 <div class="title"><img src="/_common/themes/admin/gw/webmail/mobile/images/manage-menu-lightblue.jpg" alt="管理メニュー"/>管理メニュー</div>
-<%= form_for :item, url: mobile_manage_gw_webmail_mails_path(@mailbox.name, id: @item.uid), html: { id: 'managementForm', name: 'managementForm', class: 'managementForm' } do |f| %>
+<%= form_for :item, url: { action: :mobile_manage, id: @item.uid }, html: { id: 'managementForm', name: 'managementForm', class: 'managementForm' } do |f| %>
 <input type="hidden" name="item[ids][<%= @item.uid %>]" value="1" />
 <% if @item.draft? %>
   <%= submit_tag '編集', name: 'mobile_edit', class: 'menuItem' %>
@@ -124,4 +124,4 @@
   <br />
 </div>
 
-<div class="link"><%= link_to '一覧へ戻る', url_for(@s_params.merge(action: :index, mailbox: @mailbox.name, mobile: :list)), class: 'link' %></div>
+<div class="link"><%= link_to '一覧へ戻る', { action: :index, mobile: :list }, class: 'link' %></div>

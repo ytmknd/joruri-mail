@@ -6,33 +6,33 @@ subject_wrap = @mail_list_subject.blank? ? '' : 'autoWrap'
     <th class="drag" data-action="drag"></th>
     <th class="check"><input type="checkbox" id="checkAll" value="0" /></th>
     <th class="<%= params[:sort_starred] == '1' ? 'starOn' : 'starOff' %>" title="スター"
-      onclick="window.location.href='<%=raw escape_javascript url_for(@s_params.merge(sort_starred: params[:sort_starred] == '1' ? '' : '1')) %>';"></th>
+      onclick="window.location.href='<%=raw escape_javascript url_for(sort_starred: params[:sort_starred] == '1' ? '' : '1') %>';"></th>
     <th class="attach" title="添付ファイル">添</th>
-    <th class="subject"><%= link_to_sort '件名', @s_params.merge(sort_key: :subject), class: 'sorter' %></th>
+    <th class="subject"><%= link_to_sort '件名', { sort_key: :subject }, class: 'sorter' %></th>
     <% if @mailbox.star_box? || @mailbox.virtual_box? %>
       <th class="mailbox"></th>
     <% end %>
     <th class="<%= @mail_list_from_address.blank? ? 'from' : 'fromOmitAddress' %>">
       <span class="caption">
         <% if @mailbox.sent_box? || @mailbox.draft_box? %>
-          <%= link_to_sort '受信者', @s_params.merge(sort_key: :to), class: 'sorter' %>
+          <%= link_to_sort '受信者', { sort_key: :to }, class: 'sorter' %>
         <% else %>
-          <%= link_to_sort '差出人', @s_params.merge(sort_key: :from), class: 'sorter' %>
+          <%= link_to_sort '差出人', { sort_key: :from }, class: 'sorter' %>
         <% end %>
       </span>
       <% if params[:s_from] %>
-        <%= link_to "≪絞込解除", url_for(@s_params.dup.except('s_from').merge(page: 1)), class: "cancelFromSearch" %>
+        <%= link_to "≪絞込解除", { s_from: nil, page: 1 }, class: 'cancelFromSearch' %>
       <% end %>
     </th>
-    <th class="date"><%= link_to_sort '送信日時', @s_params.merge(sort_key: :date), class: 'sorter' %></th>
-    <th class="size"><%= link_to_sort 'サイズ', @s_params.merge(sort_key: :size), class: 'sorter' %></th>
+    <th class="date"><%= link_to_sort '送信日時', { sort_key: :date }, class: 'sorter' %></th>
+    <th class="size"><%= link_to_sort 'サイズ', { sort_key: :size }, class: 'sorter' %></th>
   </tr>
   <% items.each do |item| %>
     <%
       from, s_from, from_tooltip = mail_from_display(item, @mailbox, @mail_list_from_address.present?)
     %>
     <tr id="mail_<%= item.uid %>" class="mail <%= 'unseen' if item.unseen? %> <%= cycle '', 'cycle' %>"
-      data-uid="<%= item.uid %>" data-url="<%= url_for(@s_params.merge(action: :show, id: item.uid, new_window: (@mail_open_window.blank? ? nil : 1))) %>">
+      data-uid="<%= item.uid %>" data-url="<%= url_for(action: :show, id: item.uid, new_window: (@mail_open_window.blank? ? nil : 1)) %>">
       <td class="drag" id="drag_<%= item.uid %>" data-uid="<%= item.uid %>"></td>
       <td class="check"><input type="checkbox" name="item[ids][<%= item.uid %>]" value="1" data-uid="<%= item.uid %>" /></td>
       <td class="star <%= item.starred? ? 'starOn' : 'starOff' %>" id="mail_star_<%= item.uid %>" title="<%= 'スター' if item.starred? %>" data-uid="<%= item.uid %>"></td>
@@ -61,7 +61,7 @@ subject_wrap = @mail_list_subject.blank? ? '' : 'autoWrap'
       <% end %>
       <td class="from">
         <span class="overflowHidden" title="<%= from_tooltip %>">
-          <%= link_to mail_text_wrap(from), url_for(@s_params.merge(s_from: s_from, page: 1)) %>
+          <%= link_to mail_text_wrap(from), { s_from: s_from, page: 1 } %>
         </span>
       </td>
       <td class="date"><%= item.date %></td>
