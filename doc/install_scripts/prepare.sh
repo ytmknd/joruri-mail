@@ -44,16 +44,16 @@ echo "
   画面: `ruby -ryaml -e "puts YAML.load_file('/var/share/jorurimail/config/core.yml')['production']['uri']"`_admin
 
     管理者（システム管理者）
-    ユーザID   : admin
+    ユーザーID   : admin
     パスワード : admin
 
-１．MySQL の root ユーザはパスワードが pass に設定されています。適宜変更してください。
+１．MySQL の root ユーザーはパスワードが pass に設定されています。適宜変更してください。
     # mysqladmin -u root -prootpass password 'pass'
-２．MySQL の joruri ユーザはパスワードが pass に設定されています。適宜変更してください。
+２．MySQL の joruri ユーザーはパスワードが pass に設定されています。適宜変更してください。
     mysql> SET PASSWORD FOR joruri@localhost = PASSWORD('pass');
     また、変更時には /var/share/jorurimail/config/database.yml も合わせて変更してください。
     # vi /var/share/jorurimail/config/database.yml
-３．メールサーバの接続情報を設定してください。
+３．メールサーバーの接続情報を設定してください。
     # vi /var/share/jorurimail/config/smtp.yml
     # vi /var/share/jorurimail/config/imap.yml
 ４．メールアカウントのドメインを設定してください。

@@ -117,7 +117,7 @@ class Gw::Admin::Webmail::MailboxesController < Gw::Controller::Admin::Base
     short_name = @item.path.blank? ? @item.name : @item.name[@item.path.size, @item.name.size]
     new_name = "Trash.#{short_name}"
     if !delete_complete && Core.imap.list('', "Trash.#{short_name}")
-      raise @item.errors.add(:base, "同じ名前のフォルダが既に存在します。")  
+      raise @item.errors.add(:base, "同じ名前のフォルダーが既に存在します。")  
     end
 
     begin

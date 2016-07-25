@@ -2,10 +2,10 @@ ja:
   webmail:
     menus:
       mail: メール
-      mailbox: フォルダ
+      mailbox: フォルダー
       sys_address: 組織アドレス帳
       address_group: 個人アドレス帳
-      filter: フィルタ
+      filter: フィルター
       template: テンプレート
       sign: 署名
       memo: メモ

@@ -34,11 +34,11 @@ class Sys::Admin::SwitchUsersController < Sys::Controller::Admin::Base
     switch_user_count = Gw::WebmailSetting.switch_user_max_count
 
     CSV.parse(csv, headers: true) do |data|
-      account = data["ユーザID"]
+      account = data["ユーザーID"]
       switch_user_account = []
       switch_user_password = []
       (0..switch_user_count).each do |i|
-         switch_user_account << data["切替先#{i}ユーザID"]
+         switch_user_account << data["切替先#{i}ユーザーID"]
          switch_user_password << data["切替先#{i}パスワード"]
       end
 

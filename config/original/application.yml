@@ -13,7 +13,7 @@ webmail:
   attachment_file_max_size: 5
   # 組織アドレス帳/LDAPユーザーのみ表示
   show_only_ldap_user: 0
-  # フィルタ条件最大登録件数
+  # フィルター条件最大登録件数
   filter_condition_max_count: 100
   # メール送信先履歴最大保持件数
   mail_address_history_max_count: 200

@@ -61,7 +61,7 @@ class Gw::Admin::Webmail::FiltersController < Gw::Controller::Admin::Base
     @f_item.attributes = f_item_params
 
     ## validation
-    @f_item.errors.add :base, "適用するフォルダを入力してください。" if @f_item.mailbox.blank?
+    @f_item.errors.add :base, "適用するフォルダーを入力してください。" if @f_item.mailbox.blank?
     @f_item.errors.add :base, "適用する条件が見つかりません。" if @item.conditions.size == 0
     return false if @f_item.errors.size > 0
 
@@ -73,7 +73,7 @@ class Gw::Admin::Webmail::FiltersController < Gw::Controller::Admin::Base
         @item.apply(select: mailbox, conditions: ['NOT', 'DELETED'], timeout: timeout)
       end
     rescue Sys::Lib::Timeout::Error => e
-      flash[:error] = "フィルタ処理がタイムアウトしました。（#{e.second}秒）"
+      flash[:error] = "フィルター処理がタイムアウトしました。（#{e.second}秒）"
     end
 
     if @item.applied > 0

@@ -33,7 +33,7 @@ class Sys::Admin::AccountController < Sys::Controller::Admin::Base
     end
 
     unless login_ok
-      flash.now[:notice] = "ユーザＩＤ・パスワードを正しく入力してください"
+      flash.now[:notice] = "ユーザーＩＤ・パスワードを正しく入力してください"
       respond_to do |format|
         format.html { render }
         format.xml  { render(:xml => '<errors />') }

@@ -79,7 +79,7 @@ class Gw::Admin::Webmail::MailsController < Gw::Controller::Admin::Base
     end
     if error
       flash.now[:notice] ||= ""
-      flash.now[:notice]  += "（フィルタ処理がタイムアウトしました。）"
+      flash.now[:notice]  += "（フィルター処理がタイムアウトしました。）"
     end
 
     ## search

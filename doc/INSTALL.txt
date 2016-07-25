@@ -5,12 +5,12 @@
 **********************************************************************
 
 [システム]
-OS         : CentOS 6.8 (64bit), CentOS 7.2 (64bit)
-Webサーバ  : Apache 2.2, Apache 2.4
-DBシステム : MySQL 5.6
-Ruby       : 2.3.1
-Rails      : 4.2.6
-Mailサーバ : SMTP, IMAP4
+OS           : CentOS 6.8 (64bit), CentOS 7.2 (64bit)
+Webサーバー  : Apache 2.2, Apache 2.4
+DBシステム   : MySQL 5.6
+Ruby         : 2.3.1
+Rails        : 4.2.6
+Mailサーバー : SMTP, IMAP4
 
 [ネットワーク関連設定]
 IPアドレス     : 192.168.0.2
@@ -25,7 +25,7 @@ CentOSをインストールします。
 ※インストール完了後、ご利用になられる環境に合わせて適切なセキュリティ設定をお願いします。
 CentOSに関するセキュリティ設定については、本マニュアルの範囲外となります。
 
-rootユーザに変更します。
+rootユーザーに変更します。
 
   $ su -
 
@@ -128,7 +128,7 @@ MySQLを起動します。
 
   # chkconfig mysqld on
 
-rootユーザのパスワードを設定します。
+rootユーザーのパスワードを設定します。
 
   # /usr/bin/mysqladmin -u root password "pass"
 
@@ -141,11 +141,11 @@ rootユーザのパスワードを設定します。
   # yum -y install ImageMagick-devel libjpeg-devel libpng-devel librsvg2-devel　libxml2-devel libxslt-devel mysql-devel openldap-devel shared-mime-info libicu-devel npm
   # npm install bower -g
 
-Joruriユーザを作成します。
+Joruriユーザーを作成します。
 
   # useradd -m joruri
 
-DBユーザを作成します。
+DBユーザーを作成します。
 
   # /usr/bin/mysql -u root -ppass -e "grant all on *.* to joruri@localhost IDENTIFIED BY 'pass'"
 
@@ -155,7 +155,7 @@ DBユーザを作成します。
   # git clone https://github.com/joruri/joruri-mail.git /var/share/jorurimail
   # chown -R joruri:joruri /var/share/jorurimail
 
-Joruriユーザに変更します。
+Joruriユーザーに変更します。
 
   # su - joruri
   $ cd /var/share/jorurimail
@@ -188,9 +188,9 @@ Joruriユーザに変更します。
   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 
   ※プロキシ
-  プロキシサーバが導入されている場合は  http://example:8080/ の様に記述してください。
+  プロキシサーバーが導入されている場合は  http://example:8080/ の様に記述してください。
 
-DB, SMTP, IMAPサーバ接続情報を設定します。
+DB, SMTP, IMAPサーバー接続情報を設定します。
 
   $ vi config/database.yml
   $ vi config/smtp.yml
@@ -274,20 +274,20 @@ Apache を起動します。
 
   http://192.168.0.2/
 
-次のユーザが登録されています。
+次のユーザーが登録されています。
 
     管理者（システム管理者）
-      ユーザID   : admin
+      ユーザーID   : admin
       パスワード : admin
 
-    一般ユーザ（徳島　太郎）
-      ユーザID   : user1
+    一般ユーザー（徳島　太郎）
+      ユーザーID   : user1
       パスワード : user1
 
-    一般ユーザ（阿波　花子）
-      ユーザID   : user2
+    一般ユーザー（阿波　花子）
+      ユーザーID   : user2
       パスワード : user2
 
-    一般ユーザ（吉野　三郎）
-      ユーザID   : user3
+    一般ユーザー（吉野　三郎）
+      ユーザーID   : user3
       パスワード : user3

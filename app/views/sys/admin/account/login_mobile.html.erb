@@ -16,7 +16,7 @@
   <%= form_tag do %>
   <%= hidden_field_tag :uri, h(@uri.gsub(/(\?|&)mobile=top/, "").concat(($1?$1:"?")+"mobile=top")) %>
   <div class="fields">
-    <font class="head">ユーザID</font><br/>
+    <font class="head">ユーザーID</font><br/>
     <%= text_field_tag 'account', '', class: "inputItem", istyle: "3", format: "*m", mode: "alphabet" %><br/>
     <font class="head">パスワード</font><br/>
     <%= password_field_tag 'password', '', class: "inputItem", istyle: "3", format: "*m", mode: "alphabet", autocomplete: "off" %><br/>

@@ -37,7 +37,7 @@ module Gw::MailboxHelper
       when 'folder'
         %Q{∟}
       else
-        %Q{<img src="/_common/themes/admin/gw/webmail/mobile/images/folder-white.jpg" alt="フォルダ" />}
+        %Q{<img src="/_common/themes/admin/gw/webmail/mobile/images/folder-white.jpg" alt="フォルダー" />}
       end
     img.html_safe
   end

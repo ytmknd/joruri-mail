@@ -2,7 +2,7 @@
 <div id="webmailMenuContainer">
 
 <div class="menu">
-  <%= link_to 'フォルダの登録', url_for(action: :new, mailbox: 'INBOX'), class: 'newMailbox', title: 'フォルダの登録' %>
+  <%= link_to 'フォルダーの登録', url_for(action: :new, mailbox: 'INBOX'), class: 'newMailbox', title: 'フォルダーの登録' %>
 </div>
 
 <%= render 'gw/admin/webmail/base/account' %>
@@ -29,7 +29,7 @@
       <%= f.hidden_field :path, value: "#{@item.name}." %>
       <table class="show" style="height: 40px;">
         <tr>
-          <th style="">新しいフォルダの登録</th>
+          <th style="">新しいフォルダーの登録</th>
           <td style="">
             <%= f.text_field :title, value: '' %>
             <%= f.submit '登録する' %>
@@ -43,7 +43,7 @@
     <%= form_for :item, url: { action: :update }, html: { method: :patch } do |f| %>
       <table class="show" style="height: 40px;">
         <tr>
-          <th style="">フォルダ名の変更</th>
+          <th style="">フォルダー名の変更</th>
           <td style="">
             <%= f.text_field :title %>
             <%= f.submit '変更する' %>
@@ -55,7 +55,7 @@
     <%= form_for :item, url: { action: :update }, html: { method: :patch } do |f| %>
       <table class="show" style="height: 40px;">
         <tr>
-          <th style="">フォルダの移動</th>
+          <th style="">フォルダーの移動</th>
           <td style="">
             <%= f.select :path, @mailboxes.select { |box| box.selectable_as_parent? && box.name != @mailbox.name && box.name.index("#{@mailbox.name}.") != 0 }
               .map { |box| [box.slashed_title, "#{box.name}."] }, include_blank: '（ルート階層）' %>
@@ -69,7 +69,7 @@
     <div style="height:150px"></div>
     <table class="show" style="height: 40px;">
       <tr>
-        <th style="">フォルダの削除</th>
+        <th style="">フォルダーの削除</th>
         <td style="">
           <%= link_to '削除する', url_for(action: :destroy), method: :delete, data: { confirm: '削除してよろしいですか？' } %>
         </td>

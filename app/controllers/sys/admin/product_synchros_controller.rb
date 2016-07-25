@@ -44,7 +44,7 @@ class Sys::Admin::ProductSynchrosController < Sys::Controller::Admin::Base
     messages << "-- 更新 #{@results[:group]}件"
     messages << "-- 削除 #{@results[:gdel]}件" if @results[:gdel] > 0
     messages << "-- 失敗 #{@results[:gerr]}件" if @results[:gerr] > 0
-    messages << "ユーザ"
+    messages << "ユーザー"
     messages << "-- 更新 #{@results[:user]}件"
     messages << "-- 削除 #{@results[:udel]}件" if @results[:udel] > 0
     messages << "-- 失敗 #{@results[:uerr]}件" if @results[:uerr] > 0

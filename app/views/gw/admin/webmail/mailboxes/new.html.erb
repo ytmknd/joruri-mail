@@ -2,7 +2,7 @@
 <div id="webmailMenuContainer">
 
 <div class="menu">
-  <%= link_to 'フォルダの登録', url_for(action: :new, mailbox: 'INBOX'), class: 'newMailbox', title: 'フォルダの登録' %>
+  <%= link_to 'フォルダーの登録', url_for(action: :new, mailbox: 'INBOX'), class: 'newMailbox', title: 'フォルダーの登録' %>
 </div>
 
 <%= render 'gw/admin/webmail/base/account' %>
@@ -11,7 +11,7 @@
 </div>
 </td><td id="webmailContent"><div id="mailboxContent">
 
-<p class="form">フォルダの登録</p>
+<p class="form">フォルダーの登録</p>
 
 <%= form_for @item, as: :item, url: { action: :create } do |f| %>
   <%= render 'form', f: f %>

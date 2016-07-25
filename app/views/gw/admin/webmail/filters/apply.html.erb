@@ -17,10 +17,10 @@
     <th><%= @item.class.human_attribute_name :name %></th>
     <td><%= @item.name %></td>
   </tr><tr>
-    <th>適用するフォルダ</th>
+    <th>適用するフォルダー</th>
     <td>
       <%= f.select :mailbox, Gw::WebmailMailbox.mailbox_options(&:filter_appliable_box?), include_blank: true %>
-      <%= f.check_box :include_sub %><label for="f_item_include_sub">サブフォルダを含める</label>
+      <%= f.check_box :include_sub %><label for="f_item_include_sub">サブフォルダーを含める</label>
     </td>
   </tr>
 </table>

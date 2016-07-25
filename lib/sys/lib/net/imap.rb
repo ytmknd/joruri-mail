@@ -35,7 +35,7 @@ module Sys::Lib::Net::Imap
       raise "IMAP: 接続に失敗 (ECONNRESET)"
     rescue Timeout::Error => e
       #raise "IMAP: 接続に失敗 (Timeout::Error)"
-      raise Sys::Lib::Net::Imap::Error.new("メールサーバが混雑等の原因により遅延しているようです。しばらく時間をおいてからアクセスしてください。")
+      raise Sys::Lib::Net::Imap::Error.new("メールサーバーが混雑等の原因により遅延しているようです。しばらく時間をおいてからアクセスしてください。")
     rescue SocketError => e
       raise "IMAP: DNSエラー (SocketError)"
     rescue Exception => e
