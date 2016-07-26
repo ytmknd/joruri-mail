@@ -65,7 +65,6 @@ class Gw::WebmailMailAttachment < ActiveRecord::Base
 
   def validate_image(filedata)
     begin
-      require 'RMagick'
       image = Magick::Image.from_blob(filedata).shift
       if image.format =~ /(GIF|JPEG|PNG)/
         return [image.columns, image.rows]

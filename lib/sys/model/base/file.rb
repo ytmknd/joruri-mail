@@ -50,7 +50,6 @@ module Sys::Model::Base::File
     @_file_data = file.read
 
     begin
-      require 'RMagick'
       image = Magick::Image.from_blob(@_file_data).shift
       if image.format =~ /(GIF|JPEG|PNG)/
         self.image_is = 1
@@ -193,7 +192,6 @@ module Sys::Model::Base::File
     return nil if image_width <= 300 && image_height <= 400
 
     begin
-      require 'RMagick'
       #info = Magick::Image::Info.new
       size = reduced_size(width: 300, height: 400)
       img  = Magick::Image.read(public_path).first

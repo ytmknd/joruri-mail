@@ -17,7 +17,6 @@ class Sys::Lib::Mail::Attachment
   def image_width
     return nil unless image?
     begin
-      require 'RMagick'
       image = Magick::Image.from_blob(data).shift
       if image.format =~ /(GIF|JPEG|PNG)/
         @image_width = image.columns
@@ -55,7 +54,6 @@ class Sys::Lib::Mail::Attachment
   
   def thumbnail(options)
     begin
-      require 'RMagick'
       image = Magick::Image.from_blob(@body).shift
       raise 'NotImage' unless image.format =~ /(GIF|JPEG|PNG|BMP)/
       src_w = image.columns.to_f

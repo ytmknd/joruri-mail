@@ -52,7 +52,6 @@ class Sys::Lib::File::NoUploadedFile
   
   def validate_image
     begin
-      require 'RMagick'
       image = Magick::Image.from_blob(@data).shift
       if image.format =~ /(GIF|JPEG|PNG)/
         return image
