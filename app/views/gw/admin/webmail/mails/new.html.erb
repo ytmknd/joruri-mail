@@ -13,8 +13,8 @@
 
 <%= error_messages_for 'item' %>
 
-<%= form_for :item, url: { action: @form_action, id: params[:id] },
-  html: { id: 'item_form', method: @form_method, multipart: true } do |f| %>
+<%= form_for :item, url: { action: mail_form_action, id: params[:id] },
+  html: { id: 'item_form', method: mail_form_method, multipart: true } do |f| %>
 
 <% if false %>
 <%= hidden_field_tag :remain_draft, 1 %>

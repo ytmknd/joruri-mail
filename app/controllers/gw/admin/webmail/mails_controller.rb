@@ -2,6 +2,7 @@ class Gw::Admin::Webmail::MailsController < Gw::Controller::Admin::Base
   include Sys::Controller::Scaffold::Base
   include Gw::Controller::Admin::Mobile::Mail
   layout :select_layout
+  rescue_from Exception, with: :rescue_mail
 
   before_action :check_user_email, only: [:new, :create, :edit, :update, :answer, :forward] 
   before_action :handle_mailto_scheme, if: -> { params[:src] == 'mailto' }
@@ -16,8 +17,6 @@ class Gw::Admin::Webmail::MailsController < Gw::Controller::Admin::Base
     @mailbox = Gw::WebmailMailbox.load_mailbox(params[:mailbox] || 'INBOX')
     @filter = ["UNDELETED"]
     @sort = get_sort_params(@mailbox.name)
-  rescue => e
-    rescue_mail(e)
   end
 
   def load_mailboxes
@@ -193,8 +192,6 @@ class Gw::Admin::Webmail::MailsController < Gw::Controller::Admin::Base
   end
 
   def new
-    @form_action = "create"
-
     @item = Gw::WebmailMail.new
     @item.init_for_new(template: default_template, sign: default_sign)
     @item.init_from_flash(flash)
@@ -202,16 +199,11 @@ class Gw::Admin::Webmail::MailsController < Gw::Controller::Admin::Base
   end
 
   def create
-    @form_action = "create"
-
     @item = Gw::WebmailMail.new(params[:item])
     send_message(@item)
   end
 
   def edit
-    @form_action = "update"
-    @form_method = "patch"
-
     @ref = Gw::WebmailMail.find_by_uid(params[:id], select: @mailbox.name, conditions: @filter)
     return http_error(404) unless @ref
 
@@ -222,9 +214,6 @@ class Gw::Admin::Webmail::MailsController < Gw::Controller::Admin::Base
   end
 
   def update
-    @form_action = "update"
-    @form_method = "patch"
-
     @ref = Gw::WebmailMail.find_by_uid(params[:id], select: @mailbox.name, conditions: @filter)
     return http_error(404) unless @ref
 
@@ -243,8 +232,6 @@ class Gw::Admin::Webmail::MailsController < Gw::Controller::Admin::Base
   end
 
   def answer
-    @form_action = "answer"
-
     @ref = Gw::WebmailMail.find_by_uid(params[:id], select: @mailbox.name, conditions: @filter)
     return http_error(404) unless @ref
 
@@ -272,8 +259,6 @@ class Gw::Admin::Webmail::MailsController < Gw::Controller::Admin::Base
   end
 
   def forward
-    @form_action = "forward"
-
     @ref = Gw::WebmailMail.find_by_uid(params[:id], select: @mailbox.name, conditions: @filter)
     return http_error(404) unless @ref
 
@@ -900,32 +885,19 @@ class Gw::Admin::Webmail::MailsController < Gw::Controller::Admin::Base
     mailbox_uids
   end
 
+  def rescue_mail_action?
+    (request.post? || request.put? || request.patch?) &&
+      (action_name.in?(%w(create update answer forward mobile_send)))
+  end
+
   def rescue_mail(e)
+    raise e unless rescue_mail_action?
+
     @mailbox = Gw::WebmailMailbox.where(user_id: Core.current_user.id, name: params[:mailbox] || 'INBOX').first
     raise e unless @mailbox
 
-    if params[:mobile] && params[:mobile].is_a?(Hash)
-      action = params[:mobile][:form_action]
-    else
-      action = params[:action]
-    end
-
-    case action
-    when 'create'
-      @form_action = "create"
-    when 'update'
-      @form_action = "update"
-      @form_method = "patch"
-    when 'answer'
-      @form_action = "answer"
-    when 'forward'
-      @form_action = "forward"
-    else
-      raise e
-    end
-
     @item = Gw::WebmailMail.new(params[:item])
-    flash.now[:error] = "エラーが発生しました。#{e}"
+    flash.now[:error] = "サーバーエラーが発生しました。時間をおいて再度送信してください。（#{e}）"
     render :new
   end
 end

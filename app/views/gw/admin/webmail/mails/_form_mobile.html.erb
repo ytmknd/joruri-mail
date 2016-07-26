@@ -13,8 +13,7 @@ end
 attachments = Gw::WebmailMailAttachment.where(tmp_id: @item.tmp_id)
 %>
 
-<%= hidden_field_tag "mobile[action]", params[:action] %>
-<%= hidden_field_tag "mobile[form_action]", @form_action %>
+<%= hidden_field_tag "mobile[action]", params.dig(:mobile, :action) || action_name %>
 <%= hidden_field_tag "mobile[mailbox]", @mailbox.name %>
 <%= hidden_field_tag "mobile[uid]", params[:id] if params[:id] %>
 <%= hidden_field_tag "mobile[qt]", params[:qt] %>

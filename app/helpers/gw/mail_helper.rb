@@ -266,4 +266,22 @@ module Gw::MailHelper
       'gw/admin/webmail/mails/form/file'
     end
   end
+
+  def mail_form_action
+    action = params.dig(:mobile, :action) || action_name
+    case action
+    when 'new', 'create' then 'create'
+    when 'edit', 'update' then 'update'
+    when 'answer' then 'answer'
+    when 'forward' then 'forward'
+    end
+  end
+
+  def mail_form_method
+    action = params.dig(:mobile, :action) || action_name
+    case action
+    when 'edit', 'update' then 'patch'
+    else 'post'
+    end
+  end
 end

@@ -1,5 +1,4 @@
 module Gw::Controller::Admin::Mobile::Mail
-  
   def mobile_manage
     if params[:mobile_move]
       move
@@ -19,7 +18,6 @@ module Gw::Controller::Admin::Mobile::Mail
   end
 
   def mobile_send
-    
     add_mail_params_to_session = lambda do
       session[:mobile] = params[:mobile]
       [:to, :cc, :bcc].each do |t|
@@ -32,7 +30,7 @@ module Gw::Controller::Admin::Mobile::Mail
         session[:mobile][t] = params[:item][t]
       end
     end
-    
+
     if params[:addSysAddress]
       add_mail_params_to_session.call
       return redirect_to gw_webmail_sys_addresses_path
@@ -40,26 +38,25 @@ module Gw::Controller::Admin::Mobile::Mail
       add_mail_params_to_session.call
       return redirect_to gw_webmail_address_groups_path
     end
-    
+
     if params[:commit_send]
       flash[:commit_send] = params[:commit_send]
       [:in_to, :in_cc, :in_bcc, :in_subject].each do |t|
         flash[t] = params[:item][t]
       end
     end
-    
+
     case params[:mobile][:action]
     when 'new', 'create'
-      return create
+      create
     when 'edit', 'update'
-      return update
+      update
     when 'answer'
-      return answer
+      answer
     when 'forward'
-      return forward
+      forward
+    else
+      create
     end
-    
-    create
   end
-  
 end
