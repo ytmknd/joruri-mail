@@ -25,8 +25,7 @@ class Gw::Admin::Webmail::AddressGroupsController < Gw::Controller::Admin::Base
     @items = Gw::WebmailAddress.readable.where(user_id: Core.user.id).order(@orders)
     @s_items = @items.search(params) if params[:search]
 
-    @groups = Gw::WebmailAddressGroup.user_groups
-    @root_groups = @groups.select {|i| i.parent_id == 0}
+    @root_groups = Gw::WebmailAddressGroup.user_root_groups
 
     _index @s_items || @items
   end

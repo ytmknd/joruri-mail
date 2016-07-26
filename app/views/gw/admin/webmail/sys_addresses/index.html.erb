@@ -17,9 +17,10 @@
     </li>
   </ul>
   <ul class="root" id="folderRoot">
+    <% counts = @groups.enabled_children_counts %>
     <% @groups.each do |group| %>
       <li class="folder">
-        <% if group.enabled_children.count > 0 %>
+        <% if counts[group.id].to_i > 0 %>
           <a href="#toggleGroups" id="toggleGroup<%= group.id %>" data-gid="<%= group.id %>" class="toggleGroups toggleGroupsClose">+</a>
         <% else %>
           <a href="#" class="toggleGroups" style="visibility:hidden;">+</a>

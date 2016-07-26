@@ -22,7 +22,6 @@ class Gw::WebmailAddress < ActiveRecord::Base
   end
 
   scope :readable, ->(user = Core.user) { where(user_id: user.id) }
-  scope :user_addresses, ->(user = Core.user) { where(user_id: user.id) }
   scope :search, ->(params) {
     rel = all
     params.each do |k, vs|

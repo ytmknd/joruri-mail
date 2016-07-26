@@ -29,6 +29,18 @@ class Sys::Group < Sys::ManageDatabase
   validates :code, presence: true, uniqueness: true
 
   scope :readable, -> { all }
+  scope :enabled_roots, -> { where(parent_id: 1, state: 'enabled') }
+
+  scope :enabled_children_counts, -> {
+    joins(:enabled_children).group(:id).count('enabled_children_sys_groups.id')
+  }
+  scope :enabled_users_counts, -> {
+    if self.show_only_ldap_user
+      joins(:ldap_users).group(:id).count('sys_users.id')
+    else
+      joins(:enabled_users).group(:id).count('sys_users.id')
+    end
+  }
 
   def ou_name
     "#{code}#{name}"

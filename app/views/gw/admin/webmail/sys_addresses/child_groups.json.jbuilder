@@ -1,6 +1,6 @@
-json.id @group.id
-json.children @children do |child|
+counts = @group.enabled_children.enabled_children_counts
+json.children @group.enabled_children do |child|
   json.id child.id
   json.name child.name
-  json.has_children child.enabled_children.exists?
+  json.has_children counts[child.id].to_i > 0
 end

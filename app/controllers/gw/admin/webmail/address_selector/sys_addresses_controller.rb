@@ -13,7 +13,6 @@ class Gw::Admin::Webmail::AddressSelector::SysAddressesController < Gw::Controll
 
   def show
     @group = Sys::Group.find(params[:id])
-    @groups = @group.enabled_children
     @items = @group.users_having_email.reorder(@orders)
   end
 end

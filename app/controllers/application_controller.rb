@@ -63,10 +63,14 @@ class ApplicationController < ActionController::Base
 
   private
 
-  def rescue_exception(exception)
-    @exception = exception
+  def rescue_exception(e)
+    @exception = e
     error_log("#{@exception}\n" + @exception.backtrace.join("\n")) if Rails.env == 'production'
-    render template: 'application/exception', layout: true, status: 500
+    if params[:format] == 'html'
+      render template: 'application/exception', layout: true, status: 500
+    else
+      raise @exception
+    end
   end
 
   def http_error(status, message = nil)

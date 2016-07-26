@@ -5,7 +5,6 @@ class Gw::WebmailAddressGroup < ActiveRecord::Base
 
   has_many :children, -> { order(:name, :id) },
     foreign_key: :parent_id, class_name: 'Gw::WebmailAddressGroup', dependent: :destroy
-
   has_many :groupings, foreign_key: :group_id, class_name: 'Gw::WebmailAddressGrouping', dependent: :destroy
   has_many :addresses, -> { order(:email, :id) }, through: :groupings
 
@@ -15,19 +14,7 @@ class Gw::WebmailAddressGroup < ActiveRecord::Base
   validates :user_id, :name, presence: true
 
   scope :readable, ->(user = Core.user) { where(user_id: user.id) }
-
-  def self.user_root_groups(conditions = {})
-    cond = conditions.merge(parent_id: 0, level_no: 1)
-    self.user_groups(cond)
-  end
-
-  def self.user_groups(conditions = {})
-    self.where(conditions.merge(user_id: Core.user.id)).order(:name, :id)
-  end
-
-  def self.user_sorted_groups(conditions = {})
-    self.new.sorted_groups(self.user_root_groups(conditions))
-  end
+  scope :user_root_groups, -> { where(parent_id: 0, level_no: 1, user_id: Core.user.id) }
 
   def editable?
     Core.user.has_auth?(:manager) || user_id == Core.user.id
@@ -35,18 +22,6 @@ class Gw::WebmailAddressGroup < ActiveRecord::Base
 
   def deletable?
     Core.user.has_auth?(:manager) || user_id == Core.user.id
-  end
-
-  def sorted_groups(roots)
-    groups = []
-    down = lambda do |p|
-      if new_record? || p.id != id
-        groups << p
-        p.children.each {|child| down.call(child)}
-      end
-    end
-    roots.each {|item| down.call(item)}
-    return groups
   end
 
   def nested_name
@@ -72,5 +47,11 @@ class Gw::WebmailAddressGroup < ActiveRecord::Base
 
   def descendant_options
     descendants {|rel| rel.select(:id, :name, :level_no) }.map {|g| [g.nested_name, g.id] }
+  end
+
+  class << self
+    def user_sorted_groups
+      user_root_groups.map { |g| g.descendants { |rel| rel.order(:name, :id) } }.flatten
+    end
   end
 end

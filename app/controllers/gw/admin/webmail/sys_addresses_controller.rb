@@ -55,13 +55,14 @@ class Gw::Admin::Webmail::SysAddressesController < Gw::Controller::Admin::Base
 
   def child_groups
     @group = Sys::Group.find(params[:id])
-    @children = @group.enabled_children
     render layout: false if request.xhr?
   end
 
   def child_users
     @group = Sys::Group.find(params[:id])
-    @users = @group.users_having_email.reorder(@orders).paginate(page: 1, per_page: 1000)
+    @users = @group.users_having_email.reorder(@orders)
+      .paginate(page: 1, per_page: 1000)
+      .preload(:groups)
     @gid = @group.id
     @gname = @group.name
     render layout: false if request.xhr?

@@ -23,9 +23,10 @@ pri_search_field_options = [['名前', 's_name_or_kana'], ['メールアドレ�
       <td rowspan="3" class="addressesColumn">
         <div id="sysAddresses" class="addresses" style="display:none">
           <ul id="sysAddressesRoot">
-          <% Sys::Group.where(parent_id: 1, state: 'enabled').order(:sort_no).each do |g| %>
+          <% counts = Sys::Group.enabled_roots.enabled_children_counts %>
+          <% Sys::Group.enabled_roots.order(:sort_no).each do |g| %>
             <li class="group" id="sysGroup<%= g.id %>">
-            <% if g.enabled_children.length > 0 %>
+            <% if counts[g.id].to_i > 0 %>
               <%= link_to '+', '#', id: "sysToggleItems#{g.id}", class: "toggleItems toggleItemsClose",
                 onclick: "AddressSelector.instance.loadItems('sys', '#{g.id}');return false" %>
             <% else %>
@@ -40,7 +41,7 @@ pri_search_field_options = [['名前', 's_name_or_kana'], ['メールアドレ�
         <div id="priAddresses" class="addresses" style="display:none">
           <ul id="priAddressesRoot">
             <li class="group" id="priGroup0">
-            <% if Gw::WebmailAddress.user_addresses.size > 0 %>
+            <% if Gw::WebmailAddress.where(user_id: Core.user.id).exists? %>
               <%= link_to '+', '#', id: "priToggleItems0", class: "toggleItems toggleItemsClose",
                 onclick: "AddressSelector.instance.loadItems('pri', '0');return false" %>
             <% else %>
