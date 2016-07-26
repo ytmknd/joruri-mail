@@ -102,25 +102,7 @@ class Gw::Admin::Webmail::MailsController < Gw::Controller::Admin::Base
     @mail_address_history = confs[:mail_address_history].blank? ? 10 : confs[:mail_address_history].to_i
     @label_confs = Gw::WebmailSetting.load_label_confs
 
-    if params[:download] == "eml"
-      filename = @item.subject + ".eml"
-      filename = filename.gsub(/[\/\<\>\|:"\?\*\\]/, '_')
-      msg = @item.rfc822 || @item.mail.to_s
-      return send_data(msg, filename: filename, type: 'message/rfc822', disposition: 'attachment')
-    elsif params[:download] == 'all'
-      filename = sprintf("%07d_%s.zip", @item.uid, Util::File.filesystemize(@item.subject, length: 100))
-      zipdata = @item.zip_attachments(encoding: request.user_agent =~ /Windows/ ? 'shift_jis' : 'utf-8')
-      return send_data(zipdata, type: 'application/zip', filename: filename, disposition: 'attachment')
-    elsif params[:download]
-      return download_attachment(params[:download])
-    elsif params[:header]
-      msg = @item.rfc822 || @item.mail.to_s
-      msg = msg.slice(0, msg.index("\r\n\r\n"))
-      return send_data(msg.gsub(/\r\n/m, "\n"), type: 'text/plain; charset=utf-8', disposition: 'inline')
-    elsif params[:source]
-      msg = @item.rfc822 || @item.mail.to_s
-      return send_data(msg.gsub(/\r\n/m, "\n"), type: 'text/plain; charset=utf-8', disposition: 'inline')
-    elsif params[:show_html_image]
+    if params[:show_html_image]
       return http_error(404) unless @item.html_mail?
       return respond_to do |format|
         format.json { render :show_html }
@@ -172,10 +154,33 @@ class Gw::Admin::Webmail::MailsController < Gw::Controller::Admin::Base
     _show @item
   end
 
+  def download
+    @item  = Gw::WebmailMail.find_by_uid(params[:id], select: @mailbox.name, conditions: @filter)
+    return error_auth unless @item
+
+    case
+    when params[:download] == 'eml'
+      filename = @item.subject + '.eml'
+      msg = @item.rfc822
+      send_data(msg, filename: filename, type: 'message/rfc822', disposition: 'attachment')
+    when params[:download] == 'all'
+      filename = sprintf("%07d_%s.zip", @item.uid, Util::File.filesystemize(@item.subject, length: 100))
+      zipdata = @item.zip_attachments(encoding: request.user_agent =~ /Windows/ ? 'shift_jis' : 'utf-8')
+      send_data(zipdata, type: 'application/zip', filename: filename, disposition: 'attachment')
+    when params[:download]
+      return download_attachment(params[:download])
+    when params[:header]
+      msg = @item.rfc822
+      msg = msg.slice(0, msg.index("\r\n\r\n"))
+      send_data(msg, type: 'text/plain; charset=utf-8', disposition: 'inline')
+    when params[:source]
+      msg = @item.rfc822
+      send_data(msg, type: 'text/plain; charset=utf-8', disposition: 'inline')
+    end
+  end  
+
   def download_attachment(no)
-    return http_error(404) unless no =~ /^[0-9]+$/
     return http_error(404) unless @file = @item.attachments[no.to_i]
-    #return http_error(404) unless @file.name == params[:filename]
 
     if params[:thumbnail].present? && (data = @file.thumbnail(width: params[:width] || 64, height: params[:height] || 64, format: :JPEG, quality: 70))
       filedata = data

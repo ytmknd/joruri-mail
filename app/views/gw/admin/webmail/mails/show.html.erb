@@ -1,3 +1,7 @@
+<%
+# TODO: call inline_contents before for html_image_was_omitted?
+@item.inline_contents
+%>
 <table id="webmailContainer"><tr>
 <% unless @new_window %>
 <td id="webmailMenu"><div id="webmailMenuContainer">
@@ -57,9 +61,9 @@
         data: { url: url_for(action: :answer, all: 1, qt: 1) } %></div>
     </div>
     <div id="otherMenu" class="popupMenu" style="display:none; width:100px">
-      <div class="menuItem"><%= link_to 'ローカル保存', { download: 'eml'} %></div>
-      <div class="menuItem"><%= link_to 'ヘッダ表示', { header: 1 }, target: '_blank' %></div>
-      <div class="menuItem"><%= link_to 'ソース表示', { source: 1 }, target: '_blank' %></div>
+      <div class="menuItem"><%= link_to 'ローカル保存', { action: :download, download: 'eml'} %></div>
+      <div class="menuItem"><%= link_to 'ヘッダ表示', { action: :download, header: 1 }, target: '_blank' %></div>
+      <div class="menuItem"><%= link_to 'ソース表示', { action: :download, source: 1 }, target: '_blank' %></div>
       <% if Core.current_user.id == Core.user.id %>
       <div class="menuItem"><%= link_to '迷惑メール登録', '#registerSpamMail' %></div>
       <% end %>
@@ -208,7 +212,7 @@
     <tr>
       <td class="title">添付ファイル</td>
       <td class="actions">
-        <%= link_to '一括ダウンロード', { download: :all } %>
+        <%= link_to '一括ダウンロード', { action: :download, download: :all } %>
       </td>
     </tr>
   </table>
@@ -221,29 +225,29 @@
           <% if at.image? %>
             <span class="thumbnail">
               <span class="box" title="<%= file_title %>">
-                <a class="box" href="<%= url_for(download: at.seqno, size: at.size) %>" target="_blank">
+                <a class="box" href="<%= url_for(action: :download, download: at.seqno, size: at.size) %>" target="_blank">
                   <% if thumbnail = thumbnail_for_embed(at, width: 128, height: 96) %>
                     <img src="data:image/jpeg;base64,<%= thumbnail %>" class="image" alt="<%= file_title %>" title="<%= file_title %>" />
                   <% else %>
-                    <%= image_tag url_for(download: at.seqno, thumbnail: 1, width: 128, height: 96), alt: file_title, title: file_title %>
+                    <%= image_tag url_for(action: :download, download: at.seqno, thumbnail: 1, width: 128, height: 96), alt: file_title, title: file_title %>
                   <% end %>
                 </a>
               </span>
               <span class="remarks">
                 <%= at.name %><br />
-                <a href="<%= url_for(download: at.seqno, size: at.size, disposition: :attachment) %>" title="<%= file_title %>">ダウンロード</a> (<%= at.eng_unit %>)
+                <a href="<%= url_for(action: :download, download: at.seqno, size: at.size, disposition: :attachment) %>" title="<%= file_title %>">ダウンロード</a> (<%= at.eng_unit %>)
               </span>
             </span>
           <% else %>
             <span class="thumbnail">
               <span class="box" title="<%= file_title %>">
-                <a href="<%= url_for(download: at.seqno, size: at.size) %>" target="<%= (at.image? ? '_blank' : nil) %>" title="<%= file_title %>">
+                <a href="<%= url_for(action: :download, download: at.seqno, size: at.size) %>" target="<%= (at.image? ? '_blank' : nil) %>" title="<%= file_title %>">
                   <span class="<%= at.css_class %>"><%= mail_text_wrap(at.name, 5) %></span>
                 </a>
               </span>
               <span class="remarks">
                 <%= at.name %><br />
-                <a href="<%= url_for(download: at.seqno, size: at.size, disposition: :attachment) %>" title="<%= file_title %>">ダウンロード</a> (<%= at.eng_unit %>)
+                <a href="<%= url_for(action: :download, download: at.seqno, size: at.size, disposition: :attachment) %>" title="<%= file_title %>">ダウンロード</a> (<%= at.eng_unit %>)
               </span>
             </span>
           <% end %>
@@ -252,7 +256,7 @@
       <% else %>
         <td id="normalArea">
           <% @item.attachments.each do |at| %>
-            <%= link_to h("#{at.name}(#{at.eng_unit})"), { download: at.seqno, size: at.size },
+            <%= link_to h("#{at.name}(#{at.eng_unit})"), { action: :download, download: at.seqno, size: at.size },
               target: (at.image? ? '_blank' : nil), class: at.css_class %>
           <% end %>
         </td>

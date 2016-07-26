@@ -131,7 +131,7 @@
   <tr>
     <td id="showNormalArea">
       <% @item.attachments.each do |at| %>
-        <%= link_to_if attachment_file_downloadable?, mail_text_wrap("#{at.name}(#{at.eng_unit})"), { download: at.seqno, size: at.size },
+        <%= link_to_if attachment_file_downloadable?, mail_text_wrap("#{at.name}(#{at.eng_unit})"), { action: :download, download: at.seqno, size: at.size },
           target: (at.image? ? '_blank' : nil), class: at.css_class %>
       <% end %>
     </td>

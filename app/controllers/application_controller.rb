@@ -49,7 +49,7 @@ class ApplicationController < ActionController::Base
 
   def send_data(data, options = {})
     if options[:filename].present?
-      options[:filename].gsub!(/[\/\<\>\|:"\?\*\\]/, '_')
+      options[:filename] = Util::File.filesystemize(options[:filename])
       case
       when request.env['HTTP_USER_AGENT'] =~ /(MSIE 6|MSIE 7)/
         options[:filename] = NKF.nkf("-s", options[:filename])

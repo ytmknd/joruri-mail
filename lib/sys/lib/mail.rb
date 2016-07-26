@@ -417,7 +417,7 @@ module Sys::Lib::Mail
       body = decode(part.body.decoded, part.charset)
     end
     body, image_was_omitted = secure_html_body(body, options)
-    @html_image_was_omitted ||= image_was_omitted
+    @html_image_was_omitted = image_was_omitted
 
     unless options[:replace_cid] == false
       files = []
@@ -490,7 +490,7 @@ module Sys::Lib::Mail
         end
       end
     ))
-    [Nokogiri::HTML5(html).xpath('//body').inner_html, sanitize_image]
+    return Nokogiri::HTML5(html).xpath('//body').inner_html, sanitize_image
   end
 
   def convert_html_to_text(html)

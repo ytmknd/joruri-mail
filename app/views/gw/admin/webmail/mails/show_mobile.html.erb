@@ -71,7 +71,7 @@
 <% end %>
 <div class="files">
 <% @item.attachments.each do |at| %>
-  <div class="file"><%= link_to_if attachment_file_downloadable?, h("#{at.name}"), { download: at.seqno, size: at.size },
+  <div class="file"><%= link_to_if attachment_file_downloadable?, h("#{at.name}"), { action: :download, download: at.seqno, size: at.size },
     target: (at.image? ? '_blank' : nil), class: at.css_class %> (<%= h("#{at.eng_unit.gsub(/Bytes/,'B')}") %>)</div>
 <% end %>
 </div>
