@@ -220,10 +220,20 @@ module Gw::MailHelper
     return limit_size
   end
 
-  def thumbnail_for_embed(at, options)
+  def attachment_thumbnail_options
+    {
+      width: Joruri.config.application['webmail.thumbnail_width'],
+      height: Joruri.config.application['webmail.thumbnail_height'],
+      format: 'jpeg',
+      quality: Joruri.config.application['webmail.thumbnail_quality'],
+      method: Joruri.config.application['webmail.thumbnail_method']
+    }
+  end
+
+  def attachment_thumbnail_for_embed(at)
     limit_size = data_uri_scheme_limit_size
 
-    if limit_size > 0 && (thumbnail = at.thumbnail(width: options[:width] || 128, height: options[:height] || 96, format: :JPEG, quality: 70))
+    if limit_size > 0 && (thumbnail = at.thumbnail(attachment_thumbnail_options))
       thumbnail = Base64.encode64(thumbnail)
       if thumbnail.length <= limit_size
         return thumbnail

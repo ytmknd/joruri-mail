@@ -177,23 +177,19 @@ class Gw::Admin::Webmail::MailsController < Gw::Controller::Admin::Base
       msg = @item.rfc822
       send_data(msg.gsub(/\r\n/m, "\n"), type: 'text/plain; charset=utf-8', disposition: 'inline')
     end
-  end  
+  end
 
   def download_attachment(no)
-    return http_error(404) unless no =~ /^[0-9]+$/
-    return http_error(404) unless @file = @item.attachments[no.to_i]
-    #return http_error(404) unless @file.name == params[:filename]
+    return http_error(404) unless at = @item.attachments[no.to_i]
 
-    if params[:thumbnail].present? && (data = @file.thumbnail(width: params[:width] || 64, height: params[:height] || 64, format: :JPEG, quality: 70))
-      filedata = data
-      content_type = 'image/jpeg'
+    if params[:thumbnail].present? && (data = at.thumbnail(attachment_thumbnail_options))
+      type = 'image/jpeg'
     else
-      filedata = @file.body
-      content_type = @file.content_type
+      data = at.body
+      type = at.content_type
     end
-    disposition = params[:disposition] ? params[:disposition] : (@file.image? ? 'inline' : 'attachment')
 
-    send_data(filedata, type: content_type, filename: @file.name, disposition: disposition)
+    send_data(data, type: type, filename: at.name, disposition: params[:disposition].presence || at.disposition)
   end
 
   def new

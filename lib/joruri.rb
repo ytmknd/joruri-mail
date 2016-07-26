@@ -15,7 +15,11 @@ module Joruri
         "webmail.filter_condition_max_count"     => 100,
         "webmail.mail_address_history_max_count" => 100,
         "webmail.synchronize_mobile_setting"     => 0,
-        "webmail.show_gw_schedule_link"          => 1
+        "webmail.show_gw_schedule_link"          => 1,
+        "webmail.thumbnail_width"                => 128,
+        "webmail.thumbnail_height"               => 96,
+        "webmail.thumbnail_quality"              => 50,
+        "webmail.thumbnail_method"               => 'thumbnail',
     }}
   end
   

@@ -226,10 +226,10 @@
             <span class="thumbnail">
               <span class="box" title="<%= file_title %>">
                 <a class="box" href="<%= url_for(action: :download, download: at.seqno, size: at.size) %>" target="_blank">
-                  <% if thumbnail = thumbnail_for_embed(at, width: 128, height: 96) %>
+                  <% if thumbnail = attachment_thumbnail_for_embed(at) %>
                     <img src="data:image/jpeg;base64,<%= thumbnail %>" class="image" alt="<%= file_title %>" title="<%= file_title %>" />
                   <% else %>
-                    <%= image_tag url_for(action: :download, download: at.seqno, thumbnail: 1, width: 128, height: 96), alt: file_title, title: file_title %>
+                    <%= image_tag url_for(action: :download, download: at.seqno, thumbnail: 1), alt: file_title, title: file_title %>
                   <% end %>
                 </a>
               </span>
