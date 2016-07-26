@@ -175,7 +175,7 @@
       <%= submit_tag '編集', name: 'mobile_edit', class: 'edit' %>
       <%= submit_tag '削除', name: 'mobile_delete', class: 'delete' %>
     <% else %>
-      <%= submit_tag '編集', name: 'mobile_resend', class: 'edit' if @mailbox.sent_box? %>
+      <%= submit_tag '編集', name: 'mobile_edit', class: 'edit' if @mailbox.sent_box? %>
       <%= submit_tag '移動', name: 'mobile_move', class: 'move' %>
       <%= submit_tag 'コピー', name: 'mobile_copy', class: 'copy' %>
       <%= submit_tag '削除', name: 'mobile_delete', class: 'delete' %>

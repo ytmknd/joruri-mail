@@ -12,7 +12,7 @@ Joruri::Application.routes.draw do
               post :move, :delete, :seen, :unseen, :register_spam, :mobile_manage, :status
             end
             member do
-              get :edit, :answer, :forward, :resend
+              get :edit, :answer, :forward
               post :edit, :answer, :forward, :send_mdn, :mobile_send
             end
           end

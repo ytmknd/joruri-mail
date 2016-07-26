@@ -6,7 +6,8 @@ class Gw::WebmailMail
   FORMAT_HTML = 'html'
 
   attr_accessor :charset, :in_to, :in_cc, :in_bcc, :in_from, :in_sender,
-    :in_subject, :in_body, :in_html_body, :in_format, :in_files, :tmp_id, :tmp_attachment_ids, :request_mdn
+    :in_subject, :in_body, :in_html_body, :in_format, :in_files, :in_request_mdn,
+    :tmp_id, :tmp_attachment_ids
   attr_reader :in_to_addrs, :in_cc_addrs, :in_bcc_addrs
 
   def initialize(attributes = nil)
@@ -38,10 +39,6 @@ class Gw::WebmailMail
 
   def find_node
     Gw::WebmailMailNode.where(user_id: Core.current_user.id, mailbox: mailbox, uid: uid).first
-  end
-
-  def request_mdn?
-    @request_mdn.to_s == "1"
   end
 
   def reference=(reference)
@@ -111,6 +108,113 @@ class Gw::WebmailMail
     return errors.size == 0
   end
 
+  def init_for_new(template: nil, sign: nil)
+    self.tmp_id = Sys::File.new_tmp_id
+    if template
+      self.in_to      = template.to
+      self.in_cc      = template.cc
+      self.in_bcc     = template.bcc
+      self.in_subject = template.subject
+      self.in_body    = template.body
+    end
+    if sign
+      self.in_body = "\n\n#{sign.body}"
+    end
+    self.in_format = FORMAT_TEXT 
+  end
+
+  def init_for_edit(ref, format:)
+    self.tmp_id     = Sys::File.new_tmp_id
+    self.in_to      = ref.friendly_to_addrs.join(', ')
+    self.in_cc      = ref.friendly_cc_addrs.join(', ')
+    self.in_bcc     = ref.friendly_bcc_addrs.join(', ')
+    self.in_subject = ref.subject
+    if format == FORMAT_HTML && ref.html_mail?
+      self.in_html_body = ref.html_body_for_edit
+      self.in_format    = FORMAT_HTML         
+    else
+      self.in_body      = ref.text_body
+      self.in_format    = FORMAT_TEXT     
+    end
+    self.in_request_mdn = '1' if ref.has_disposition_notification_to?
+
+    init_tmp_attachments_from_ref(ref)
+  end
+
+  def init_for_answer(ref, format:, sign: nil, sign_pos: nil, all: nil, quote: nil)
+    self.tmp_id     = Sys::File.new_tmp_id
+    self.in_to      = ref.friendly_reply_to_addrs(all.present?).join(', ')
+    self.in_cc      = ref.friendly_cc_addrs.join(', ') if all
+    self.in_subject = "Re: #{ref.subject}"
+
+    if format == FORMAT_HTML && ref.html_mail?
+      quot_body = "<p></p>#{ref.referenced_html_body}" if quote
+      sign_body = Util::String.text_to_html("\n" + sign.body) if sign
+      self.in_html_body = concat_body_and_sign(quot_body, sign_body, sign_pos)
+      self.in_format = FORMAT_HTML
+    else
+      quot_body = "\n\n#{ref.referenced_body}" if quote
+      sign_body = "\n\n#{sign.body}" if sign
+      self.in_body = concat_body_and_sign(quot_body, sign_body, sign_pos)
+      self.in_format = FORMAT_TEXT
+    end
+  end
+
+  def init_for_forward(ref, format:, sign: nil, sign_pos: nil)
+    self.tmp_id      = Sys::File.new_tmp_id
+    self.in_subject  = "Fw: #{ref.subject}"
+
+    if format == FORMAT_HTML && ref.html_mail?
+      quot_body = "<p></p>#{ref.referenced_html_body(:forward)}"
+      sign_body = Util::String.text_to_html("\n" + sign.body) if sign  
+      self.in_html_body = concat_body_and_sign(quot_body, sign_body, sign_pos)
+      self.in_format = FORMAT_HTML    
+    else
+      quot_body = "\n\n#{ref.referenced_body(:forward)}"
+      sign_body = "\n\n#{sign.body}" if sign
+      self.in_body = concat_body_and_sign(quot_body, sign_body, sign_pos)
+      self.in_format = FORMAT_TEXT
+    end
+
+    init_tmp_attachments_from_ref(ref)
+  end
+
+  def init_tmp_attachments_from_ref(ref)
+    self.tmp_attachment_ids = []
+    ref.attachments.each do |f|
+      file = Gw::WebmailMailAttachment.new(tmp_id: tmp_id)
+      tmpfile = Sys::Lib::File::Tempfile.new(data: f.body, filename: f.name)
+      file.save_file(tmpfile)
+      self.tmp_attachment_ids << file.id
+    end
+  end
+
+  def concat_body_and_sign(quot_body, sign_body, sign_pos)
+    if sign_pos.blank?
+      "#{sign_body}#{quot_body}"
+    else
+      "#{quot_body}#{sign_body}"
+    end
+  end
+
+  def init_from_flash(flash = {})
+    self.in_to  = flash[:mail_to] if flash[:mail_to]
+    self.in_cc  = flash[:mail_cc] if flash[:mail_cc]
+    self.in_bcc = flash[:mail_bcc] if flash[:mail_bcc]
+    self.in_subject = flash[:mail_subject] if flash[:mail_subject]
+    self.in_body = flash[:mail_body] if flash[:mail_body]
+    self.tmp_id = flash[:mail_tmp_id] if flash[:mail_tmp_id]
+    self.tmp_attachment_ids = flash[:mail_tmp_attachment_ids] if flash[:mail_tmp_attachment_ids]
+  end
+
+  def init_from_params(params = {})
+    self.in_to      = NKF::nkf('-w', params[:to]) if params[:to]
+    self.in_cc      = NKF::nkf('-w', params[:cc]) if params[:cc]
+    self.in_bcc     = NKF::nkf('-w', params[:bcc]) if params[:bcc]
+    self.in_subject = NKF::nkf('-w', params[:subject]) if params[:subject]
+    self.in_body    = "#{NKF::nkf('-w', params[:body])}\n\n#{in_body}" if params[:body]
+  end
+
   def prepare_mail(request = nil)
     mail = Mail.new
     mail.charset     = charset
@@ -123,7 +227,7 @@ class Gw::WebmailMail
 
     mail.header["X-Mailer"] = "Joruri Mail ver. #{Joruri.version}"
     mail.header["User-Agent"] = request.user_agent.force_encoding('us-ascii') if request
-    mail.header["Disposition-Notification-To"] = @in_from_addr[0].to_s if self.request_mdn?
+    mail.header["Disposition-Notification-To"] = @in_from_addr[0].to_s if in_request_mdn == '1'
 
     if @reference ## for answer
       references = []

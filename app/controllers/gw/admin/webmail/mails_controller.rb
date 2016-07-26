@@ -3,7 +3,7 @@ class Gw::Admin::Webmail::MailsController < Gw::Controller::Admin::Base
   include Gw::Controller::Admin::Mobile::Mail
   layout :select_layout
 
-  before_action :check_user_email, only: [:new, :create, :edit, :update, :answer, :forward, :resend] 
+  before_action :check_user_email, only: [:new, :create, :edit, :update, :answer, :forward] 
   before_action :handle_mailto_scheme, if: -> { params[:src] == 'mailto' }
 
   def pre_dispatch
@@ -193,30 +193,16 @@ class Gw::Admin::Webmail::MailsController < Gw::Controller::Admin::Base
     @form_action = "create"
 
     @item = Gw::WebmailMail.new
-    @item.tmp_id  = Sys::File.new_tmp_id
-    if default_template
-      @item.in_to      = default_template.to
-      @item.in_cc      = default_template.cc
-      @item.in_bcc     = default_template.bcc
-      @item.in_subject = default_template.subject
-      @item.in_body    = default_template.body
-    end
-    if default_sign_body
-      @item.in_body  ||= ""
-      @item.in_body   += "\n\n#{default_sign_body}"
-    end
+    @item.init_for_new(template: default_template, sign: default_sign)
+    @item.init_from_flash(flash)
+    @item.init_from_params(params)
+  end
 
-    load_address_from_flash
+  def create
+    @form_action = "create"
 
-    @item.in_to      = NKF::nkf('-w', params[:to]) if params[:to]
-    @item.in_cc      = NKF::nkf('-w', params[:cc]) if params[:cc]
-    @item.in_bcc     = NKF::nkf('-w', params[:bcc]) if params[:bcc]
-    @item.in_subject = NKF::nkf('-w', params[:subject]) if params[:subject]
-    @item.in_body    = "#{NKF::nkf('-w', params[:body])}\n\n#{@item.in_body}" if params[:body]
-
-    @item.in_format = Gw::WebmailMail::FORMAT_TEXT 
-
-    #@mailboxes  = load_mailboxes
+    @item = Gw::WebmailMail.new(params[:item])
+    send_message(@item)
   end
 
   def edit
@@ -225,29 +211,32 @@ class Gw::Admin::Webmail::MailsController < Gw::Controller::Admin::Base
 
     @ref = Gw::WebmailMail.find_by_uid(params[:id], select: @mailbox.name, conditions: @filter)
     return http_error(404) unless @ref
-    ref_node = @ref.find_node
 
     @item = Gw::WebmailMail.new(params[:item])
-    @item.tmp_id     = Sys::File.new_tmp_id
-    @item.in_to      = @ref.friendly_to_addrs.join(', ')
-    @item.in_cc      = @ref.friendly_cc_addrs.join(', ')
-    @item.in_bcc     = @ref.friendly_bcc_addrs.join(', ')
-    @item.in_subject = @ref.subject
-    if params[:mail_view] == Gw::WebmailMail::FORMAT_HTML && @ref.html_mail?
-      @item.in_html_body = @ref.html_body_for_edit
-      @item.in_format    = Gw::WebmailMail::FORMAT_HTML         
-    else
-      @item.in_body      = @ref.text_body
-      @item.in_format    = Gw::WebmailMail::FORMAT_TEXT     
-    end
-    @item.request_mdn = 1 if @ref.has_disposition_notification_to?
-
-    load_address_from_flash
-
-    load_attachments(@ref, @item)
-
-    #@mailboxes  = load_mailboxes
+    @item.init_for_edit(@ref, format: params[:mail_view])
+    @item.init_from_flash(flash)
     render :new
+  end
+
+  def update
+    @form_action = "update"
+    @form_method = "patch"
+
+    @ref = Gw::WebmailMail.find_by_uid(params[:id], select: @mailbox.name, conditions: @filter)
+    return http_error(404) unless @ref
+
+    @item = Gw::WebmailMail.new(params[:item])
+    send_message(@item, @ref) do
+      if !params[:remain_draft] && @ref.draft?
+        mailbox_uids = get_mailbox_uids(@mailbox, @ref.uid)
+        mailbox_uids.each do |mailbox, uids|
+          num = Gw::WebmailMail.delete_all(mailbox, uids, true)
+          if num > 0
+            Gw::WebmailMailNode.delete_nodes(mailbox, uids)
+          end
+        end
+      end
+    end
   end
 
   def answer
@@ -269,29 +258,13 @@ class Gw::Admin::Webmail::MailsController < Gw::Controller::Admin::Base
       end
     end
 
-    @item.tmp_id     = Sys::File.new_tmp_id
-    @item.in_to      = @ref.friendly_reply_to_addrs(params[:all].present?).join(', ')
-    @item.in_subject = "Re: " + @ref.subject
-
-    if params[:mail_view] == Gw::WebmailMail::FORMAT_HTML && @ref.html_mail?
-      quot_body = "<p></p>#{@ref.referenced_html_body}" if params[:qt]
-      sign_body = Util::String.text_to_html("\n" + default_sign_body) if default_sign_body
-      @item.in_html_body = concat_mail_body(quot_body, sign_body)
-      @item.in_format = Gw::WebmailMail::FORMAT_HTML
-    else
-      quot_body = "\n\n#{@ref.referenced_body}" if params[:qt]
-      sign_body = "\n\n#{default_sign_body}" if default_sign_body
-      @item.in_body = concat_mail_body(quot_body, sign_body)
-      @item.in_format = Gw::WebmailMail::FORMAT_TEXT
-    end
-
-    if params[:all]
-      @item.in_cc = @ref.friendly_cc_addrs.join(', ')
-    end
-
-    load_address_from_flash
-
-    #@mailboxes  = load_mailboxes
+    @item.init_for_answer(@ref, format: params[:mail_view],
+      sign: default_sign,
+      sign_pos: Gw::WebmailSetting.user_config_value(:sign_position),
+      all: params[:all],
+      quote: params[:qt]
+    )
+    @item.init_from_flash(flash)
     render :new
   end
 
@@ -313,94 +286,15 @@ class Gw::Admin::Webmail::MailsController < Gw::Controller::Admin::Base
       end
     end
 
-    @item.tmp_id      = Sys::File.new_tmp_id
-    @item.in_subject  = "Fw: " + @ref.subject
-
-    if params[:mail_view] == Gw::WebmailMail::FORMAT_HTML && @ref.html_mail?
-      quot_body = "<p></p>#{@ref.referenced_html_body(:forward)}"
-      sign_body = Util::String.text_to_html("\n" + default_sign_body) if default_sign_body  
-      @item.in_html_body = concat_mail_body(quot_body, sign_body)
-      @item.in_format = Gw::WebmailMail::FORMAT_HTML    
-    else
-      quot_body = "\n\n#{@ref.referenced_body(:forward)}"
-      sign_body = "\n\n#{default_sign_body}" if default_sign_body
-      @item.in_body = concat_mail_body(quot_body, sign_body) 
-      @item.in_format = Gw::WebmailMail::FORMAT_TEXT      
-    end
-
-    load_address_from_flash
-
-    load_attachments(@ref, @item)
-
-    #@mailboxes  = load_mailboxes
+    @item.init_for_forward(@ref, format: params[:mail_view],
+      sign: default_sign,
+      sign_pos: Gw::WebmailSetting.user_config_value(:sign_position)
+    )
+    @item.init_from_flash(flash)
     render :new
   end
 
-  def resend
-    @form_action = "create"
-
-    @ref = Gw::WebmailMail.find_by_uid(params[:id], select: @mailbox.name, conditions: @filter)
-    return http_error(404) unless @ref
-
-    @item = Gw::WebmailMail.new
-    @item.tmp_id     = Sys::File.new_tmp_id
-    @item.in_to      = @ref.friendly_to_addrs.join(', ')
-    @item.in_cc      = @ref.friendly_cc_addrs.join(', ')
-    @item.in_bcc     = @ref.friendly_bcc_addrs.join(', ')
-    @item.in_subject = @ref.subject
-    if params[:mail_view] == Gw::WebmailMail::FORMAT_HTML && @ref.html_mail?
-      @item.in_html_body = @ref.html_body
-      @item.in_format = Gw::WebmailMail::FORMAT_HTML
-    else
-      @item.in_body = @ref.text_body
-      @item.in_format = Gw::WebmailMail::FORMAT_TEXT
-    end
-    @item.request_mdn = 1 if @ref.has_disposition_notification_to?
-
-    load_address_from_flash
-
-    load_attachments(@ref, @item)
-
-    render :new
-  end
-
-  def create
-    @form_action = "create"
-
-    if params[:id] && params[:id] != '0' 
-      @ref = Gw::WebmailMail.find_by_uid(params[:id], select: @mailbox.name, conditions: @filter)
-      return http_error(404) unless @ref
-    end
-
-    @item = Gw::WebmailMail.new(params[:item])
-    send_message(@item, @ref) do
-      if !params[:remain_draft] && @ref && (@mailbox.draft_box? || @mailbox.star_box?)
-        mailbox_uids = get_mailbox_uids(@mailbox, @ref.uid)
-        mailbox_uids.each do |mailbox, uids|
-          num = Gw::WebmailMail.delete_all(mailbox, uids, true)
-          if num > 0
-            Gw::WebmailMailNode.delete_nodes(mailbox, uids)
-          end
-        end
-      end
-    end
-  end
-
-  def update
-    @form_action = "update"
-    @form_method = "patch"
-
-    @ref = Gw::WebmailMail.find_by_uid(params[:id], select: @mailbox.name, conditions: @filter)
-    return http_error(404) unless @ref
-
-    @item = Gw::WebmailMail.new(params[:item])
-    send_message(@item, @ref) do
-      Gw::WebmailMailNode.delete_nodes(@mailbox.name, @ref.uid)
-      @ref.destroy(true)
-    end
-  end
-
-  def send_message(item, ref, &block)
+  def send_message(item, ref = nil, &block)
     config = Gw::WebmailSetting.user_config_value(:mail_from)
     ma = Mail::Address.new
     ma.address      = Core.current_user.email
@@ -849,7 +743,7 @@ class Gw::Admin::Webmail::MailsController < Gw::Controller::Admin::Base
 
   def select_layout
     case params[:action].to_sym
-    when :new, :edit, :answer, :forward, :close, :create, :update, :resend
+    when :new, :create, :edit, :update, :answer, :forward, :close
       "admin/gw/mail_form"
     when :show, :move
       if params[:new_window].present?
@@ -883,14 +777,14 @@ class Gw::Admin::Webmail::MailsController < Gw::Controller::Admin::Base
     redirect_to new_gw_webmail_mail_path(mailto.merge(mailbox: 'INBOX'))
   end
 
-  def default_sign_body
-    return @default_sign.body if @default_sign
+  def default_sign
+    return @default_sign if @default_sign
     if request.mobile? || request.smart_phone?
       @default_sign = Gw::WebmailSign.new
     else
       @default_sign = (Gw::WebmailSign.default_sign || Gw::WebmailSign.new)
     end
-    @default_sign.body
+    @default_sign
   end
 
   def default_template
@@ -901,20 +795,6 @@ class Gw::Admin::Webmail::MailsController < Gw::Controller::Admin::Base
       @default_template = (Gw::WebmailTemplate.default_template || Gw::WebmailTemplate.new)
     end
     @default_template
-  end
-
-  def load_attachments(ref, item)
-    return unless item.tmp_attachment_ids.nil?
-
-    item.tmp_attachment_ids = []
-    if ref.has_attachments?
-      ref.attachments.each do |f|
-        file = Gw::WebmailMailAttachment.new(tmp_id: item.tmp_id)
-        tmpfile = Sys::Lib::File::Tempfile.new(data: f.body, filename: f.name)
-        file.save_file(tmpfile) # pass the errors
-        item.tmp_attachment_ids << file.id
-      end
-    end
   end
 
   def mdn_request_mode
@@ -942,25 +822,6 @@ class Gw::Admin::Webmail::MailsController < Gw::Controller::Admin::Base
 
     Core.imap.uid_store(@item.uid, "+FLAGS", "$Notified")
     @item.flags << "$Notified"
-  end
-
-  def load_address_from_flash
-    @item.in_to  = flash[:mail_to] if flash[:mail_to]
-    @item.in_cc  = flash[:mail_cc] if flash[:mail_cc]
-    @item.in_bcc = flash[:mail_bcc] if flash[:mail_bcc]
-    @item.in_subject = flash[:mail_subject] if flash[:mail_subject]
-    @item.in_body = flash[:mail_body] if flash[:mail_body]
-    @item.tmp_id = flash[:mail_tmp_id] if flash[:mail_tmp_id]
-    @item.tmp_attachment_ids = flash[:mail_tmp_attachment_ids] if flash[:mail_tmp_attachment_ids]
-  end
-
-  def concat_mail_body(quot_body, sign_body)
-    sign_position = Gw::WebmailSetting.user_config_value(:sign_position)
-    if sign_position.blank?
-      "#{sign_body}#{quot_body}"
-    else
-      "#{quot_body}#{sign_body}"
-    end
   end
 
   def get_sort_params(mailbox_name)
@@ -1056,8 +917,6 @@ class Gw::Admin::Webmail::MailsController < Gw::Controller::Admin::Base
       @form_action = "answer"
     when 'forward'
       @form_action = "forward"
-    when 'resend'
-      @form_action = "create"
     else
       raise e
     end

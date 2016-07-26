@@ -42,7 +42,7 @@ attachments = Gw::WebmailMailAttachment.where(tmp_id: @item.tmp_id)
 <%= f.hidden_field :in_html_body, class: 'html_body', rows: 10, istyle: '1', format: '*M', mode: 'hiragana' %>
 <% end %>
 <div class="confirm">
-  <%= f.check_box :request_mdn %>開封確認メッセージを要求する
+  <%= f.check_box :in_request_mdn %>開封確認メッセージを要求する
 </div>
 
 <%= f.hidden_field :in_format %>

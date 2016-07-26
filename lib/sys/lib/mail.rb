@@ -148,23 +148,21 @@ module Sys::Lib::Mail
   end
 
   def referenced_body(type = :answer)
-    body = ""
-    if type == :answer
-      body << text_body.to_s.gsub(/\r\n/, "\n").gsub(/^/, "> ")
-    elsif type == :forward
-      body << referenced_body_for_forward(:text)
+    case type
+    when :answer
+      text_body.to_s.gsub(/\r\n/, "\n").gsub(/^/, "> ")
+    when :forward
+      referenced_body_for_forward(:text)
     end
-    body
   end
 
   def referenced_html_body(type = :answer)
-    body = ""
-    if type == :answer
-      body << %Q(<blockquote>#{html_body_for_edit.to_s.gsub(/\r\n/, "\n")}</blockquote>\n)
-    elsif type == :forward
-      body << referenced_body_for_forward(:html)
+    case type
+    when :answer
+      %Q(<blockquote>#{html_body_for_edit.to_s.gsub(/\r\n/, "\n")}</blockquote>\n)
+    when :forward
+      referenced_body_for_forward(:html)
     end
-    body
   end
 
   def has_attachments?

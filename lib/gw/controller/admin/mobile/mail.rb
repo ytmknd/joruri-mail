@@ -14,10 +14,7 @@ module Gw::Controller::Admin::Mobile::Mail
       unseen
     elsif params[:mobile_edit]
       params[:item].delete(:ids) if params[:item][:ids]
-      redirect_to edit_gw_webmail_mail_path(params[:mailbox], params[:id])
-    elsif params[:mobile_resend]
-      params[:item].delete(:ids) if params[:item][:ids]
-      redirect_to resend_gw_webmail_mail_path(params[:mailbox], params[:id])
+      redirect_to action: :edit, id: params[:id]
     end
   end
 
@@ -52,16 +49,14 @@ module Gw::Controller::Admin::Mobile::Mail
     end
     
     case params[:mobile][:action]
-    when 'create'
+    when 'new', 'create'
       return create
-    when 'update'
+    when 'edit', 'update'
       return update
     when 'answer'
       return answer
     when 'forward'
       return forward
-    when 'resend'
-      return create
     end
     
     create

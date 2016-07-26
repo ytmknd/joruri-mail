@@ -23,7 +23,7 @@
       <%= link_to '≪一覧へ戻る', { action: :index }, class: 'index'
       %><span class="separator">|</span
       ><% end %><%= link_to '編集', '#editMail', class: 'edit', title: '編集', target: '_blank',
-        data: { url: url_for(action: :resend) }
+        data: { url: url_for(action: :edit) }
       %><%= link_to '削除', { action: :destroy, new_window: @new_window }, method: :delete, class: :delete, title: '削除'
       %><span class="separator">|</span
       ><%= link_to 'ラベル', '#showLabelMenu', class: 'label', title: 'ラベル'
@@ -37,7 +37,7 @@
       %><%= link_to '転送', '#editMail', class: 'forward', title: '転送', target: '_blank',
         data: { url: url_for(action: :forward) }
       %><%= link_to '編集', '#editMail', class: 'edit', title: '編集', target: '_blank',
-        data: { url: url_for(action: :resend) } if @mailbox.sent_box?
+        data: { url: url_for(action: :edit) } if @mailbox.sent_box?
       %><%= link_to '移動', '#moveMail', class: 'move', title: '移動'
       %><%= link_to 'コピー', '#copyMail', class: 'copy', title: 'コピー'
       %><%= link_to '削除', { action: :destroy, new_window: @new_window }, method: :delete, class: :delete, title: '削除'
