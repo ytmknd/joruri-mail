@@ -35,6 +35,12 @@ class Gw::WebmailAddressGroup < ActiveRecord::Base
       .map { |g| [g.nested_name, g.id] }
   end
 
+  def descendant_options
+    descendants {|rel| rel.select(:id, :name, :level_no) }.map {|g| [g.nested_name, g.id] }
+  end
+
+  private
+
   def update_child_level_no
     if call_update_child_level_no && level_no_changed?
       children.each do |c|
@@ -43,10 +49,6 @@ class Gw::WebmailAddressGroup < ActiveRecord::Base
         c.save(validate: false)
       end
     end
-  end
-
-  def descendant_options
-    descendants {|rel| rel.select(:id, :name, :level_no) }.map {|g| [g.nested_name, g.id] }
   end
 
   class << self
