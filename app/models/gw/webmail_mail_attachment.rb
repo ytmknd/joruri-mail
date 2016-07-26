@@ -1,4 +1,3 @@
-require 'shared-mime-info'
 class Gw::WebmailMailAttachment < ActiveRecord::Base
   include Sys::Model::Base
   include Sys::Model::Base::File

@@ -1,4 +1,3 @@
-require 'shared-mime-info'
 class Sys::Lib::File::Tempfile < Tempfile
   
   def initialize(options = {})
