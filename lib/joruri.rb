@@ -26,6 +26,7 @@ module Joruri
   
   class Joruri::Config
     def self.application
+      return $joruri_config[:application] if $joruri_config[:application]
       config = Joruri.default_config["application"]
       file   = "#{Rails.root}/config/application.yml"
       if ::File.exist?(file)
