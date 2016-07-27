@@ -605,7 +605,7 @@ class Gw::Admin::Webmail::MailsController < Gw::Controller::Admin::Base
     if label_id == 0
       @item.flags.clear
     elsif labeled
-      @item.flags.delete(label_id)
+      @item.flags.delete("$label#{label_id}")
     else
       @item.flags << "$label#{label_id}"
     end
