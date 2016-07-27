@@ -4,8 +4,9 @@ class Gw::Admin::Webmail::MailsController < Gw::Controller::Admin::Base
   layout :select_layout
   rescue_from Exception, with: :rescue_mail
 
-  before_action :check_user_email, only: [:new, :create, :edit, :update, :answer, :forward] 
   before_action :handle_mailto_scheme, if: -> { params[:src] == 'mailto' }
+  before_action :check_user_email, only: [:new, :create, :edit, :update, :answer, :forward]
+  before_action :check_posted_uids, only: [:move, :delete, :seen, :unseen, :register_spam]
 
   before_action :set_conf, only: [:index, :show, :move]
   before_action :set_address_histories, only: [:index, :show, :move]
@@ -349,17 +350,12 @@ class Gw::Admin::Webmail::MailsController < Gw::Controller::Admin::Base
     end
   end
 
-  ## move_all or move_one
   def move
-    if !params[:item] || !params[:item][:ids]
-      return redirect_to action: :index
-    end
-
-    uids = params[:item][:ids].collect{|k, v| k.to_s =~ /^[0-9]+$/ ? k.to_i : nil }
-    cond = ['UID', uids] + ['UNDELETED']
+    uids = params[:item][:ids].keys.map(&:to_i).select(&:positive?)
+    return http_error if uids.blank?
 
     if !params[:item][:mailbox]
-      @items = Gw::WebmailMail.find(select: @mailbox.name, conditions: cond, sort: @sort)
+      @items = Gw::WebmailMail.find(select: @mailbox.name, conditions: ['UID', uids] + ['UNDELETED'], sort: @sort)
       return render template: 'gw/admin/webmail/mails/move'
     end
 
@@ -401,13 +397,9 @@ class Gw::Admin::Webmail::MailsController < Gw::Controller::Admin::Base
     redirect_to action: @new_window ? :close : :index
   end
 
-  ## destroy_all
   def delete
-    if !params[:item] || !params[:item][:ids]
-      return redirect_to action: :index
-    end
-
-    uids = params[:item][:ids].collect{|k, v| k.to_s =~ /^[0-9]+$/ ? k.to_i : nil }
+    uids = params[:item][:ids].keys.map(&:to_i).select(&:positive?)
+    return http_error if uids.blank?
 
     changed_num = 0
     changed_mailbox_uids = {}
@@ -434,11 +426,8 @@ class Gw::Admin::Webmail::MailsController < Gw::Controller::Admin::Base
   end
 
   def seen
-    if !params[:item] || !params[:item][:ids]
-      return redirect_to action: :index
-    end
-
-    uids = params[:item][:ids].collect{|k, v| k.to_s =~ /^[0-9]+$/ ? k.to_i : nil }
+    uids = params[:item][:ids].keys.map(&:to_i).select(&:positive?)
+    return http_error if uids.blank?
 
     changed_num = 0
     mailbox_uids = get_mailbox_uids(@mailbox, uids)
@@ -452,11 +441,8 @@ class Gw::Admin::Webmail::MailsController < Gw::Controller::Admin::Base
   end
 
   def unseen
-    if !params[:item] || !params[:item][:ids]
-      return redirect_to action: :index
-    end
-
-    uids = params[:item][:ids].collect{|k, v| k.to_s =~ /^[0-9]+$/ ? k.to_i : nil }
+    uids = params[:item][:ids].keys.map(&:to_i).select(&:positive?)
+    return http_error if uids.blank?
 
     changed_num = 0
     mailbox_uids = get_mailbox_uids(@mailbox, uids)
@@ -466,6 +452,35 @@ class Gw::Admin::Webmail::MailsController < Gw::Controller::Admin::Base
     end
 
     flash[:notice] = "#{changed_num}件のメールを未読にしました。"
+    redirect_to action: :index
+  end
+
+  def register_spam
+    uids = params[:item][:ids].keys.map(&:to_i).select(&:positive?)
+    return http_error if uids.blank?
+
+    items = Gw::WebmailMail.find(select: @mailbox.name, conditions: ['UID', uids] + ['UNDELETED'])
+    return redirect_to action: :index if items.blank?
+
+    Gw::WebmailFilter.register_spams(items)
+
+    changed_num = 0
+    changed_mailbox_uids = {}
+    include_starred_uid = Gw::WebmailMail.include_starred_uid?(@mailbox.name, uids)
+
+    mailbox_uids = get_mailbox_uids(@mailbox, uids)
+    mailbox_uids.each do |mailbox, uids|
+      num = Gw::WebmailMail.delete_all(mailbox, uids)
+      if num > 0
+        Gw::WebmailMailNode.delete_nodes(mailbox, uids)
+        changed_mailbox_uids['Trash'] = [:all]
+      end
+      changed_num += num if mailbox !~ /^(Star)$/
+    end
+
+    reload_starred_mails(changed_mailbox_uids) if include_starred_uid
+
+    flash[:notice] = "#{items.count}件のメールを迷惑メールに登録しました。"
     redirect_to action: :index
   end
 
@@ -535,41 +550,6 @@ class Gw::Admin::Webmail::MailsController < Gw::Controller::Admin::Base
     redirect_to action: :index
   end
 
-  def register_spam
-    if !params[:item] || !params[:item][:ids]
-      return redirect_to action: :index
-    end
-
-    uids = params[:item][:ids].collect{|k, v| k.to_s =~ /^[0-9]+$/ ? k.to_i : nil }
-    cond = ['UID', uids] + ['UNDELETED']
-    items = Gw::WebmailMail.find(select: @mailbox.name, conditions: cond)
-
-    if items.count == 0
-      return redirect_to action: :index
-    end
-
-    Gw::WebmailFilter.register_spams(items)
-
-    changed_num = 0
-    changed_mailbox_uids = {}
-    include_starred_uid = Gw::WebmailMail.include_starred_uid?(@mailbox.name, uids)
-
-    mailbox_uids = get_mailbox_uids(@mailbox, uids)
-    mailbox_uids.each do |mailbox, uids|
-      num = Gw::WebmailMail.delete_all(mailbox, uids)
-      if num > 0
-        Gw::WebmailMailNode.delete_nodes(mailbox, uids)
-        changed_mailbox_uids['Trash'] = [:all]
-      end
-      changed_num += num if mailbox !~ /^(Star)$/
-    end
-
-    reload_starred_mails(changed_mailbox_uids) if include_starred_uid
-
-    flash[:notice] = "#{items.count}件のメールを迷惑メールに登録しました。"
-    redirect_to action: :index
-  end
-
   def star
     @item = Gw::WebmailMail.find_by_uid(params[:id], select: @mailbox.name, conditions: ['UNDELETED'])
     return error_auth unless @item
@@ -608,21 +588,28 @@ class Gw::Admin::Webmail::MailsController < Gw::Controller::Admin::Base
 
     @label_confs = Gw::WebmailSetting.load_label_confs
 
-    label = params[:label].to_i
-    labeled = @item.labeled?(label)
+    label_id = params[:label].to_i
+    labeled = @item.labeled?(label_id)
 
     mailbox_uids = get_mailbox_uids(@mailbox, @item.uid)
     mailbox_uids.each do |mailbox, uids|
-      if label == 0
+      if label_id == 0
         Gw::WebmailMail.unlabel_all(mailbox, uids)
       elsif labeled
-        Gw::WebmailMail.unlabel_all(mailbox, uids, label)
+        Gw::WebmailMail.unlabel_all(mailbox, uids, label_id)
       else
-        Gw::WebmailMail.label_all(mailbox, uids, label)
+        Gw::WebmailMail.label_all(mailbox, uids, label_id)
       end
     end
 
-    @item = Gw::WebmailMail.find_by_uid(params[:id], select: @mailbox.name, conditions: ['UNDELETED'])
+    if label_id == 0
+      @item.flags.clear
+    elsif labeled
+      @item.flags.delete(label_id)
+    else
+      @item.flags << "$label#{label_id}"
+    end
+
     render layout: false
   end
 
@@ -652,16 +639,22 @@ class Gw::Admin::Webmail::MailsController < Gw::Controller::Admin::Base
     options
   end
 
+  def handle_mailto_scheme
+    mailto = Util::Mailto.parse(params[:uri])
+    [:to, :cc, :bcc, :subject, :body].each { |k| mailto[k] = params[k] if params[k] }
+    redirect_to new_gw_webmail_mail_path(mailto.merge(mailbox: 'INBOX'))
+  end
+
   def check_user_email
     if Core.current_user.email.blank?
       return render text: "メールアドレスが登録されていません。", layout: true
     end
   end
 
-  def handle_mailto_scheme
-    mailto = Util::Mailto.parse(params[:uri])
-    [:to, :cc, :bcc, :subject, :body].each { |k| mailto[k] = params[k] if params[k] }
-    redirect_to new_gw_webmail_mail_path(mailto.merge(mailbox: 'INBOX'))
+  def check_posted_uids
+    if !params[:item] || !params[:item][:ids]
+      return redirect_to action: :index
+    end    
   end
 
   def set_conf
