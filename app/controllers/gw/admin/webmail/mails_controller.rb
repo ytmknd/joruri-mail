@@ -237,7 +237,6 @@ class Gw::Admin::Webmail::MailsController < Gw::Controller::Admin::Base
       return redirect_to action: :close
     end
 
-
     ## submit/draft
     if params[:commit_draft].present?
       unless item.valid?(:draft)
@@ -254,7 +253,7 @@ class Gw::Admin::Webmail::MailsController < Gw::Controller::Admin::Base
     begin
       mail = item.prepare_mail(request)
       mail.delivery_method(:smtp, ActionMailer::Base.smtp_settings)
-      sent = mail.deliver
+      mail.deliver
     rescue => e
       flash.now[:error] = "メールの送信に失敗しました。（#{e}）"
       respond_to do |format|
@@ -271,8 +270,8 @@ class Gw::Admin::Webmail::MailsController < Gw::Controller::Admin::Base
 
     ## save to 'Sent'
     begin
-      item.mail = sent
-      Timeout.timeout(60) { Core.imap.append('Sent', item.for_save.to_s, [:Seen], Time.now) }
+      mail.header[:bcc].include_in_headers = true
+      Timeout.timeout(60) { Core.imap.append('Sent', mail.to_s, [:Seen], Time.now) }
     rescue => e
       flash[:error] = "メールは送信できましたが、送信トレイへの保存に失敗しました。（#{e}）"
     end
@@ -288,19 +287,11 @@ class Gw::Admin::Webmail::MailsController < Gw::Controller::Admin::Base
   def save_as_draft(item, ref, &block)
     begin
       mail = item.prepare_mail(request)
-      imap = Core.imap
-      imap.create("Drafts") unless imap.list("", "Drafts") rescue nil
-      #next_uid = imap.status("Drafts", ["UIDNEXT"])["UIDNEXT"]
-      item.mail = mail
-      flags = [:Seen, :Draft]
-      flags << :Flagged if ref && ref.starred?
-      Timeout.timeout(30) { imap.append("Drafts", item.for_save.to_s, flags, Time.now) }
-      item.delete_tmp_attachments
-
-      yield if block_given?
-    rescue => error
-      item.errors.add :base, "下書き保存に失敗しました。（#{error}）"
-      flash.now[:notice] = "下書き保存に失敗しました。（#{error}）"
+      mail.header[:bcc].include_in_headers = true
+      flags = [:Seen, :Draft].tap { |a| a << :Flagged if ref && ref.starred? }
+      Timeout.timeout(60) { Core.imap.append('Drafts', mail.to_s, flags, Time.now) }
+    rescue => e
+      flash.now[:error] = "下書き保存に失敗しました。（#{e}）"
       respond_to do |format|
         format.html { render :action => :new }
         format.xml  { render :xml => item.errors, :status => :unprocessable_entity }
@@ -308,7 +299,10 @@ class Gw::Admin::Webmail::MailsController < Gw::Controller::Admin::Base
       return
     end
 
-    #flash[:notice] = '下書きに保存しました。'
+    item.delete_tmp_attachments
+
+    yield if block_given?
+
     status         = params[:_created_status] || :created
     location       = url_for(action: :close)
     respond_to do |format|

@@ -336,12 +336,6 @@ class Gw::WebmailMail
     mail
   end
 
-  def for_save
-    return nil unless @mail
-    @mail.header[:bcc].include_in_headers = true
-    @mail  
-  end
-
   def zip_attachments(encoding: 'utf-8')
     filenames = attachments.map do |at|
       name = at.name
