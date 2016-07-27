@@ -286,9 +286,9 @@ class Gw::WebmailSetting < ActiveRecord::Base
 
     def user_config_values(names)
       values = self.select(:name, :value).where(user_id: Core.user.id, name: names).map do |setting|
-        [setting.name, setting.decoded_value]
+        [setting.name.to_sym, setting.decoded_value]
       end
-      Hash[*values.flatten].with_indifferent_access
+      ActiveSupport::OrderedOptions[*values.flatten]
     end
 
     def load_address_orders

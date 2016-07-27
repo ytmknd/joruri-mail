@@ -7,13 +7,14 @@ class Gw::Admin::Webmail::MailsController < Gw::Controller::Admin::Base
   before_action :check_user_email, only: [:new, :create, :edit, :update, :answer, :forward] 
   before_action :handle_mailto_scheme, if: -> { params[:src] == 'mailto' }
 
+  before_action :set_conf, only: [:index, :show, :move]
+  before_action :set_mail_form_size
+
   def pre_dispatch
     return if params[:action] == 'status'
     return redirect_to action: :index, mailbox: params[:mailbox] if params[:reset]
 
-    @limit = 20
     @new_window = params[:new_window].blank? ? nil : 1
-    @mail_form_size = Gw::WebmailSetting.user_config_value(:mail_form_size, 'medium') unless params[:action] == 'index'
     @mailbox = Gw::WebmailMailbox.load_mailbox(params[:mailbox] || 'INBOX')
     @filter = ["UNDELETED"]
     @sort = get_sort_params(@mailbox.name)
@@ -60,17 +61,6 @@ class Gw::Admin::Webmail::MailsController < Gw::Controller::Admin::Base
   end
 
   def index
-    confs = Gw::WebmailSetting.user_config_values(
-      [:mails_per_page, :mail_form_size, :mail_list_from_address, :mail_list_subject, :mail_open_window, :mail_address_history])
-    @limit = confs[:mails_per_page].blank? ? 20 : confs[:mails_per_page].to_i if !request.mobile?
-    @mail_form_size = confs[:mail_form_size].blank? ? 'medium' : confs[:mail_form_size]
-    @mail_list_from_address = confs[:mail_list_from_address]
-    @mail_list_subject = confs[:mail_list_subject]
-    @mail_open_window = confs[:mail_open_window]
-    @mail_address_history = confs[:mail_address_history].blank? ? 10 : confs[:mail_address_history].to_i
-    @label_confs = Gw::WebmailSetting.load_label_confs
-
-    ## apply filters
     last_uid, recent, error = Gw::WebmailFilter.apply_recents
     reset_mailboxes if recent
     if @mailbox.name == "INBOX"
@@ -86,20 +76,14 @@ class Gw::Admin::Webmail::MailsController < Gw::Controller::Admin::Base
 
     @mailboxes = load_mailboxes
     @quota = load_quota
-    @addr_histories = Gw::WebmailMailAddressHistory.load_user_histories(@mail_address_history) if @mail_address_history != 0
 
     @items = Gw::WebmailMail.paginate(select: @mailbox.name, conditions: filter,
-      sort: @sort, page: params[:page], limit: @limit, starred: params[:sort_starred])
+      sort: @sort, page: params[:page], limit: @conf.mails_per_page, starred: params[:sort_starred])
   end
 
   def show
     @item  = Gw::WebmailMail.find_by_uid(params[:id], select: @mailbox.name, conditions: @filter)
     return error_auth unless @item
-
-    confs = Gw::WebmailSetting.user_config_values([:mail_attachment_view, :mail_address_history])
-    @mail_attachment_view = confs[:mail_attachment_view]
-    @mail_address_history = confs[:mail_address_history].blank? ? 10 : confs[:mail_address_history].to_i
-    @label_confs = Gw::WebmailSetting.load_label_confs
 
     if params[:show_html_image]
       return http_error(404) unless @item.html_mail?
@@ -109,10 +93,6 @@ class Gw::Admin::Webmail::MailsController < Gw::Controller::Admin::Base
     end
 
     Core.title += " - #{@item.subject} - #{Core.current_user.email}"
-
-    if @item.html_mail?
-      @html_mail_view = Gw::WebmailSetting.user_config_value(:html_mail_view, 'html')
-    end
 
     if from = Email.parse(@item.friendly_from_addr)
       @from_addr = CGI.escapeHTML(from.address)
@@ -147,8 +127,6 @@ class Gw::Admin::Webmail::MailsController < Gw::Controller::Admin::Base
 
     @pagination = Gw::WebmailMail.paginate_uid(params[:id],
       select: @mailbox.name, conditions: filter, sort: @sort, starred: params[:sort_starred])
-
-    @addr_histories = Gw::WebmailMailAddressHistory.load_user_histories(@mail_address_history) if @mail_address_history != 0
 
     _show @item
   end
@@ -435,11 +413,6 @@ class Gw::Admin::Webmail::MailsController < Gw::Controller::Admin::Base
     if !params[:item][:mailbox]
       @items = Gw::WebmailMail.find(select: @mailbox.name, conditions: cond, sort: @sort)
       @mailboxes = load_mailboxes
-
-      confs = Gw::WebmailSetting.user_config_values([:mail_address_history])
-      @mail_address_history = confs[:mail_address_history].blank? ? 10 : confs[:mail_address_history].to_i
-      @addr_histories = Gw::WebmailMailAddressHistory.load_user_histories(@mail_address_history) if @mail_address_history != 0
-
       return render template: 'gw/admin/webmail/mails/move'
     end
 
@@ -763,6 +736,27 @@ class Gw::Admin::Webmail::MailsController < Gw::Controller::Admin::Base
     mailto = Util::Mailto.parse(params[:uri])
     [:to, :cc, :bcc, :subject, :body].each { |k| mailto[k] = params[k] if params[k] }
     redirect_to new_gw_webmail_mail_path(mailto.merge(mailbox: 'INBOX'))
+  end
+
+  def set_conf
+    @conf = Gw::WebmailSetting.user_config_values([
+      :mails_per_page, :mail_list_subject, :mail_list_from_address, :mail_address_history,
+      :html_mail_view, :mail_attachment_view, :mail_open_window,
+      :mail_form_size,
+    ])
+    @conf.mails_per_page = request.mobile? ? 20 : (@conf.mails_per_page.presence || 20).to_i
+    @conf.mail_address_history = (@conf.mail_address_history.presence || 10).to_i
+    @conf.html_mail_view = @conf.html_mail_view.presence || 'html'
+    @mail_form_size = @conf.mail_form_size.presence || 'medium'
+
+    if @conf.mail_address_history != 0
+      @address_histories = Gw::WebmailMailAddressHistory.load_user_histories(@conf.mail_address_history)
+    end
+    @conf.mail_labels = Gw::WebmailSetting.load_label_confs
+  end
+
+  def set_mail_form_size
+    @mail_form_size ||= Gw::WebmailSetting.user_config_value(:mail_form_size, 'medium')
   end
 
   def default_sign

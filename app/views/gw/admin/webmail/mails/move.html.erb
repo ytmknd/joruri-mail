@@ -16,7 +16,7 @@ action_label = params[:copy].blank? ? '移動' : 'コピー'
 
 <%= render 'gw/admin/webmail/base/account' %>
 <%= render 'gw/admin/webmail/mails/shared/mailbox' %>
-<%= render 'gw/admin/webmail/mails/shared/mail_address_history' if @mail_address_history != 0 %>
+<%= render 'gw/admin/webmail/mails/shared/mail_address_history', histories: @address_histories if @address_histories %>
 
 </div></td>
 <% end %>

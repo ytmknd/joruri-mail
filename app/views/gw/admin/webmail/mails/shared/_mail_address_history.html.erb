@@ -1,7 +1,7 @@
 <div class="addressHistory">
 <span class="title">クイックアドレス帳</span>
 <ul>
-<% @addr_histories.each do |history| %>
+<% histories.each do |history| %>
   <li>
     <%= link_to history.display_name.presence || history.address, "#", title: history.email_format,
       onclick: open_mail_form(new_gw_webmail_mail_path('INBOX', to: history.email_format)) %>
@@ -9,7 +9,7 @@
 <% end %>
 </ul>
 
-<% if @addr_histories.size > 0 %>
+<% if histories.size > 0 %>
 <div class="reset">
   <%= link_to '≫履歴をリセットする', { action: :reset_address_history }, class: 'reset', 
     data: { confirm: 'クイックアドレス帳をリセットします。よろしいですか？' } %>

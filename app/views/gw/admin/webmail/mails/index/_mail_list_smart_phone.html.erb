@@ -1,21 +1,21 @@
 <%
-subject_wrap = @mail_list_subject.blank? ? '' : 'autoWrap'
+subject_wrap = @conf.mail_list_subject.blank? ? '' : 'autoWrap'
 %>
 <table id="mails" class="mails">
   <% items.each do |item| %>
     <%
-      from, s_from, from_tooltip = mail_from_display(item, @mailbox, @mail_list_from_address.present?)
+      from, s_from, from_tooltip = mail_from_display(item, @mailbox, @conf.mail_list_from_address.present?)
     %>
     <tr class="mail <%= 'unseen' if item.unseen? %> <%= cycle '', 'cycle' %>">
       <td class="check"><input type="checkbox" name="item[ids][<%= item.uid %>]" value="1" class="checkUI" /></td>
       <td class="star <%= item.starred? ? 'starOn' : 'starOff' %>" id="mail_star_<%= item.uid %>" title="<%= 'スター' if item.starred? %>" data-uid="<%= item.uid %>">&nbsp;</td>
       <td class="attach subject from date <%= mail_flags(item).join(' ') %> <%= subject_wrap %>">
-        <a href="<%= url_for(action: :show, id: item.uid, new_window: (@mail_open_window.blank? ? nil : 1)) %>">
+        <a href="<%= url_for(action: :show, id: item.uid, new_window: (@conf.mail_open_window.blank? ? nil : 1)) %>">
           <span class="date"><%= item.date %></span>
           <span class="from"><%= mail_text_wrap(from) %></span><br />
           <span class="subject overflowHidden <%= subject_wrap %>" title="<%= item.subject %>">
             <span id="mail_<%= item.uid %>_labels" class="labels">
-              <%= render 'gw/admin/webmail/mails/shared/label', labels: item.labels, label_confs: @label_confs if item.labels.present? %>
+              <%= render 'gw/admin/webmail/mails/shared/label', labels: item.labels, label_confs: @conf.mail_labels if item.labels.present? %>
             </span>
             <span class="text"><%= mail_text_wrap(truncate(item.subject, length: 70, escape: false).presence || ' ') %></span>
           </span>

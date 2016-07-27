@@ -7,7 +7,7 @@
   <% if @item.has_attachments? %>
   <img src="/_common/themes/admin/gw/webmail/mobile/images/clip-lightblue.jpg" alt="[有]" />
   <% end %>
-  <%= render 'gw/admin/webmail/mails/shared/label', labels: @item.labels, label_confs: @label_confs %>
+  <%= render 'gw/admin/webmail/mails/shared/label', labels: @item.labels, label_confs: @conf.mail_labels %>
   <%= link_to image_tag(mail_star_image_path(@item)), { action: :star, id: @item.uid, from: :show } %>
 </div>
 <div class="showItem">
@@ -46,7 +46,7 @@
   <div id="inlineContents">
   <% @item.inline_contents.each_with_index do |inline, idx| %>
     <div id="inlineContent_<%= inline.seqno %>" class="<%= 'inlineContent' if idx > 0 %>">
-      <% if @html_mail_view == 'html' && inline.display_as_html? %>
+      <% if @conf.html_mail_view == 'html' && inline.display_as_html? %>
         <div id="htmlPreview_<%= inline.seqno %>"><%=raw inline.html_body %></div>
       <% else %>
         <div id="textBody_<%= inline.seqno %>" class="autoWrap mailBodyText">

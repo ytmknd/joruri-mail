@@ -9,7 +9,7 @@
 
 <%= render 'gw/admin/webmail/base/account' %>
 <%= render 'gw/admin/webmail/mails/shared/mailbox' %>
-<%= render 'gw/admin/webmail/mails/shared/mail_address_history' if @mail_address_history != 0 %>
+<%= render 'gw/admin/webmail/mails/shared/mail_address_history', histories: @address_histories if @address_histories %>
 
 </div>
 </td><td id="webmailContent">
@@ -27,7 +27,7 @@
     <% end %>
     <a href="#toggleSearchForm" class="search" title="検索">検索</a>
     <div id="labelMenu" class="popupMenu" style="display:none;width:100px;">
-      <% @label_confs.each do |conf| %>
+      <% @conf.mail_labels.each do |conf| %>
         <div class="menuItem"><a href="#labelMails" data-label-id="<%= conf.id %>"><%= conf.name %></a></div>
       <% end %>
       <div class="menuItem"><hr /></div>
@@ -176,7 +176,7 @@ $(function() {
     $('input[name^="item[ids]"').prop('checked', checked);
   });
   $('#mails .mail').find('.subject, .mailbox, .date, .size').on('click', function() {
-    openMail($(this).parent().attr('data-url'), <%= @mail_open_window.present? %>);
+    openMail($(this).parent().attr('data-url'), <%= @conf.mail_open_window.present? %>);
     return false;
   });
   $('#mails .mail .star').on('click', function() {

@@ -14,7 +14,7 @@
 
 <%= render 'gw/admin/webmail/base/account' %>
 <%= render 'gw/admin/webmail/mails/shared/mailbox' %>
-<%= render 'gw/admin/webmail/mails/shared/mail_address_history' if @mail_address_history != 0 %>
+<%= render 'gw/admin/webmail/mails/shared/mail_address_history', histories: @address_histories if @address_histories %>
 
 </div></td>
 <% end %>
@@ -70,7 +70,7 @@
       <div class="menuItem"><%= link_to @item.starred? ? 'スターをはずす' : 'スターを付ける', '#starMail' %></div>
     </div>
     <div id="labelMenu" class="popupMenu" style="display:none; width:100px;">
-      <% @label_confs.each do |conf| %>
+      <% @conf.mail_labels.each do |conf| %>
         <div class="menuItem"><%= link_to conf.name, '#labelMail', data: { label_id: conf.id } %></div>
       <% end %>
       <div class="menuItem"><hr /></div>
@@ -119,7 +119,7 @@
         class="<%= @item.starred? ? 'starOn' : 'starOff' %>" title="<%= @item.starred? ? 'スター' : '' %>"></a>
       <span id="mail_star_<%= @item.uid %>_loading" class="loading star-loading" style="display:none;"></span>
       <span id="mail_<%= @item.uid %>_labels" class="labels">
-        <%= render 'gw/admin/webmail/mails/shared/label', labels: @item.labels, label_confs: @label_confs %>
+        <%= render 'gw/admin/webmail/mails/shared/label', labels: @item.labels, label_confs: @conf.mail_labels %>
       </span>
       <span id="mail_<%= @item.uid %>_label_loading" class="loading label-loading" style="display:none;"></span>
       <span class="subject"><%= mail_text_wrap(@item.subject) %></span>
@@ -132,7 +132,7 @@
   </tr>
 </table>
 <% if @item.html_mail? && @item.html_image_was_omitted? %>
-  <table id="htmlSecurityAlert" class="mailAttention">
+  <table id="htmlSecurityAlert" class="mailAttention" style="<%= 'display: none;' if @conf.html_mail_view == 'text' %>">
     <tr>
       <td class="message">画像が非表示になっています。画像を表示しますか？</td>
       <td class="actions" style="width:130px">
@@ -171,15 +171,15 @@
       <a href="#toggleView" class="htmlView" title="HTML表示" data-type="html">HTML</a>
     </div>
   <% end %>
-  <%= hidden_field_tag :mail_view, @html_mail_view, id: 'currentMailView' %>
+  <%= hidden_field_tag :mail_view, @conf.html_mail_view, id: 'currentMailView' %>
   <div id="inlineContents">
   <% @item.inline_contents.each_with_index do |inline, idx| %>
     <div id="inlineContent_<%= inline.seqno %>" class="<%= 'inlineContent' if idx > 0 %>">
       <% if inline.display_as_html? %>
-        <div id="textBody_<%= inline.seqno %>" class="autoWrap mailBodyText" style="<%= 'display:none;' if @html_mail_view != 'text' %>">
+        <div id="textBody_<%= inline.seqno %>" class="autoWrap mailBodyText" style="<%= 'display:none;' if @conf.html_mail_view != 'text' %>">
           <%= mail_text_wrap(inline.text_body, 10, auto_link: true) %>
         </div>
-        <div id="htmlBody_<%= inline.seqno %>" class="mailBodyText" style="<%= 'display:none;' if @html_mail_view != 'html' %>">
+        <div id="htmlBody_<%= inline.seqno %>" class="mailBodyText" style="<%= 'display:none;' if @conf.html_mail_view != 'html' %>">
           <%=raw mail_html_autolink(inline.html_body) %>
         </div>
       <% else %>
@@ -218,7 +218,7 @@
   </table>
   <table class="mail attachments">
     <tr>
-      <% if @mail_attachment_view != 'list' && @item.has_images? %>
+      <% if @conf.mail_attachment_view != 'list' && @item.has_images? %>
         <td class="thumbnailArea">
         <% @item.attachments.each do |at| %>
           <% file_title = "#{at.name}(#{at.eng_unit})" %>
