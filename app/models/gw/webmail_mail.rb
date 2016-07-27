@@ -275,6 +275,19 @@ class Gw::WebmailMail
     mail
   end
 
+  def mdn_request_mode
+    return unless has_disposition_notification_to?
+
+    @mdn_request_mode ||=
+      if (domain = Core.config['mail_domain']).present? &&
+         (addrs = disposition_notification_to_addrs) &&
+         addrs[0] && addrs[0].address =~ /[@\.]#{Regexp.escape(domain)}$/i
+        :auto
+      else
+        :manual
+      end
+  end
+
   def prepare_mdn(original, send_mode = 'manual', request = nil)
     mail = Mail.new    
     mail.charset = charset

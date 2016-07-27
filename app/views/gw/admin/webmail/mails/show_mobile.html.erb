@@ -78,13 +78,12 @@
 </div>
 <% end %>
 
-<% if @mdnRequest.present? && @mdnRequest == :manual && !@item.draft? && !@mailbox.sent_box? %>
+<% if @item.mdn_request_mode == :manual && !@item.draft? && !@mailbox.sent_box? %>
 <div class="mdnMenu">
 <div class="title">開封確認</div>
 <div class="message">メール送信者は開封確認を要求しています。開封確認のメールを送信しますか？</div>
 <%= form_for :item, url: { action: :send_mdn }, html: { id: 'mail', name: 'mdnForm', class: 'mdnForm' } do |f| %>
   <%= hidden_field_tag :mobile, 1 %>
-  <%= hidden_field_tag :send_mode, 'manual' %>
   <%= submit_tag '送信', name: 'send', class: 'menuItem' %>
 <% end %>
 </div>

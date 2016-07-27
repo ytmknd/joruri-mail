@@ -97,15 +97,11 @@ module Sys::Lib::Mail
   end
 
   def disposition_notification_to_addrs
-    disposition_notification_to = @mail.header[:disposition_notification_to]
-    if disposition_notification_to && disposition_notification_to.field
-      begin
-        disposition_notification_to.field.addrs
-      rescue => e
-        error_log(e)
-        nil
-      end
-    end
+    dnt = @mail.header[:disposition_notification_to]
+    dnt.try(:field).try(:addrs) || []
+  rescue => e
+    error_log(e)
+    []
   end
 
   def text_body

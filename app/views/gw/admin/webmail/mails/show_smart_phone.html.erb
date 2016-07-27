@@ -64,7 +64,7 @@
   </tr>
 </table>
 
-<% if @mdnRequest.present? && @mdnRequest == :manual && !@item.draft? && !@mailbox.sent_box? %>
+<% if @item.mdn_request_mode == :manual && !@item.draft? && !@mailbox.sent_box? %>
 <table id="mdnRequest" class="mailAttention">
   <tr>
     <td class="message">メッセージ送信者は、開封確認を要求しています。開封確認のメールを送信しますか？</td>
@@ -73,7 +73,6 @@
     <td class="actions">
     <%= form_for :item, url: { action: :send_mdn }, html: { id: 'mail', name: 'mdnForm', class: 'mdnForm' } do |f| %>
       <%= hidden_field_tag :mobile, 1 %>
-      <%= hidden_field_tag :send_mode, 'manual' %>
       <div class="submitters">
         <%= submit_tag '送信', name: 'send', class: 'send' %>
       </div>

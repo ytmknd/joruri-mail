@@ -142,7 +142,7 @@
     </tr>
   </table>
 <% end %>
-<% if @mdnRequest == :manual && !@mailbox.draft_box? && !@mailbox.sent_box? %>
+<% if @item.mdn_request_mode == :manual && !@mailbox.draft_box? && !@mailbox.sent_box? %>
   <table id="mdnRequest" class="mailAttention">
     <tr>
       <td class="message">メッセージ送信者は、開封確認を要求しています。開封確認のメールを送信しますか？</td>
@@ -408,7 +408,6 @@ $(function() {
   $('a[href="#sendMdn"]').on('click', function() {
     $('#mdnRequest').hide();
     $.post('<%=raw escape_javascript(send_mdn_gw_webmail_mail_path(@mailbox.name, @item.uid)) %>', {
-      send_mode: 'manual',
       authenticity_token: '<%= form_authenticity_token %>'
     })
     .done(function(data) {

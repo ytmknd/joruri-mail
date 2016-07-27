@@ -109,14 +109,11 @@ class Gw::Admin::Webmail::MailsController < Gw::Controller::Admin::Base
 
       @seen_flagged = true
 
-      if @item.has_disposition_notification_to? && !@item.notified? && !@mailbox.draft_box? && !@mailbox.sent_box?
-        @mdnRequest = mdn_request_mode
-        if @mdnRequest == :auto
-          begin
-            send_mdn_message(@mdnRequest)
-          rescue => e
-            flash.now[:notice] = "開封確認メールの自動送信に失敗しました。"
-          end
+      if @item.mdn_request_mode == :auto && !@item.notified? && !@mailbox.draft_box? && !@mailbox.sent_box?
+        begin
+          send_mdn_message(@item.mdn_request_mode)
+        rescue => e
+          flash.now[:notice] = "開封確認メールの自動送信に失敗しました。"
         end
       end
     end
@@ -576,11 +573,11 @@ class Gw::Admin::Webmail::MailsController < Gw::Controller::Admin::Base
     return error_auth unless @item && @item.has_disposition_notification_to?
 
     if request.xhr?
-      send_mdn_message(params[:send_mode])
+      send_mdn_message(:manual)
       return render text: ''
     else
       begin
-        send_mdn_message(params[:send_mode])
+        send_mdn_message(:manual)
         flash[:notice] = "開封確認メールを送信しました。"
       rescue => e
         flash[:notice] = "開封確認メールの送信に失敗しました。"
@@ -777,22 +774,6 @@ class Gw::Admin::Webmail::MailsController < Gw::Controller::Admin::Base
       @default_template = (Gw::WebmailTemplate.default_template || Gw::WebmailTemplate.new)
     end
     @default_template
-  end
-
-  def mdn_request_mode
-    mdnRequest = :manual
-    domain = Core.config['mail_domain']
-    addrs = @item.disposition_notification_to_addrs
-    begin
-      if domain.present? && addrs && addrs.size > 0 && addrs[0].address =~ /[@\.]#{Regexp.escape(domain)}$/i
-        mdnRequest = :auto  
-      end
-    rescue => e
-      #Disposition-Notification-Toのパースエラー対策
-      error_log(e)
-      mdnRequest = nil
-    end
-    mdnRequest
   end
 
   def send_mdn_message(mdn_mode)
