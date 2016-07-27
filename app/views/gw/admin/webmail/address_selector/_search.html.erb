@@ -50,9 +50,13 @@ pri_search_field_options = [['名前', 's_name_or_kana'], ['メールアドレ�
             <%= link_to 'すべて', "#", class: "itemName groupName",
               onclick: "AddressSelector.instance.loadItems('pri', '0', {'close':false});return false;" %>
             </li>
+            <%
+              children_counts = Gw::WebmailAddressGroup.user_root_groups.children_counts
+              addresses_counts = Gw::WebmailAddressGroup.user_root_groups.addresses_counts
+            %>
             <% Gw::WebmailAddressGroup.user_root_groups.each do |g| %>
             <li class="group" id="priGroup<%= g.id %>">
-            <% if g.children.count > 0 || g.addresses.count > 0 %>
+            <% if children_counts[g.id].to_i > 0 || addresses_counts[g.id].to_i > 0 %>
               <%= link_to '+', '#', id: "priToggleItems#{g.id}", class: "toggleItems toggleItemsClose",
                 onclick: "AddressSelector.instance.loadItems('pri', '#{g.id}');return false" %>
             <% else %>
