@@ -2,7 +2,7 @@
 <div id="webmailMenuContainer">
 
 <div class="menu">
-  <%= link_to 'メールの受信', gw_webmail_mails_path(@mailbox.name), class: 'index', title: 'メールの受信' %>
+  <%= link_to 'メールの受信', gw_webmail_mails_path(@mailbox.name, reload: true), class: 'index', title: 'メールの受信' %>
   <%= link_to 'メールの作成', new_gw_webmail_mail_path('INBOX'), class: 'newMail', title: 'メールの作成', target: '_blank',
     onclick: open_mail_form(new_gw_webmail_mail_path('INBOX')) %>
 </div>

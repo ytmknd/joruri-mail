@@ -397,32 +397,36 @@ class Gw::WebmailMail
   end
 
   class << self
-    def check_server_status
-      { imap: check_imap_status, smtp: check_smtp_status }
+    def make_conditions_from_params(params, fromto = 'FROM')
+      conds =  ['UNDELETED']
+      conds += ['UNSEEN'] if params[:s_status] == 'unseen'
+      conds += ['SEEN']   if params[:s_status] == 'seen'
+      conds += ['KEYWORD', "$label#{params[:s_label]}"] if params[:s_label].present?
+      conds += ['FLAGGED']   if params[:s_flag] == 'starred'
+      conds += ['UNFLAGGED'] if params[:s_flag] == 'unstarred'
+
+      if params[:s_column].present? && params[:s_keyword].present?
+        params[:s_keyword].split(/[ 　]+/).each do |w|
+          next if w.blank?
+          conds += [params[:s_column].upcase, Net::IMAP::QuotedString.new(w)] 
+        end
+      end
+      if params[:s_from]
+        if from_addr = Email.parse(params[:s_from]).try(:address)
+          conds += [fromto, Net::IMAP::QuotedString.new(from_addr)]
+        end
+      end
+      conds
     end
 
-    def check_imap_status
-      begin
-        imap_settings = Joruri.config.imap_settings
-        imap_sock = TCPSocket.open(imap_settings[:address], imap_settings[:port])
-        true
-      rescue => e
-        false
-      ensure
-        imap_sock.close if imap_sock
-      end
-    end
+    def make_sort_from_params(params)
+      key, order = params[:sort_key].present? ? [params[:sort_key], params[:sort_order]] : ['date', 'reverse']
 
-    def check_smtp_status
-      smtp_settings = ActionMailer::Base.smtp_settings
-      begin
-        smtp_sock = TCPSocket.open(smtp_settings[:address], smtp_settings[:port])
-        true
-      rescue => e
-        false
-      ensure
-        smtp_sock.close if smtp_sock
-      end
+      sorts = []
+      sorts += [order.upcase] if order.present?
+      sorts += [key.upcase]
+      sorts += ['REVERSE', 'DATE'] if key != 'date'
+      sorts
     end
 
     def load_from_cache(mailbox, uids)

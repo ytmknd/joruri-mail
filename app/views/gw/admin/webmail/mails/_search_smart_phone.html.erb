@@ -29,8 +29,8 @@ ssopts = [["",""],["スター付き優先","1"]]
       <th>並び順</th>
       <td>:</td>
       <td>
-        <%= select_tag :sort_key, options_for_select(skopts, params[:sort_key]) %>
-        <%= select_tag :sort_order, options_for_select(soopts, params[:sort_order]) %>
+        <%= select_tag :sort_key, options_for_select(skopts, params.key?(:sort_key) ? params[:sort_key] : 'date') %>
+        <%= select_tag :sort_order, options_for_select(soopts, params.key?(:sort_order) ? params[:sort_order] : 'reverse') %>
         <%= select_tag :sort_starred, options_for_select(ssopts, params[:sort_starred]) %>
       </td>
     </tr>

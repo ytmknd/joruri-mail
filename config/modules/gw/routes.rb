@@ -9,7 +9,7 @@ Joruri::Application.routes.draw do
           resources :mails, path: '*mailbox/mails' do
             collection do
               get :empty, :close, :reset_address_history, :star, :label
-              post :move, :delete, :seen, :unseen, :register_spam, :mobile_manage, :status
+              post :move, :delete, :seen, :unseen, :register_spam, :mobile_manage
             end
             member do
               get :edit, :download, :answer, :forward
@@ -18,6 +18,11 @@ Joruri::Application.routes.draw do
           end
           post '*mailbox/mails/new' => 'mails#new'
           resources :mail_attachments
+          resources :servers do
+            collection do
+              post :status
+            end
+          end
           resources :mailboxes, path: '*mailbox/mailboxes' do
             collection do
               patch :update

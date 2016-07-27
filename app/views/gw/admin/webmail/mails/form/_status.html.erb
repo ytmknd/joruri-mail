@@ -6,7 +6,7 @@ function submitMailForm(button) {
     .submit();
 }
 function checkServerStatus(button) {
-  $.post('<%=raw status_gw_webmail_mails_path(format: :json) %>', {
+  $.post('<%=raw status_gw_webmail_servers_path(format: :json) %>', {
     authenticity_token: $('input[name="authenticity_token"]').val()
   })
   .done(function(data) {
