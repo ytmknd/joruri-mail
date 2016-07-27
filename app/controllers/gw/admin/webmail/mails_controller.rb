@@ -2,7 +2,7 @@ class Gw::Admin::Webmail::MailsController < Gw::Controller::Admin::Base
   include Sys::Controller::Scaffold::Base
   include Gw::Controller::Admin::Mobile::Mail
   layout :select_layout
-  rescue_from Exception, with: :rescue_mail
+  rescue_from StandardError, with: :rescue_mail
 
   before_action :handle_mailto_scheme, if: -> { params[:src] == 'mailto' }
   before_action :check_user_email, only: [:new, :create, :edit, :update, :answer, :forward]

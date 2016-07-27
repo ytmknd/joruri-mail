@@ -34,7 +34,7 @@ class Gw::WebmailMailNode < ActiveRecord::Base
     end
 
     def delete_ref_nodes(boxname, uids = nil)
-      items = self.where(user_id, Core.current_user.id, ref_mailbox: boxname)
+      items = self.where(user_id: Core.current_user.id, ref_mailbox: boxname)
       items = items.where(ref_uid: uids) if uids
       items.delete_all
     end
