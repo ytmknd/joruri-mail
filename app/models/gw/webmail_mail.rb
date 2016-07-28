@@ -218,10 +218,10 @@ class Gw::WebmailMail
   def prepare_mail(request = nil)
     mail = Mail.new
     mail.charset     = charset
-    mail.from        = @in_from_addr[0]
-    mail.to          = @in_to_addrs.join(', ')
-    mail.cc          = @in_cc_addrs.join(', ')
-    mail.bcc         = @in_bcc_addrs.join(', ')
+    mail.from        = Email.encode_addresses(@in_from_addr, charset)
+    mail.to          = Email.encode_addresses(@in_to_addrs, charset)
+    mail.cc          = Email.encode_addresses(@in_cc_addrs, charset)
+    mail.bcc         = Email.encode_addresses(@in_bcc_addrs, charset)
     mail.subject     = in_subject.gsub(/\r\n|\n/, ' ')
     #mail.body    = in_body
 
@@ -292,7 +292,7 @@ class Gw::WebmailMail
     mail = Mail.new    
     mail.charset = charset
     from = Email.parse_list(in_from)[0]
-    mail.from = from
+    mail.from = Email.encode_address(from, charset)
     mail.to = original.disposition_notification_to_addrs[0]
     mail.subject = "開封済み : #{original.subject.gsub(/\r\n|\n/, ' ')}"
     mail.content_type = "multipart/report; report-type=disposition-notification"

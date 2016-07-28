@@ -23,6 +23,27 @@ module Email
       end
     end
 
+    def encode_list(str, encoding = 'utf-8')
+      addresses = parse_list(str)
+      enccode_addresses(addresses, encoding)
+    end
+
+    def encode_address(address, encoding = 'utf-8')
+      if address.display_name.present?
+        opt = encoding.downcase == 'iso-2022-jp' ? '-WjM' : '-WwM'
+        display_name = NKF.nkf(opt, quote_phrase(address.display_name))
+        "#{display_name} <#{address.address}>"
+      else
+        address.address
+      end
+    end
+
+    def encode_addresses(addresses, encoding = 'utf-8')
+      addresses.map do |addr|
+        encode_address(addr, encoding)
+      end.join(', ')
+    end
+
     def valid_email?(email)
       email =~ /\A[a-zA-Z0-9!#\$%&'\*\+\-\/=\?\^_`\{\|\}~\.]+@[a-zA-Z0-9\-\.]+\Z/ 
     end
