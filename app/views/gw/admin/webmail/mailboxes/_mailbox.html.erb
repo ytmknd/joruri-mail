@@ -3,3 +3,36 @@
     <%= render 'mailbox_children', mailboxes: @mailboxes.select(&:root?) %>
   </ul>
 </div>
+
+<%= form_tag url_for(action: :update, mailbox: '__MAILBOX__'), method: :patch, id: 'dragdropForm', style: 'display: none;' do %>
+  <%= submit_tag '移動する' %>
+<% end %>
+
+<script type="text/javascript">
+//<![CDATA[
+$(function() {
+  $('#mailboxes .draggable').draggable({
+    opacity: 0.8,
+    cursor: 'move',
+    helper: function(e) {
+      var mailbox = $(e.currentTarget).siblings('a').text();
+      return $('<div />').css({'padding': '5px', 'margin-left': '-5px', 'background-color': '#fff'}).text(mailbox);
+    }
+  });
+  $('#mailboxes .droppable').droppable({
+    hoverClass: "ui-hover",
+    activeClass: "ui-active",
+    tolerance: "pointer",
+    greedy: true,
+    drop: function(e, ui) {
+      var dest = $(e.target).attr('data-mailbox');
+      var src = ui.draggable.siblings('a').attr('data-mailbox');
+      $('#dragdropForm')
+        .append( $('<input />').attr({ type: 'hidden', name: 'item[path]', value: dest + '.' }) )
+        .attr('action', $('#dragdropForm').attr('action').replace(/__MAILBOX__/, encodeURIComponent(src)))
+        .submit();
+    }
+  });
+});
+//]]>
+</script>
