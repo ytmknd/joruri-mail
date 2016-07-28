@@ -26,8 +26,6 @@ class Gw::Admin::Webmail::MailsController < Gw::Controller::Admin::Base
 
     @mailbox = Gw::WebmailMailbox.load_mailbox(params[:mailbox] || 'INBOX')
     return http_error(404) unless @mailbox
-
-    @new_window = params[:new_window].blank? ? nil : 1
   end
 
   def index
@@ -332,10 +330,10 @@ class Gw::Admin::Webmail::MailsController < Gw::Controller::Admin::Base
     if changed_num > 0
       reload_starred_mails(changed_mailbox_uids) if @item.starred?
 
-      flash[:notice] = 'メールを削除しました。' unless @new_window
+      flash[:notice] = 'メールを削除しました。' unless new_window?
       respond_to do |format|
         format.html do
-          redirect_to action: @new_window ? :close : :index
+          redirect_to action: new_window? ? :close : :index
         end
         format.xml  { head :ok }
       end
@@ -343,7 +341,7 @@ class Gw::Admin::Webmail::MailsController < Gw::Controller::Admin::Base
       flash[:error] = 'メールの削除に失敗しました。'
       respond_to do |format|
         format.html do
-          redirect_to action: @new_window ? :close : :index
+          redirect_to action: new_window? ? :close : :index
         end
         format.xml  { render :xml => @item.errors, :status => :unprocessable_entity }
       end
@@ -393,8 +391,8 @@ class Gw::Admin::Webmail::MailsController < Gw::Controller::Admin::Base
 #    end
 
     label = params[:copy].blank? ? '移動' : 'コピー'
-    flash[:notice] = "#{changed_num}件のメールを#{label}しました。" unless @new_window
-    redirect_to action: @new_window ? :close : :index
+    flash[:notice] = "#{changed_num}件のメールを#{label}しました。" unless new_window?
+    redirect_to action: new_window? ? :close : :index
   end
 
   def delete
@@ -613,27 +611,28 @@ class Gw::Admin::Webmail::MailsController < Gw::Controller::Admin::Base
     render layout: false
   end
 
+  def new_window?
+    params[:new_window] == '1'
+  end
+
   private
 
   def select_layout
-    case params[:action].to_sym
+    case action_name.to_sym
     when :new, :create, :edit, :update, :answer, :forward, :close
-      "admin/gw/mail_form"
+      'admin/gw/mail_form'
     when :show, :move
-      if params[:new_window].present?
-        "admin/gw/mail_form"
-      else
-        "admin/gw/webmail"
-      end
+      new_window? ? 'admin/gw/mail_form' : 'admin/gw/webmail'
     else
-      "admin/gw/webmail"
+      'admin/gw/webmail'
     end
   end
 
   def keep_params(options = {})
     if options[:mailbox].blank? &&
        (options[:controller].blank? || options[:controller].in?([controller_name, controller_path]))
-      keeps = params.slice(:page, :search, :s_keyword, :s_column, :s_status, :s_label, :sort_key, :sort_order, :sort_starred)
+      keeps = params.slice(:page, :search, :s_keyword, :s_column, :s_status, :s_label,
+        :sort_key, :sort_order, :sort_starred, :new_window)
       options = options.reverse_merge(keeps)
     end
     options
@@ -672,7 +671,7 @@ class Gw::Admin::Webmail::MailsController < Gw::Controller::Admin::Base
   end
 
   def set_address_histories
-    if @conf.mail_address_history != 0
+    if @conf.mail_address_history != 0 && !new_window?
       @address_histories = Gw::WebmailMailAddressHistory.load_user_histories(@conf.mail_address_history)
     end
   end
@@ -682,7 +681,9 @@ class Gw::Admin::Webmail::MailsController < Gw::Controller::Admin::Base
   end
 
   def set_mailboxes
-    @mailboxes = Gw::WebmailMailbox.load_mailboxes(params[:reload].present? ? :all : nil)
+    if !new_window?
+      @mailboxes = Gw::WebmailMailbox.load_mailboxes(params[:reload].present? ? :all : nil)
+    end
   end
 
   def reload_mailboxes
@@ -697,12 +698,6 @@ class Gw::Admin::Webmail::MailsController < Gw::Controller::Admin::Base
     @quota = Gw::WebmailMailbox.load_quota(true)
   end
 
-  def reload_starred_mails(mailbox_uids = {'INBOX' => :all})
-    Util::Database.lock_by_name(Core.current_user.account) do
-      Gw::WebmailMailbox.load_starred_mails(mailbox_uids)
-    end
-  end
-
   def set_conditions_from_params
     fromto = @mailbox.sent_box? || @mailbox.draft_box? ? 'TO' : 'FROM'
     @conditions = Gw::WebmailMail.make_conditions_from_params(params, fromto)
@@ -712,24 +707,26 @@ class Gw::Admin::Webmail::MailsController < Gw::Controller::Admin::Base
     @sort = Gw::WebmailMail.make_sort_from_params(params)
   end
 
-  def default_sign
-    return @default_sign if @default_sign
-    if request.mobile? || request.smart_phone?
-      @default_sign = Gw::WebmailSign.new
-    else
-      @default_sign = (Gw::WebmailSign.default_sign || Gw::WebmailSign.new)
+  def reload_starred_mails(mailbox_uids = {'INBOX' => :all})
+    Util::Database.lock_by_name(Core.current_user.account) do
+      Gw::WebmailMailbox.load_starred_mails(mailbox_uids)
     end
-    @default_sign
+  end
+
+  def default_sign
+    if request.mobile? || request.smart_phone?
+      Gw::WebmailSign.new
+    else
+      Gw::WebmailSign.default_sign || Gw::WebmailSign.new
+    end
   end
 
   def default_template
-    return @default_template if @default_template
     if request.mobile? || request.smart_phone?
-      @default_template = Gw::WebmailTemplate.new
+      Gw::WebmailTemplate.new
     else
-      @default_template = (Gw::WebmailTemplate.default_template || Gw::WebmailTemplate.new)
+      Gw::WebmailTemplate.default_template || Gw::WebmailTemplate.new
     end
-    @default_template
   end
 
   def send_mdn_message(mdn_mode)

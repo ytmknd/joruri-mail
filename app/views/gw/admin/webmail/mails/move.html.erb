@@ -5,7 +5,7 @@ end
 action_label = params[:copy].blank? ? '移動' : 'コピー'
 %>
 <table id="webmailContainer"><tr>
-<% unless @new_window %>
+<% unless controller.new_window? %>
 <td id="webmailMenu"><div id="webmailMenuContainer">
 
 <div class="menu">
@@ -24,7 +24,6 @@ action_label = params[:copy].blank? ? '移動' : 'コピー'
 
 <%= form_for :item, url: { action: :move }, html: { id: "mails", name: "mails" } do |f| %>
 <%= hidden_field_tag 'copy', params[:copy] %>
-<%= hidden_field_tag 'new_window', @new_window %>
 <% params[:item][:ids].each do |id, key| %>
 <%= hidden_field_tag "item[ids][#{id}]", 1 %>
 <% end %>

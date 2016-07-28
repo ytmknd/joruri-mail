@@ -3,7 +3,7 @@
 @item.inline_contents
 %>
 <table id="webmailContainer"><tr>
-<% unless @new_window %>
+<% unless controller.new_window? %>
 <td id="webmailMenu"><div id="webmailMenuContainer">
 
 <div class="menu">
@@ -23,18 +23,18 @@
 <div class="menu">
   <div class="leftMenu" style="position:relative;">
     <% if @item.draft? %>
-      <% unless @new_window %>
+      <% unless controller.new_window? %>
       <%= link_to '≪一覧へ戻る', { action: :index }, class: 'index'
       %><span class="separator">|</span
       ><% end %><%= link_to '編集', '#editMail', class: 'edit', title: '編集', target: '_blank',
         data: { url: url_for(action: :edit) }
-      %><%= link_to '削除', { action: :destroy, new_window: @new_window }, method: :delete, class: :delete, title: '削除'
+      %><%= link_to '削除', { action: :destroy }, method: :delete, class: :delete, title: '削除'
       %><span class="separator">|</span
       ><%= link_to 'ラベル', '#showLabelMenu', class: 'label', title: 'ラベル'
       %><%= link_to 'その他', '#showOtherMenu', class: 'etc', title: 'その他'
       %><%= link_to '印刷', '#', onclick: 'window.print(); return false;', class: 'print', title: '印刷' %>
     <% else %>
-      <% unless @new_window %>
+      <% unless controller.new_window? %>
       <%= link_to '≪一覧へ戻る', { action: :index }, class: 'index'
       %><span class="separator">|</span
       ><% end %><%= link_to '返信', '#showAnswerMenu', class: 'answer', title: '返信'
@@ -44,7 +44,7 @@
         data: { url: url_for(action: :edit) } if @mailbox.sent_box?
       %><%= link_to '移動', '#moveMail', class: 'move', title: '移動'
       %><%= link_to 'コピー', '#copyMail', class: 'copy', title: 'コピー'
-      %><%= link_to '削除', { action: :destroy, new_window: @new_window }, method: :delete, class: :delete, title: '削除'
+      %><%= link_to '削除', { action: :destroy }, method: :delete, class: :delete, title: '削除'
       %><span class="separator">|</span
       ><%= link_to 'ラベル', '#showLabelMenu', class: 'label', title: 'ラベル'
       %><%= link_to 'その他', '#showOtherMenu', class: 'etc', title: 'その他'
@@ -83,7 +83,6 @@
 <%= form_for :item, url: { action: :move }, html: { id: 'mailForm' } do |f| %>
 <input type="hidden" name="id" value="<%= @item.uid %>" />
 <input type="hidden" name="item[ids][<%= @item.uid %>]" value="1" />
-<input type="hidden" name="new_window" value="<%= @new_window %>" />
 <% end %>
 
 <div id="mailContent">
@@ -269,7 +268,7 @@
 
 <div class="menu">
   <div class="leftMenu">
-    <% unless @new_window %>
+    <% unless controller.new_window? %>
     <%= link_to '≪一覧へ戻る', { action: :index }, class: 'index' %>
     <% end %>
   </div>
@@ -293,7 +292,7 @@ function syncLabels(uid, html) {
   $('#mail_' + uid + '_labels').html(html);
 }
 $(function() {
-  <% if @new_window && @seen_flagged %>
+  <% if controller.new_window? && @seen_flagged %>
   if (window.opener) {
     window.opener.syncUnseenClass('<%=raw escape_javascript @mailbox.name %>', '<%= @item.uid %>');
     <% if @mailbox.star_box? %>
