@@ -15,7 +15,7 @@ class Gw::WebmailMail
 
   with_options on: [:send, :draft] do
     validates :in_subject, length: { maximum: 100 }
-    validates :in_to, :in_cc, :in_bcc, email: true
+    validates :in_to, :in_cc, :in_bcc, email_list: true
     validates :in_to_addrs, :in_cc_addrs, :in_bcc_addrs, length: { maximum: 150, message: :too_many_addresses }
     validate :validate_tmp_attachments
   end
