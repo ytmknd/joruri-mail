@@ -1,16 +1,3 @@
-<%
-assert = "このメールは携帯端末から送信しています。"
-if @item.in_format == Gw::WebmailMail::FORMAT_HTML
-  if @item.in_html_body !~ /^#{assert}/
-    @item.in_html_body = "#{@item.in_html_body}\n\n-------\n#{assert}\n\n\n"
-  end
-else
-  if @item.in_body !~ /^#{assert}/
-    @item.in_body = "#{@item.in_body}\n\n-------\n#{assert}\n\n\n"
-  end
-end
-%>
-
 <%= hidden_field_tag "mobile[action]", params.dig(:mobile, :action) || action_name %>
 <%= hidden_field_tag "mobile[mailbox]", @mailbox.name %>
 <%= hidden_field_tag "mobile[uid]", params[:id] if params[:id] %>

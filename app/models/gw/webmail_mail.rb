@@ -337,6 +337,13 @@ class Gw::WebmailMail
     data
   end
 
+  def append_mobile_notice_to_body
+    notice = "-------\nこのメールは携帯端末から送信しています。\n"
+    if in_body !~ /#{notice}/ && in_body !~ /#{notice.gsub("\n", "\r\n")}/
+      self.in_body = "\n\n\n#{notice}\n\n#{in_body}"
+    end
+  end
+
   private
 
   def prepare_validation

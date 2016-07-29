@@ -131,6 +131,7 @@ class Gw::Admin::Webmail::MailsController < Gw::Controller::Admin::Base
     @item.init_for_new(template: default_template, sign: default_sign)
     @item.init_from_flash(flash)
     @item.init_from_params(params)
+    @item.append_mobile_notice_to_body if request.mobile? || request.smart_phone?
   end
 
   def create
@@ -145,6 +146,7 @@ class Gw::Admin::Webmail::MailsController < Gw::Controller::Admin::Base
     @item = Gw::WebmailMail.new(params[:item])
     @item.init_for_edit(@ref, format: params[:mail_view])
     @item.init_from_flash(flash)
+    @item.append_mobile_notice_to_body if request.mobile? || request.smart_phone?
     render :new
   end
 
@@ -190,6 +192,7 @@ class Gw::Admin::Webmail::MailsController < Gw::Controller::Admin::Base
       quote: params[:qt]
     )
     @item.init_from_flash(flash)
+    @item.append_mobile_notice_to_body if request.mobile? || request.smart_phone?
     render :new
   end
 
@@ -214,6 +217,7 @@ class Gw::Admin::Webmail::MailsController < Gw::Controller::Admin::Base
       sign_pos: Gw::WebmailSetting.user_config_value(:sign_position)
     )
     @item.init_from_flash(flash)
+    @item.append_mobile_notice_to_body if request.mobile? || request.smart_phone?
     render :new
   end
 
@@ -714,18 +718,14 @@ class Gw::Admin::Webmail::MailsController < Gw::Controller::Admin::Base
   end
 
   def default_sign
-    if request.mobile? || request.smart_phone?
-      Gw::WebmailSign.new
-    else
-      Gw::WebmailSign.default_sign || Gw::WebmailSign.new
+    if !request.mobile? && !request.smart_phone?
+      Gw::WebmailSign.default_sign
     end
   end
 
   def default_template
-    if request.mobile? || request.smart_phone?
-      Gw::WebmailTemplate.new
-    else
-      Gw::WebmailTemplate.default_template || Gw::WebmailTemplate.new
+    if !request.mobile? && !request.smart_phone?
+      Gw::WebmailTemplate.default_template
     end
   end
 
