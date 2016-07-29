@@ -124,7 +124,7 @@ module Sys::Lib::Net::Imap
       Core.imap
     end
 
-    def find_uids(select: 'INBOX', conditions: ['ALL'], sort: nil)
+    def find_uids(select:, conditions: [], sort: nil)
       imap.examine(select)
       if sort && imap.capabilities.include?('SORT')
         imap.uid_sort(sort, conditions, 'utf-8')
@@ -133,7 +133,7 @@ module Sys::Lib::Net::Imap
       end
     end
 
-    def find_by_uid(uid, select: 'INBOX', conditions: [])
+    def find_by_uid(uid, select:, conditions: [], fetch: ['FLAGS', 'RFC822'])
       uid = uid.to_i
       return nil if uid == 0
 
@@ -141,18 +141,18 @@ module Sys::Lib::Net::Imap
       search_uid = imap.uid_search(['UID', uid] + conditions, 'utf-8').first
       return nil unless search_uid
 
-      msg = imap.uid_fetch(search_uid, ['FLAGS', 'RFC822']).to_a.first
+      msg = imap.uid_fetch(search_uid, fetch).to_a.first
       return nil unless msg
 
       item = self.new
-      item.parse(msg.attr['RFC822'])
+      item.parse(msg.attr['RFC822']) if msg.attr['RFC822']
       item.uid     = uid
       item.mailbox = select
-      item.flags   = msg.attr['FLAGS']
+      item.flags   = msg.attr['FLAGS'] if msg.attr['FLAGS']
       item
     end
 
-    def find(select: 'INBOX', conditions: ['ALL'], sort: nil)
+    def find(select:, conditions: [], sort: nil)
       imap.examine(select)
       uids =
         if sort && imap.capabilities.include?('SORT')
@@ -165,7 +165,7 @@ module Sys::Lib::Net::Imap
       items.sort { |a, b| uids.index(a.uid) <=> uids.index(b.uid) }
     end
 
-    def paginate(select: 'INBOX', conditions: ['ALL'], sort: ['REVERSE', 'DATE'], page: 1, limit: 20, starred: nil)
+    def paginate(select:, conditions: [], sort: [], page: 1, limit: 20, starred: nil)
       page = (page.presence || 1).to_i
       limit = (limit.presence || 20).to_i
 
@@ -184,7 +184,7 @@ module Sys::Lib::Net::Imap
       end
     end
 
-    def paginate_uid(uid, select: 'INBOX', conditions: ['ALL'], sort: ['REVERSE', 'DATE'], starred: nil)
+    def paginate_uid(uid, select:, conditions: [], sort: [], starred: nil)
       uids =
         if starred == '1'
           find_uids(select: select, conditions: conditions + ['FLAGGED'], sort: sort) +

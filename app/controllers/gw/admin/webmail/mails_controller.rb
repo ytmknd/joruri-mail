@@ -311,7 +311,7 @@ class Gw::Admin::Webmail::MailsController < Gw::Controller::Admin::Base
   end
 
   def destroy
-    @item = Gw::WebmailMail.find_by_uid(params[:id], select: @mailbox.name, conditions: ['UNDELETED'])
+    @item = Gw::WebmailMail.find_by_uid(params[:id], select: @mailbox.name, conditions: ['UNDELETED'], fetch: ['FLAGS'])
     return error_auth unless @item
 
     changed_num = 0
@@ -549,7 +549,7 @@ class Gw::Admin::Webmail::MailsController < Gw::Controller::Admin::Base
   end
 
   def star
-    @item = Gw::WebmailMail.find_by_uid(params[:id], select: @mailbox.name, conditions: ['UNDELETED'])
+    @item = Gw::WebmailMail.find_by_uid(params[:id], select: @mailbox.name, conditions: ['UNDELETED'], fetch: ['FLAGS'])
     return error_auth unless @item
 
     starred = @item.starred?
@@ -581,7 +581,7 @@ class Gw::Admin::Webmail::MailsController < Gw::Controller::Admin::Base
   end
 
   def label
-    @item = Gw::WebmailMail.find_by_uid(params[:id], select: @mailbox.name, conditions: ['UNDELETED'])
+    @item = Gw::WebmailMail.find_by_uid(params[:id], select: @mailbox.name, conditions: ['UNDELETED'], fetch: ['FLAGS'])
     return error_auth unless @item
 
     @label_confs = Gw::WebmailSetting.load_label_confs
