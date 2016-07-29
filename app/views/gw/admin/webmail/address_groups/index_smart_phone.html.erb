@@ -17,7 +17,7 @@ end
 
 <%= form_tag gw_webmail_address_groups_path, { id: 'groupForm', name: 'groupForm', class: 'groupForm', method: :get } do |f| %>
   グループ：<%= select_tag :group_id, options_for_select(
-  [['すべて', 0]] + @root_groups.map(&:descendant_options).reduce(:+), @group.id), class: 'selectUI', :onchange => "changeSelection();" %><br/>
+  [['すべて', 0]] + @root_groups.map(&:descendant_options).flatten(1), @group.id), class: 'selectUI', :onchange => "changeSelection();" %><br/>
   <%#= submit_tag '検索', name: 'select', class: 'search' %>
   <%= submit_tag 'リセット', name: 'clear', class: 'reset' %>
 <% end %>

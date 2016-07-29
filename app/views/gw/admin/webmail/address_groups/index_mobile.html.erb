@@ -14,7 +14,7 @@ end
 <div class="groups"><%= Joruri.config.application['webmail.address_group_menu'] %></div>
 <%= form_tag gw_webmail_address_groups_path, { id: 'groupForm', name: 'groupForm', class: 'groupForm', method: :get } do |f| %>
   <%= select_tag :group_id, options_for_select(
-    [['すべて', 0]] + @root_groups.map(&:descendant_options).reduce(:+), @group.id), class: 'selectUI' %><br/>
+    [['すべて', 0]] + @root_groups.map(&:descendant_options).flatten(1), @group.id), class: 'selectUI' %><br/>
   <%= submit_tag '検索', class: 'menuItem', name: 'select', accesskey: '1' %>
   <%= submit_tag 'リセット', class: 'menuItem', name: 'clear', accesskey: '2' %>
 <% end %>
