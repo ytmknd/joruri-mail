@@ -86,43 +86,42 @@ class Gw::Admin::Webmail::MailboxesController < Gw::Controller::Admin::Base
 
     if !delete_complete && Core.imap.list('', "Trash.#{short_name}")
       @item.errors.add(:base, '同じ名前のフォルダーが既に存在します。')
+      return render :index
     end
 
     parent = @item.path.to_s.gsub(/\.+$/, '')
     parent = "INBOX" if parent.blank?
 
-    if @item.errors.blank? && @item.valid?
-      begin
-        if children = Core.imap.list('', "#{@item.name}.*")
-          children.each do |box|
-            if delete_complete
-              Core.imap.delete(box.name)
-            end
-  
-            uids = Gw::WebmailMailNode.find_ref_nodes(box.name).map{|x| x.uid}
-            num = Gw::WebmailMail.delete_all('Star', uids)
-            if num > 0
-              Gw::WebmailMailNode.delete_ref_nodes(box.name)
-              reload_starred_mails({new_name => [:all]}) unless delete_complete
-            end
+    begin
+      if children = Core.imap.list('', "#{@item.name}.*")
+        children.each do |box|
+          if delete_complete
+            Core.imap.delete(box.name)
+          end
+
+          uids = Gw::WebmailMailNode.find_ref_nodes(box.name).map{|x| x.uid}
+          num = Gw::WebmailMail.delete_all('Star', uids)
+          if num > 0
+            Gw::WebmailMailNode.delete_ref_nodes(box.name)
+            reload_starred_mails({new_name => [:all]}) unless delete_complete
           end
         end
-  
-        if delete_complete
-          @item.delete_mailbox
-        else
-          @item.rename_mailbox(new_name)
-        end
-  
-        uids = Gw::WebmailMailNode.find_ref_nodes(old_name).map{|x| x.uid}
-        num = Gw::WebmailMail.delete_all('Star', uids)
-        if num > 0
-          Gw::WebmailMailNode.delete_ref_nodes(old_name)
-          reload_starred_mails({new_name => [:all]}) unless delete_complete
-        end
-      rescue => e
-        @item.errors.add(:base, e.to_s)
       end
+
+      if delete_complete
+        @item.delete_mailbox
+      else
+        @item.rename_mailbox(new_name)
+      end
+
+      uids = Gw::WebmailMailNode.find_ref_nodes(old_name).map{|x| x.uid}
+      num = Gw::WebmailMail.delete_all('Star', uids)
+      if num > 0
+        Gw::WebmailMailNode.delete_ref_nodes(old_name)
+        reload_starred_mails({new_name => [:all]}) unless delete_complete
+      end
+    rescue => e
+      @item.errors.add(:base, e.to_s)
     end
 
     if @item.errors.present?

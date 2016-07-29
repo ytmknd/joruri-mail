@@ -6,20 +6,27 @@ module Gw::Webmail::Mailboxes::Imap
   ORDERS = %w(INBOX Star Drafts Sent Archives virtual _etc Trash)
 
   def create_mailbox(name)
-    imap.create(name)
-    self.name = name
-    self.save
+    transaction do
+      self.name = name
+      self.save
+      imap.create(name)
+    end
   end
 
   def rename_mailbox(new_name)
-    imap.rename(name, new_name)
-    self.name = new_name
-    self.save
+    transaction do
+      old_name = name
+      self.name = new_name
+      self.save
+      imap.rename(old_name, new_name)
+    end
   end
 
   def delete_mailbox
-    imap.delete(name)
-    self.destroy
+    transaction do
+      self.destroy
+      imap.delete(name)
+    end
   end
 
   private
