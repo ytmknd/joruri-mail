@@ -29,7 +29,7 @@ class Gw::Admin::Webmail::MailsController < Gw::Controller::Admin::Base
   end
 
   def index
-    last_uid, recent, error = Gw::WebmailFilter.apply_recents
+    last_uid, recent, delayed = Gw::WebmailFilter.apply_recents
     if recent && params[:reload].blank?
       reload_mailboxes
       reload_quota
@@ -37,9 +37,9 @@ class Gw::Admin::Webmail::MailsController < Gw::Controller::Admin::Base
     if @mailbox.name == 'INBOX'
       @conditions += ['UID', "1:#{last_uid}"]
     end
-    if error
-      flash.now[:error] = 'フィルター処理がタイムアウトしました。フィルター未処理のメールが残っている可能性があります。'
-    end 
+    if delayed > 0
+      flash.now[:error] = "新着メールのフィルター処理件数が規定値を超えたため、残り#{delayed}件はバックグラウンドで実行します。完了までに時間がかかる場合があります。"
+    end
 
     @items = Gw::WebmailMail.paginate(select: @mailbox.name, conditions: @conditions,
       sort: @sort, page: params[:page], limit: @conf.mails_per_page, starred: params[:sort_starred])

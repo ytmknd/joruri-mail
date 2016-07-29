@@ -38,5 +38,7 @@ module Joruri
     config.action_view.field_error_proc = proc { |html_tag, instance|
       %Q|<span class="field_with_errors">#{html_tag}</span>|.html_safe
     }
+
+    config.active_job.queue_adapter = :delayed_job
   end
 end

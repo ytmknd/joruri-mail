@@ -13,6 +13,7 @@ module Joruri
         "webmail.attachment_file_upload_method"  => 'auto',
         "webmail.show_only_ldap_user"            => 1,
         "webmail.filter_condition_max_count"     => 100,
+        "webmail.filter_max_mail_count_at_once"  => 500,
         "webmail.mail_address_history_max_count" => 100,
         "webmail.synchronize_mobile_setting"     => 0,
         "webmail.show_gw_schedule_link"          => 1,

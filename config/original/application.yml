@@ -15,10 +15,11 @@ webmail:
   show_only_ldap_user: 0
   # フィルター条件最大登録件数
   filter_condition_max_count: 100
+  # フィルター1回あたりの最大処理メール件数
+  filter_max_mail_count_at_once: 500
   # メール送信先履歴最大保持件数
   mail_address_history_max_count: 200
   # 切替ユーザー最大登録件数
   switch_user_max_count: 5
   # Gwスケジュール連携リンク表示
   show_gw_schedule_link: 0
-

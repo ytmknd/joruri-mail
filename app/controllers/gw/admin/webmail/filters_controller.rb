@@ -54,27 +54,12 @@ class Gw::Admin::Webmail::FiltersController < Gw::Controller::Admin::Base
   def apply
     @item = Gw::WebmailFilter.find(params[:id])
     return error_auth unless @item.readable?
-
-    @f_item = Gw::WebmailFilter.new
     return false unless request.post?
 
-    @f_item.attributes = f_item_params
+    @item.attributes = apply_item_params
+    return false if @item.invalid?(:apply)
 
-    ## validation
-    @f_item.errors.add :base, "適用するフォルダーを入力してください。" if @f_item.mailbox.blank?
-    @f_item.errors.add :base, "適用する条件が見つかりません。" if @item.conditions.size == 0
-    return false if @f_item.errors.size > 0
-
-    begin
-      timeout = Sys::Lib::Timeout.new(60)
-      mailboxes = [@f_item.mailbox]
-      mailboxes += Core.imap.list('', "#{@f_item.mailbox}.*").to_a.map(&:name) if @f_item.include_sub == '1'
-      mailboxes.each do |mailbox|
-        @item.apply(select: mailbox, conditions: ['NOT', 'DELETED'], timeout: timeout)
-      end
-    rescue Sys::Lib::Timeout::Error => e
-      flash[:error] = "フィルター処理がタイムアウトしました。（#{e.second}秒）"
-    end
+    @item.apply
 
     if @item.applied > 0
       changed_mailbox_uids = {}
@@ -89,6 +74,7 @@ class Gw::Admin::Webmail::FiltersController < Gw::Controller::Admin::Base
     end
 
     flash[:notice] = "#{@item.applied}件のメールに適用しました。"
+    flash[:error] = "フィルター処理件数が規定値を超えたため、残り#{@item.delayed}件のメールはバックグラウンドで実行します。完了までに時間がかかる場合があります。" if @item.delayed > 0
     redirect_to action: :apply
   end
 
@@ -99,7 +85,7 @@ class Gw::Admin::Webmail::FiltersController < Gw::Controller::Admin::Base
       :conditions_attributes => [:id, :column, :inclusion, :value, :_destroy])
   end
 
-  def f_item_params
-    params.require(:f_item).permit(:mailbox, :include_sub)
+  def apply_item_params
+    params.require(:item).permit(:target_mailbox, :include_sub)
   end
 end

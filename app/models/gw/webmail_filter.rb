@@ -4,16 +4,17 @@ class Gw::WebmailFilter < ActiveRecord::Base
 
   NUMBER_OF_SLICE_UIDS = 256
 
-  belongs_to_active_hash :status, foreign_key: :state, class_name: 'Sys::Base::Status'
+  attr_accessor :target_mailbox, :include_sub
+  attr_accessor :matched_uids
+  attr_reader :applied, :processed, :delayed
 
+  belongs_to_active_hash :status, foreign_key: :state, class_name: 'Sys::Base::Status'
   has_many :conditions, -> { order(:sort_no) },
     foreign_key: :filter_id, class_name: 'Gw::WebmailFilterCondition', dependent: :destroy
 
   accepts_nested_attributes_for :conditions, allow_destroy: true
 
-  attr_accessor :include_sub
-  attr_accessor :matched_uids
-  attr_reader :applied
+  before_validation :set_conditions_for_save
 
   validates :user_id, :state, :name, :conditions_chain, :action, presence: true
   validates :sort_no, numericality: { greater_than_or_equal_to: 0, only_integer: true }
@@ -21,7 +22,10 @@ class Gw::WebmailFilter < ActiveRecord::Base
   validate :validate_mailbox
   validate :validate_name
 
-  before_validation :set_conditions_for_save
+  with_options on: :apply do
+    validates :target_mailbox, presence: true
+    validates :conditions, presence: true
+  end
 
   scope :readable, ->(user = Core.user) { where(user_id: user.id) }
 
@@ -64,19 +68,42 @@ class Gw::WebmailFilter < ActiveRecord::Base
     nil
   end
 
-  def apply(select:, conditions:, timeout:)
-    @applied = 0
-    applied_uids = []
+  def target_mailboxes
+    mailboxes = [target_mailbox]
+    mailboxes += Core.imap.list('', "#{mailbox}.*").to_a.map(&:name) if include_sub == '1'
+    mailboxes
+  end
 
-    uids = Gw::WebmailMail.find_uids(select: select, conditions: conditions)
-    uids.each_slice(NUMBER_OF_SLICE_UIDS) do |slice_uids|
-      timeout.check 
-      applied_uids += self.class.apply_uids([self], select, slice_uids, delete_cache: true)
-      @applied = applied_uids.size
+  def schedule_mail_uids
+    mail_uids = target_mailboxes.each_with_object({}) do |mailbox, hash|
+      uids = Gw::WebmailMail.find_uids(select: mailbox, conditions: ['UNDELETED'])
+      hash[mailbox] = uids.sort.reverse
     end
-  ensure
+    self.class.schedule_mail_uids(mail_uids)
+  end
+
+  def apply
+    @applied = 0
+    @processed = 0
+    @delayed = 0
+
+    process_uids, delay_uids = schedule_mail_uids
+    process_uids.each do |mailbox, uids|
+      applied_uids = apply_to(mailbox: mailbox, uids: uids)
+      @processed += uids.size
+      @applied += applied_uids.size
+    end
+    delay_uids.each do |mailbox, uids|
+      Gw::WebmailFilterJob.new(user: Core.current_user, mailbox: mailbox, uids: uids).delay(queue: 'filter').perform
+      @delayed += uids.size
+    end
+  end
+
+  def apply_to(mailbox:, uids:)
+    applied_uids = self.class.apply_uids([self], mailbox: mailbox, uids: uids)
+
     if applied_uids.size > 0
-      starred_uids = Gw::WebmailMailNode.find_ref_nodes(select, applied_uids).map{|x| x.uid}
+      starred_uids = Gw::WebmailMailNode.find_ref_nodes(mailbox, applied_uids).map{|x| x.uid}
       if starred_uids.present?
         Core.imap.select('Star')
         num = Core.imap.uid_store(starred_uids, '+FLAGS', [:Deleted]).to_a.size
@@ -86,6 +113,7 @@ class Gw::WebmailFilter < ActiveRecord::Base
         end
       end
     end
+    applied_uids
   end
 
   def delete_exceeded_conditions
@@ -157,26 +185,33 @@ class Gw::WebmailFilter < ActiveRecord::Base
 
   class << self
     def apply_recents
-      st = Gw::WebmailSetting.where(user_id: Core.current_user.id, name: 'last_uid').first_or_initialize
+      st = Gw::WebmailSetting.where(user_id: Core.current_user.id, name: 'last_uid').first_or_initialize(value: 1)
       next_uid = Core.imap.status('INBOX', ['UIDNEXT'])['UIDNEXT']
       last_uid = (next_uid > 1) ? next_uid - 1 : 1
-      imap_cnd = st.value.blank? ? ['RECENT'] : ['UID', "#{st.value.to_i + 1}:#{last_uid}", 'UNSEEN']
+      imap_cnd = st.value.blank? ? ['RECENT'] : ['UID', "#{st.value.to_i}:#{last_uid}", 'UNSEEN']
 
+      delayed = 0
       filters = self.where(user_id: Core.current_user.id, state: 'enabled')
         .order(:sort_no, :id)
         .preload(:conditions)
 
       if filters.size > 0
-        timeout = Sys::Lib::Timeout.new(60)
         uids = Gw::WebmailMail.find_uids(select: 'INBOX', conditions: imap_cnd)
-        begin
-          uids.each_slice(NUMBER_OF_SLICE_UIDS) do |slice_uids|
-            timeout.check
-            apply_uids(filters, 'INBOX', slice_uids)
+        if uids.present?
+          process_uids, delay_uids = schedule_mail_uids('INBOX' => uids)
+          if process_uids.present?
+            process_uids.each do |mailbox, uids|
+              apply_uids(filters, mailbox: mailbox, uids: uids)
+            end
           end
-        rescue Sys::Lib::Timeout::Error => e
-          error = e
-        end        
+          if delay_uids.present?
+            delay_uids.each do |mailbox, uids|
+              Gw::WebmailFilterJob.new(user: Core.current_user, mailbox: mailbox, uids: uids)
+                .delay(queue: 'filter').perform
+              delayed += uids.size
+            end
+          end
+        end
       end
 
       if last_uid != st.value.to_i
@@ -186,11 +221,39 @@ class Gw::WebmailFilter < ActiveRecord::Base
       else
         recent = false
       end
-      return last_uid, recent, error
+      return last_uid, recent, delayed
     end
 
-    def apply_uids(filters, mailbox, uids, options = {})
-      filters = Array(filters)
+    def schedule_mail_uids(mail_uids)
+      count = 0
+      process_uids = {}
+      delay_uids = {}
+      max_count = Joruri.config.application['webmail.filter_max_mail_count_at_once']
+
+      mail_uids.each do |mailbox, uids|
+        uids.each do |uid|
+          if count >= max_count
+            delay_uids[mailbox] ||= []
+            delay_uids[mailbox] << uid
+          else 
+            process_uids[mailbox] ||= []
+            process_uids[mailbox] << uid
+          end
+          count += 1
+        end
+      end
+      return process_uids, delay_uids
+    end
+
+    def apply_uids(filters, mailbox:, uids:, delete_cache: true)
+      applied_uids = []
+      uids.each_slice(NUMBER_OF_SLICE_UIDS) do |sliced_uids|
+        applied_uids += apply_uids_for_each_slice(filters, mailbox: mailbox, uids: sliced_uids, delete_cache: delete_cache)
+      end
+      applied_uids
+    end
+
+    def apply_uids_for_each_slice(filters, mailbox:, uids:, delete_cache: true)
       mails = Gw::WebmailMail.fetch_for_filter(uids, mailbox)
       mails.each do |mail|
         mail_data = {
@@ -210,7 +273,7 @@ class Gw::WebmailFilter < ActiveRecord::Base
       applied_uids = []
       filters.each do |filter|
         if filter.matched_uids.present?
-          applied_uids += filter.perform_action(mailbox, filter.matched_uids, options)
+          applied_uids += filter.perform_action(mailbox, filter.matched_uids, delete_cache: delete_cache)
         end
       end
       applied_uids
