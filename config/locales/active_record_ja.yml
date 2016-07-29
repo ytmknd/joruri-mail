@@ -36,3 +36,7 @@ ja:
         invalid_datetime: "の日時を正しく入力してください。"
         invalid_email: "を正しく入力してください。"
         invalid_email_list: "を正しく入力してください。"
+        invalid_address: "を正しく入力してください。（%{address}）"
+        too_many_addresses: "は%{count}件以内で入力してください。"
+        too_short_addresses: "は%{count}件以上で入力してください。"
+        not_found: "が見つかりません（%{name}）"

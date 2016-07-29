@@ -1,4 +1,6 @@
-class Gw::WebmailToolBatchDeleteSetting < Sys::Model::ActiveModel
+class Gw::WebmailToolBatchDeleteSetting
+  include Sys::Model::ActiveModel
+
   attr_accessor :mailbox_id, :start_date, :end_date
   attr_accessor :include_starred
 

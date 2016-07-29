@@ -1,16 +1,34 @@
 class Gw::WebmailMail
+  include Sys::Model::ActiveModel
   include Sys::Lib::Net::Imap
   include Sys::Lib::Mail
 
   FORMAT_TEXT = 'text'
   FORMAT_HTML = 'html'
 
-  attr_accessor :charset, :in_to, :in_cc, :in_bcc, :in_from, :in_sender,
+  attr_accessor :in_from, :in_to, :in_cc, :in_bcc,
     :in_subject, :in_body, :in_html_body, :in_format, :in_files, :in_request_mdn,
     :tmp_id, :tmp_attachment_ids
   attr_reader :in_to_addrs, :in_cc_addrs, :in_bcc_addrs
 
+  before_validation :prepare_validation
+
+  with_options on: [:send, :draft] do
+    validates :in_subject, length: { maximum: 100 }
+    validates :in_to, :in_cc, :in_bcc, email: true
+    validates :in_to_addrs, :in_cc_addrs, :in_bcc_addrs, length: { maximum: 150, message: :too_many_addresses }
+    validate :validate_tmp_attachments
+  end
+
+  with_options on: :send do
+    validates :in_from, presence: true
+    validates :in_body, presence: true, if: -> { in_format == FORMAT_TEXT }
+    validates :in_html_body, presence: true, if: -> { in_format == FORMAT_HTML }
+    validate :validate_address_list
+  end
+
   def initialize(attributes = nil)
+    @tmp_attachment_ids = []
     if attributes.is_a?(Gw::WebmailMailNode)
       @node = attributes
       self.uid     = @node.uid
@@ -55,57 +73,19 @@ class Gw::WebmailMail
     Gw::WebmailMailAttachment.where(tmp_id: tmp_id).destroy_all
   end
 
-  def errors
-    @errors ||= ActiveModel::Errors.new(self)
-  end
+  def save_tmp_attachments
+    return if in_files.blank?
 
-  def valid?(mode = :send)
-    @in_from_addr     = Email.parse_list(in_from)
-    @in_to_addrs      = Email.parse_list(in_to)
-    @in_cc_addrs      = Email.parse_list(in_cc)
-    @in_bcc_addrs     = Email.parse_list(in_bcc)
-    self.in_subject   = NKF.nkf('-Ww --no-best-fit-chars', in_subject) if in_subject.present?
-    self.in_body      = NKF.nkf('-Ww --no-best-fit-chars', in_body) if in_body.present?
-    self.in_html_body = NKF.nkf('-Ww --no-best-fit-chars', in_html_body) if in_html_body.present?
-
-    if in_files.present?
-      in_files.each do |file|
-        attach = Gw::WebmailMailAttachment.new(tmp_id: tmp_id)
-        if attach.save_file(file)
-          @tmp_attachment_ids ||= []
-          @tmp_attachment_ids << attach.id
-        else
-          attach.errors.full_messages.each do |msg|
-            errors.add(:base, "#{file.original_filename.force_encoding('UTF-8')}: #{msg}")
-          end
+    in_files.each do |file|
+      attach = Gw::WebmailMailAttachment.new(tmp_id: tmp_id)
+      if attach.save_file(file)
+        @tmp_attachment_ids << attach.id
+      else
+        attach.errors.full_messages.each do |msg|
+          errors.add(:base, "#{file.original_filename.force_encoding('UTF-8')}: #{msg}")
         end
       end
     end
-
-    return if mode == :file
-
-    self.in_subject = "件名なし" if in_subject.blank?
-    #errors.add :base, "件名が未入力です。"   if in_subject.blank?
-    errors.add :base, "件名は100文字以内で入力してください。" if in_subject.size > 100
-    errors.add :base, "宛先は150件以内で入力してください。" if @in_to_addrs.size > 150
-    errors.add :base, "Ccは150件以内で入力してください。"   if @in_cc_addrs.size > 150
-    errors.add :base, "Bccは150件以内で入力してください。"  if @in_bcc_addrs.size > 150
-
-    tmp_attachments.each do |f|
-      errors.add :base, "添付ファイルが見つかりません。（#{f.name}）" unless File.exist?(f.upload_path)
-    end
-
-    if mode == :send
-      errors.add :base, "送信元が未入力です。" if in_from.blank?
-      errors.add :base, "宛先が未入力です。"   if in_to.blank? && in_cc.blank? && in_bcc.blank?
-      if in_format == FORMAT_HTML
-        body_check = in_html_body.present?
-      else
-        body_check = in_body.present?
-      end
-      errors.add :base, "本文が未入力です。" unless body_check
-    end
-    return errors.size == 0
   end
 
   def init_for_new(template: nil, sign: nil)
@@ -180,12 +160,11 @@ class Gw::WebmailMail
   end
 
   def init_tmp_attachments_from_ref(ref)
-    self.tmp_attachment_ids = []
     ref.attachments.each do |f|
       file = Gw::WebmailMailAttachment.new(tmp_id: tmp_id)
       tmpfile = Sys::Lib::File::Tempfile.new(data: f.body, filename: f.name)
       file.save_file(tmpfile)
-      self.tmp_attachment_ids << file.id
+      @tmp_attachment_ids << file.id
     end
   end
 
@@ -359,6 +338,30 @@ class Gw::WebmailMail
   end
 
   private
+
+  def prepare_validation
+    @in_from_addr = Email.parse_list(in_from)
+    @in_to_addrs  = Email.parse_list(in_to)
+    @in_cc_addrs  = Email.parse_list(in_cc)
+    @in_bcc_addrs = Email.parse_list(in_bcc)
+
+    self.in_subject = '件名なし' if in_subject.blank?
+    self.in_subject   = NKF.nkf('-Ww --no-best-fit-chars', in_subject) if in_subject.present?
+    self.in_body      = NKF.nkf('-Ww --no-best-fit-chars', in_body) if in_body.present?
+    self.in_html_body = NKF.nkf('-Ww --no-best-fit-chars', in_html_body) if in_html_body.present?
+  end
+
+  def validate_address_list
+    if in_to.blank? && in_cc.blank? && in_bcc.blank?
+      errors.add :in_to, :blank
+    end
+  end
+
+  def validate_tmp_attachments
+    tmp_attachments.each do |at|
+      errors.add :in_files, :not_found, name: at.name unless File.exist?(at.upload_path)
+    end
+  end
 
   def modify_html_body(html, charset = 'utf-8')
     html =

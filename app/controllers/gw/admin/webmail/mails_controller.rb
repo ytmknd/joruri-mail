@@ -226,7 +226,7 @@ class Gw::Admin::Webmail::MailsController < Gw::Controller::Admin::Base
 
     ## submit/file
     if params[:commit_file].present?
-      item.valid?(:file)
+      item.save_tmp_attachments
       return render :new
     end
 

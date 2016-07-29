@@ -1,7 +1,20 @@
 ja: 
   activerecord: 
     attributes: 
-      gw/webmail:
+      gw/webmail_mail:
+        in_from: 差出人
+        in_to: 宛先
+        in_to_addrs: 宛先
+        in_cc: Cc
+        in_cc_addrs: Cc
+        in_bcc: Bcc
+        in_bcc_addrs: Bcc
+        in_subject: 件名
+        in_body: 本文
+        in_html_body: 本文
+        in_format: 本文の形式
+        in_files: 添付ファイル
+        in_request_mdn: 開封確認
       gw/webmail_mailbox:
         title: フォルダー名
       gw/webmail_address:
