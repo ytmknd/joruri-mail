@@ -206,7 +206,7 @@ class Gw::WebmailMail
 
     mail.header["X-Mailer"] = "Joruri Mail ver. #{Joruri.version}"
     mail.header["User-Agent"] = request.user_agent.force_encoding('us-ascii') if request
-    mail.header["Disposition-Notification-To"] = @in_from_addr[0].to_s if in_request_mdn == '1'
+    mail.header["Disposition-Notification-To"] = Email.encode_addresses(@in_from_addr, charset) if in_request_mdn == '1'
 
     if @reference ## for answer
       references = []
