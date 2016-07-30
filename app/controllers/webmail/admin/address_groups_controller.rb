@@ -1,6 +1,6 @@
 class Webmail::Admin::AddressGroupsController < Webmail::Controller::Admin::Base
   include Sys::Controller::Scaffold::Base
-  include Webmail::Controller::Admin::Mobile::Address
+  include Webmail::Admin::Mobile::Address
   layout 'admin/webmail/base'
 
   def pre_dispatch

@@ -1,6 +1,6 @@
 class Webmail::Admin::MailsController < Webmail::Controller::Admin::Base
   include Sys::Controller::Scaffold::Base
-  include Webmail::Controller::Admin::Mobile::Mail
+  include Webmail::Admin::Mobile::Mail
   layout :select_layout
   rescue_from StandardError, with: :rescue_mail
 

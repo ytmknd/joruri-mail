@@ -1,4 +1,4 @@
-module Webmail::Controller::Admin::Mobile::Address
+module Webmail::Admin::Mobile::Address
   extend ActiveSupport::Concern
 
   included do

@@ -1,4 +1,4 @@
-module Webmail::Controller::Admin::Mobile::Mail
+module Webmail::Admin::Mobile::Mail
   def mobile_manage
     if params[:mobile_move]
       move
