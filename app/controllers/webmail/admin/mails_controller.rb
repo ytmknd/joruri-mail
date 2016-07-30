@@ -135,7 +135,7 @@ class Webmail::Admin::MailsController < Webmail::Controller::Admin::Base
   end
 
   def create
-    @item = Webmail::Mail.new(params[:item])
+    @item = Webmail::Mail.new(item_params)
     send_message(@item)
   end
 
@@ -143,7 +143,7 @@ class Webmail::Admin::MailsController < Webmail::Controller::Admin::Base
     @ref = Webmail::Mail.find_by_uid(params[:id], select: @mailbox.name, conditions: ['UNDELETED'])
     return http_error(404) unless @ref
 
-    @item = Webmail::Mail.new(params[:item])
+    @item = Webmail::Mail.new(item_params)
     @item.init_for_edit(@ref, format: params[:mail_view])
     @item.init_from_flash(flash)
     @item.append_mobile_notice_to_body if request.mobile? || request.smart_phone?
@@ -154,7 +154,7 @@ class Webmail::Admin::MailsController < Webmail::Controller::Admin::Base
     @ref = Webmail::Mail.find_by_uid(params[:id], select: @mailbox.name, conditions: ['UNDELETED'])
     return http_error(404) unless @ref
 
-    @item = Webmail::Mail.new(params[:item])
+    @item = Webmail::Mail.new(item_params)
     send_message(@item, @ref) do
       if !params[:remain_draft] && @ref.draft?
         mailbox_uids = get_mailbox_uids(@mailbox, @ref.uid)
@@ -172,7 +172,7 @@ class Webmail::Admin::MailsController < Webmail::Controller::Admin::Base
     @ref = Webmail::Mail.find_by_uid(params[:id], select: @mailbox.name, conditions: ['UNDELETED'])
     return http_error(404) unless @ref
 
-    @item = Webmail::Mail.new(params[:item])
+    @item = Webmail::Mail.new(item_params)
     @item.reference = @ref
 
     if request.post?
@@ -200,7 +200,7 @@ class Webmail::Admin::MailsController < Webmail::Controller::Admin::Base
     @ref = Webmail::Mail.find_by_uid(params[:id], select: @mailbox.name, conditions: ['UNDELETED'])
     return http_error(404) unless @ref
 
-    @item = Webmail::Mail.new(params[:item])
+    @item = Webmail::Mail.new(item_params)
 
     if request.post?
       return send_message(@item, @ref) do
@@ -660,6 +660,12 @@ class Webmail::Admin::MailsController < Webmail::Controller::Admin::Base
     end    
   end
 
+  def item_params
+    return {} unless params[:item]
+    params.require(:item).permit(:in_to, :in_cc, :in_bcc, :in_subject, :in_body, :in_html_body,
+      :in_format, :in_request_mdn, :in_files, :tmp_id, :tmp_attachment_ids => [])
+  end
+
   def set_conf
     @conf = Webmail::Setting.user_config_values([
       :mails_per_page, :mail_list_subject, :mail_list_from_address, :mail_address_history,
@@ -771,7 +777,7 @@ class Webmail::Admin::MailsController < Webmail::Controller::Admin::Base
     @mailbox = Webmail::Mailbox.where(user_id: Core.current_user.id, name: params[:mailbox] || 'INBOX').first
     raise e unless @mailbox
 
-    @item = Webmail::Mail.new(params[:item])
+    @item = Webmail::Mail.new(item_params)
     flash.now[:error] = "サーバーエラーが発生しました。時間をおいて再度送信してください。（#{e}）"
     render :new
   end
