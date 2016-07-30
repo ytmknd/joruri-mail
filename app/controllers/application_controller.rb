@@ -66,7 +66,7 @@ class ApplicationController < ActionController::Base
   def rescue_exception(e)
     @exception = e
     error_log("#{@exception}\n" + @exception.backtrace.join("\n")) if Rails.env == 'production'
-    if params[:format] == 'html'
+    if !params.key?(:format) || params[:format] == 'html'
       render template: 'application/exception', layout: true, status: 500
     else
       raise @exception
