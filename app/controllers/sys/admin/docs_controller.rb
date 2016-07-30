@@ -6,19 +6,19 @@ class Sys::Admin::DocsController < Sys::Controller::Admin::Base
   end
 
   def index
-    @items = Gw::WebmailDoc.order(:sort_no, :id).paginate(page: params[:page], per_page: params[:limit])
+    @items = Webmail::Doc.order(:sort_no, :id).paginate(page: params[:page], per_page: params[:limit])
     _index @items
   end
 
   def show
-    @item = Gw::WebmailDoc.find(params[:id])
+    @item = Webmail::Doc.find(params[:id])
     return error_auth unless @item.readable?
 
     _show @item
   end
 
   def new
-    @item = Gw::WebmailDoc.new(
+    @item = Webmail::Doc.new(
       state: 'public',
       sort_no: 0,
       published_at: Core.now,
@@ -26,20 +26,20 @@ class Sys::Admin::DocsController < Sys::Controller::Admin::Base
   end
 
   def create
-    @item = Gw::WebmailDoc.new(item_params)
+    @item = Webmail::Doc.new(item_params)
 
     _create @item
   end
 
   def update
-    @item = Gw::WebmailDoc.find(params[:id])
+    @item = Webmail::Doc.find(params[:id])
     @item.attributes = item_params
 
     _update @item
   end
 
   def destroy
-    @item = Gw::WebmailDoc.find(params[:id])
+    @item = Webmail::Doc.find(params[:id])
 
     _destroy @item
   end

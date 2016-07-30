@@ -1,0 +1,35 @@
+<div id="signContent">
+  
+<div class="actionMenu">
+<%= action_menu :index %>
+<%= action_menu :show %>
+</div>
+
+<%= form_for :item, url: { action: :apply } do |f| %>
+
+<%= f.error_messages %>
+
+<table class="show">
+  <tr>
+    <th>アカウント</th>
+    <td><%= "#{Core.current_user.name}（#{Core.current_user.account}）" %></td>
+  </tr><tr>
+    <th><%= @item.class.human_attribute_name :name %></th>
+    <td><%= @item.name %></td>
+  </tr><tr>
+    <th>適用するフォルダー</th>
+    <td>
+      <%= f.select :target_mailbox, Webmail::Mailbox.mailbox_options(&:filter_appliable_box?), include_blank: true %>
+      <%= f.check_box :include_sub %><label for="item_include_sub">サブフォルダーを含める</label>
+    </td>
+  </tr>
+</table>
+
+<div class="submitters">
+  <%= f.submit '適用する' %>
+</div>
+
+<% end %>
+
+</div>
+

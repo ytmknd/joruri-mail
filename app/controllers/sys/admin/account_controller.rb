@@ -3,7 +3,7 @@ class Sys::Admin::AccountController < Sys::Controller::Admin::Base
   layout 'base'
 
   def login
-    admin_uri = '/_admin/gw/webmail/INBOX/mails'
+    admin_uri = '/webmail/INBOX/mails'
 
     #return redirect_to(admin_uri) if logged_in?
     if request.mobile? && params[:_session_id] == ''

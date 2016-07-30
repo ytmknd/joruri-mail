@@ -1,0 +1,16 @@
+<div class="memo">
+<div class="title"><%= Joruri.config.application['webmail.memo_menu'] %></div>
+
+<div class="body">
+<% if @item.value.empty? %>
+  編集ボタンを押すとメモを登録できます。
+<% else %>
+  <%=hbr @item.value %>
+<% end %>
+</div>
+
+<%= form_tag edit_webmail_memo_path(0), { method: :get, id: 'memoForm', name: 'memoForm', class: 'memoForm' } do %>
+  <%= submit_tag '編集', class: 'editMemo' %>
+<% end %>
+
+</div>

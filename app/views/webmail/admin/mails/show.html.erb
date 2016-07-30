@@ -1,0 +1,480 @@
+<%
+# TODO: call inline_contents before for html_image_was_omitted?
+@item.inline_contents
+%>
+<table id="webmailContainer"><tr>
+<% unless controller.new_window? %>
+<td id="webmailMenu"><div id="webmailMenuContainer">
+
+<div class="menu">
+  <%= link_to 'メールの受信', webmail_mails_path(@mailbox.name), class: 'index', title: 'メールの受信' %>
+  <%= link_to 'メールの作成', new_webmail_mail_path('INBOX'), class: 'newMail', title: 'メールの作成', target: '_blank',
+    onclick: open_mail_form(new_webmail_mail_path('INBOX')) %>
+</div>
+
+<%= render 'webmail/admin/base/account' %>
+<%= render 'webmail/admin/mails/shared/mailbox' %>
+<%= render 'webmail/admin/mails/shared/mail_address_history', histories: @address_histories if @address_histories %>
+
+</div></td>
+<% end %>
+<td id="webmailContent">
+
+<div class="menu">
+  <div class="leftMenu" style="position:relative;">
+    <% if @item.draft? %>
+      <% unless controller.new_window? %>
+      <%= link_to '≪一覧へ戻る', { action: :index }, class: 'index'
+      %><span class="separator">|</span
+      ><% end %><%= link_to '編集', '#editMail', class: 'edit', title: '編集', target: '_blank',
+        data: { url: url_for(action: :edit) }
+      %><%= link_to '削除', { action: :destroy }, method: :delete, class: :delete, title: '削除'
+      %><span class="separator">|</span
+      ><%= link_to 'ラベル', '#showLabelMenu', class: 'label', title: 'ラベル'
+      %><%= link_to 'その他', '#showOtherMenu', class: 'etc', title: 'その他'
+      %><%= link_to '印刷', '#', onclick: 'window.print(); return false;', class: 'print', title: '印刷' %>
+    <% else %>
+      <% unless controller.new_window? %>
+      <%= link_to '≪一覧へ戻る', { action: :index }, class: 'index'
+      %><span class="separator">|</span
+      ><% end %><%= link_to '返信', '#showAnswerMenu', class: 'answer', title: '返信'
+      %><%= link_to '転送', '#editMail', class: 'forward', title: '転送', target: '_blank',
+        data: { url: url_for(action: :forward) }
+      %><%= link_to '編集', '#editMail', class: 'edit', title: '編集', target: '_blank',
+        data: { url: url_for(action: :edit) } if @mailbox.sent_box?
+      %><%= link_to '移動', '#moveMail', class: 'move', title: '移動'
+      %><%= link_to 'コピー', '#copyMail', class: 'copy', title: 'コピー'
+      %><%= link_to '削除', { action: :destroy }, method: :delete, class: :delete, title: '削除'
+      %><span class="separator">|</span
+      ><%= link_to 'ラベル', '#showLabelMenu', class: 'label', title: 'ラベル'
+      %><%= link_to 'その他', '#showOtherMenu', class: 'etc', title: 'その他'
+      %><%= link_to '印刷', '#', onclick: 'window.print(); return false;', class: 'print', title: '印刷' %>
+    <% end %>
+    <div id="answerMenu" class="popupMenu" style="display:none; width:140px">
+      <div class="menuItem"><%= link_to '送信者に返信', '#editMail',
+        data: { url: url_for(action: :answer) } %></div>
+      <div class="menuItem"><%= link_to '送信者に返信（引用あり）', '#editMail',
+        data: { url: url_for(action: :answer, qt: 1) } %></div>
+      <div class="menuItem"><%= link_to '全員に返信', '#editMail',
+        data: { url: url_for(action: :answer, all: 1) } %></div>
+      <div class="menuItem"><%= link_to '全員に返信（引用あり）', '#editMail',
+        data: { url: url_for(action: :answer, all: 1, qt: 1) } %></div>
+    </div>
+    <div id="otherMenu" class="popupMenu" style="display:none; width:100px">
+      <div class="menuItem"><%= link_to 'ローカル保存', { action: :download, download: 'eml'} %></div>
+      <div class="menuItem"><%= link_to 'ヘッダ表示', { action: :download, header: 1 }, target: '_blank' %></div>
+      <div class="menuItem"><%= link_to 'ソース表示', { action: :download, source: 1 }, target: '_blank' %></div>
+      <% if Core.current_user.id == Core.user.id %>
+      <div class="menuItem"><%= link_to '迷惑メール登録', '#registerSpamMail' %></div>
+      <% end %>
+      <div class="menuItem"><%= link_to @item.starred? ? 'スターをはずす' : 'スターを付ける', '#starMail' %></div>
+    </div>
+    <div id="labelMenu" class="popupMenu" style="display:none; width:100px;">
+      <% @conf.mail_labels.each do |conf| %>
+        <div class="menuItem"><%= link_to conf.name, '#labelMail', data: { label_id: conf.id } %></div>
+      <% end %>
+      <div class="menuItem"><hr /></div>
+      <div class="menuItem"><%= link_to 'すべてはずす', '#labelMail', data: { label_id: 0 } %></div>
+    </div>
+  </div>
+  <%= render 'webmail/admin/mails/show/pagination' %>
+</div>
+
+<%= form_for :item, url: { action: :move }, html: { id: 'mailForm' } do |f| %>
+<input type="hidden" name="id" value="<%= @item.uid %>" />
+<input type="hidden" name="item[ids][<%= @item.uid %>]" value="1" />
+<% end %>
+
+<div id="mailContent">
+
+<table class="mail">
+  <tr>
+    <th>送信者</th>
+    <td class="autoWrap">
+      <% if @from_addr %>
+        <%= link_to 'アドレス帳に登録する', '#addAddress', class: 'addAddress' %>
+      <% end %>
+      <%= mail_text_wrap @item.friendly_from_addr %>
+    </td>
+  </tr><tr>
+    <th><%= @item.draft? ? '保存日時' : '送信日時' %></th>
+    <td><%= @item.date %></td>
+  </tr><tr>
+    <th>宛先</th>
+    <td class="autoWrap"><%= mail_text_wrap @item.friendly_to_addrs.join('，') %></td>
+  </tr>
+  <% if @item.friendly_cc_addrs.present? %><tr>
+    <th>Cc</th>
+    <td class="autoWrap"><%= mail_text_wrap @item.friendly_cc_addrs.join('，') %></td>
+  </tr><% end %>
+  <% if @item.friendly_bcc_addrs.present? %><tr>
+    <th>Bcc</th>
+    <td class="autoWrap"><%= mail_text_wrap @item.friendly_bcc_addrs.join('，') %></td>
+  </tr><% end %>
+  <tr>
+    <th>件名</th>
+    <td class="subject autoWrap">
+      <a href="#starMail" id="mail_star_<%= @item.uid %>"
+        class="<%= @item.starred? ? 'starOn' : 'starOff' %>" title="<%= @item.starred? ? 'スター' : '' %>"></a>
+      <span id="mail_star_<%= @item.uid %>_loading" class="loading star-loading" style="display:none;"></span>
+      <span id="mail_<%= @item.uid %>_labels" class="labels">
+        <%= render 'webmail/admin/mails/shared/label', labels: @item.labels, label_confs: @conf.mail_labels %>
+      </span>
+      <span id="mail_<%= @item.uid %>_label_loading" class="loading label-loading" style="display:none;"></span>
+      <span class="subject"><%= mail_text_wrap(@item.subject) %></span>
+      <% if @item.has_attachments? %>
+        <span class="attachmentMark">
+          <a href="#attachments" class="attachmentMark" title="<%= @item.attachments.map(&:name).join(', ') %>">添付ファイル有り</a>
+        </span>
+      <% end %>
+    </td>
+  </tr>
+</table>
+<% if @item.html_mail? && @item.html_image_was_omitted? %>
+  <table id="htmlSecurityAlert" class="mailAttention" style="<%= 'display: none;' if @conf.html_mail_view == 'text' %>">
+    <tr>
+      <td class="message">画像が非表示になっています。画像を表示しますか？</td>
+      <td class="actions" style="width:130px">
+        <a href="#showHtmlImage">はい</a>
+        <a href="#hideHtmlSecurityAlert">いいえ</a>
+      </td>
+    </tr>
+  </table>
+<% end %>
+<% if @item.mdn_request_mode == :manual && !@mailbox.draft_box? && !@mailbox.sent_box? %>
+  <table id="mdnRequest" class="mailAttention">
+    <tr>
+      <td class="message">メッセージ送信者は、開封確認を要求しています。開封確認のメールを送信しますか？</td>
+      <td class="actions" style="width:130px">
+        <a href="#sendMdn">はい</a>
+        <a href="#hideMdnRequest">いいえ</a>
+      </td>
+    </tr>
+  </table>
+<% end %>
+<% if @item.disposition_notification_mail? %>
+  <table id="mdnAlert" class="mailAttention">
+    <tr>
+      <td class="message">これは、 <%= @item.friendly_from_addr %> により送信された、開封確認のメールです。</td>
+      <td class="actions" style="width:80px">
+        <%= link_to "OK", "#hideMdnAlert" %>
+      </td>
+    </tr>
+  </table>
+<% end %>
+
+<div class="mailBody">
+  <% if @item.html_mail? %>
+    <div class="mailViewSelector">
+      <a href="#toggleView" class="textView" title="テキスト表示" data-type="text">TEXT</a>
+      <a href="#toggleView" class="htmlView" title="HTML表示" data-type="html">HTML</a>
+    </div>
+  <% end %>
+  <%= hidden_field_tag :mail_view, @conf.html_mail_view, id: 'currentMailView' %>
+  <div id="inlineContents">
+  <% @item.inline_contents.each_with_index do |inline, idx| %>
+    <div id="inlineContent_<%= inline.seqno %>" class="<%= 'inlineContent' if idx > 0 %>">
+      <% if inline.display_as_html? %>
+        <div id="textBody_<%= inline.seqno %>" class="autoWrap mailBodyText" style="<%= 'display:none;' if @conf.html_mail_view != 'text' %>">
+          <%= mail_text_wrap(inline.text_body, 10, auto_link: true) %>
+        </div>
+        <div id="htmlBody_<%= inline.seqno %>" class="mailBodyText" style="<%= 'display:none;' if @conf.html_mail_view != 'html' %>">
+          <%=raw mail_html_autolink(inline.html_body) %>
+        </div>
+      <% else %>
+        <div id="textBody_<%= inline.seqno %>" class="autoWrap mailBodyText">
+          <%= mail_text_wrap(inline.text_body, 10, auto_link: true) %>
+        </div>
+      <% end %>
+    </div>
+  <% end %>
+  </div>
+  <% if Joruri.config.application['webmail.show_gw_schedule_link'] == 1 %>
+    <div class="scheduleMenu">
+      <a href="#openScheduleWindow" title="スケジュールを作成する">スケジュールを作成する</a>
+      <%= form_tag '/_admin/sso', method: :post, id: "scheduleForm", target: "scheduleWindow_#{Core.now.gsub(/[\W]/, '')}", style: 'display:none;' do %>
+        <%= hidden_field_tag :to, 'gw' %>
+        <%= hidden_field_tag :path, '/gw/schedules/new', id: 'schedule_path' %>
+        <%= hidden_field_tag 'item[title]', @item.subject, id: 'schedule_title'  %>
+        <%= hidden_field_tag 'item[memo]', @item.inline_contents.map(&:text_body).join("\n\n"), id: 'schedule_memo'  %>
+      <% end %>
+    </div>
+  <% end %>
+  <% if mail_mdn_dipslay?(@item, @mailbox) %>
+    <div id="mdnSent" class="recipientConfirm">[開封確認メッセージを送信]</div>
+  <% end %>
+</div>
+
+<% if @item.has_attachments? && @item.attachments.size > 0 %>
+  <a name="attachments"></a><br />
+  <table class="attachmentDownloader">
+    <tr>
+      <td class="title">添付ファイル</td>
+      <td class="actions">
+        <%= link_to '一括ダウンロード', { action: :download, download: :all } %>
+      </td>
+    </tr>
+  </table>
+  <table class="mail attachments">
+    <tr>
+      <% if @conf.mail_attachment_view != 'list' && @item.has_images? %>
+        <td class="thumbnailArea">
+        <% @item.attachments.each do |at| %>
+          <% file_title = "#{at.name}(#{at.eng_unit})" %>
+          <% if at.image? %>
+            <span class="thumbnail">
+              <span class="box" title="<%= file_title %>">
+                <a class="box" href="<%= url_for(action: :download, download: at.seqno, size: at.size) %>" target="_blank">
+                  <% if thumbnail = attachment_thumbnail_for_embed(at) %>
+                    <img src="data:image/jpeg;base64,<%= thumbnail %>" class="image" alt="<%= file_title %>" title="<%= file_title %>" />
+                  <% else %>
+                    <%= image_tag url_for(action: :download, download: at.seqno, thumbnail: 1), alt: file_title, title: file_title %>
+                  <% end %>
+                </a>
+              </span>
+              <span class="remarks">
+                <%= at.name %><br />
+                <a href="<%= url_for(action: :download, download: at.seqno, size: at.size, disposition: :attachment) %>" title="<%= file_title %>">ダウンロード</a> (<%= at.eng_unit %>)
+              </span>
+            </span>
+          <% else %>
+            <span class="thumbnail">
+              <span class="box" title="<%= file_title %>">
+                <a href="<%= url_for(action: :download, download: at.seqno, size: at.size) %>" target="<%= (at.image? ? '_blank' : nil) %>" title="<%= file_title %>">
+                  <span class="<%= at.css_class %>"><%= mail_text_wrap(at.name, 5) %></span>
+                </a>
+              </span>
+              <span class="remarks">
+                <%= at.name %><br />
+                <a href="<%= url_for(action: :download, download: at.seqno, size: at.size, disposition: :attachment) %>" title="<%= file_title %>">ダウンロード</a> (<%= at.eng_unit %>)
+              </span>
+            </span>
+          <% end %>
+        <% end %>
+        </td>
+      <% else %>
+        <td id="normalArea">
+          <% @item.attachments.each do |at| %>
+            <%= link_to h("#{at.name}(#{at.eng_unit})"), { action: :download, download: at.seqno, size: at.size },
+              target: (at.image? ? '_blank' : nil), class: at.css_class %>
+          <% end %>
+        </td>
+      <% end %>
+    </tr>
+  </table>
+<% end %>
+
+<!-- end #mailContent --></div>
+
+<div class="menu">
+  <div class="leftMenu">
+    <% unless controller.new_window? %>
+    <%= link_to '≪一覧へ戻る', { action: :index }, class: 'index' %>
+    <% end %>
+  </div>
+  <%= render 'webmail/admin/mails/show/pagination' %>
+</div>
+
+<!-- end #webmailContainer --></td></table>
+
+<script type="text/javascript">
+//<![CDATA[
+function syncStarClass(uid, starClass) {
+  var title = { starOn: 'スター', starOff: '' };
+  var menuText = { starOn: 'スターをはずす', starOff: 'スターを付ける' };
+  $('#mail_star_' + uid)
+    .removeClass('starOn starOff')
+    .addClass(starClass)
+    .attr('title', title[starClass]);
+  $('a[href="#starMail"]:not(:empty)').text(menuText[starClass]);
+}
+function syncLabels(uid, html) {
+  $('#mail_' + uid + '_labels').html(html);
+}
+$(function() {
+  <% if controller.new_window? && @seen_flagged %>
+  if (window.opener) {
+    window.opener.syncUnseenClass('<%=raw escape_javascript @mailbox.name %>', '<%= @item.uid %>');
+    <% if @mailbox.star_box? %>
+      <% if @item.node && @item.node.ref_mailbox %>
+        window.opener.syncUnseenClass('<%=raw escape_javascript @item.node.ref_mailbox %>', '');
+      <% end %>
+    <% elsif @item.starred? %>
+      window.opener.syncUnseenClass('Star', '');
+    <% end %> 
+  }
+  <% end %>
+
+  $('a[href="#showAnswerMenu"]').popupMenu({ menu: '#answerMenu' });
+  $('a[href="#showLabelMenu"]').popupMenu({ menu: '#labelMenu' });
+  $('a[href="#showOtherMenu"]').popupMenu({ menu: '#otherMenu' });
+
+  $('a[href="#editMail"]').on('click', function(e) {
+    e.preventDefault();
+    var url = $(this).attr('data-url');
+    var view = $('#currentMailView').val();
+    if (view != "") {
+      if (url.indexOf('?') < 0) {
+        url += '?';
+      } else {
+        url += '&';
+      }
+      url += "mail_view=" + view;
+    }
+    openMailForm(url, '<%=raw mail_form_style %>');
+  });
+  $('a[href="#moveMail"]').on('click', function() {
+    $('#mailForm').submit();
+    return false;
+  });
+  $('a[href="#copyMail"]').on('click', function() {
+    $('#mailForm').append('<input type="hidden" name="copy" value="1">').submit();
+    return false;
+  });
+  $('a[href="#registerSpamMail"]').on('click', function() {
+    if (confirm('迷惑メールに登録した後、ごみ箱に移動します。よろしいですか？')) {
+      $('#mailForm').attr('action', '<%=raw escape_javascript url_for(action: :register_spam) %>')
+        .submit();
+    }
+  });
+  $('a[href="#labelMail"]').on('click', function(e) {
+    e.preventDefault();
+    var uid = '<%= @item.uid %>';
+    var labelElems = $('#mail_' + uid + '_labels, #mail_' + uid + '_label_loading');
+
+    labelElems.toggle();
+    $.get('<%=raw escape_javascript label_webmail_mails_path(@mailbox.name) %>', {
+      id: uid,
+      label: $(this).attr('data-label-id')
+    })
+    .done(function(data) {
+        syncLabels(uid, data);
+        if (window.opener) {
+          window.opener.syncLabels(uid, data);
+        }
+    })
+    .always(function() {
+      labelElems.toggle();
+    });
+  });
+  $('a[href="#starMail"]').on('click', function(e) {
+    e.preventDefault();
+    var uid = '<%= @item.uid %>';
+    var elem = $('#mail_star_' + uid);
+    var beforeClass = elem.hasClass('starOn') ? 'starOn' : 'starOff';
+    var afterClass = beforeClass == 'starOn' ? 'starOff' : 'starOn'
+    var loading = $('#mail_star_' + uid + '_loading');
+
+    elem.toggle();
+    loading.toggle();
+    $.get('<%=raw escape_javascript star_webmail_mails_path(@mailbox.name) %>', {
+      id: uid
+    })
+    .done(function() {
+      syncStarClass(uid, afterClass);
+      if (window.opener) {
+        window.opener.syncStarClass(uid, afterClass);
+      }
+    })
+    .always(function() {
+      elem.toggle();
+      loading.toggle();
+    });
+  });
+  $('a[href="#addAddress"]').on('click', function() {
+    $.post('<%= webmail_addresses_path(format: :json) %>', {
+      authenticity_token: '<%= form_authenticity_token %>',
+      "item[easy_entry]" : true,
+      "item[email]" : '<%=raw escape_javascript @from_addr %>',
+      "item[name]"  : '<%=raw escape_javascript @from_name %>'
+    })
+    .done(function() {
+      alert('アドレス帳に登録しました。');
+    })
+    .fail(function(request) {
+      var message = request.responseJSON[0];
+      alert(message == '' ? '送信に失敗しました。' : message);
+    });
+    return false;
+  });
+});
+$(function() {
+  $(window).on('beforeunload', function() {
+    if ($('#mdnRequest').is(':visible')) {
+      return '開封確認メールが送信されていません。';
+    }
+  });
+  $('a[href="#sendMdn"]').on('click', function() {
+    $('#mdnRequest').hide();
+    $.post('<%=raw escape_javascript(send_mdn_webmail_mail_path(@mailbox.name, @item.uid)) %>', {
+      authenticity_token: '<%= form_authenticity_token %>'
+    })
+    .done(function(data) {
+      //alert("開封確認メールを送信しました。");
+    })
+    .fail(function(request) {
+      alert("開封確認メールの送信に失敗しました。");
+      $('#mdnRequest').show();
+    });
+    return false;
+  });
+  $('a[href="#hideMdnRequest"]').on('click', function() {
+    $('#mdnRequest').hide();
+    return false;
+  });
+  $('a[href="#hideMdnAlert"]').on('click', function() {
+    $('#mdnAlert').hide();
+    return false;
+  });
+});
+$(function() {
+  $('a[href="#toggleView"').on('click', function() {
+    var type = $(this).attr('data-type');
+    var texts = $('#inlineContents div[id^="textBody_"]');
+    var htmls = $('#inlineContents div[id^="htmlBody_"]');
+    var alert = $('#htmlSecurityAlert');
+
+    switch(type) {
+    case 'text':
+      texts.show();
+      htmls.hide();
+      alert.hide();
+      break;
+    case 'html':
+      texts.hide();
+      htmls.show();
+      alert.show();
+      break;
+    }
+    $('#currentMailView').val(type);
+    return false;
+  });
+  $('a[href="#showHtmlImage"').on('click', function() {
+    $('#htmlSecurityAlert').hide();
+    $.get(
+      '<%=raw escape_javascript(webmail_mail_path(format: 'json', show_html_image: 1)) %>'
+    )
+    .done(function(data) {
+      for (var i=0; i<data.length; i++) {
+        $('#htmlBody_' + data[i].seqno).html(data[i].html)
+      }
+      $('#htmlSecurityAlert').remove();
+    })
+    .fail(function(request) {
+      alert('読み込みに失敗しました。');
+      $('#htmlSecurityAlert').show();
+    });
+    return false;
+  });
+  $('a[href="#hideHtmlSecurityAlert"').on('click', function() {
+    $('#htmlSecurityAlert').hide();
+    return false;
+  });
+  $('a[href="#openScheduleWindow"').on('click', function() {
+    window.open('', 'scheduleWindow_<%=escape_javascript Core.now.gsub(/[\W]/, '') %>', 'resizable=yes,scrollbars=yes,location=yes,menubar=1,toolbar=1');
+    $('#scheduleForm').submit();
+    return false;
+  });
+});
+//]]>
+</script>

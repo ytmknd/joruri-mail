@@ -1,0 +1,87 @@
+<%
+params[:group_id] = nil if params[:clear]
+if params[:group_id].present?
+  @group = Sys::Group.find_by(id: params[:group_id].to_i) || @root
+  @groups = @group.enabled_children
+end
+
+@users = @group.users_having_email.reorder(Webmail::Setting.load_sys_address_orders)
+%>
+
+<div class="sysAddressTitle">
+  <%= t('webmail.menus.sys_address') %>
+</div>
+
+<%= form_tag webmail_sys_addresses_path, { id: 'groupForm', name: 'groupForm', class: 'groupForm', method: :get } do |f| %>
+  グループ：<%= select_tag :group_id, options_for_select(
+    [["// 選択してください",0]] + @group.ancestors_and_children_without_root_options, @group.id), class: 'selectUI' %><br/>
+  <%#= submit_tag "検索", :name => 'select', :class => 'search' %>
+  <%= submit_tag "リセット", name: 'clear', class: 'reset' %>
+<% end %>
+
+<div id="nowLoading" class="nowLoading" style="display:none;">Now Loading...</div>
+
+<%= form_for :item, url: mobile_manage_webmail_sys_addresses_path, html: { id: 'mailForm', class: 'mailForm', name: 'mailForm' } do |f| %>
+  <%= hidden_field_tag :group_id, params[:group_id] %>
+
+  <% if @group != @root %>
+  <div class="groupTitle"><%= @group.name %></div>
+  <% end %>
+
+  <% if @users.blank? %>
+    <% if @group != @root %>
+      <div class="notice">次の階層を選択してください。</div>
+    <% end %>
+  <% else %>
+    <table class="index">
+      <tr>
+        <th class="checkUI">TO</th>
+        <th class="checkUI">CC</th>
+        <th class="checkUI">BCC</th>
+        <th>名前</th>
+      </tr>
+      <% @users.each do |u| %>
+      <tr>
+        <td class="checkUI"><input type="checkbox" name="to[<%= u.id %>]" class="checkUI" value="1" /></td>
+        <td class="checkUI"><input type="checkbox" name="cc[<%= u.id %>]" class="checkUI" value="1" /></td>
+        <td class="checkUI"><input type="checkbox" name="bcc[<%= u.id %>]" class="checkUI" value="1" /></td>
+        <td><%= link_to mail_text_wrap("#{u.name} <#{u.email}>"), webmail_sys_address_path(u.id, group_id: @group.id), class: 'address' %></td>
+      </tr>
+      <% end %>
+    </table>
+    <%= submit_tag 'アドレス選択', name: 'selectAddress', class: 'selectAddress' %><br />
+  <% end %>
+
+  <% if [:to, :cc, :bcc].any? { |type| session[:mobile] && session[:mobile][type].present? } %>
+  <div class="selectedAddressesTitle">選択済みアドレス</div>
+  <table class="selectedAddresses">
+  <% [:to, :cc, :bcc].each do |type| %>
+    <% if session[:mobile][type].present? %>
+      <tr><th colspan="2"><%= type.upcase %></th></tr>
+      <% session[:mobile][type].each_with_index do |u, idx| %>
+      <tr>
+        <td><%= submit_tag '削除', class: 'deleteAddress', name: "deleteAddress=#{type}_#{idx}" %></td>
+        <td><%= mail_text_wrap u %></td>
+      </tr>
+      <% end %>
+    <% end %>
+  <% end %>
+  </table>
+  <% end %>
+
+  <% if [:to, :cc, :bcc].any? { |type| session[:mobile] && session[:mobile][type].present? } || @users.present? %>
+    <%= submit_tag 'メール作成', name: 'createMail', class: 'createMail' %>
+  <% end %>
+<% end %>
+
+<script type="text/javascript">
+//<![CDATA[
+$(function() {
+  $('#group_id').on('change', function() {
+    $('#nowLoading').show();
+    $('#mailForm').hide();
+    $('#groupForm').submit();
+  });
+});
+//]]>
+</script>

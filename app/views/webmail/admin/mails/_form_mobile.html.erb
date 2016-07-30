@@ -1,0 +1,45 @@
+<%= hidden_field_tag "mobile[action]", params.dig(:mobile, :action) || action_name %>
+<%= hidden_field_tag "mobile[mailbox]", @mailbox.name %>
+<%= hidden_field_tag "mobile[uid]", params[:id] if params[:id] %>
+<%= hidden_field_tag "mobile[qt]", params[:qt] %>
+<%= hidden_field_tag :id, params[:id] %>
+
+<div class="addressMenus">
+<%= submit_tag t('webmail.menus.sys_address'), class: 'menuItem', name: 'addSysAddress' %>
+<%= submit_tag t('webmail.menus.address_group'), class: 'menuItem', name: 'addPriAddress' %>
+</div>
+
+<div class="to">宛先</div>
+<%= f.text_area :in_to, class: 'to', rows: 2, istyle: "3", format: "*m", mode: "alphabet" %>
+<div class="cc">Cc</div>
+<%= f.text_field :in_cc, class: 'cc', istyle: "3", format: "*m", mode: "alphabet" %>
+<div class="bcc">Bcc</div>
+<%= f.text_field :in_bcc, class: 'bcc', istyle: "3", format: "*m", mode: "alphabet" %>
+<div class="subject">件名</div>
+<%= f.text_field :in_subject, class: 'subject', istyle: '1', format: '*M', mode: 'hiragana' %>
+<div class="body">本文</div>
+<% if @item.in_format == Webmail::Mail::FORMAT_HTML %>
+<%= f.text_area :in_html_body, class: 'html_body', rows: 10, istyle: '1', format: '*M', mode: 'hiragana' %>
+<%= f.hidden_field :in_body, class: 'body', rows: 10, istyle: '1', format: '*M', mode: 'hiragana' %>
+<% else %>
+<%= f.text_area :in_body, class: 'body', rows: 10, istyle: '1', format: '*M', mode: 'hiragana' %>
+<%= f.hidden_field :in_html_body, class: 'html_body', rows: 10, istyle: '1', format: '*M', mode: 'hiragana' %>
+<% end %>
+<div class="confirm">
+  <%= f.check_box :in_request_mdn %>開封確認メッセージを要求する
+</div>
+
+<%= f.hidden_field :in_format %>
+<%= f.hidden_field :tmp_id %>
+
+<% if @item.tmp_attachments.present? %>
+<div class="attachmentFile">
+<div class="title">添付ファイル</div>
+<div class="files">
+<% @item.tmp_attachments.each do |at| %>
+  <div class="file"><%= at.name %> (<%= at.eng_unit.gsub(/Bytes/,'B') %>)</div>
+  <input type="hidden" name="item[tmp_attachment_ids][]" value="<%= at.id %>" />
+<% end %>
+</div>
+</div>
+<% end %>

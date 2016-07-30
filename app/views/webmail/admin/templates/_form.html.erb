@@ -1,0 +1,89 @@
+<div id="mailContent">
+
+<%= f.error_messages %>
+
+<table class="show">
+  <tr>
+    <th><%= @item.class.human_attribute_name :name %></th>
+    <td><%= f.text_field :name, class: 'title' %></td>
+  </tr>
+</table>
+
+<div id="openAddress" style="margin-top:10px">
+  <a href="#openAddressSelector" data-prefix="sys"><%= t('webmail.menus.sys_address') %></a>
+  <a href="#openAddressSelector" data-prefix="pri"><%= t('webmail.menus.address_group') %></a>
+</div>
+<%= render 'webmail/admin/address_selector/search' %>
+
+<table class="show" id="mailAddressesForm">
+  <tr>
+    <th><%= @item.class.human_attribute_name :to %></th>
+    <td><%= f.text_area :to, class: 'to' %></td>
+  </tr><tr>
+    <th><%= @item.class.human_attribute_name :cc %></th>
+    <td><%= f.text_area :cc, class: 'cc' %></td>
+  </tr><tr>
+    <th><%= @item.class.human_attribute_name :bcc %></th>
+    <td><%= f.text_area :bcc, class: 'bcc' %></td>
+  </tr>
+</table>
+
+<table class="show" style="margin-top:10px">
+  <tr>
+    <th><%= @item.class.human_attribute_name :subject %></th>
+    <td><%= f.text_area :subject, class: 'subject' %></td>
+  </tr><tr>
+    <th><%= @item.class.human_attribute_name :body %></th>
+    <td><%= f.text_area :body, class: 'body', style: 'width:700px' %></td>
+  </tr><tr>
+    <th><%= @item.class.human_attribute_name :default_flag %></th>
+    <td><%= f.collection_radio_buttons :default_flag, [['設定する',1],['設定しない',0]], :last, :first, class: 'states' %></td>
+  </tr>
+</table>
+
+<div class="submitters">
+  <%= f.submit %>
+</div>
+
+<!-- end #mailContent --></div>
+
+<script type="text/javascript">
+//<![CDATA[
+$(function() {
+  $('input:submit').on('click', function() {
+    if ($('#mailAddressesForm').is(':hidden')) {
+      alert("アドレス帳を閉じてください。");
+      return false;
+    }
+    return true;
+  });
+  $('a[href="#openAddressSelector"]').on('click', function() {
+    var prefix = $(this).attr('data-prefix');
+    var current = AddressSelector.instance.currentBook();
+    if (current && current == prefix) {
+      AddressSelector.instance.finishSelection(true);
+    } else {
+      AddressSelector.instance.toggle(prefix, 
+        $('#item_to').val(),
+        $('#item_cc').val(),
+        $('#item_bcc').val(),
+        addressSelectorCallBack
+      );
+      $('a[href="#openAddressSelector"]').removeClass('current');
+      $(this).addClass('current');
+      $('#mailAddressesForm').hide();
+    }
+    return false;
+  });
+  function addressSelectorCallBack(ok, to, cc, bcc) {
+    if (ok) {
+      $('#item_to').val(to);
+      $('#item_cc').val(cc);
+      $('#item_bcc').val(bcc);
+    }
+    $('#mailAddressesForm').show();
+    $('a[href="#openAddressSelector"]').removeClass('current');
+  }
+});
+//]]>
+</script>

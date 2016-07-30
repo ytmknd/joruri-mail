@@ -1,0 +1,5 @@
+<div class="menu">
+<%= link_to '連絡先の登録', new_webmail_address_path, class: 'new_address', title: '連絡先の登録' unless @parent %>
+<%= link_to '連絡先の登録', new_webmail_address_path(group_id: @parent.id), class: 'new_address', title: '連絡先の登録' if @parent %>
+<%= link_to 'グループの登録', new_webmail_address_group_path(@parent ? {parent_id: @parent.id} : nil), class: 'new_group', title: 'グループの登録' %>
+</div>

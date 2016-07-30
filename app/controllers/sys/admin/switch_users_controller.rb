@@ -31,7 +31,7 @@ class Sys::Admin::SwitchUsersController < Sys::Controller::Admin::Base
 
   def import_switch_users(csv)
     results = [0, 0, 0]
-    switch_user_count = Gw::WebmailSetting.switch_user_max_count
+    switch_user_count = Webmail::Setting.switch_user_max_count
 
     CSV.parse(csv, headers: true) do |data|
       account = data["ユーザーID"]
@@ -52,7 +52,7 @@ class Sys::Admin::SwitchUsersController < Sys::Controller::Admin::Base
         next
       end
 
-      Gw::WebmailSetting.where(user_id: user.id).where("name LIKE 'switch_user%'").delete_all
+      Webmail::Setting.where(user_id: user.id).where("name LIKE 'switch_user%'").delete_all
 
       saved_count = 0
       (0..switch_user_count).each do |i|
@@ -62,7 +62,7 @@ class Sys::Admin::SwitchUsersController < Sys::Controller::Admin::Base
         hash[:account] = switch_user_account[i]
         hash[:password] = Util::String::Crypt.encrypt_with_mime(switch_user_password[i]) || ''
 
-        setting = Gw::WebmailSetting.new
+        setting = Webmail::Setting.new
         setting.user_id = user.id
         setting.name    = "switch_user#{i}"
         setting.value   = hash.to_json

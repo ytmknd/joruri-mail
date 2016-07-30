@@ -8,7 +8,7 @@ class Sys::Admin::AirController < ApplicationController
   end
 
   def login
-    @admin_uri = params[:path] || '/_admin/gw/webmail/INBOX/mails'
+    @admin_uri = params[:path] || '/webmail/INBOX/mails'
     @admin_uri += '?mobile=top' if request.mobile? || request.smart_phone?
 
     if params[:account] && params[:password]

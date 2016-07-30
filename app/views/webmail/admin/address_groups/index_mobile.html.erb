@@ -1,0 +1,63 @@
+<%
+params[:group_id] = nil if params[:clear]
+
+@group = Webmail::AddressGroup.new(id: 0, name: 'すべて')
+if params[:group_id].present?
+  gid = params[:group_id].to_i
+  if gid != 0
+    @group = Webmail::AddressGroup.find(params[:group_id])
+    @items = @group.addresses.order(Webmail::Setting.load_address_orders)
+  end
+end
+%>
+
+<div class="groups"><%= Joruri.config.application['webmail.address_group_menu'] %></div>
+<%= form_tag webmail_address_groups_path, { id: 'groupForm', name: 'groupForm', class: 'groupForm', method: :get } do |f| %>
+  <%= select_tag :group_id, options_for_select(
+    [['すべて', 0]] + @root_groups.map(&:descendant_options).flatten(1), @group.id), class: 'selectUI' %><br/>
+  <%= submit_tag '検索', class: 'menuItem', name: 'select', accesskey: '1' %>
+  <%= submit_tag 'リセット', class: 'menuItem', name: 'clear', accesskey: '2' %>
+<% end %>
+
+<div class="group"><%= @group.name%></div>
+<%= form_for :item, url: mobile_manage_webmail_address_groups_path, html: { id: 'mailForm', name: 'mailForm', class: 'mailForm'} do |f| %>
+  <% if @items.blank? %>
+  <div class="notice">登録アドレスはありません。</div>
+  <% else %>
+  <div class="addressItems">
+    <div class="captions">
+      <font class="to">To</font>
+      <font class="cc">Cc</font>
+      <font class="bcc">Bcc</font>
+    </div>
+    <% @items.each do |u| %>
+    <div class="addressItem">
+      <input type="checkbox" name="to[<%= u.id %>]" value="1" />
+      <input type="checkbox" name="cc[<%= u.id %>]" value="1" />
+      <input type="checkbox" name="bcc[<%= u.id %>]" value="1" />
+      <%= link_to "#{u.name} <#{u.email}>", webmail_address_path(u.id, group_id: @group.id), class: 'nameLink' %><br/>
+    </div>
+    <% end %>
+  </div>
+  <%= submit_tag 'アドレス選択', class: 'menuItem', name: 'selectAddress', accesskey: '3' %>
+  <% end %>
+  <% if [:to, :cc, :bcc].any? { |type| session[:mobile] && session[:mobile][type].present? } %>
+  <div class="selectedTitle">選択済みアドレス</div>
+  <div class="selectedAddresses">
+  <% [:to, :cc, :bcc].each do |type| %>
+    <% if session[:mobile][type].present? %>
+    <div class="addresses">
+      <font class="type"><%= type.capitalize %></font>
+      <% session[:mobile][type].each_with_index do |u, idx| %>
+      <div class="address"><%= submit_tag '削除', class: 'deleteItem', name: "deleteAddress=#{type}_#{idx}" %><%= u %></div>
+      <% end %>
+    </div>
+    <% end %>
+  <% end %>
+  </div>
+  <% end %>
+  <%= hidden_field_tag :group_id, params[:group_id] %>
+  <% if [:to, :cc, :bcc].any? { |type| session[:mobile] && session[:mobile][type].present? } || @items.present? %>
+  <%= submit_tag 'メール作成', class: 'menuItem', name: 'createMail' %>
+  <% end %>
+<% end %>

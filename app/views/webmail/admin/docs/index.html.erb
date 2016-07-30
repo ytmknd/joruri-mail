@@ -1,0 +1,19 @@
+<div id="docContent">
+<%= render 'menu' %>
+
+<table class="index">
+  <tr>
+    <th style="width: ;"><%= Webmail::Doc.human_attribute_name :title %></th>
+    <th style="width: 120px; text-align: center;"><%= Webmail::Doc.human_attribute_name :created_at %></th>
+  </tr>
+  <% @items.each do |item| %>
+    <tr <%= cycle '', 'class="cycle"' %>>
+      <td><%= link_to item.title, url_for(action: :show, id: item) %></td>
+      <td style="text-align: center;"><%=l item.created_at if item.created_at %></td>
+    </tr>
+  <% end %>
+</table>
+
+<%= paginate @items %>
+
+</div>

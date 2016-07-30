@@ -14,23 +14,23 @@ class Sys::User < Sys::ManageDatabase
     foreign_key: :user_id, class_name: 'Sys::UserLogin', dependent: :delete_all
 
   has_many :webmail_mail_nodes, -> { order(:id) },
-    foreign_key: :user_id, class_name: 'Gw::WebmailMailNode', dependent: :destroy
+    foreign_key: :user_id, class_name: 'Webmail::MailNode', dependent: :destroy
   has_many :webmail_mailboxes, -> { order(:id) },
-    foreign_key: :user_id, class_name: 'Gw::WebmailMailbox', dependent: :destroy
+    foreign_key: :user_id, class_name: 'Webmail::Mailbox', dependent: :destroy
   has_many :webmail_settings, -> { order(:id) },
-    foreign_key: :user_id, class_name: 'Gw::WebmailSetting', dependent: :destroy
+    foreign_key: :user_id, class_name: 'Webmail::Setting', dependent: :destroy
   has_many :webmail_address_groups, -> { order(:id) },
-    foreign_key: :user_id, class_name: 'Gw::WebmailAddressGroup', dependent: :destroy
+    foreign_key: :user_id, class_name: 'Webmail::AddressGroup', dependent: :destroy
   has_many :webmail_addresses, -> { order(:id) },
-    foreign_key: :user_id, class_name: 'Gw::WebmailAddress', dependent: :destroy
+    foreign_key: :user_id, class_name: 'Webmail::Address', dependent: :destroy
   has_many :webmail_filters, -> { order(:id) },
-    foreign_key: :user_id, class_name: 'Gw::WebmailFilter', dependent: :destroy
+    foreign_key: :user_id, class_name: 'Webmail::Filter', dependent: :destroy
   has_many :webmail_signs, -> { order(:id) },
-    foreign_key: :user_id, class_name: 'Gw::WebmailSign', dependent: :destroy
+    foreign_key: :user_id, class_name: 'Webmail::Sign', dependent: :destroy
   has_many :webmail_templates, -> { order(:id) },
-    foreign_key: :user_id, class_name: 'Gw::WebmailTemplate', dependent: :destroy
+    foreign_key: :user_id, class_name: 'Webmail::Template', dependent: :destroy
   has_many :webmail_mail_address_histories, -> { order(:id) },
-    foreign_key: :user_id, class_name: 'Gw::WebmailMailAddressHistory', dependent: :destroy
+    foreign_key: :user_id, class_name: 'Webmail::MailAddressHistory', dependent: :destroy
 
   attr_accessor :_in_group_id
   #attr_accessor :group, :group_id, :in_group_id

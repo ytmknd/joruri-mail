@@ -1,8 +1,8 @@
 Joruri::Application.routes.draw do
-  root 'gw/admin/webmail/mails#index', mailbox: 'INBOX'
+  root 'webmail/admin/mails#index', mailbox: 'INBOX'
 
   ## Admin
-  match '_admin'                   => 'gw/admin/webmail/mails#index', mailbox: 'INBOX', via: :get
+  match '_admin'                   => 'webmail/admin/mails#index', mailbox: 'INBOX', via: :get
   match '_admin/login(.:format)'   => 'sys/admin/account#login', via: [:get, :post]
   match '_admin/logout(.:format)'  => 'sys/admin/account#logout', via: [:get, :post]
   match '_admin/account(.:format)' => 'sys/admin/account#info', via: :get

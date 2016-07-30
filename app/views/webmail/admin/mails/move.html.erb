@@ -1,0 +1,54 @@
+<%
+mailboxes = Webmail::Mailbox.mailbox_options do |box|
+  box.mail_movable_box? && !(box.name == @mailbox.name && params[:copy].blank?)
+end
+action_label = params[:copy].blank? ? '移動' : 'コピー'
+%>
+<table id="webmailContainer"><tr>
+<% unless controller.new_window? %>
+<td id="webmailMenu"><div id="webmailMenuContainer">
+
+<div class="menu">
+  <%= link_to 'メールの受信', webmail_mails_path(@mailbox.name), class: 'index', title: "メールの受信" %>
+  <%= link_to 'メールの作成', new_webmail_mail_path('INBOX'), class: 'newMail', title: "メールの作成", target: '_blank',
+    onclick: open_mail_form(new_webmail_mail_path('INBOX')) %>
+</div>
+
+<%= render 'webmail/admin/base/account' %>
+<%= render 'webmail/admin/mails/shared/mailbox' %>
+<%= render 'webmail/admin/mails/shared/mail_address_history', histories: @address_histories if @address_histories %>
+
+</div></td>
+<% end %>
+<td id="webmailContent"><div id="mailContent">
+
+<%= form_for :item, url: { action: :move }, html: { id: "mails", name: "mails" } do |f| %>
+<%= hidden_field_tag 'copy', params[:copy] %>
+<% params[:item][:ids].each do |id, key| %>
+<%= hidden_field_tag "item[ids][#{id}]", 1 %>
+<% end %>
+
+<table class="index">
+  <tr><th><%= action_label %>するメール</th></tr>
+  <% @items.each do |item| %>
+  <tr><td class="autoWrap" style="word-break:break-all;"><%= mail_text_wrap(item.subject) %></td></tr>
+  <% end %>
+</table>
+<br />
+
+<table class="index">
+  <tr>
+    <th style="width: 120px;"><%= action_label %>先フォルダー</th>
+    <td><%= f.select :mailbox, mailboxes, selected: 'Archives' %></td>
+  </tr>
+</table>
+
+<% if mailboxes.size > 0 %>
+  <div class="submitters">
+    <%= f.submit "#{action_label}する" %>
+  </div>
+<% end %>
+
+<% end %>
+
+</div><!-- end #webmailContainer --></td></table>

@@ -97,6 +97,6 @@ Core.user       = Sys::User.find_by(account: 'admin')
 Core.user_group = Core.user.groups[0]
 
 load_seed_file "demo/sys.rb"
-load_seed_file "demo/gw.rb"
+load_seed_file "demo/webmail.rb"
 
 puts "Imported demo data."

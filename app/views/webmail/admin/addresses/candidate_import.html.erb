@@ -1,0 +1,77 @@
+<table id="webmailContainer"><tr><td id="webmailMenu">
+<div id="webmailMenuContainer">
+<%= render 'upper_menu' %>
+<%= render 'lower_menu' %>
+</div>
+</td><td id="webmailContent"><div id="addressContent">
+  
+<table class="show countAddresses">
+  <tr>
+    <th>インポートできるアドレス</th>
+  <td><%= @success_items.size %> 件</td>
+  </tr>
+  <tr>
+    <th>インポートできないアドレス</th>  
+    <td><%= @error_items.size %> 件</td>
+  </tr>
+</table>
+
+<div class="actionMenu">
+  <%= link_to 'インポートできるアドレスを表示', '#successAddresses' %>
+  <%= link_to 'インポートできないアドレスを表示', '#errorAddresses' %>
+</div>
+
+<div id="successAddresses">
+  <p class="form">インポートできるアドレス</p>
+  <table class="index">
+    <tr>
+      <th style="width: 30%;">名前</th>
+      <th>メールアドレス</th>
+    </tr>
+    <% @success_items.each do |item| %>
+      <tr <%= cycle '', 'class="cycle"' %>>
+        <td><%= item.name %></td>
+        <td><%= item.email %></td>
+      </tr>
+    <% end %>
+  </table>
+</div>
+
+<div id="errorAddresses" style="display:none">
+  <p class="form">インポートできないアドレス</p>
+  <table class="index">
+    <tr>
+      <th style="width: 30%;">名前</th>
+      <th>メールアドレス</th>
+      <th>エラー内容</th>
+    </tr>
+    <% @error_items.each do |item| %>
+      <tr <%= cycle '', 'class="cycle"' %>>
+        <td><%= item.name %></td>
+        <td><%= item.email %></td>
+        <td><%= item.errors.full_messages.join(', ') %></td>
+      </tr>
+    <% end %>
+  </table>
+</div>
+
+<%= form_tag exec_import_webmail_addresses_path do %>
+  <%= hidden_field_tag :csv, @csv %>
+  <div class="submitters">
+    <%= submit_tag 'インポート' %>
+  </div>
+<% end %>
+
+</div><!-- end #webmailContainer --></td></table>
+
+<script type="text/javascript">
+//<![CDATA[
+$(function() {
+  $('a[href="#successAddresses"], a[href="#errorAddresses"]').on('click', function() {
+    $('#successAddresses, #errorAddresses').hide();
+    $($(this).attr('href')).show();
+    return false;
+  });
+});
+//]]>
+</script>
