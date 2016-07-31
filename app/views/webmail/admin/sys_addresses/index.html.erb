@@ -207,6 +207,7 @@ $(function() {
     );
   }
   addressView.searchAddresses = function(name_or_kana, email) {
+    if (addressView.loading) return;
     this.searchCount++;
     this.loadAddresses('Search' + this.searchCount, {
       search: 'on',
