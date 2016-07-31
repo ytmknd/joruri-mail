@@ -21,14 +21,6 @@ class Sys::Controller::Admin::Base < ApplicationController
     ## each processes before dispatch
   end
 
-  def self.simple_layout
-    self.layout 'admin/base'
-  end
-
-  def simple_layout
-    self.class.layout 'admin/base'
-  end
-
   private
 
   def authenticate
