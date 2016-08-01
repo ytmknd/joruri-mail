@@ -1,5 +1,6 @@
 class Webmail::Mail
-  include Sys::Model::ActiveModel
+  include ActiveModel::Model
+  include ActiveModel::Validations::Callbacks
   include Webmail::Mails::Imap
   include Webmail::Mails::Base
 

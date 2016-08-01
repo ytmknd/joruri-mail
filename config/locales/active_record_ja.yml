@@ -1,5 +1,5 @@
 ja:
-  activerecord:
+  activerecord: &activerecord
     errors:
       template:
         header:
@@ -40,3 +40,6 @@ ja:
         too_many_addresses: "は%{count}件以内で入力してください。"
         too_short_addresses: "は%{count}件以上で入力してください。"
         not_found: "が見つかりません（%{name}）"
+
+  activemodel:
+    <<: *activerecord

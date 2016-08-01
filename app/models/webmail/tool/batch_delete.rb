@@ -1,5 +1,5 @@
 class Webmail::Tool::BatchDelete
-  include Sys::Model::ActiveModel
+  include ActiveModel::Model
 
   attr_accessor :mailbox_id, :start_date, :end_date
   attr_accessor :include_starred
