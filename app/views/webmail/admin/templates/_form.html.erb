@@ -1,5 +1,3 @@
-<div id="mailContent">
-
 <%= f.error_messages %>
 
 <table class="show">
@@ -18,20 +16,20 @@
 <table class="show" id="mailAddressesForm">
   <tr>
     <th><%= @item.class.human_attribute_name :to %></th>
-    <td><%= f.text_area :to, class: 'to' %></td>
+    <td><%= f.text_area :to, style: 'width: 90%; height: 2.5em;' %></td>
   </tr><tr>
     <th><%= @item.class.human_attribute_name :cc %></th>
-    <td><%= f.text_area :cc, class: 'cc' %></td>
+    <td><%= f.text_area :cc, style: 'width: 90%; height: 2.5em;' %></td>
   </tr><tr>
     <th><%= @item.class.human_attribute_name :bcc %></th>
-    <td><%= f.text_area :bcc, class: 'bcc' %></td>
+    <td><%= f.text_area :bcc, style: 'width: 90%; height: 2.5em;' %></td>
   </tr>
 </table>
 
 <table class="show" style="margin-top:10px">
   <tr>
     <th><%= @item.class.human_attribute_name :subject %></th>
-    <td><%= f.text_area :subject, class: 'subject' %></td>
+    <td><%= f.text_area :subject, style: 'width: 90%; height: 2.5em;' %></td>
   </tr><tr>
     <th><%= @item.class.human_attribute_name :body %></th>
     <td><%= f.text_area :body, class: 'body', style: 'width:700px' %></td>
@@ -44,8 +42,6 @@
 <div class="submitters">
   <%= f.submit %>
 </div>
-
-<!-- end #mailContent --></div>
 
 <script type="text/javascript">
 //<![CDATA[
