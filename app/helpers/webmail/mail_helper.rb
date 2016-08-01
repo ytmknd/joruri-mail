@@ -71,7 +71,7 @@ module Webmail::MailHelper
 
     text = "#{text}".force_encoding('utf-8')
     text = text.gsub(/\t/, "  ")
-    text = text_wrap(text, col, "\t") unless request.env['HTTP_USER_AGENT'] =~ /(MSIE|Trident)/
+    text = text_wrap(text, col, "\t") unless request.env['HTTP_USER_AGENT'] =~ /MSIE/
     if options[:auto_link]
       text = mail_text_autolink(text)
       text = to_nbsp.call(text)
