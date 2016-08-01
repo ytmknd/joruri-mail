@@ -8,8 +8,8 @@
 OS           : CentOS 6.8 (64bit), CentOS 7.2 (64bit)
 Webサーバー  : Apache 2.2, Apache 2.4
 DBシステム   : MySQL 5.6
-Ruby         : 2.3.1
-Rails        : 4.2.6
+Ruby         : 2.3
+Rails        : 4.2
 Mailサーバー : SMTP, IMAP4
 
 [ネットワーク関連設定]
