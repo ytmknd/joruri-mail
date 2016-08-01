@@ -94,7 +94,7 @@ Apacheをインストールします。
 Passengerをインストールします。
 
   # yum -y install curl-devel
-  # gem install passenger -v 5.0.23
+  # gem install passenger -v 5.0.30
   # passenger-install-apache2-module -a
   (画面の内容を確認して Enterキーを押してください)
 
