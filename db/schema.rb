@@ -76,6 +76,26 @@ ActiveRecord::Schema.define(version: 20160729171630) do
     t.string   "group_s_name", limit: 255
   end
 
+  create_table "sys_groups_backups", force: :cascade do |t|
+    t.string   "state",        limit: 15
+    t.string   "web_state",    limit: 15
+    t.datetime "created_at"
+    t.datetime "updated_at"
+    t.integer  "parent_id",    limit: 4,     null: false
+    t.integer  "level_no",     limit: 4
+    t.string   "code",         limit: 255,   null: false
+    t.integer  "sort_no",      limit: 4
+    t.integer  "layout_id",    limit: 4
+    t.integer  "ldap",         limit: 4,     null: false
+    t.string   "ldap_version", limit: 255
+    t.string   "name",         limit: 255
+    t.string   "name_en",      limit: 255
+    t.string   "tel",          limit: 255
+    t.string   "outline_uri",  limit: 255
+    t.text     "email",        limit: 65535
+    t.string   "group_s_name", limit: 255
+  end
+
   create_table "sys_languages", force: :cascade do |t|
     t.string   "state",      limit: 15
     t.datetime "created_at"
@@ -86,18 +106,20 @@ ActiveRecord::Schema.define(version: 20160729171630) do
   end
 
   create_table "sys_ldap_synchros", force: :cascade do |t|
-    t.integer  "parent_id",    limit: 4
+    t.integer  "parent_id",         limit: 4
     t.datetime "created_at"
     t.datetime "updated_at"
-    t.string   "version",      limit: 10
-    t.string   "entry_type",   limit: 15
-    t.string   "code",         limit: 255
-    t.integer  "sort_no",      limit: 4
-    t.string   "name",         limit: 255
-    t.string   "name_en",      limit: 255
-    t.string   "email",        limit: 255
-    t.string   "kana",         limit: 255
-    t.string   "group_s_name", limit: 255
+    t.string   "version",           limit: 10
+    t.string   "entry_type",        limit: 15
+    t.string   "code",              limit: 255
+    t.string   "name",              limit: 255
+    t.string   "name_en",           limit: 255
+    t.string   "email",             limit: 255
+    t.string   "kana",              limit: 255
+    t.string   "sort_no",           limit: 255
+    t.string   "official_position", limit: 255
+    t.string   "assigned_job",      limit: 255
+    t.string   "group_s_name",      limit: 255
   end
 
   add_index "sys_ldap_synchros", ["version", "parent_id", "entry_type"], name: "version", using: :btree
@@ -164,6 +186,30 @@ ActiveRecord::Schema.define(version: 20160729171630) do
     t.string   "group_s_name",              limit: 255
   end
 
+  create_table "sys_users_backups", force: :cascade do |t|
+    t.text     "air_login_id",              limit: 65535
+    t.string   "state",                     limit: 15
+    t.datetime "created_at"
+    t.datetime "updated_at"
+    t.integer  "ldap",                      limit: 4,     null: false
+    t.string   "ldap_version",              limit: 255
+    t.integer  "auth_no",                   limit: 4,     null: false
+    t.string   "name",                      limit: 255
+    t.string   "name_en",                   limit: 255
+    t.string   "account",                   limit: 255
+    t.string   "password",                  limit: 255
+    t.integer  "mobile_access",             limit: 4
+    t.string   "mobile_password",           limit: 255
+    t.string   "email",                     limit: 255
+    t.text     "remember_token",            limit: 65535
+    t.datetime "remember_token_expires_at"
+    t.string   "kana",                      limit: 255
+    t.string   "sort_no",                   limit: 255
+    t.string   "official_position",         limit: 255
+    t.string   "assigned_job",              limit: 255
+    t.string   "group_s_name",              limit: 255
+  end
+
   create_table "sys_users_groups", force: :cascade do |t|
     t.datetime "created_at"
     t.datetime "updated_at"
@@ -172,6 +218,15 @@ ActiveRecord::Schema.define(version: 20160729171630) do
   end
 
   add_index "sys_users_groups", ["user_id", "group_id"], name: "user_id", using: :btree
+
+  create_table "sys_users_groups_backups", force: :cascade do |t|
+    t.datetime "created_at"
+    t.datetime "updated_at"
+    t.integer  "user_id",    limit: 4
+    t.integer  "group_id",   limit: 4
+  end
+
+  add_index "sys_users_groups_backups", ["user_id", "group_id"], name: "user_id", using: :btree
 
   create_table "webmail_address_groupings", force: :cascade do |t|
     t.integer  "group_id",   limit: 4, null: false
