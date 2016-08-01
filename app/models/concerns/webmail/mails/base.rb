@@ -362,8 +362,13 @@ module Webmail::Mails::Base
 
   def collect_addrs(field)
     return [] unless field
-    field.address_list.addresses.map do |addr|
-      addr.name ? "#{Email.quote_phrase(addr.name)} <#{addr.address}>" : addr.address
+
+    if field.errors.blank?
+      field.address_list.addresses.map do |addr|
+        addr.name ? "#{Email.quote_phrase(addr.name)} <#{addr.address}>" : addr.address
+      end
+    else
+      Email.parse_list(NKF.nkf('-w', field.value))
     end
   end
 
