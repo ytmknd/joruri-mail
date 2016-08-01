@@ -45,7 +45,7 @@ module Email
     end
 
     def valid_email?(email)
-      email =~ /\A[a-zA-Z0-9!#\$%&'\*\+\-\/=\?\^_`\{\|\}~\.]+@[a-zA-Z0-9\-\.]+\Z/ 
+      email =~ /\A[a-zA-Z0-9!"#\$%&'\*\+\-\/=\?\^_`\{\|\}~\.]+@[a-zA-Z0-9\-\.]+\Z/
     end
 
     def quote_phrase(str)
