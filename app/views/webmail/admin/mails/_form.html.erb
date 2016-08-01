@@ -144,20 +144,17 @@ function isFormChanged() {
   }
   return false;
 }
-function checkFormChanged() {
-  if (isFormChanged()) {
-    return 'メールは保存されていません。';
-  }
-}
-
 $(function() {
-  $(window).on('beforeunload', checkFormChanged);
-
   var submitted = false;
+
+  window.onbeforeunload = function() {
+    if (!submitted && isFormChanged()) {
+      return 'メールは保存されていません。';
+    }
+  }
   $('#item_form').on('submit', function() {
     if (submitted) { return false; }
     submitted = true;
-    $(window).off('beforeunload');
     if ($('#item_in_format').val() == 'html') {
       var html = tinyMCE.activeEditor.getContent();
       $('#item_in_body').val(convertHtmlToText(html));

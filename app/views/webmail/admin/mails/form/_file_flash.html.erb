@@ -22,9 +22,9 @@
 <script id="uploadedFilesTemplate" type="text/x-jsrender">
   <span class="uploadedFile" id="uploadedFile{{:id}}">
     {{if image_is == 1}}
-      <a href="<%= webmail_mail_attachments_path %>/{{:id}}?tmp_id={{:tmp_id}}&filename={{:name}}" class="uploadedFileName {{:css_class}}" target="_blank">{{>title}}</a>
+      <a href="<%= webmail_mail_attachments_path %>/{{:id}}?tmp_id={{:tmp_id}}" class="uploadedFileName {{:css_class}}" target="_blank">{{>title}}</a>
     {{else}}
-      <a href="<%= webmail_mail_attachments_path %>/{{:id}}?tmp_id={{:tmp_id}}&filename={{:name}}" class="uploadedFileName {{:css_class}}">{{>title}}</a>
+      <a href="<%= webmail_mail_attachments_path %>/{{:id}}?tmp_id={{:tmp_id}}" class="uploadedFileName {{:css_class}}">{{>title}}</a>
     {{/if}}
     <a href="#deleteUploadedFile" data-id="{{:id}}" class="deleteUploadedFile" title="削除">x</a>
     <input type="hidden" value="{{:id}}" name="item[tmp_attachment_ids][]">
@@ -150,9 +150,11 @@ $(function() {
   })
   .on('click', 'a.uploadedFileName', function() {
     if ($(this).attr('target') == '_blank') return;
-    $(window).off('beforeunload');
+    var beforeUnloadFunc = window.onbeforeunload;
+    window.onbeforeunload = function() {
+      window.onbeforeunload = beforeUnloadFunc;
+    };
     window.location.href = this.href;
-    $(window).on('beforeunload', checkFormChanged);
     return false;
   });
 

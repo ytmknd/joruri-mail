@@ -11,8 +11,6 @@ class Webmail::Admin::MailAttachmentsController < ApplicationController#Webmail:
 
   def show
     @item = Webmail::MailAttachment.find_by!(id: params[:id], tmp_id: params[:tmp_id])
-    return http_error(404) unless params[:filename] == @item.name
-
     send_data @item.read, type: @item.mime_type, disposition: @item.image_is == 1 ? 'inline' : 'attachment', filename: @item.name
   end
 
