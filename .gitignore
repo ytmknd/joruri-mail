@@ -1,7 +1,6 @@
 *.project
 *.thumb
 *.swp
-Gemfile.lock
 /.bundle
 /.poject
 /.idea
@@ -9,6 +8,7 @@ Gemfile.lock
 /.rspec
 
 /config/*.yml
+/config/initializers/debug.rb
 /log
 /public/assets
 /tmp
