@@ -292,7 +292,7 @@ function syncLabels(uid, html) {
   $('#mail_' + uid + '_labels').html(html);
 }
 $(function() {
-  <% if controller.new_window? && @seen_flagged %>
+  <% if controller.new_window? && @item.seen_flagged? %>
   if (window.opener) {
     window.opener.syncUnseenClass('<%=raw escape_javascript @mailbox.name %>', '<%= @item.uid %>');
     <% if @mailbox.star_box? %>

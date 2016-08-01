@@ -71,7 +71,7 @@ class Webmail::Admin::MailsController < Webmail::Controller::Admin::Base
       end
       reload_mailboxes
 
-      @seen_flagged = true
+      @item.seen!
 
       if @item.mdn_request_mode == :auto && !@item.notified? && !@mailbox.draft_box? && !@mailbox.sent_box?
         begin

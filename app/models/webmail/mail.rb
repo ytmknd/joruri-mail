@@ -256,7 +256,7 @@ class Webmail::Mail
   end
 
   def mdn_request_mode
-    return unless has_disposition_notification_to?
+    return if !seen_flagged? || !has_disposition_notification_to?
 
     @mdn_request_mode ||=
       if (domain = Core.config['mail_domain']).present? &&

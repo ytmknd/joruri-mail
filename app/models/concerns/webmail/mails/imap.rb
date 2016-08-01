@@ -29,7 +29,7 @@ module Webmail::Mails::Imap
   end
 
   def unseen?
-    !flags.index(:Seen)
+    !seen?
   end
 
   def draft?
@@ -59,6 +59,15 @@ module Webmail::Mails::Imap
   def labels
     labels = flags.select { |flag| flag =~ /^\$label\d+$/ }
     labels.map { |flag| flag.gsub(/^\$label/, '') }.sort
+  end
+
+  def seen!
+    @seen_flagged = true
+    flags << :Seen
+  end
+
+  def seen_flagged?
+    @seen_flagged
   end
 
   def destroy(complete = false)
