@@ -98,32 +98,12 @@ class Sys::Group < Sys::ManageDatabase
     return nil
   end
 
-  def candidate(include_top = false)
-    choices = []
-    
-    down = lambda do |p, i|
-      if new_record? || p.id != id
-        choices << [('　　' * i) + p.name, p.id]
-        p.children.each {|child| down.call(child, i + 1)}
-      end
-    end
-
-    top = self.class.where(level_no: 1).first
-    if include_top
-      roots = [top]
-    else
-      roots = top.children 
-    end
-    roots.each {|i| down.call(i, 0)}
-    
-    choices
-  end
-
   def ancestors_and_children_without_root_options
     ancestors_and_children[1..-1].map { |g| [g.nested_name.sub(/　　/, ''), g.id] }
   end
 
-private
+  private
+
   def disable_users
     users.each do |user|
       if user.groups.size == 1
