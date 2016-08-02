@@ -2,7 +2,6 @@ class Webmail::Admin::MailsController < Webmail::Controller::Admin::Base
   include Sys::Controller::Scaffold::Base
   include Webmail::Admin::Mobile::Mail
   layout :select_layout
-  rescue_from StandardError, with: :rescue_mail
 
   before_action :handle_mailto_scheme, if: -> { params[:src] == 'mailto' }
   before_action :check_user_email, only: [:new, :create, :edit, :update, :answer, :forward]
@@ -771,11 +770,11 @@ class Webmail::Admin::MailsController < Webmail::Controller::Admin::Base
       (action_name.in?(%w(create update answer forward mobile_send)))
   end
 
-  def rescue_mail(e)
-    raise e unless rescue_mail_action?
+  def rescue_exception(e)
+    return super unless rescue_mail_action?
 
     @mailbox = Webmail::Mailbox.where(user_id: Core.current_user.id, name: params[:mailbox] || 'INBOX').first
-    raise e unless @mailbox
+    return super unless @mailbox
 
     @item = Webmail::Mail.new(item_params)
     flash.now[:error] = "サーバーエラーが発生しました。時間をおいて再度送信してください。（#{e}）"
