@@ -99,7 +99,7 @@ class Webmail::Mail
       self.in_body    = template.body
     end
     if sign
-      self.in_body = "\n\n#{sign.body}"
+      self.in_body = "#{in_body}\n\n#{sign.body}"
     end
     self.in_format = FORMAT_TEXT 
   end
