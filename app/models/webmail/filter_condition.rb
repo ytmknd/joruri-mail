@@ -9,30 +9,15 @@ class Webmail::FilterCondition < ActiveRecord::Base
 
   scope :readable, ->(user = Core.user) { where(user_id: user.id) }
 
+  enumerize :column, in: [:subject, :from, :to]
+  enumerize :inclusion, in: ['<', '!<', '==', '=~']
+
   def editable?
     Core.user.has_auth?(:manager) || user_id == Core.user.id
   end
 
   def deletable?
     Core.user.has_auth?(:manager) || user_id == Core.user.id
-  end
-
-  def column_options
-    [["件名（Subject）","subject"],["差出人（From）","from"],["宛先（To）","to"]]
-  end
-
-  def column_label
-    column_options.each {|c| return c[0] if column == c[1].to_s }
-    nil
-  end
-
-  def inclusion_options
-    [["に次を含む","<"],["に次を含まない","!<"],["が次と一致する","=="],["正規表現","=~"]]
-  end
-
-  def inclusion_label
-    inclusion_options.each {|c| return c[0] if inclusion == c[1].to_s }
-    nil
   end
 
   def match?(data = {})

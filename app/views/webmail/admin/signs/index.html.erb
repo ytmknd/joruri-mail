@@ -10,7 +10,7 @@
   <% @items.each do |item| %>
     <tr <%= cycle '', 'class="cycle"' %>>
       <td style="text-align: center;"><%= link_to :show, url_for(item) %></td>
-      <td><%= item.name %> <%= '（既定）' if item.default_flag == 1 %></td>
+      <td><%= item.name %> <%= '（既定）' if item.default_flag? %></td>
       <td style="text-align: center;"><%=l item.created_at if item.created_at %></td>
     </tr>
   <% end %>

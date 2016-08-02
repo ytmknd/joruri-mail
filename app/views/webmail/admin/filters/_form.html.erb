@@ -6,7 +6,7 @@
     <td><%= @item.name !~ /^[*]/ ? f.text_field(:name, class: 'name') : @item.name %></td>
   </tr><tr>
     <th><%= @item.class.human_attribute_name :state %></th>
-    <td><%= f.collection_radio_buttons :state, @item.states, :last, :first, class: 'states' %></td>
+    <td><%= f.collection_radio_buttons :state, @item.class.state.options, :last, :first, class: 'states' %></td>
   </tr><tr>
     <th><%= @item.class.human_attribute_name :sort_no %></th>
     <td><%= f.text_field :sort_no, class: 'number' %></td>
@@ -18,7 +18,7 @@
 <table class="show">
   <tr>
     <th><%= @item.class.human_attribute_name :conditions_chain %></th>
-    <td><%= f.collection_radio_buttons :conditions_chain, @item.conditions_chain_labels, :last, :first, class: 'states' %></td>
+    <td><%= f.collection_radio_buttons :conditions_chain, @item.class.conditions_chain.options, :last, :first, class: 'states' %></td>
   </tr><tr>
     <th>条件</th>
     <td>
@@ -38,7 +38,7 @@
 <table class="show">
   <tr>
     <th><%= @item.class.human_attribute_name :action %></th>
-    <td><%= f.select :action, @item.action_labels, include_blank: true %></td>
+    <td><%= f.select :action, @item.class.action.options, include_blank: true %></td>
   </tr><tr>
     <th><%= @item.class.human_attribute_name :mailbox %></th>
     <td><%= f.select :mailbox, Webmail::Mailbox.mailbox_options(&:filter_targetable_box?), include_blank: true %></td>

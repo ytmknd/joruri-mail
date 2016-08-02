@@ -12,10 +12,10 @@
   <% @items.each do |item| %>
     <tr <%= cycle '', 'class="cycle"' %>>
       <td style="text-align: center;"><%= link_to :show, url_for(item) %></td>
-      <td><%= item.name %> <%#= '（既定）' if item.default_flag == 1 %></td>
+      <td><%= item.name %></td>
       <td style="text-align: right;"><%= item.sort_no %></td>
       <td style="text-align: center;"><%=l item.created_at if item.created_at %></td>
-      <td style="text-align: center;"><%= item.status.name if item.status %></td>
+      <td style="text-align: center;"><%= item.state_text %></td>
     </tr>
   <% end %>
 </table>

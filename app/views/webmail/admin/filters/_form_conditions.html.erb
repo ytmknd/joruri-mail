@@ -1,8 +1,8 @@
 <% conditions.each do |cond| %>
   <%= f.fields_for :conditions, cond, options.dup do |f2| %>
     <div style="margin: 5px 0px;">
-      <%= f2.select :column, options_for_select(cond.column_options, cond.column), { include_blank: true }, id: nil %>
-      <%= f2.select :inclusion, options_for_select(cond.inclusion_options, cond.inclusion), { include_blank: true }, id: nil %>
+      <%= f2.select :column, options_for_select(cond.class.column.options, cond.column), { include_blank: true }, id: nil %>
+      <%= f2.select :inclusion, options_for_select(cond.class.inclusion.options, cond.inclusion), { include_blank: true }, id: nil %>
       <%= f2.text_field :value, class: 'name', id: nil %>
       <%= link_to 'クリア', '#clearCondition' %>
     </div>

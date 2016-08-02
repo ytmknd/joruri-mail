@@ -2,11 +2,13 @@ class Webmail::Sign < ActiveRecord::Base
   include Sys::Model::Base
   include Sys::Model::Auth::Free
 
+  after_save :uniq_default_flag, if: :default_flag?
+
   validates :user_id, :name, presence: true
 
-  after_save :uniq_default_flag, if: %Q(default_flag == 1)
-
   scope :readable, ->(user = Core.user) { where(user_id: user.id) }
+
+  enumerize :default_flag, in: { set: 1, unset: 0 }
 
   def editable?
     Core.user.has_auth?(:manager) || user_id == Core.user.id
@@ -20,7 +22,6 @@ class Webmail::Sign < ActiveRecord::Base
 
   def uniq_default_flag
     self.class.where(user_id: Core.user.id).where.not(id: id).update_all(default_flag: 0)
-    return true
   end
 
   class << self

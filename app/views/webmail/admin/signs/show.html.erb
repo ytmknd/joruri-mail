@@ -10,7 +10,7 @@
     <td class="autoWrap mailBodyText"><%=mail_text_wrap @item.body, 10 %></td>
   </tr><tr>
     <th><%= @item.class.human_attribute_name :default_flag %></th>
-    <td><%= @item.default_flag == 1 ? '設定する' : '設定しない' %></td>
+    <td><%= @item.default_flag_text %></td>
   </tr>
 </table>
 

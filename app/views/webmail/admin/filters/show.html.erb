@@ -7,7 +7,7 @@
     <td><%= @item.name %></td>
   </tr><tr>
     <th><%= @item.class.human_attribute_name :state %></th>
-    <td><%= @item.status.name if @item.status %></td>
+    <td><%= @item.state_text %></td>
   </tr><tr>
     <th><%= @item.class.human_attribute_name :sort_no %></th>
     <td><%= @item.sort_no %></td>
@@ -18,13 +18,13 @@
 <table class="show">
   <tr>
     <th><%= @item.class.human_attribute_name :conditions_chain %></th>
-    <td><%= @item.conditions_chain_label %></td>
+    <td><%= @item.conditions_chain_text %></td>
   </tr><tr>
     <th>条件</th>
     <td>
       <% @item.conditions.each do |c| %>
       <div style="margin: 5px 0px;">
-        <%= c.column_label %>　<%= c.inclusion_label %>　<b><%= c.value %></b></div>
+        <%= c.column_text %>　<%= c.inclusion_text %>　<b><%= c.value %></b></div>
       <% end %>
     </td>
   </tr>
@@ -34,7 +34,7 @@
 <table class="show">
   <tr>
     <th><%= @item.class.human_attribute_name :action %></th>
-    <td><%= @item.action_label %></td>
+    <td><%= @item.action_text %></td>
   </tr><tr>
     <th><%= @item.class.human_attribute_name :mailbox %></th>
     <td><%= @item.mailbox_name %></td>

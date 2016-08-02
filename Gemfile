@@ -35,6 +35,7 @@ gem 'sdoc', '~> 0.4.0', group: :doc
 gem 'activerecord-import', '~> 0.15.0'
 gem 'activerecord-session_store', '~> 1.0.0'
 gem 'active_hash', '~> 1.4.1'
+gem 'enumerize', '~> 1.1.1'
 gem 'ruby-ldap', '~> 0.9.11'
 gem 'will_paginate', '~> 3.1.0'
 gem 'jpmobile', '~> 4.2.0'

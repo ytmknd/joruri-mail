@@ -9,7 +9,7 @@
     <td><%= f.text_area :body, class: 'body' %></td>
   </tr><tr>
     <th><%= @item.class.human_attribute_name :default_flag %></th>
-    <td><%= f.collection_radio_buttons :default_flag, [['設定する',1],['設定しない',0]], :last, :first, class: 'states' %></td>
+    <td><%= f.collection_radio_buttons :default_flag, @item.class.default_flag.options, :last, :first %></td>
   </tr>
 </table>
 

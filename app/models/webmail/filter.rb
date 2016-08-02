@@ -8,7 +8,6 @@ class Webmail::Filter < ActiveRecord::Base
   attr_accessor :matched_uids
   attr_reader :applied, :processed, :delayed
 
-  belongs_to_active_hash :status, foreign_key: :state, class_name: 'Sys::Base::Status'
   has_many :conditions, -> { order(:sort_no) },
     foreign_key: :filter_id, class_name: 'Webmail::FilterCondition', dependent: :destroy
 
@@ -29,6 +28,10 @@ class Webmail::Filter < ActiveRecord::Base
 
   scope :readable, ->(user = Core.user) { where(user_id: user.id) }
 
+  enumerize :state, in: [:enabled, :disabled]
+  enumerize :action, in: [:move, :delete]
+  enumerize :conditions_chain, in: [:and, :or]
+
   def editable?
     Core.user.has_auth?(:manager) || user_id == Core.user.id
   end
@@ -37,35 +40,8 @@ class Webmail::Filter < ActiveRecord::Base
     Core.user.has_auth?(:manager) || user_id == Core.user.id
   end
 
-  def states
-    [['有効','enabled'],['無効','disabled']]
-  end
-
-  def action_labels
-    [["メールを移動する", "move"],["メールを削除する","delete"]]
-  end
-
-  def state_label
-    states.each {|a| return a[0] if state == a[1].to_s }
-    nil
-  end
-
-  def action_label
-    action_labels.each {|a| return a[0] if action == a[1].to_s }
-    nil
-  end
-
   def mailbox_name
     Webmail::Mailbox.name_to_title(mailbox).gsub('.', '/')
-  end
-
-  def conditions_chain_labels
-    [["全ての条件に一致", "and"],["いずれかの条件に一致","or"]]
-  end
-
-  def conditions_chain_label
-    conditions_chain_labels.each {|a| return a[0] if conditions_chain == a[1].to_s }
-    nil
   end
 
   def target_mailboxes

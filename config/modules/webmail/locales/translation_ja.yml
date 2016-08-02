@@ -93,3 +93,33 @@ ja:
         mailbox_id: メールボックス
         start_date: 削除開始日
         end_date: 削除終了日
+
+  enumerize:
+    webmail/filter:
+      state:
+        enabled: 有効
+        disabled: 無効
+      action:
+        move: メールを移動する
+        delete: メールを削除する
+      conditions_chain:
+        and: 全ての条件に一致
+        or: いずれかの条件に一致
+    webmail/filter_condition:
+      column:
+        subject: 件名（Subject）
+        from: 差出人（From）
+        to: 宛先（To）
+      inclusion:
+        '<': に次を含む
+        '!<': に次を含まない
+        '==': が次と一致する
+        '=~': 正規表現
+    webmail/template:
+      default_flag:
+        set: 設定する
+        unset: 設定しない
+    webmail/sign:
+      default_flag:
+        set: 設定する
+        unset: 設定しない
