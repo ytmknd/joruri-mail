@@ -1,4 +1,4 @@
-## Joruri Mail v2.0.0 インストールマニュアル                2016.07.08
+## Joruri Mail v2.0.0 インストールマニュアル                2016.08.03
 
 **********************************************************************
  1 想定環境
@@ -96,7 +96,6 @@ Passengerをインストールします。
   # yum -y install curl-devel
   # gem install passenger -v 5.0.30
   # passenger-install-apache2-module -a
-  (画面の内容を確認して Enterキーを押してください)
 
 **********************************************************************
  7 MySQL のインストール
@@ -138,7 +137,7 @@ rootユーザーのパスワードを設定します。
 
 依存パッケージをインストールします。
 
-  # yum -y install ImageMagick-devel libjpeg-devel libpng-devel librsvg2-devel　libxml2-devel libxslt-devel mysql-devel openldap-devel shared-mime-info libicu-devel npm
+  # yum -y install ImageMagick-devel libjpeg-devel libpng-devel librsvg2-devel libxml2-devel libxslt-devel mysql-devel openldap-devel shared-mime-info libicu-devel npm
   # npm install bower -g
 
 Joruriユーザーを作成します。
@@ -258,7 +257,7 @@ Apacheに設定を追加します。
 
   $ su -
   # cp /var/share/jorurimail/config/samples/passenger.conf /etc/httpd/conf.d/
-  # ln -s /var/share/jorurimail/config/virtual-host/jorurimail.conf /etc/httpd/conf.d/jorurimail.conf
+  # ln -s /var/share/jorurimail/config/virtual-hosts/jorurimail.conf /etc/httpd/conf.d/jorurimail.conf
 
 Apache を起動します。
 
