@@ -9,10 +9,10 @@ module Webmail::MailboxHelper
     classes.join(' ')
   end
 
-  def mailbox_name_class(mailbox, current_mailbox)
+  def mailbox_name_class(mailbox, current_mailbox, options = {})
     classes  = ['name']
     classes << 'current' if mailbox.name == current_mailbox.name
-    classes << 'unseen' if mailbox.unseen > 0
+    classes << 'unseen' if mailbox.unseen > 0 && !options[:without_unseen]
     classes << 'droppable' if mailbox.mail_droppable_box?
     classes.join(' ')
   end

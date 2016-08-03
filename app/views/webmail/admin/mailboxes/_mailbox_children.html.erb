@@ -1,7 +1,7 @@
 <% mailboxes.each do |box| %>
   <%
     li_class = mailbox_list_class(box)
-    nm_class = mailbox_name_class(box, @mailbox)
+    nm_class = mailbox_name_class(box, @mailbox, without_unseen: true)
   %>
   <li class="<%= li_class %>">
     <% if box.editable_box? %>
