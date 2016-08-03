@@ -70,6 +70,10 @@ module Webmail::Mails::Imap
     @seen_flagged
   end
 
+  def x_mailbox_title
+    Webmail::Mailbox.name_to_title(x_mailbox.to_s).split('.').last
+  end
+
   def destroy(complete = false)
     imap.select(mailbox)
     if mailbox !~ /^Trash(\.|$)/ && !complete
