@@ -98,7 +98,7 @@ module Webmail::Mailboxes::Imap
 
     def load_mailboxes(reloads = nil)
       reloads = Array(reloads)
-      boxes = self.where(user_id: Core.current_user.id).order(:sort_no)
+      boxes = self.where(user_id: Core.current_user.id).order(:sort_no).to_a
       reloads << :all if boxes.size < DEFAULTS.size
 
       if reloads.present?

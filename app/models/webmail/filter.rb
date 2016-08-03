@@ -169,7 +169,7 @@ class Webmail::Filter < ActiveRecord::Base
       delayed = 0
       filters = self.where(user_id: Core.current_user.id, state: 'enabled')
         .order(:sort_no, :id)
-        .preload(:conditions)
+        .preload(:conditions).to_a
 
       if filters.size > 0
         uids = Webmail::Mail.find_uids(select: 'INBOX', conditions: imap_cnd)
