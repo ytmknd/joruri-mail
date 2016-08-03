@@ -632,8 +632,7 @@ class Webmail::Admin::MailsController < Webmail::Controller::Admin::Base
   end
 
   def keep_params(options = {})
-    if options[:mailbox].blank? &&
-       (options[:controller].blank? || options[:controller].in?([controller_name, controller_path]))
+    if options[:mailbox].blank? && options[:controller].blank?
       keeps = params.slice(:page, :search, :s_keyword, :s_column, :s_status, :s_label,
         :sort_key, :sort_order, :sort_starred, :new_window)
       options = options.reverse_merge(keeps)

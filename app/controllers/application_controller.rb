@@ -1,6 +1,6 @@
 class ApplicationController < ActionController::Base
   include Jpmobile::ViewSelector
-  include ParamsKeeper
+  prepend ParamsKeeper
   protect_from_forgery #:secret => '1f0d667235154ecf25eaf90055d99e99'
   before_action :initialize_application
   after_action :inline_css_for_mobile
@@ -45,6 +45,15 @@ class ApplicationController < ActionController::Base
         end
       end
     end
+  end
+
+  def url_for(options = nil)
+    if request.mobile? && options.is_a?(Hash)
+      options.each do |key, value|
+        options[key] = request.mobile.to_external(value, nil, nil).first if value.is_a?(String)
+      end
+    end
+    super
   end
 
   def send_data(data, options = {})
