@@ -1,4 +1,14 @@
 module Webmail::Admin::Mobile::Mail
+  extend ActiveSupport::Concern
+
+  included do
+    before_action only: :mobile_manage do
+      if [:mobile_move, :mobile_copy, :mobile_delete, :mobile_seen, :mobile_unseen].any? { |act| params.key?(act) }
+        check_posted_uids
+      end
+    end
+  end
+
   def mobile_manage
     if params[:mobile_move]
       move
