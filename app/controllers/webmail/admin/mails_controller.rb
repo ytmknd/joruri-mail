@@ -29,7 +29,7 @@ class Webmail::Admin::MailsController < Webmail::Controller::Admin::Base
 
   def index
     last_uid, recent, delayed = Webmail::Filter.apply_recents
-    if recent && params[:reload].blank?
+    if recent
       reload_mailboxes
       reload_quota
     end
