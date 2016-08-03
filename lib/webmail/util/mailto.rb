@@ -1,4 +1,4 @@
-class Util::Mailto
+class Webmail::Util::Mailto
   class << self
     def parse(url)
       parsed = {}

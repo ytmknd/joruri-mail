@@ -3,7 +3,7 @@ class Webmail::Admin::MailsController < Webmail::Controller::Admin::Base
   include Webmail::Admin::Mobile::Mail
   layout :select_layout
 
-  before_action :handle_mailto_scheme, if: -> { params[:src] == 'mailto' }
+  before_action :handle_mailto_scheme, if: -> { params[:src] == 'mailto' && params[:uri] }
   before_action :check_user_email, only: [:new, :create, :edit, :update, :answer, :forward]
   before_action :check_posted_uids, only: [:move, :delete, :seen, :unseen, :register_spam]
 
@@ -642,7 +642,7 @@ class Webmail::Admin::MailsController < Webmail::Controller::Admin::Base
   end
 
   def handle_mailto_scheme
-    mailto = Util::Mailto.parse(params[:uri])
+    mailto = Webmail::Util::Mailto.parse(params[:uri].to_s)
     [:to, :cc, :bcc, :subject, :body].each { |k| mailto[k] = params[k] if params[k] }
     redirect_to new_webmail_mail_path(mailto.merge(mailbox: 'INBOX'))
   end

@@ -1,4 +1,4 @@
-class Webmail::ServerChecker
+class Webmail::Util::Server
   class << self
     def check_status
       { imap: check_imap_status, smtp: check_smtp_status }
@@ -9,7 +9,9 @@ class Webmail::ServerChecker
     def check_imap_status
       imap_settings = Joruri.config.imap_settings
       begin
-        imap_sock = TCPSocket.open(imap_settings[:address], imap_settings[:port])
+        imap_sock = Timeout.timeout(10) do
+          TCPSocket.open(imap_settings[:address], imap_settings[:port])
+        end
         true
       rescue => e
         false
@@ -21,7 +23,9 @@ class Webmail::ServerChecker
     def check_smtp_status
       smtp_settings = ActionMailer::Base.smtp_settings
       begin
-        smtp_sock = TCPSocket.open(smtp_settings[:address], smtp_settings[:port])
+        smtp_sock = Timeout.timeout(10) do
+          TCPSocket.open(smtp_settings[:address], smtp_settings[:port])
+        end
         true
       rescue => e
         false
