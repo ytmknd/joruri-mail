@@ -14,7 +14,7 @@ class Sys::UserLogin < ApplicationRecord
     if (list = user.logins).size > 10
       self.where(user_id: user.id).where("id < ?", list[9].id).delete_all
     end
-    user.logins(true)
+    user.logins.reload
   end
 
   def login_at
