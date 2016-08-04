@@ -1,4 +1,4 @@
-class Webmail::Mailbox < ActiveRecord::Base
+class Webmail::Mailbox < ApplicationRecord
   include Sys::Model::Base
   include Sys::Model::Auth::Free
   include Webmail::Mailboxes::Imap

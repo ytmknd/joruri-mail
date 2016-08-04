@@ -1,4 +1,4 @@
-class Webmail::Template < ActiveRecord::Base
+class Webmail::Template < ApplicationRecord
   include Sys::Model::Base
   include Sys::Model::Auth::Free
 

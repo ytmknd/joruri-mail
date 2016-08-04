@@ -1,4 +1,4 @@
-class Webmail::Setting < ActiveRecord::Base
+class Webmail::Setting < ApplicationRecord
   include Sys::Model::Base
   include Sys::Model::Auth::Free
 

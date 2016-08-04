@@ -1,4 +1,4 @@
-class Webmail::FilterCondition < ActiveRecord::Base
+class Webmail::FilterCondition < ApplicationRecord
   include Sys::Model::Base
   include Sys::Model::Auth::Free
 

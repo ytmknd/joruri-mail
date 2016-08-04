@@ -1,4 +1,4 @@
-class Webmail::AddressGroup < ActiveRecord::Base
+class Webmail::AddressGroup < ApplicationRecord
   include Sys::Model::Base
   include Sys::Model::Tree
   include Sys::Model::Auth::Free

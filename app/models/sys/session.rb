@@ -1,4 +1,4 @@
-class Sys::Session < ActiveRecord::Base
+class Sys::Session < ApplicationRecord
   self.table_name = 'sessions'
 
   def self.delete_past_sessions_at_random(rand_max = 10000)

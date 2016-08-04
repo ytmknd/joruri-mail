@@ -90,7 +90,7 @@ class Webmail::Admin::AddressGroupsController < Webmail::Controller::Admin::Base
   end
 
   def ids_to_addrs(ids)
-    return [] if ids.blank? || !ids.is_a?(Hash)
+    return [] if ids.blank?
     Webmail::Address.where(user_id: Core.user.id, id: ids.keys)
       .where.not(email: nil).where.not(email: '').order(:kana)
       .map(&:email_format)

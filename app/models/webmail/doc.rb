@@ -1,4 +1,4 @@
-class Webmail::Doc < ActiveRecord::Base
+class Webmail::Doc < ApplicationRecord
   include Sys::Model::Base
   include Sys::Model::Base::Page
   include Sys::Model::Auth::Manager

@@ -1,4 +1,4 @@
-class Webmail::Sign < ActiveRecord::Base
+class Webmail::Sign < ApplicationRecord
   include Sys::Model::Base
   include Sys::Model::Auth::Free
 
