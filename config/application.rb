@@ -29,9 +29,6 @@ module Joruri
     config.i18n.load_path += Dir[Rails.root.join('config', 'modules', '**', 'locales', '*.yml').to_s]
     config.i18n.default_locale = :ja
 
-    # Do not swallow errors in after_commit/after_rollback callbacks.
-    config.active_record.raise_in_transactional_callbacks = true
-
     # JavaScript files you want as :defaults (application.js is always included).
     # config.action_view.javascript_expansions[:defaults] = %w(jquery rails)
     config.action_view.field_error_proc = proc { |html_tag, instance|
