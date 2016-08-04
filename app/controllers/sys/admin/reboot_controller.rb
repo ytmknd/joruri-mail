@@ -5,6 +5,6 @@ class Sys::Admin::RebootController < Sys::Controller::Admin::Base
 
   def index
     FileUtils.touch(Rails.root.join('tmp/restart.txt'))
-    render text: 'OK'
+    render plain: 'OK'
   end
 end

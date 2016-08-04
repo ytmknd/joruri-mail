@@ -4,7 +4,7 @@ class Sys::Admin::AirController < ApplicationController
   protect_from_forgery except: [:old_login, :login]
 
   def old_login
-    render text: "NG"
+    render plain: "NG"
   end
 
   def login
@@ -16,7 +16,7 @@ class Sys::Admin::AirController < ApplicationController
     elsif params[:account] && params[:token]
       return air_login(params[:account], params[:token])
     end
-    render text: "NG"
+    render plain: "NG"
   end
 
   def air_token(account, password, mobile_password)
@@ -26,7 +26,7 @@ class Sys::Admin::AirController < ApplicationController
       end
     end
 
-    return render text: 'NG' unless user
+    return render plain: 'NG' unless user
 
     now   = Time.now
     token = Digest::MD5.hexdigest(now.to_f.to_s)
@@ -36,14 +36,14 @@ class Sys::Admin::AirController < ApplicationController
     user_tmp.air_login_id = "#{token} #{enc_password}"
     user_tmp.save(validate: false)
 
-    render text: "OK #{token}"
+    render plain: "OK #{token}"
   end
 
   def air_login(account, token)
     user = Sys::User.where(account: account)
       .where.not(air_login_id: nil)
       .where("air_login_id LIKE ?", "#{Sys::User.escape_like(token)} %").first
-    return render text: "ログインに失敗しました。" unless user
+    return render plain: "ログインに失敗しました。" unless user
 
     token, enc_password = user.air_login_id.split(/ /)
 

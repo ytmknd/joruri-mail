@@ -8,7 +8,7 @@ class Webmail::Admin::AddressesController < Webmail::Controller::Admin::Base
   end
 
   def index
-    return render text: ''
+    return render plain: ''
   end
 
   def show

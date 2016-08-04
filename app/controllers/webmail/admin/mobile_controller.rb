@@ -3,6 +3,6 @@ class Webmail::Admin::MobileController < Webmail::Controller::Admin::Base
     @count = Sys::User.where(state: 'enabled', ldap: 1, mobile_access: 1)
       .where.not(mobile_password: '').count
 
-    render text: "モバイル設定人数:#{@count}"
+    render plain: "モバイル設定人数:#{@count}"
   end
 end
