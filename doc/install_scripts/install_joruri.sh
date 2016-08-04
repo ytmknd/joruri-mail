@@ -22,14 +22,14 @@ centos() {
 
   yum install -y ImageMagick-devel libjpeg-devel libpng-devel librsvg2-devel
   yum install -y libxml2-devel libxslt-devel mysql-devel openldap-devel shared-mime-info libicu-devel npm
-  npm install bower -g
+  npm install bower@1.7.9 -g
 
   git clone https://github.com/joruri/joruri-mail.git /var/share/jorurimail
   # git clone -b develop https://github.com/joruri/joruri-mail.git /var/share/jorurimail
 
-  cd /var/share/jorurimail && bundle install --path vendor/bundle --without development test
-  cp /var/share/jorurimail/config/original/*.yml && /var/share/jorurimail/config/
   chown -R joruri:joruri /var/share/jorurimail
+  su - joruri -c "cd /var/share/jorurimail && bundle install --path vendor/bundle --without development test"
+  su - joruri -c "cp /var/share/jorurimail/config/original/*.yml /var/share/jorurimail/config/"
 }
 
 others() {

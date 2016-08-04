@@ -138,7 +138,7 @@ rootユーザーのパスワードを設定します。
 依存パッケージをインストールします。
 
   # yum -y install ImageMagick-devel libjpeg-devel libpng-devel librsvg2-devel libxml2-devel libxslt-devel mysql-devel openldap-devel shared-mime-info libicu-devel npm
-  # npm install bower -g
+  # npm install bower@1.7.9 -g
 
 Joruriユーザーを作成します。
 

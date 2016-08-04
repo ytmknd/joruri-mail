@@ -34,6 +34,9 @@ centos() {
   rm -f install_all.sh
   for file in ${files[@]}; do
     echo "./$file" >> install_all.sh
+    if [ $file = 'install_ruby.sh' ]; then
+      echo ". /etc/profile" >> install_all.sh
+    fi
   done
 cat <<'EOF' >> install_all.sh
 
