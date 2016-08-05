@@ -6,7 +6,7 @@ class Webmail::Admin::FiltersController < Webmail::Controller::Admin::Base
   end
 
   def index
-    @items = Webmail::Filter.readable.where(user_id: Core.user.id).order(:sort_no, :id)
+    @items = Webmail::Filter.where(user_id: Core.user.id).order(:sort_no, :id)
       .paginate(page: params[:page], per_page: params[:limit])
     _index @items
   end

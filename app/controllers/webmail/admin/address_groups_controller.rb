@@ -22,7 +22,7 @@ class Webmail::Admin::AddressGroupsController < Webmail::Controller::Admin::Base
   end
 
   def index
-    @items = Webmail::Address.readable.where(user_id: Core.user.id).order(@orders)
+    @items = Webmail::Address.where(user_id: Core.user.id).order(@orders)
     @s_items = @items.search(params) if params[:search]
 
     @root_groups = Webmail::AddressGroup.user_root_groups.preload_children

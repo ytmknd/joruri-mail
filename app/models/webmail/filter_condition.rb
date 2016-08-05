@@ -7,8 +7,6 @@ class Webmail::FilterCondition < ApplicationRecord
   validates :user_id, :column, :inclusion, :value, presence: true
   validates :value, regexp: true, if: "inclusion == '=~'"
 
-  scope :readable, ->(user = Core.user) { where(user_id: user.id) }
-
   enumerize :column, in: [:subject, :from, :to]
   enumerize :inclusion, in: ['<', '!<', '==', '=~']
 

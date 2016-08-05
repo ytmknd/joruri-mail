@@ -6,8 +6,6 @@ class Webmail::Sign < ApplicationRecord
 
   validates :user_id, :name, presence: true
 
-  scope :readable, ->(user = Core.user) { where(user_id: user.id) }
-
   enumerize :default_flag, in: { set: 1, unset: 0 }
 
   def editable?

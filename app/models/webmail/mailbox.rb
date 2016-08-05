@@ -9,8 +9,6 @@ class Webmail::Mailbox < ApplicationRecord
   validates :title, presence: true
   validate :validate_title
 
-  scope :readable, ->(user = Core.current_user) { where(user_id: user.id) }
-
   after_initialize :set_defaults
 
   with_options if: "name.present? && name_changed?" do

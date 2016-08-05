@@ -26,8 +26,6 @@ class Webmail::Filter < ApplicationRecord
     validates :conditions, presence: true
   end
 
-  scope :readable, ->(user = Core.user) { where(user_id: user.id) }
-
   enumerize :state, in: [:enabled, :disabled]
   enumerize :action, in: [:move, :delete]
   enumerize :conditions_chain, in: [:and, :or]

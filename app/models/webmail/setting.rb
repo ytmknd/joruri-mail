@@ -189,8 +189,6 @@ class Webmail::Setting < ApplicationRecord
   validates :value, inclusion: Config.find_by(name: :sys_address_order).options.map(&:last),
     if: lambda {|item| item.name == 'sys_address_order' }
 
-  scope :readable, ->(user = Core.user) { where(user_id: user.id) }
-
   def initialize(attributes = nil)
     super
     if name

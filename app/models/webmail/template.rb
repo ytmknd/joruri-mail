@@ -7,8 +7,6 @@ class Webmail::Template < ApplicationRecord
 
   after_save :uniq_default_flag, if: :default_flag?
 
-  scope :readable, ->(user = Core.user) { where(user_id: user.id) }
-
   enumerize :default_flag, in: { set: 1, unset: 0 }
 
   def editable?

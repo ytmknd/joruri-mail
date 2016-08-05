@@ -13,7 +13,6 @@ class Webmail::AddressGroup < ApplicationRecord
 
   validates :user_id, :name, presence: true
 
-  scope :readable, ->(user = Core.user) { where(user_id: user.id) }
   scope :user_root_groups, -> {
     where(parent_id: 0, level_no: 1, user_id: Core.user.id).order(:name, :id)
   }

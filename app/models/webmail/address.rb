@@ -21,7 +21,6 @@ class Webmail::Address < ApplicationRecord
     before_validation :unquote_name
   end
 
-  scope :readable, ->(user = Core.user) { where(user_id: user.id) }
   scope :search, ->(params) {
     rel = all
     params.each do |k, vs|
