@@ -13,6 +13,7 @@
 <%= hidden_field_tag :uri, h(@uri) %>
 
 <div class="box">
+  <p>v<%= Joruri.version %></p>
   <h1>Joruri</h1>
   <div class="notice"><%= flash[:notice] %></div>
   <div class="fields">
