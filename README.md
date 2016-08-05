@@ -1,13 +1,15 @@
 # Joruri Mail
 
-Japan Originated Ruby-based RESTful and Integrated Mail: Joruri Mail is a browser-based IMAP client software.
+Japan Originated Ruby-based RESTful and Integrated Mail
+
+Joruri Mail is a browser-based IMAP client software.
 
 Features:
 * Simple and intuitive UI
 * User customizable settings (filters, templates, signatures, labels and more)
 * Multilingual mail decoding (especially japanese proper decoding)
-* Drag and drop features (local files, mails and mailboxes) 
-* Secure structure not to save emails in application
+* Drag and drop features (local files, mails and mailboxes)
+* Secure structure due to not saving email body in application database
 * Optimized UI for feature phone and smartphone
 * Cooperation with [Joruri Gw](https://github.com/joruri/joruri-gw) (single sign-on, schedule registration)
 
@@ -15,9 +17,28 @@ Features:
 
 [http://joruri.org/demo/jorurimail/](http://joruri.org/demo/jorurimail/)
 
+## System dependencies
+
+* OS: CentOS 7.2 x86_64 (recommended), CentOS 6.8 x86_64
+* Web server: Apache 2.4 (recommended), Apache 2.2
+* DB server: MySQL 5.6
+* Ruby: 2.3
+* Rails: 4.2
+* Mail server: SMTP, IMAP4
+
 ## Installation
 
+Installation maunal assumes:
+
+* CentOS is installed as minimal cofiguration
+* SELinux is diabled
+* Firewall is disabled
+
+Make sure your enviroment is secure.
+
 ### Quick install
+
+Execute script below as root user:
 
     export LANG=ja_JP.UTF-8; curl -L https://raw.githubusercontent.com/joruri/joruri-mail/master/doc/install_scripts/prepare.sh | bash
 
@@ -25,7 +46,7 @@ Features:
 
 [doc/INSTALL.txt](doc/INSTALL.txt)
 
-## Supported IMAP server
+## Supported IMAP servers
 
 IMAP servers with following capabilities are supported:
 

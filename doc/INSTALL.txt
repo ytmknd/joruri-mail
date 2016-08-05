@@ -5,8 +5,8 @@
 **********************************************************************
 
 [システム]
-OS           : CentOS 6.8 (64bit), CentOS 7.2 (64bit)
-Webサーバー  : Apache 2.2, Apache 2.4
+OS           : CentOS 7.2 x86_64, CentOS 6.8 x86_64
+Webサーバー  : Apache 2.4, Apache 2.2
 DBシステム   : MySQL 5.6
 Ruby         : 2.3
 Rails        : 4.2
@@ -248,6 +248,18 @@ assetsをコンパイルします。
 cron タスクを登録します。
 
   $ bundle exec whenever -i -s 'environment=production'
+
+cron タスクが登録されたことを確認します。
+
+  $ crontab -l
+
+======================================================================
+ 9.5 delayed_job の起動
+======================================================================
+
+delayed_job を起動します。
+
+  $ bundle exec rake delayed_job:start RAILS_ENV=production
 
 **********************************************************************
  10 サーバー起動

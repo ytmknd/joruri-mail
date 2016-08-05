@@ -1,6 +1,9 @@
 # DB Changelog
 
 2.0.0
+  * 未使用テーブル削除
+  * delayed_jobsテーブル追加
+  * テーブル名からgw_プレフィックスを削除
   2.0.0以降の差分反映は下記のマイグレーションコマンドをご利用ください。
   $ bundle exec rake db:migrate RAILS_ENV=production
 
