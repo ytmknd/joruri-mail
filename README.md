@@ -30,11 +30,11 @@ Features:
 
 Installation maunal assumes:
 
-* CentOS is installed as minimal cofiguration
-* SELinux is diabled
+* CentOS is installed with minimal configuration
+* SELinux is disabled
 * Firewall is disabled
 
-Make sure your enviroment is secure.
+Make sure your environment is secure.
 
 ### Quick install
 
