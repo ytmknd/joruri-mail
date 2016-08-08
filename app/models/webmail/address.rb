@@ -11,7 +11,7 @@ class Webmail::Address < ActiveRecord::Base
   has_many :groups, -> { order(:name, :id) }, through: :groupings
 
   validates :user_id, :name, presence: true
-  validates :email, presence: true, email: { only_address: true }
+  validates :email, presence: true, email: { only_address: true, strict: true }
   validate :validate_email_parsing
 
   before_save :replace_kana

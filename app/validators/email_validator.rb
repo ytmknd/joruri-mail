@@ -4,7 +4,7 @@ class EmailValidator < ActiveModel::EachValidator
       addr = Email.parse(value, raise_errors: true)
       if addr.blank? ||
          addr.address.blank? ||
-         !Email.valid_email?(addr.address) ||
+         (options[:strict] && !Email.valid_email?(addr.address)) ||
          (options[:only_address] && addr.name.present?)
         record.errors.add(attr, :invalid_email)
       end

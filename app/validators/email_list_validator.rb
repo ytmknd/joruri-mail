@@ -3,7 +3,7 @@ class EmailListValidator < ActiveModel::EachValidator
     if value.present?
       addrs = Email.parse_list(value, raise_errors: true)
       if addrs.blank? ||
-         addrs.any? { |addr| !Email.valid_email?(addr.address) }
+         (options[:strict] && addrs.any? { |addr| !Email.valid_email?(addr.address) })
         record.errors.add(attr, :invalid_email_list)
       end
     end
