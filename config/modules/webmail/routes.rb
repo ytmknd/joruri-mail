@@ -77,6 +77,8 @@ Joruri::Application.routes.draw do
     end
   end
 
+  match '_admin/gw/webmail/:mailbox/mails/new' => 'webmail/admin/mails#new', via: [:get, :post]
+
   scope '_api' do
     namespace 'webmail' do
       scope module: 'admin' do
