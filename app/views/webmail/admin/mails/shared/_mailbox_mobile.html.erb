@@ -1,0 +1,5 @@
+<div id="mailboxes" class="mailbox">
+  <div class="root">
+    <%= render 'webmail/admin/mails/shared/mailbox_children', mailboxes: @mailboxes.select(&:root?) %>
+  </div>
+</div>

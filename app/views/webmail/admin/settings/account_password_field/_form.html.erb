@@ -1,0 +1,15 @@
+<table class="show">
+  <tr>
+    <th>設定名</th>
+    <td><%= @item.config.title %></td>
+  </tr><tr>
+    <th>設定値</th>
+    <td>
+      <span style="width:70px; display:inline-block;">アカウント</span>
+      <%= text_field_tag 'item[value][account]', @item.decoded_value[:account], style: 'width: 150px;', autocomplete: 'off' %><br />
+      <span style="width:70px; display:inline-block;">パスワード</span>
+      <%= password_field_tag 'item[value][password]', @item.decoded_value[:password], style: 'width: 150px;', autocomplete: 'off' %>
+      <%=raw @item.config.lower_text if @item.config.lower_text %>
+    </td>
+  </tr>
+</table>

@@ -1,5 +1,3 @@
-# encoding: utf-8
-require 'shared-mime-info'
 class Sys::Lib::File::Tempfile < Tempfile
   
   def initialize(options = {})

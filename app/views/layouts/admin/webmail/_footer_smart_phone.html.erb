@@ -1,0 +1,10 @@
+<% if params[:mobile].blank? || params[:mobile] != 'top' %>
+<div class="linkTop">
+  <%= link_to image_tag('/_common/themes/admin/gw/webmail/mobile/images/smartphone/ic/ic-top.gif'), webmail_mails_path(mailbox: 'INBOX', mobile: :top) %><br />
+  <%= link_to 'トップ', webmail_mails_path(mailbox: 'INBOX', mobile: :top) %>
+</div>
+<% end %>
+<div class="personal">
+  前回ログイン日時　<%= Core.user && Core.user.previous_login_date ? l(Core.user.previous_login_date) : '---' %>
+</div>
+<div class="logout"><a href="/_admin/logout">&gt;ログアウト</a></div>

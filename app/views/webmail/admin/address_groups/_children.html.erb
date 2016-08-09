@@ -1,0 +1,11 @@
+<% groups.each do |group| %>
+  <li class="folder">
+    <%= link_to h(group.name), "#loadAddresses", id: "group#{group.id}", data: { gid: group.id } %>
+    <%= link_to :edit, edit_webmail_address_group_path(group.id), class: 'editGroup', title: '編集' %>
+    <% if group.children.to_a.size > 0 %>
+      <ul class="children level<%= group.level_no %>">
+        <%= render 'children', groups: group.children %>
+      </ul>
+    <% end %>
+  </li>
+<% end %>

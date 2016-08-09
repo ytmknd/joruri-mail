@@ -1,0 +1,16 @@
+<% if maintenance = Sys::Maintenance.latest_maintenance %>
+<div id="maintenance">
+<div class="showItem">
+  <font class="title">タイトル</font>
+  <font class="value"><%= maintenance.title %></font>
+</div>
+<div class="showItem">
+  <font class="title">日時</font>
+  <font class="value"><%=l maintenance.published_at if maintenance.published_at %></font>
+</div>
+<div class="showItem">
+  <font class="title">本文</font>
+  <font class="value"><%=raw maintenance.body %></font>
+</div>
+</div>
+<% end %>

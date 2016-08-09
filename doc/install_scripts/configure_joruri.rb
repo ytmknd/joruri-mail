@@ -9,6 +9,23 @@ gets
 require 'fileutils'
 require 'yaml/store'
 
+def bundle_exec(command)
+  `su - joruri -c "cd /var/share/jorurimail && bundle exec #{command}"`
+end
+
+def replace(filename)
+  File.open(filename, File::RDWR) do |f|
+    f.flock(File::LOCK_EX)
+    data = f.read
+    f.rewind
+    data = yield data
+    f.write data
+    f.flush
+    f.truncate(f.pos)
+    f.flock(File::LOCK_UN)
+  end
+end
+
 def ubuntu
   puts 'Ubuntu will be supported shortly.'
 end
@@ -18,35 +35,41 @@ def centos
 
   config_dir = '/var/share/jorurimail/config/'
 
-  core_yml = "#{config_dir}core.yml"
-  db = YAML::Store.new(core_yml)
-  db.transaction do
-    db['production']['uri'] = "http://#{`hostname`.chomp}/"
+  # set core.yml
+  yml = YAML::Store.new("#{config_dir}core.yml")
+  yml.transaction do
+    yml['production']['uri'] = "http://#{`hostname`.chomp}/"
   end
 
+  # set secrets.yml
+  secret = bundle_exec("rake secret RAILS_ENV=production")
+  replace("#{config_dir}secrets.yml") do |data|
+    data.gsub('<%= ENV["SECRET_KEY_BASE"] %>', secret)
+  end
+
+  # set virtual-hosts
   joruri_conf = "#{config_dir}virtual-hosts/jorurimail.conf"
-  File.open(joruri_conf, File::RDWR) do |f|
-    f.flock(File::LOCK_EX)
-
-    conf = f.read
-
-    f.rewind
-    f.write conf.gsub('jorurimail.example.com') {|m| `hostname`.chomp }
-    f.flush
-    f.truncate(f.pos)
-
-    f.flock(File::LOCK_UN)
+  replace(joruri_conf) do |data|
+    data.gsub('jorurimail.example.com', `hostname`.chomp)
   end
-
   system "ln -s #{joruri_conf} /etc/httpd/conf.d/jorurimail.conf"
+
+  # create database
   system 'service mysqld start'
   sleep 1 until system 'mysqladmin ping' # Not required to connect
   system "/usr/bin/mysql -u root -ppass -e 'create database jorurimail'"
-  system "cd /var/share/jorurimail && rake db:schema:load RAILS_ENV=production"
-  system "cd /var/share/jorurimail && rake db:seed RAILS_ENV=production"
-  system "cd /var/share/jorurimail && rake db:seed:demo RAILS_ENV=production"
+  system %q!mysql -u root -ppass -e "GRANT ALL ON jorurimail.* TO joruri@localhost IDENTIFIED BY 'pass'"!
+  bundle_exec "rake db:schema:load RAILS_ENV=production"
+  bundle_exec "rake db:seed RAILS_ENV=production"
+  bundle_exec "rake db:seed:demo RAILS_ENV=production"
   system 'service mysqld stop'
 
+  # install and compile assets
+  bundle_exec "rake bower:install RAILS_ENV=production"
+  bundle_exec "rake assets:precompile RAILS_ENV=production"
+
+  # set cron task
+  bundle_exec "whenever -i -s 'environment=production'"
 end
 
 def others

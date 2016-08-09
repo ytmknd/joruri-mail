@@ -387,6 +387,12 @@ table.root .trash a.empty {
   background-position: 0;
   overflow: hidden;
 }
+table.root .virtual td a {
+  background-image: url("/_common/themes/admin/gw/images/tree/transmit_open.gif");
+}
+table.root .flagged td a {
+  background-image: url("/_common/themes/admin/gw/images/mailoption/star_on.gif");
+}
 
 /* sendmenu
 ---------------------------------------*/

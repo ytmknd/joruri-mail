@@ -1,0 +1,51 @@
+<table class="show">
+  <tr>
+    <th>設定名</th>
+    <td><%= @item.config.title %></td>
+  </tr><tr>
+    <th>設定値</th>
+    <td>
+      <%= hidden_field_tag 'item[value][id]', @item.decoded_value[:id] %>
+      <span style="width:40px; display:inline-block;">名前</span>
+      <%= text_field_tag 'item[value][name]', @item.decoded_value[:name], style: 'width: 150px;' %><br />
+      <span style="width:40px; display:inline-block;">色</span>
+      <%= text_field_tag 'item[value][color]', @item.decoded_value[:color], style: 'width: 150px; color: #fff;', id: 'colorPicker' %><br />
+      <span style="width:40px; display:inline-block;">表示</span>
+      <%= radio_button_tag 'item[value][state]', 'enabled', @item.decoded_value[:state] == 'enabled' %><%= label_tag :item_value_state_enabled, '表示する' %>
+      <%= radio_button_tag 'item[value][state]', 'disabled', @item.decoded_value[:state] == 'disabled' %><%= label_tag :item_value_state_disabled, '表示しない' %> 
+      <%=raw @item.config.lower_text if @item.config.lower_text %>
+    </td>
+  </tr>
+</table>
+
+<script type="text/javascript">
+//<![CDATA[
+$(function() {
+  $('#colorPicker').simpleColorPicker({
+    colorsPerLine: 12,
+    colors: [
+      '#ffffff','#e5e5e5','#cccccc','#b2b2b2','#999999','#888888','#777777','#555555','#4c4c4c','#333333','#191919','#000000',
+      '#ffbbbb','#ffdfbb','#ffffbb','#dfffbb','#bbffbb','#bbffdf','#bbffff','#bbdfff','#bbbbff','#dfbbff','#ffbbff','#ffbbdf',
+      '#ff8888','#ffbf88','#ffff88','#bfff88','#88ff88','#88ffbf','#88ffff','#88bfff','#8888ff','#bf88ff','#ff88ff','#ff88bf',
+      '#ff4444','#ff9f44','#ffff44','#9fff44','#44ff44','#44ff9f','#44ffff','#449fff','#4444ff','#9f44ff','#ff44ff','#ff449f',
+      '#ff0000','#ff7f00','#ffff00','#7fff00','#00ff00','#00ff7f','#00ffff','#007fff','#0000ff','#7f00ff','#ff00ff','#ff007f',
+      '#bf0000','#bf5f00','#bfbf00','#5fbf00','#00bf00','#00bf5f','#00bfbf','#005fbf','#0000bf','#5f00bf','#bf00bf','#bf005f',
+      '#8f0000','#8f3f00','#8f8f00','#3f8f00','#008f00','#008f3f','#008f8f','#003f8f','#00008f','#3f008f','#8f008f','#8f003f',
+      '#5f0000','#5f1f00','#5f5f00','#1f5f00','#005f00','#005f1f','#005f5f','#001f5f','#00005f','#1f005f','#5f005f','#5f001f',
+      '#2f0000','#2f0f00','#2f2f00','#0f2f00','#002f00','#002f0f','#002f2f','#000f2f','#00002f','#0f002f','#2f002f','#2f000f'
+    ],
+    onChangeColor: function(color) {
+      $('#colorPicker').val(color);
+      $('#colorPicker').css('background-color', color);
+    }
+  });
+  $('#colorPicker').on('keyup', function(e) {
+    var color = $(this).val();
+    if (color.match(/^\#[a-f0-9]{6}$/)) {
+      $(this).css('background-color', color);
+    }
+  });
+  $('#colorPicker').keyup();
+});
+//]]>
+</script>

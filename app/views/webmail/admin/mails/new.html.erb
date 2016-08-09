@@ -1,0 +1,71 @@
+<div id="mailFormContainer">
+<table id="webmailContainer"><tr><td id="webmailContent"><div id="mailContent" style="padding: 0px 10px;">
+
+<%= form_for :item, html: { style: 'display: none;' } do |f| %>
+<%= text_field_tag :original_to, @item.in_to %>
+<%= text_field_tag :original_cc, @item.in_cc %>
+<%= text_field_tag :original_bcc, @item.in_bcc %>
+<%= text_area_tag :original_subject, @item.in_subject %>
+<%= text_area_tag :original_body, @item.in_body %>
+<%= text_area_tag :original_html_body, @item.in_html_body %>
+<%= text_field_tag :original_format, @item.in_format %>
+<% end %>
+
+<%= error_messages_for 'item' %>
+
+<%= form_for :item, url: { action: mail_form_action, id: params[:id] },
+  html: { id: 'item_form', method: mail_form_method, multipart: true } do |f| %>
+
+<% if false %>
+<%= hidden_field_tag :remain_draft, 1 %>
+<% end %>
+
+<div class="mailFormMenu">
+  <div class="mailSubmitters" style="float: left;">
+    <div class="submitters">
+      <input type="button" value="送信する" id="commit_send1" name="commit_send" class="send" />
+      <input type="button" value="下書き保存" id="commit_draft1" name="commit_draft" class="draft" />
+      <input type="button" value="破棄する" id="commit_destroy1" name="commit_destroy" class="destroy" />
+    </div>
+  </div>
+</div>
+
+<div>
+<%= render 'form', f: f %>
+</div>
+
+<div class="mailSubmitters">
+  <div class="submitters">
+    <input type="button" value="送信する" id="commit_send2" name="commit_send" class="send" />
+    <input type="button" value="下書き保存" id="commit_draft2" name="commit_draft" class="draft" />
+    <input type="button" value="破棄する" id="commit_destroy2" name="commit_destroy" class="destroy" />
+  </div>
+</div>
+
+<% end %>
+
+<% if Joruri.config.application['webmail.show_gw_schedule_link'] == 1 %>
+  <%= form_tag '/_admin/sso', method: :post, id: 'scheduleForm', target: "scheduleWindow_#{Core.now.gsub(/[\W]/, '')}", style: 'display:none;' do %>
+    <%= hidden_field_tag :to, 'gw' %>
+    <%= hidden_field_tag :path, '/gw/schedules/new', id: 'schedule_path' %>
+    <%= hidden_field_tag 'item[title]', '', id: 'schedule_title'  %>
+    <%= hidden_field_tag 'item[memo]', '', id: 'schedule_memo'  %>
+  <% end %>
+<% end %>
+
+</div><!-- end #webmailContainer --></td></table>
+<!-- end #mailFormContainer --></div>
+
+<%= render 'webmail/admin/mails/form/status' %>
+<script type="text/javascript">
+//<![CDATA[
+$(function() {
+  $('input[name="commit_send"], input[name="commit_draft"]').on('click', function() {
+    checkServerStatus(this);
+  });
+  $('input[name="commit_destroy"]').on('click', function() {
+    submitMailForm(this);
+  });
+});
+//]]>
+</script>

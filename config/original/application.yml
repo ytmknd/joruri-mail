@@ -1,0 +1,25 @@
+sys:
+  # セッション保持期限（H）
+  session_expiration: 24
+  # 携帯向けセッション保持期限（H）
+  session_expiration_for_mobile: 1
+  # PCサイト/携帯サイト強制表示
+  force_site: ''
+
+webmail:
+  # メールボックス容量警告使用割合
+  mailbox_quota_alert_rate: 0.85
+  # 添付ファイル最大サイズ（MB）
+  attachment_file_max_size: 5
+  # 組織アドレス帳/LDAPユーザーのみ表示
+  show_only_ldap_user: 0
+  # フィルター条件最大登録件数
+  filter_condition_max_count: 100
+  # フィルター1回あたりの最大処理メール件数
+  filter_max_mail_count_at_once: 500
+  # メール送信先履歴最大保持件数
+  mail_address_history_max_count: 200
+  # 切替ユーザー最大登録件数
+  switch_user_max_count: 5
+  # Gwスケジュール連携リンク表示
+  show_gw_schedule_link: 0

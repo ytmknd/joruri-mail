@@ -1,0 +1,58 @@
+<table id="webmailContainer"><tr><td id="webmailMenu">
+<div id="webmailMenuContainer">
+
+<%= render "upper_menu" %>
+
+</div>
+</td><td id="webmailContent"><div id="toolContent">
+
+<p class="form">一括削除</p>
+<%= error_messages_for :item %>
+<%= form_for @item, as: :item, url: { action: :batch_delete }, html: { id: 'batchDeleteForm' } do |f| %>
+<table class="show">
+  <tr>
+    <th>アカウント</th>
+    <td><%= "#{Core.current_user.name}（#{Core.current_user.account}）" %></td>
+  </tr>
+  <tr>
+    <th>対象フォルダー</th>
+    <td>
+      <%= f.select :mailbox_id, options_for_select(
+        [["全てのフォルダー", 0]] + @mailboxes.select(&:batch_deletable_box?).map { |box| [box.slashed_title, box.id] }, @item.mailbox_id.to_i) %>
+    </td>
+  </tr>
+  <tr>
+    <th>削除開始日</th>
+    <td><%= f.text_field :start_date, class: 'datepicker' %></td>
+  </tr>
+  <tr>
+    <th>削除終了日</th>
+    <td><%= f.text_field :end_date, class: 'datepicker' %></td>
+  </tr>
+  <tr>
+    <th>スター付きメール</th>
+    <td><%= f.check_box :include_starred %><%= f.label :include_starred, 'スター付きメールを削除する' %></td>
+  </tr>
+</table>
+<br />
+<div class="submitters">
+  <%= submit_tag '一括削除する' %>
+</div>
+<% end %>
+
+</div><!-- end #webmailContainer --></td></table>
+
+<script type="text/javascript">
+//<![CDATA[
+$(function() {
+  $('input.datepicker').datepicker();
+  $('#batchDeleteForm').on('submit', function() {
+    if (confirm('ごみ箱に移動せず、直接削除します。\n（元に戻すことはできません）')) {
+      return true;
+    } else {
+      return false;
+    }
+  });
+});
+//]]>
+</script>

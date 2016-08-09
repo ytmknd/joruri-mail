@@ -1,4 +1,3 @@
-# encoding: utf-8
 module Sys::Controller::Scaffold::Base
   def edit
     show
@@ -9,6 +8,7 @@ protected
     respond_to do |format|
       format.html { render }
       format.xml  { render :xml => items.to_xml(:dasherize => false, :root => 'items') }
+      format.json { render :json => items.to_json }
     end
   end
   
@@ -17,7 +17,8 @@ protected
     respond_to do |format|
       format.html { render }
       format.xml  { render :xml => item.to_xml(:dasherize => false, :root => 'item') }
-      format.js { render }
+      format.js   { render }
+      format.json { render :json => item.to_json }
     end
   end
   
@@ -30,12 +31,14 @@ protected
       respond_to do |format|
         format.html { redirect_to options[:location] }
         format.xml  { render :xml => item.to_xml(:dasherize => false), :status => status, :location => url_for(:action => :index) }
+        format.json { render :json => item.to_json, :status => status, :location => url_for(:action => :index) }
       end
     else
       flash.now[:notice] = '登録処理に失敗しました。'
       respond_to do |format|
         format.html { render :action => :new }
         format.xml  { render :xml => item.errors, :status => :unprocessable_entity }
+        format.json { render :json => item.errors.full_messages, :status => :unprocessable_entity }
       end
     end
   end
@@ -48,12 +51,14 @@ protected
       respond_to do |format|
         format.html { redirect_to options[:location] }
         format.xml  { head :ok }
+        format.json { head :ok }
       end
     else
       flash.now[:notice] = '更新処理に失敗しました。'
       respond_to do |format|
         format.html { render :action => :edit }
         format.xml  { render :xml => item.errors, :status => :unprocessable_entity }
+        format.json { render :json => item.errors.full_messages, :status => :unprocessable_entity }
       end
     end
   end
@@ -66,12 +71,14 @@ protected
       respond_to do |format|
         format.html { redirect_to(options[:location]) }
         format.xml  { head :ok }
+        format.json { head :json }
       end
     else
       flash.now[:notice] = '削除処理に失敗しました。'
       respond_to do |format|
         format.html { render :action => :show }
         format.xml  { render :xml => item.errors, :status => :unprocessable_entity }
+        format.json { render :json => item.errors.full_messages, :status => :unprocessable_entity }
       end
     end
   end

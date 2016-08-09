@@ -1,15 +1,30 @@
 module Sys::Model::Tree
-  def parents_tree(options = {})
-    climb_parents_tree(id, :class => self.class)
+  extend ActiveSupport::Concern
+
+  included do
+    belongs_to :parent, class_name: name
+    has_many :children, class_name: name, foreign_key: :parent_id, dependent: :destroy
+    scope :roots, -> { where(parent_id: [0, nil]) }
   end
-  
-private
-  def climb_parents_tree(id, options = {})
-    tree = []
-    while current = options[:class].find_by_id(id)
-      tree.unshift(current)
-      id = current.parent_id
-    end
-    return tree
+
+  def ancestors(items = [])
+    parent.ancestors(items) if parent
+    items << self
+  end
+
+  def descendants(items = [], &block)
+    items << self
+    rel = children
+    rel = yield(rel) || rel if block_given?
+    rel.each {|c| c.descendants(items, &block) }
+    items
+  end
+
+  def ancestors_and_children
+    (ancestors + children).uniq
+  end
+
+  def root?
+    parent_id == nil || parent_id == 0
   end
 end

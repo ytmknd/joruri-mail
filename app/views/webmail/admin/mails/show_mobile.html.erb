@@ -1,0 +1,126 @@
+<div class="mailboxTitle">
+  <%= link_to @mailbox.title, { action: :index, mobile: :list, page: 1 }, class: "link" %>
+</div>
+<div class="header">
+<div class="headerTitle">
+  <%= @item.subject %>
+  <% if @item.has_attachments? %>
+  <img src="/_common/themes/admin/gw/webmail/mobile/images/clip-lightblue.jpg" alt="[有]" />
+  <% end %>
+  <%= render 'webmail/admin/mails/shared/label', labels: @item.labels, label_confs: @conf.mail_labels %>
+  <%= link_to image_tag(mail_star_image_path(@item)), { action: :star, id: @item.uid, from: :show } %>
+</div>
+<div class="showItem">
+  <font class="field">送信者</font>
+  <font class="value"><%= mail_text_wrap(omit_from_address_in_mail_list(@item.friendly_from_addr)[0], 1000) %></font>
+</div>
+<div class="showItem">
+  <font class="field"><%= @item.draft? ? '保存日時' : '送信日時' %></font>
+  <font class="value"><%= @item.date %></font>
+</div>
+<div class="showItem">
+  <font class="field">宛先</font>
+  <font class="value"><%=raw omit_from_addresses_in_mail_list(@item.friendly_to_addrs, auto_link: true) %></font>
+</div>
+<% if @item.friendly_cc_addrs.present? %>
+<div class="showItem">
+  <font class="field">Cc</font>
+  <font class="value"><%=raw omit_from_addresses_in_mail_list(@item.friendly_cc_addrs, auto_link: true) %></font>
+</div>
+<% end %>
+<% if @item.friendly_bcc_addrs.present? %>
+<div class="showItem">
+  <font class="field">Bcc</font>
+  <font class="value"><%=raw omit_from_addresses_in_mail_list(@item.friendly_bcc_addrs, auto_link: true) %></font>
+</div>
+<% end %>
+</div>
+
+<% if @item.disposition_notification_mail? %>
+<div class="mdn">
+<div class="message">このメールは <%= @item.friendly_from_addr %> により送信された開封確認のメールです。</div>
+</div>
+<% end %>
+
+<div class="body">
+  <div id="inlineContents">
+  <% @item.inline_contents.each_with_index do |inline, idx| %>
+    <div id="inlineContent_<%= inline.seqno %>" class="<%= 'inlineContent' if idx > 0 %>">
+      <% if @conf.html_mail_view == 'html' && inline.display_as_html? %>
+        <div id="htmlPreview_<%= inline.seqno %>"><%=raw inline.html_body %></div>
+      <% else %>
+        <div id="textBody_<%= inline.seqno %>" class="autoWrap mailBodyText">
+          <%= mail_text_wrap(inline.text_body, 1000, auto_link: true) %>
+        </div>
+      <% end %>
+    </div>
+  <% end %>
+  </div>
+  <% if mail_mdn_dipslay?(@item, @mailbox) %>
+    <div id="mdnSent" class="recipientConfirm">[開封確認メッセージを送信]</div>
+  <% end %>
+</div>
+
+<% if @item.has_attachments? %>
+<div class="attachmentFile">
+<div class="title"><img src="/_common/themes/admin/gw/webmail/mobile/images/clip-glay.jpg" alt="[有]" />添付ファイル</div>
+<% if (message = mail_form_download_message).present? %>
+<div class="attention">
+  <%= message %>
+</div>
+<% end %>
+<div class="files">
+<% @item.attachments.each do |at| %>
+  <div class="file"><%= link_to_if attachment_file_downloadable?, h("#{at.name}"), { action: :download, download: at.seqno, size: at.size },
+    target: (at.image? ? '_blank' : nil), class: at.css_class %> (<%= h("#{at.eng_unit.gsub(/Bytes/,'B')}") %>)</div>
+<% end %>
+</div>
+</div>
+<% end %>
+
+<% if @item.mdn_request_mode == :manual && !@item.draft? && !@mailbox.sent_box? %>
+<div class="mdnMenu">
+<div class="title">開封確認</div>
+<div class="message">メール送信者は開封確認を要求しています。開封確認のメールを送信しますか？</div>
+<%= form_for :item, url: { action: :send_mdn }, html: { id: 'mail', name: 'mdnForm', class: 'mdnForm' } do |f| %>
+  <%= hidden_field_tag :mobile, 1 %>
+  <%= submit_tag '送信', name: 'send', class: 'menuItem' %>
+<% end %>
+</div>
+<% end %>
+
+<div class="replyMenu">
+<div class="title"><img src="/_common/themes/admin/gw/webmail/mobile/images/reply-menu-lightblue.jpg" alt="返信メニュー"/>返信メニュー</div>
+<div class="menuItem"><%= link_to '送信者に返信', { action: :answer }, class: 'menuItemLink', accesskey: '1' %></div>
+<% if false %>
+<div class="menuItem"><%= link_to '送信者に返信（引用有り）', { action: :answer, qt: 1 }, class: 'menuItemLink', accesskey: '2' %></div>
+<% end %>
+<div class="menuItem"><%= link_to '全員に返信', { action: :answer, all: 1 }, class: 'menuItemLink', accesskey: '3' %></div>
+<% if false %>
+<div class="menuItem"><%= link_to '全員に返信（引用有り）', { action: :answer, all: 1, qt: 1 }, class: 'menuItemLink', accesskey: '4' %></div>
+<% end %>
+<div class="menuItem"><%= link_to '転送', { action: :forward }, class: 'menuItemLink', accesskey: '5' %></div>
+</div>
+
+<div class="managementMenu">
+<div class="title"><img src="/_common/themes/admin/gw/webmail/mobile/images/manage-menu-lightblue.jpg" alt="管理メニュー"/>管理メニュー</div>
+<%= form_for :item, url: { action: :mobile_manage, id: @item.uid }, html: { id: 'managementForm', name: 'managementForm', class: 'managementForm' } do |f| %>
+<input type="hidden" name="item[ids][<%= @item.uid %>]" value="1" />
+<% if @item.draft? %>
+  <%= submit_tag '編集', name: 'mobile_edit', class: 'menuItem' %>
+	<%= submit_tag '削除', name: 'mobile_delete', class: 'menuItem' %>
+<% else %>
+  <%= submit_tag '編集', name: 'mobile_edit', class: 'menuItem' if @mailbox.sent_box? %>
+  <%= submit_tag '移動', name: 'mobile_move', class: 'menuItem' %>
+  <%= submit_tag 'コピー', name: 'mobile_copy', class: 'menuItem' %>
+  <%= submit_tag '削除', name: 'mobile_delete', class: 'menuItem' %>
+<% end %>
+<% end %>
+</div>
+
+<div class="pagination">
+  <%= render 'webmail/admin/mails/show/pagination' %>
+  <br />
+</div>
+
+<div class="link"><%= link_to '一覧へ戻る', { action: :index, mobile: :list }, class: 'link' %></div>

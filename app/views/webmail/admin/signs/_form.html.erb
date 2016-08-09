@@ -1,0 +1,18 @@
+<%= f.error_messages %>
+
+<table class="show">
+  <tr>
+    <th><%= @item.class.human_attribute_name :name %></th>
+    <td><%= f.text_field :name, class: 'title' %></td>
+  </tr><tr>
+    <th><%= @item.class.human_attribute_name :body %></th>
+    <td><%= f.text_area :body, class: 'body' %></td>
+  </tr><tr>
+    <th><%= @item.class.human_attribute_name :default_flag %></th>
+    <td><%= f.collection_radio_buttons :default_flag, @item.class.default_flag.options, :last, :first %></td>
+  </tr>
+</table>
+
+<div class="submitters">
+  <%= f.submit %>
+</div>

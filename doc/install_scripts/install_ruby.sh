@@ -1,10 +1,7 @@
 #!/bin/bash
 DONE_FLAG="/tmp/$0_done"
 
-RUBY_VERSION='ruby-1.9.2-p290'
-RUBY_SOURCE_URL="http://cache.ruby-lang.org/pub/ruby/1.9/$RUBY_VERSION.tar.bz2"
-
-echo "#### Install $RUBY_VERSION ####"
+echo "#### Install Ruby ####"
 if [ -f $DONE_FLAG ]; then exit; fi
 echo '-- PRESS ENTER KEY --'
 read KEY
@@ -16,28 +13,23 @@ ubuntu() {
 centos() {
   echo "It's CentOS!"
 
-  yum install -y wget gcc-c++ patch libyaml-* libjpeg-devel libpng-devel librsvg2-devel ghostscript-devel curl-devel libevent libevent-devel openssl openssl-devel 
+  yum install -y make gcc-c++ bzip2 openssl-devel libyaml-devel libffi-devel readline-devel zlib-devel gdbm-devel ncurses-devel
 
-  cd /usr/local/src
-  rm -rf $RUBY_VERSION.tar.bz2 $RUBY_VERSION
-  wget $RUBY_SOURCE_URL
-  tar jxf $RUBY_VERSION.tar.bz2
+  git clone git://github.com/sstephenson/rbenv.git /usr/local/rbenv
+  git clone git://github.com/sstephenson/ruby-build.git /usr/local/rbenv/plugins/ruby-build
 
-  # patch
-  yum install -y patch
-  cd /usr/local/src/ruby-1.9.2-p290/ext/openssl/
-  wget http://joruri.org/download/jorurimail/ruby1.9.2-p290-ossl_pkey_ec.patch
-  patch < ruby1.9.2-p290-ossl_pkey_ec.patch
+  echo 'export RBENV_ROOT="/usr/local/rbenv"' >> /etc/profile.d/rbenv.sh
+  echo 'export PATH="${RBENV_ROOT}/bin:${PATH}"' >> /etc/profile.d/rbenv.sh
+  echo 'eval "$(rbenv init -)"' >> /etc/profile.d/rbenv.sh
+  . /etc/profile.d/rbenv.sh
 
-  # ruby make install
-  cd /usr/local/src
-  cd $RUBY_VERSION && ./configure && make && make install
+  rbenv install 2.3.1
+  rbenv global 2.3.1
+  rbenv rehash
+  ruby -v
 
-  # rubygems
-  gem install rubygems-update -v 1.6.2
-  update_rubygems
-
-  gem install rails -v 3.0.0
+  # bundler
+  gem install bundler -v 1.11.2
 }
 
 others() {

@@ -1,0 +1,10 @@
+<%
+case params[:mobile].to_s
+when 'top'
+  concat render 'webmail/admin/mails/index/top'
+when 'maintenance'
+  concat render 'webmail/admin/mails/index/maintenance'
+else
+  concat render 'webmail/admin/mails/index/list'
+end  
+%>

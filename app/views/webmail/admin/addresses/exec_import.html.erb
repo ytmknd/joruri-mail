@@ -1,0 +1,70 @@
+<table id="webmailContainer"><tr><td id="webmailMenu">
+<div id="webmailMenuContainer">
+<%= render 'upper_menu' %>
+<%= render 'lower_menu' %>
+</div>
+</td><td id="webmailContent"><div id="addressContent">
+
+<table class="show countAddresses">
+  <tr>
+    <th>インポートに成功したアドレス</th>
+    <td><%= @success_items.size %> 件</td>
+  </tr>
+  <tr>
+    <th>インポートに失敗したアドレス</th>  
+    <td><%= @error_items.size %> 件</td>
+  </tr>
+</table>
+
+<div class="actionMenu">
+  <%= link_to 'インポートに成功したアドレスを表示', '#successAddresses' %>
+  <%= link_to 'インポートに失敗したアドレスを表示', '#errorAddresses' %>
+</div>
+
+<div id="successAddresses">
+  <p class="form">インポートに成功したアドレス</p>
+  <table class="index">
+    <tr>
+      <th style="width: 30%;">名前</th>
+      <th>メールアドレス</th>
+    </tr>
+    <% @success_items.each do |item| %>
+      <tr <%= cycle '', 'class="cycle"' %>>
+        <td><%= item.name %></td>
+        <td><%= item.email %></td>
+      </tr>
+    <% end %>
+  </table>
+</div>
+
+<div id="errorAddresses" style="display:none">
+  <p class="form">インポートに失敗したアドレス</p>
+  <table class="index">
+    <tr>
+      <th style="width: 30%;">名前</th>
+      <th>メールアドレス</th>
+      <th>エラー内容</th>
+    </tr>
+    <% @error_items.each do |item| %>
+      <tr <%= cycle '', 'class="cycle"' %>>
+        <td><%= item.name %></td>
+        <td><%= item.email %></td>
+        <td><%= item.errors.full_messages.to_a.join(', ') %></td>
+      </tr>
+    <% end %>
+  </table>
+</div>
+
+</div><!-- end #webmailContainer --></td></table>
+
+<script type="text/javascript">
+//<![CDATA[
+$(function() {
+  $('a[href="#successAddresses"], a[href="#errorAddresses"]').on('click', function() {
+    $('#successAddresses, #errorAddresses').hide();
+    $($(this).attr('href')).show();
+    return false;
+  });
+});
+//]]>
+</script>

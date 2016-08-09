@@ -1,0 +1,35 @@
+﻿Date: Tue, 19 Apr 2011 10:08:34 +0900
+From: admin@localhost
+To: admin@localhost
+Subject: =?UTF-8?B?5re75LuY44OV44Kh44Kk44Or5ZCN44Gu44Ko44Oz44Kz44O844OJ54Sh44GX?=
+Mime-Version: 1.0
+Content-Type: multipart/mixed;
+ boundary="--==_mimepart_4dace091d4941_d1547929fe838cf";
+ charset=utf-8
+Content-Transfer-Encoding: 8bit
+
+
+----==_mimepart_4dace091d4941_d1547929fe838cf
+Date: Tue, 19 Apr 2011 10:08:34 +0900
+Mime-Version: 1.0
+Content-Type: text/plain;
+ charset=utf-8
+Content-Transfer-Encoding: 8bit
+
+
+admin@localhost
+
+
+----==_mimepart_4dace091d4941_d1547929fe838cf
+Date: Tue, 19 Apr 2011 10:08:34 +0900
+Mime-Version: 1.0
+Content-Type: application/octet-stream;
+ name="テスト"
+Content-Transfer-Encoding: base64
+Content-Disposition: attachment;
+ filename="テスト"
+
+AAAAAAA=
+
+
+----==_mimepart_4dace091d4941_d1547929fe838cf--

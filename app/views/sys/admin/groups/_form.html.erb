@@ -1,48 +1,32 @@
+<%= f.error_messages %>
+
 <p class="form">基本情報</p>
 
 <table class="show">
   <tr>
-    <th><%= @item.locale(:state) %></th>
-    <td><%= f.radio_buttons :state, @item.states, :class => 'status' %></td>
+    <th><%= @item.class.human_attribute_name :state %></th>
+    <td><%= f.collection_radio_buttons :state, @item.states, :last, :first, class: 'status' %></td>
   </tr><tr>
-    <th><%= @item.locale(:parent_id) %></th>
-    <td><%= f.select :parent_id, @item.candidate(true) %></td>
+    <th><%= @item.class.human_attribute_name :parent_id %></th>
+    <td><%= f.select :parent_id, @item.root? ? [['', 0]] : Sys::Group.select_options_except(@item) %></td>
   </tr><tr>
-    <th><%= @item.locale(:code) %></th>
-    <td><%= f.text_field :code, :class => 'id' %></td>
+    <th><%= @item.class.human_attribute_name :code %></th>
+    <td><%= f.text_field :code, class: 'id' %></td>
   </tr><tr>
-    <th><%= @item.locale(:name) %></th>
-    <td><%= f.text_field :name, :class => 'name' %></td>
+    <th><%= @item.class.human_attribute_name :name %></th>
+    <td><%= f.text_field :name, class: 'name' %></td>
   </tr><tr>
-    <th><%= @item.locale(:name_en) %></th>
-    <td><%= f.text_field :name_en, :class => 'nameEn' %></td>
+    <th><%= @item.class.human_attribute_name :name_en %></th>
+    <td><%= f.text_field :name_en, class: 'nameEn' %></td>
   </tr><tr>
-    <th><%= @item.locale(:ldap) %></th>
-    <td><%= f.radio_buttons :ldap, @item.ldap_states, :class => 'status' %></td>
+    <th><%= @item.class.human_attribute_name :ldap %></th>
+    <td><%= f.collection_radio_buttons :ldap, @item.ldap_states, :last, :first, class: 'status' %></td>
   </tr><tr>
-    <th><%= @item.locale(:sort_no) %></th>
-    <td><%= f.text_field :sort_no, :class => 'number' %></td>
+    <th><%= @item.class.human_attribute_name :sort_no %></th>
+    <td><%= f.text_field :sort_no, class: 'number' %></td>
   </tr>
 </table>
 
-<% if false %>
-<br /><p class="form">Web公開</p>
-
-<table class="show">
-  <tr>
-    <th><%= @item.locale(:web_state) %></th>
-    <td><%= f.radio_buttons :web_state, @item.web_states, :class => 'status' %></td>
-  </tr>
-  <%= layout_form f, :container => :tr %>
-  <tr>
-    <th><%= @item.locale(:email) %></th>
-    <td><%= f.text_field :email, :class => 'email' %></td>
-  </tr><tr>
-    <th><%= @item.locale(:tel) %></th>
-    <td><%= f.text_field :tel, :class => 'number' %></td>
-  </tr><tr>
-    <th><%= @item.locale(:outline_uri) %></th>
-    <td><%= f.text_field :outline_uri, :class => 'url' %></td>
-  </tr>  
-</table>
-<% end %>
+<div class="submitters">
+  <%= f.submit %>
+</div>

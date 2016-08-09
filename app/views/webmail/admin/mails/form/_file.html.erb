@@ -1,0 +1,179 @@
+<table style="width: 100%;">
+  <tr>
+    <td>
+      <div id="jqueryFileUploader" style="display: none;">
+        <%= file_field_tag 'file', multiple: true, id: 'fileupload', style: 'display: none;' %>
+        <label for="fileupload" class="labelButton">ファイル選択...</label>
+        <label id="cancelUploads" class="labelButton">キャンセル</label>
+      </div>
+      <div id="defaultUploader" style="display: none;">
+        <%= f.file_field :in_files, name: 'item[in_files][]', size: 90, style: 'width: 300px;', class: 'file', multiple: true %><br />
+        <input type="button" value="選択したファイルを添付" id="commit_file" name="commit_file" style="display: none;" />
+      </div>
+    </td>
+    <td style="vertical-align: bottom;">
+      <%= yield %>
+    </td>
+  </tr>
+</table>
+
+<div id="uploadedFiles">
+  <span id="dropZoneNotice" class="dropZoneNotice"></span>
+</div>
+<script id="uploadedFilesTemplate" type="text/x-jsrender">
+  <span class="uploadedFile" id="uploadedFile{{:id}}">
+    {{if image_is == 1}}
+      <a href="<%= webmail_mail_attachments_path %>/{{:id}}?tmp_id={{:tmp_id}}" class="uploadedFileName {{:css_class}}" target="_blank">{{>title}}</a>
+    {{else}}
+      <a href="<%= webmail_mail_attachments_path %>/{{:id}}?tmp_id={{:tmp_id}}" class="uploadedFileName {{:css_class}}">{{>title}}</a>
+    {{/if}}
+    <a href="#deleteUploadedFile" data-id="{{:id}}" class="deleteUploadedFile" title="削除">x</a>
+    <input type="hidden" value="{{:id}}" name="item[tmp_attachment_ids][]">
+  </span>
+</script>
+
+<div id="fileUploaderProgress"></div>
+<script id="fileUploaderProgressTemplate" type="text/x-jsrender">
+  <div class="progressWrapper">
+    <div class="progressContainer">
+      <div class="progressBarInProgress"></div>
+      <div class="progressBarName">{{>name}}</div>
+      <div class="progressBarStatus">uploading...</div>
+    </div>
+  </div>
+</script>
+
+<%
+attachment_file_max_size = Joruri.config.application['webmail.attachment_file_max_size']
+%>
+<script type="text/javascript">
+//<![CDATA[
+$(function() {
+  var tmp_attachments = <%=
+    @item.tmp_attachments.map { |at|
+      mail_attachment_view_model(at, tmp_id: @item.tmp_id)
+    }.to_json.html_safe
+  %>
+  $('#uploadedFiles').append( $('#uploadedFilesTemplate').render(tmp_attachments) );
+
+  $('#jqueryFileUploader').show();
+  if ('draggable' in document.createElement('span')) {
+    $('#dropZoneNotice').text('（ここにファイルをドロップできます）');
+  }
+
+  var jqXHR = [];
+  $('#fileupload').fileupload({
+    url: '<%= webmail_mail_attachments_path %>',
+    type: 'post',
+    dataType: 'html', // for IE9 + jquery-file-uploader
+    formData: {
+      //authenticity_token: '<%= form_authenticity_token %>',
+      tmp_id: '<%= @item.tmp_id %>',
+    },
+    dropZone: $('#uploadedFiles'),
+    sequentialUploads: true,
+    minFileSize: 1,
+    maxFileSize: <%= attachment_file_max_size %> * 1024 * 1024,
+    messages: {
+      maxFileSize: 'ファイルサイズが大きすぎます。',
+      minFileSize: 'ファイルサイズが小さすぎます。'
+    }
+  })
+  .on('fileuploadadd', function(e, data) {
+    var opts = { name: data.files ? data.files[0].name : '' }
+    data.context = $( $('#fileUploaderProgressTemplate').render(opts) ).appendTo('#fileUploaderProgress');
+  })
+  .on('fileuploaddone', function(e, data) {
+    var result = $.parseJSON(data.result);
+    if (result.status == 'OK') {
+      $('#uploadedFiles').append( $('#uploadedFilesTemplate').render(result) );
+    } else {
+      alert(result.message);
+    }
+  })
+  .on('fileuploadalways', function(e, data) {
+    data.context.hide('slow');
+  })
+  .on('fileuploadprogress', function(e, data) {
+    var rate = parseInt(data.loaded / data.total * 100);
+    data.context.find('.progressBarInProgress').css('width', rate + '%');
+  })
+  .on('fileuploadprocessdone', function(e, data) {
+    jqXHR.push(data.submit());
+  })
+  .on('fileuploadprocessfail', function(e, data) {
+    var file = data.files[data.index];
+    if (file) {
+      alert(file.name + '：' + file.error);
+      data.context.hide('slow');
+    }
+  });
+
+  $('#cancelUploads').on('click', function(e) {
+    $.each(jqXHR, function(i, xhr) {
+      if (xhr) { xhr.abort(); }
+    });
+    jqXHR = [];
+  });
+
+  $(document).on('drop dragover', function (e) {
+    e.preventDefault();
+  })
+  .on('dragover', function(e) {
+    var dropZone = $('#uploadedFiles');
+    var timeout = window.dropZoneTimeout;
+    if (timeout) {
+      clearTimeout(timeout);
+    }
+    if (e.target.id == 'uploadedFiles' || $(e.target).parents('#uploadedFiles').length) {
+      dropZone.addClass('hover');
+    } else {
+      dropZone.removeClass('hover');
+    }
+    window.dropZoneTimeout = setTimeout(function () {
+      window.dropZoneTimeout = null;
+      dropZone.removeClass('hover');
+    }, 200);
+  });
+
+  $(document).on('click', 'a[href="#deleteUploadedFile"]', function() {
+    var id = $(this).attr('data-id');
+    $.post('<%= webmail_mail_attachments_path %>/' + id, {
+      _method: 'delete',
+      authenticity_token: '<%= form_authenticity_token %>',
+      tmp_id: '<%= @item.tmp_id %>'
+    })
+    .done(function() {
+      $('#uploadedFile' + id).remove();
+    });
+    return false;
+  })
+  .on('click', 'a.uploadedFileName', function() {
+    if ($(this).attr('target') == '_blank') return;
+    var beforeUnloadFunc = window.onbeforeunload;
+    window.onbeforeunload = function() {
+      window.onbeforeunload = beforeUnloadFunc;
+    };
+    window.location.href = this.href;
+    return false;
+  });
+
+  $('#item_in_files').on('change', function() {
+    if (this.value == '') { return; }
+    if (this.files) {
+      var maxsize = <%= attachment_file_max_size %>;
+      if (this.files[0].size > maxsize*1024*1024) {
+        alert('ファイルサイズが容量制限（' + maxsize + ' MB）を超えています。');
+        return;
+      }
+    }
+    var opts = { name: this.files ? this.files[0].name : '' }
+    $('#fileUploaderProgress').append( $('#fileUploaderProgressTemplate').render(opts) );
+    $('#commit_file').click();
+  });
+  $('#commit_file').on('click', function() {
+    checkServerStatus(this);
+  });
+});
+//]]>
+</script>

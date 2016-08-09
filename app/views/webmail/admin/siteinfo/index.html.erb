@@ -1,0 +1,32 @@
+<div id="siteinfoContent">
+<table id="siteinfo" class="show">
+  <tr>
+    <th>接続先サーバー名</th>
+    <td><%= @host || request.server_name %></td>
+  </tr>
+  <tr>
+    <th>端末IPアドレス</th>
+    <td><%= request.env['HTTP_X_FORWARDED_FOR'] || request.remote_ip %></td>
+  </tr>
+</table>
+
+<script type="text/javascript">
+//<![CDATA[
+$(function() {
+  var props = [
+    ["ブラウザーコード名", navigator.appCodeName],
+    ["ブラウザー名", navigator.appName],
+    ["バージョン", navigator.appVersion],
+    ["プラットフォーム", navigator.platform],
+    ["ユーザーエージェント", navigator.userAgent]
+  ];
+  for (var i=0; i<props.length; i++) {
+    var tr = $("<tr>")
+      .append( $("<th>").html(props[i][0]) )
+      .append( $("<td>").html(props[i][1]) );
+    $("#siteinfo").append(tr);
+  }
+});
+//]]>
+</script>
+</div>

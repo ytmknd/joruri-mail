@@ -1,5 +1,5 @@
 class DefaultMailer < ActionMailer::Base
-  default :charset => "UTF-8"
+  default charset: "UTF-8"
   
 #  def send_message(msg)
 #    mail(

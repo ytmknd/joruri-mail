@@ -1,0 +1,125 @@
+ja:
+  activerecord:
+    attributes:
+      webmail/mailbox:
+        title: フォルダー名
+      webmail/address:
+        group_id: グループ 
+        name: 名前
+        email: メールアドレス
+        memo: メモ
+        kana: 名前フリガナ
+        company_name: 会社名
+        company_kana: 会社名フリガナ
+        official_position: 役職
+        company_tel: 電話番号（会社）
+        company_fax: ファクシミリ（会社）
+        company_zip_code: 郵便番号（会社）
+        company_address: 住所（会社）
+        tel: 電話番号（自宅）
+        fax: ファクシミリ（自宅）
+        zip_code: 郵便番号（自宅）
+        address: 住所（自宅）
+        mobile_tel: 携帯電話
+        uri: URL
+        sort_no: 並び順
+      webmail/address_group: 
+        parent_id: 親グループ
+        name: グループ名
+      webmail/sign: 
+        name: 署名タイトル
+        body: 内容
+        default_flag: 既定の署名
+        created_at: 作成日時
+        updated_at: 更新日時
+      webmail/filter: 
+        state: 状態
+        name: フィルター名
+        sort_no: 並び順
+        action: 動作
+        mailbox: 対象フォルダー
+        conditions_chain: 条件の結合
+        conditions: 条件
+        created_at: 作成日時
+        updated_at: 更新日時
+        target_mailbox: 適用するフォルダー
+      webmail/filter_condition: &filter_condition
+        column: 条件の適用対象
+        inclusion: 条件の演算子
+        value: 条件の値
+      webmail/filter/conditions:
+        <<: *filter_condition
+      webmail/template: 
+        name: テンプレート名
+        to: 宛先
+        cc: Cc
+        bcc: Bcc
+        subject: 件名
+        body: 本文
+        default_flag: 既定のテンプレート
+        created_at: 作成日時
+        updated_at: 更新日時
+      webmail/setting:
+        mobile_access: モバイルアクセス
+        mobile_password: モバイルパスワード
+        memo_body: 本文
+        updated_at: 更新日時
+      webmail/doc:
+        state: 状態
+        sort_no: 並び順
+        title: タイトル
+        body: 本文
+        created_at: 作成日時
+        updated_at: 更新日時
+        published_at: 公開日時
+
+  activemodel:
+    attributes:
+      webmail/mail:
+        in_from: 差出人
+        in_to: 宛先
+        in_to_addrs: 宛先
+        in_cc: Cc
+        in_cc_addrs: Cc
+        in_bcc: Bcc
+        in_bcc_addrs: Bcc
+        in_subject: 件名
+        in_body: 本文
+        in_html_body: 本文
+        in_format: 本文の形式
+        in_files: 添付ファイル
+        in_request_mdn: 開封確認
+      webmail/tool/batch_delete: 
+        mailbox_id: メールボックス
+        start_date: 削除開始日
+        end_date: 削除終了日
+
+  enumerize:
+    webmail/filter:
+      state:
+        enabled: 有効
+        disabled: 無効
+      action:
+        move: メールを移動する
+        delete: メールを削除する
+      conditions_chain:
+        and: 全ての条件に一致
+        or: いずれかの条件に一致
+    webmail/filter_condition:
+      column:
+        subject: 件名（Subject）
+        from: 差出人（From）
+        to: 宛先（To）
+      inclusion:
+        '<': に次を含む
+        '!<': に次を含まない
+        '==': が次と一致する
+        '=~': 正規表現
+    webmail/template:
+      default_flag:
+        set: 設定する
+        unset: 設定しない
+    webmail/sign:
+      default_flag:
+        set: 設定する
+        unset: 設定しない

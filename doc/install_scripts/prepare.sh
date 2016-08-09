@@ -1,6 +1,5 @@
 #!/bin/bash
 
-EPEL_RPM_URL="http://dl.fedoraproject.org/pub/epel/6/`uname -i`/epel-release-6-8.noarch.rpm"
 INSTALL_SCRIPTS_URL='https://raw.githubusercontent.com/joruri/joruri-mail/master/doc/install_scripts'
 # INSTALL_SCRIPTS_URL='https://raw.githubusercontent.com/joruri/joruri-mail/develop/doc/install_scripts'
 
@@ -13,8 +12,8 @@ ubuntu() {
 centos() {
   echo "It's CentOS6!"
 
-  rpm -ivh $EPEL_RPM_URL
-  yum install -y wget git
+  yum install -y epel-release
+  yum install -y wget git patch
 
   cd /usr/local/src
 
@@ -35,6 +34,9 @@ centos() {
   rm -f install_all.sh
   for file in ${files[@]}; do
     echo "./$file" >> install_all.sh
+    if [ $file = 'install_ruby.sh' ]; then
+      echo ". /etc/profile" >> install_all.sh
+    fi
   done
 cat <<'EOF' >> install_all.sh
 
@@ -45,17 +47,18 @@ echo "
   画面: `ruby -ryaml -e "puts YAML.load_file('/var/share/jorurimail/config/core.yml')['production']['uri']"`_admin
 
     管理者（システム管理者）
-    ユーザID   : admin
+    ユーザーID   : admin
     パスワード : admin
 
-１．MySQL の root ユーザはパスワードが pass に設定されています。適宜変更してください。
+１．MySQL の root ユーザーはパスワードが pass に設定されています。適宜変更してください。
     # mysqladmin -u root -prootpass password 'pass'
-２．MySQL の joruri ユーザはパスワードが pass に設定されています。適宜変更してください。
+２．MySQL の joruri ユーザーはパスワードが pass に設定されています。適宜変更してください。
     mysql> SET PASSWORD FOR joruri@localhost = PASSWORD('pass');
     また、変更時には /var/share/jorurimail/config/database.yml も合わせて変更してください。
     # vi /var/share/jorurimail/config/database.yml
-３．メールサーバとの接続設定を行ってください。
-    # vi /var/share/jorurimail/config/enviroments/production.rb
+３．メールサーバーの接続情報を設定してください。
+    # vi /var/share/jorurimail/config/smtp.yml
+    # vi /var/share/jorurimail/config/imap.yml
 ４．メールアカウントのドメインを設定してください。
     # vi /var/share/jorurimail/config/core.yml
 

@@ -343,6 +343,13 @@ form.search td input.email {
   background-image: url(../images/mailoption/star_on.gif);
   background-position: 5px 5px;
 }
+#webmailMenu .mailbox li.virtual a {
+  background-image: url(../images/tree/transmit_open.gif);
+}
+#webmailMenu .mailbox li.flagged a {
+  background-image: url(../images/mailoption/star_on.gif);
+  background-position: 5px 5px;
+}
 #webmailMenu .mailbox li.folder a {
   background-image: url(../images/tree/folder_close.gif);
 }
@@ -383,6 +390,19 @@ form.search td input.email {
   color: #00d;
   background-color: #bdf;
 }
+#webmailMenu .mailbox li .draggable {
+  cursor: move;
+  background-image: url(../images/ic_mail_drag.gif);
+  background-repeat: no-repeat;
+  background-position: 0 0;
+  position: absolute;
+  display: inline-block;
+  width: 4px;
+  height: 17px;
+  margin-top: 3px;
+  margin-left: -4px;
+}
+
 #webmailMenu .mailbox li a.editGroup { /* address */
   display: inline-block;
   overflow: hidden;
@@ -395,7 +415,6 @@ form.search td input.email {
   font-size: 0;
   line-height: normal;
 }
-
 #webmailMenu .addressTree li a {
   xposition: relative;
   margin-left: 13px;

@@ -1,0 +1,5 @@
+<%= error_messages_for @item %>
+
+<%= text_area_tag :memo_body, @item.value, rows: 10, cols: 34 %>
+
+<%= submit_tag '編集する', class: 'editMemo' %>

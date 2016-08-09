@@ -1,0 +1,6 @@
+<% label_confs = label_confs.index_by(&:id) %>
+<% labels.each do |label| %>
+  <% if conf = label_confs[label] %>
+    <span class="label" style="background-color: <%= conf.color %>"><%= conf.name %></span>
+  <% end %>
+<% end %>

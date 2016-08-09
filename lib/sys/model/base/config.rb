@@ -1,24 +1,20 @@
-# encoding: utf-8
 module Sys::Model::Base::Config
+  extend ActiveSupport::Concern
+
+  included do
+    scope :state_enabled, -> { where(state: 'enabled') }
+    scope :state_disabled, -> { where(state: 'disabled') }
+  end
+
   def states
     [['有効','enabled'],['無効','disabled']]
   end
-  
-  def enabled
-    self.and :state, 'enabled'
-    self
+
+  def enabled?
+    state == 'enabled'
   end
 
-  def disabled
-    self.and :state, 'disabled'
-    self
-  end
-  
-  def enabled?
-    return state == 'enabled'
-  end
-  
   def disabled?
-    return state == 'disabled'
+    state == 'disabled'
   end
 end

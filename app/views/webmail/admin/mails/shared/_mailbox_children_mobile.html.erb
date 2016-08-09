@@ -1,0 +1,22 @@
+<% mailboxes.each do |box| %>
+  <%
+    li_class = mailbox_list_class(box)
+    nm_class = mailbox_name_class(box, @mailbox)
+    mailbox_type = li_class == 'folder' && box.root? ? 'rootFolder' : li_class 
+  %>
+  <div class="<%= li_class %>">
+    <%= mailbox_mobile_image_tag(mailbox_type) %>
+    <%= link_to h(box.title), { action: :index, mailbox: box.name }, class: nm_class %>
+    <% if box.unseen > 0 %>
+      <font class="unseenNum">(<font class="num"><%= box.unseen %></font>)</font>
+    <% end %>
+    <% if box.trash_box?(:root) && (box.messages > 0 || box.children.length > 0) %>
+      <%= link_to '≫空にする', { action: :empty, mailbox: box.name }, class: 'empty' %>
+    <% end %>
+    <% if box.children.size > 0 %>
+      <div class="children level<%= box.level_no %>">
+        <%= render 'webmail/admin/mails/shared/mailbox_children', mailboxes: box.children %>
+      </div>
+    <% end %>
+  </div>
+<% end %>

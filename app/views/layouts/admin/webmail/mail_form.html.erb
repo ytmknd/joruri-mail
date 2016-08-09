@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=Edge">
+<%= csrf_meta_tag %>
+<link rel="shortcut icon" href="/_common/themes/admin/gw/images/other/favicon.ico">
+<title><%= Core.title %></title>
+<%= javascript_include_tag :application %>
+<%= javascript_include_tag '/_common/js/navigation.js' %>
+<%= stylesheet_link_tag '/_common/themes/admin/gw/webmail/style', media: 'all' %>
+<%= stylesheet_link_tag '/_common/themes/admin/gw/print', media: 'print' %>
+<%= yield :head %>
+</head>
+<body><a id="top" name="top"></a>
+<%
+if [:show, :move, :close].index(params[:action].to_sym)
+  style='min-width:770px;_width:expression(document.body.clientWidth < 775 ? "770px" : "auto")'
+else
+  container_size = mail_form_size(@mail_form_size)[:container]
+  style = "width:#{container_size}px;min-width:#{container_size}px;"
+end
+%>
+<div id="container" style="<%= style %>">
+
+<div id="main">
+
+<%= render 'layouts/admin/webmail/notice' %>
+<%= render 'layouts/admin/webmail/error' %>
+
+<div id="content">
+<div id="contentContainer">
+
+<div id="contentHeader">
+  <div id="contentTitle">
+    <span class="title">メール</span>
+    <span class="email"><%= Core.current_user.email if Core.current_user %></span>
+  </div>
+</div>
+
+<div id="contentBody">
+<%= yield  %>
+</div>
+
+<div id="contentFooter"></div>
+
+<!-- /#contentContainer --></div>
+<!-- /#content --></div>
+<!-- /#main --></div>
+<!-- /#container --></div>
+
+</body>
+</html>

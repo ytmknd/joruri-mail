@@ -1,4 +1,3 @@
-# encoding: utf-8
 class Sys::Lib::Mail::Inline
   attr_accessor :seqno
   attr_accessor :content_type
@@ -19,4 +18,7 @@ class Sys::Lib::Mail::Inline
     @attachment
   end
 
+  def display_as_html?
+    (alternative? && html_body.present?) || content_type == 'text/html'
+  end
 end

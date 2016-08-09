@@ -1,0 +1,23 @@
+<div id="mailboxes" class="mailboxes">
+  <table class="root">
+    <% @mailboxes.each_with_index do |box, idx| %>
+      <%
+        li_class = mailbox_list_class(box)
+        nm_class = mailbox_name_class(box, @mailbox)
+        unseenNum = box.unseen > 0 ? "(#{box.unseen})" : ''
+      %>
+      <tr class="<%= li_class %>">
+        <td>
+          <%= content_tag_if box.trash_box?(:root), :div do %> 
+            <%= content_tag_if box.unseen > 0, :b do %>
+              <%= link_to "#{h(box.title)}#{unseenNum}", { action: :index, mailbox: box.name }, class: nm_class %>
+            <% end %>
+            <% if box.trash_box?(:root) && (box.messages > 0 || box.children.length > 0) %>
+              <%= link_to '≫空にする', { action: :empty, mailbox: box.name }, class: 'empty', data: { confirm: '空にしてよろしいですか？' } %>
+            <% end %>
+          <% end %>
+        </td>
+      </tr>
+    <% end %>
+  </table>
+</div>

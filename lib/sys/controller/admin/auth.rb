@@ -1,16 +1,15 @@
-# coding: utf-8
 module Sys::Controller::Admin::Auth
   ACCOUNT_KEY = :sys_user_account
   PASSWD_KEY  = :sys_user_password
   @@current_user = false
-  
+
 protected
   def logged_in?
     if session[:expired_at] && session[:expired_at] < Time.now
       reset_session
       return false
     end
-    if request.mobile?
+    if request.mobile? || request.smart_phone?
       expiration = Joruri.config.application['sys.session_expiration_for_mobile']
     else
       expiration = Joruri.config.application['sys.session_expiration']
@@ -48,8 +47,10 @@ protected
   def current_user
     unless @@current_user
       return false if (!session[ACCOUNT_KEY] || !session[PASSWD_KEY])
-      unless user = Sys::User.authenticate(session[ACCOUNT_KEY], session[PASSWD_KEY], true)
-        return false
+      unless user = Sys::User.where(state: 'enabled', account: session[ACCOUNT_KEY]).first
+        unless user = Sys::User.authenticate(session[ACCOUNT_KEY], session[PASSWD_KEY], true)
+          return false
+        end
       end
       @@current_user = user
     end
@@ -146,7 +147,7 @@ protected
   # cookie and log the user back in if apropriate
   def login_from_cookie
     return unless cookies[:auth_token] && !logged_in?
-    user = Sys::User.find_by_remember_token(cookies[:auth_token])
+    user = Sys::User.find_by(remember_token: cookies[:auth_token])
     if user && user.remember_token?
       user.remember_me
       self.current_user = user

@@ -1,10 +1,10 @@
-# encoding: utf-8
 class Sys::Admin::RebootController < Sys::Controller::Admin::Base
+  def pre_dispatch
+    return error_auth unless Core.user.has_auth?(:manager)
+  end
+
   def index
-    f = File.open(File.join(::Rails.root.to_s, 'tmp/restart.txt'), 'w')
-    f.close
-    
-    skip_layout
-    render :action => 'index'
+    FileUtils.touch(Rails.root.join('tmp/restart.txt'))
+    render text: 'OK'
   end
 end

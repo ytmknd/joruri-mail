@@ -1,0 +1,33 @@
+Date: Wed, 16 Nov 2011 16:53:15 +0900
+From: adminlocalhost
+To: adminlocalhost
+Subject: Boundary Test
+Mime-Version: 1.0
+Content-Type: multipart/mixed;
+ Boundary="--==_mimepart_4ec36beae15fb_76e84eaa124579f";
+ charset=utf-8
+Content-Transfer-Encoding: 8bit
+
+
+----==_mimepart_4ec36beae15fb_76e84eaa124579f
+Date: Wed, 16 Nov 2011 16:53:15 +0900
+Mime-Version: 1.0
+Content-Type: text/plain;
+ charset=utf-8
+Content-Transfer-Encoding: 8bit
+
+Boundary Test
+
+----==_mimepart_4ec36beae15fb_76e84eaa124579f
+Date: Wed, 16 Nov 2011 16:53:15 +0900
+Mime-Version: 1.0
+Content-Type: application/octet-stream;
+ name=test.txt
+Content-Transfer-Encoding: base64
+Content-Disposition: attachment;
+ filename=test.txt
+
+IA==
+
+
+----==_mimepart_4ec36beae15fb_76e84eaa124579f--

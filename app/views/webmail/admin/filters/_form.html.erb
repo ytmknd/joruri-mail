@@ -1,0 +1,75 @@
+<%= f.error_messages %>
+
+<table class="show">
+  <tr>
+    <th><%= @item.class.human_attribute_name :name %></th>
+    <td><%= @item.name !~ /^[*]/ ? f.text_field(:name, class: 'name') : @item.name %></td>
+  </tr><tr>
+    <th><%= @item.class.human_attribute_name :state %></th>
+    <td><%= f.collection_radio_buttons :state, @item.class.state.options, :last, :first, class: 'states' %></td>
+  </tr><tr>
+    <th><%= @item.class.human_attribute_name :sort_no %></th>
+    <td><%= f.text_field :sort_no, class: 'number' %></td>
+  </tr>
+</table>
+
+<br />
+<p class="form">条件</p>
+<table class="show">
+  <tr>
+    <th><%= @item.class.human_attribute_name :conditions_chain %></th>
+    <td><%= f.collection_radio_buttons :conditions_chain, @item.class.conditions_chain.options, :last, :first, class: 'states' %></td>
+  </tr><tr>
+    <th>条件</th>
+    <td>
+      <div id="conditions">
+        <% (5-@item.conditions.size).times { @item.conditions.build } %>
+        <%= render 'form_conditions', f: f, conditions: @item.conditions, options: {} %>
+      </div>
+      <%= link_to '追加', '#addCondition'%>
+      <script id="conditionTemplate" type="text/x-jsrender">
+        <%= render 'form_conditions', f: f, conditions: [@item.conditions.first.class.new], options: { child_index: '{{:index}}' } %>
+      </script>
+    </td>
+  </tr>
+</table>
+
+<br /><p class="form">動作</p>
+<table class="show">
+  <tr>
+    <th><%= @item.class.human_attribute_name :action %></th>
+    <td><%= f.select :action, @item.class.action.options, include_blank: true %></td>
+  </tr><tr>
+    <th><%= @item.class.human_attribute_name :mailbox %></th>
+    <td><%= f.select :mailbox, Webmail::Mailbox.mailbox_options(&:filter_targetable_box?), include_blank: true %></td>
+  </tr>
+</table>
+
+<div class="submitters">
+  <%= f.submit %>
+</div>
+
+<script type="text/javascript">
+//<![CDATA[
+$(function() {
+  checkConditionCount();
+
+  function checkConditionCount() {
+    var maxConditionCount = <%= Joruri.config.application['webmail.filter_condition_max_count'] || 100 %>;
+    if ($('#conditions div').length >= maxConditionCount) {
+      $('#addCondition').hide();
+    }
+  }
+  $('a[href="#addCondition"]').on('click', function() {
+    var nextIndex = $('#conditions div').length;
+    $('#conditions').append( $('#conditionTemplate').render({index: nextIndex}) );
+    checkConditionCount();
+    return false;
+  });
+  $(document).on('click', 'a[href="#clearCondition"]', function() {
+    $(this).parent().find('select[name$="[column]"], select[name$="[inclusion]"], input[name$="[value]"]').val('');
+    return false;
+  });
+});
+//]]>
+</script>

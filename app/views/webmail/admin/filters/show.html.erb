@@ -1,0 +1,44 @@
+<div id="signContent">
+<%= render 'menu' %>
+
+<table class="show">
+  <tr>
+    <th><%= @item.class.human_attribute_name :name %></th>
+    <td><%= @item.name %></td>
+  </tr><tr>
+    <th><%= @item.class.human_attribute_name :state %></th>
+    <td><%= @item.state_text %></td>
+  </tr><tr>
+    <th><%= @item.class.human_attribute_name :sort_no %></th>
+    <td><%= @item.sort_no %></td>
+  </tr>
+</table>
+
+<br /><p class="form">条件</p>
+<table class="show">
+  <tr>
+    <th><%= @item.class.human_attribute_name :conditions_chain %></th>
+    <td><%= @item.conditions_chain_text %></td>
+  </tr><tr>
+    <th>条件</th>
+    <td>
+      <% @item.conditions.each do |c| %>
+      <div style="margin: 5px 0px;">
+        <%= c.column_text %>　<%= c.inclusion_text %>　<b><%= c.value %></b></div>
+      <% end %>
+    </td>
+  </tr>
+</table>
+
+<br /><p class="form">動作</p>
+<table class="show">
+  <tr>
+    <th><%= @item.class.human_attribute_name :action %></th>
+    <td><%= @item.action_text %></td>
+  </tr><tr>
+    <th><%= @item.class.human_attribute_name :mailbox %></th>
+    <td><%= @item.mailbox_name %></td>
+  </tr>
+</table>
+
+</div>

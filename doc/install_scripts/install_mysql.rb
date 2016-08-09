@@ -15,7 +15,8 @@ end
 def centos
   puts "It's CentOS!"
 
-  system 'yum install -y mysql-server'
+  system 'yum install -y http://dev.mysql.com/get/mysql-community-release-el6-5.noarch.rpm'
+  system 'yum install -y mysql-community-server'
 
   my_cnf = '/etc/my.cnf'
 
@@ -46,7 +47,6 @@ def centos
     system 'service mysqld start'
     sleep 1 until system 'mysqladmin ping' # Not required to connect
     system "mysqladmin -u root password 'pass'"
-    system %q!mysql -u root -ppass -e "GRANT ALL ON jorurimail.* TO joruri@localhost IDENTIFIED BY 'pass'"!
     system 'service mysqld stop'
   end
 end

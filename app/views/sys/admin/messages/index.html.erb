@@ -1,5 +1,4 @@
 <table class="index">
-  
   <tr>
     <th style="width: 60px; text-align: center;">詳細</th>
     <th style="width: 60px; text-align: right;">ID</th>
@@ -7,17 +6,15 @@
     <th style="width: ;">タイトル</th>
     <th style="width: 60px; text-align: center;">状態</th>
   </tr>
-  
-  <% for item in @items %>
-  <tr <%= cycle '', 'class="cycle"' %>>
-    <td style="text-align: center;"><%= link_to :show, url_for(:action => :show, :id => item) %></td>
-    <td style="text-align: right;"><%=h item.id %></td>
-    <td style="text-align: center;"><%=h item.published_at.strftime('%Y-%m-%d %H:%M') %></td>
-    <td><%=h item.title %></td>
-    <td style="text-align: center;"><%= item.status.name %></td>
-  </tr>
+  <% @items.each do |item| %>
+    <tr <%= cycle '', 'class="cycle"' %>>
+      <td style="text-align: center;"><%= link_to :show, url_for(item) %></td>
+      <td style="text-align: right;"><%= item.id %></td>
+      <td style="text-align: center;"><%=l item.published_at if item.published_at %></td>
+      <td><%= item.title %></td>
+      <td style="text-align: center;"><%= item.status.name %></td>
+    </tr>
   <% end %>
-
 </table>
 
 <%= paginate @items %>

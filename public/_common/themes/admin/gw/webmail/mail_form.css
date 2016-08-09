@@ -169,6 +169,7 @@ a.scheduleLink {
   border: 1px solid #bbb;
   background-color: #fff;
   line-height: 1.5;
+  min-height: 1.5em;
 }
 #uploadedFiles .uploadedFile {
   display: block;
@@ -200,6 +201,12 @@ a.scheduleLink {
 #uploadedFiles a.deleteUploadedFile:hover {
   background-position: 0px 0px;
 }
+#uploadedFiles .dropZoneNotice {
+  color: #aaa;
+}
+#uploadedFiles.hover {
+  background-color: #bdf;
+}
 
 #swfupButtons {
   margin-top: 1px;
@@ -208,7 +215,8 @@ a.scheduleLink {
   margin-right: 5px;
   vertical-align: bottom;
 }
-#btnCancel {
+#btnCancel,
+#jqueryFileUploader .labelButton {
   display: inline-block;
   width: 80px;
   border: 1px solid #aaa;
@@ -219,6 +227,15 @@ a.scheduleLink {
   text-align: center;
   line-height: 22px;
   height: 24px;
+}
+#jqueryFileUploader .labelButton {
+  width: auto;
+  padding: 0px 10px;
+  line-height: 24px;
+}
+#jqueryFileUploader .labelButton:hover {
+  background-image: none;
+  color: #444;
 }
 #divStatus {
   display: none;

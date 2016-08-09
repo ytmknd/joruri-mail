@@ -1,0 +1,16 @@
+<%= f.error_messages %>
+
+<table class="show">
+  <tr>
+    <th><%= @item.class.human_attribute_name :parent_id %></th>
+    <td><%= f.select :parent_id, @item.parent_options, { include_blank: '（ルート階層）' }, { class: 'parent_id' } %></td>
+  </tr>
+  <tr>
+    <th><%= @item.class.human_attribute_name :name %></th>
+    <td><%= f.text_field :name, class: 'name' %></td>
+  </tr>
+</table>
+
+<div class="submitters">
+  <%= f.submit %>
+</div>

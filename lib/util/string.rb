@@ -1,4 +1,3 @@
-# encoding: utf-8
 module Util::String
   def self.search_platform_dependent_characters(str)
     regex = "[" +
@@ -36,7 +35,7 @@ module Util::String
         '&nbsp;' * m.length
       end
       #line << '&nbsp;' if line.blank?
-      rslt << %Q(<p style="margin:0px; padding:0px;">#{line}</p>\n)
+      rslt << %Q(<p>#{line}</p>\n)
     end
     rslt
   end

@@ -1,0 +1,5 @@
+<div class="actionMenu">
+<%= action_menu :new %>
+<%= action_menu :index %>
+<%= action_menu :destroy if safe{params[:item][:id]}%>
+</div>

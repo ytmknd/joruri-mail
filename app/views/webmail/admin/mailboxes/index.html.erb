@@ -1,0 +1,77 @@
+<table id="webmailContainer"><tr><td id="webmailMenu">
+<div id="webmailMenuContainer">
+
+<div class="menu">
+  <%= link_to 'フォルダーの登録', url_for(action: :new, mailbox: 'INBOX'), class: 'newMailbox', title: 'フォルダーの登録' %>
+</div>
+
+<%= render 'webmail/admin/base/account' %>
+<%= render 'mailbox' %>
+
+</div>
+</td><td id="webmailContent"><div id="mailboxContent">
+
+<%= error_messages_for :item %>
+
+<p class="form"><%= @mailbox.title %></p>
+
+<% if !@mailbox.creatable_child_box? &&
+      !@mailbox.editable_box? &&
+      !@mailbox.deletable_box? %>
+  <div style="margin-top: 10px;"><%= @mailbox.title %>は変更できません。</div>
+<% else %>
+  <% if @mailbox.creatable_child_box? %>
+    <%= form_for :item, url: { action: :create } do |f| %>
+      <%= f.hidden_field :path, value: "#{@item.name}." %>
+      <table class="show" style="height: 40px;">
+        <tr>
+          <th style="">新しいフォルダーの登録</th>
+          <td style="">
+            <%= f.text_field :title, value: '' %>
+            <%= f.submit '登録する' %>
+          </td>
+        </tr>
+      </table>
+    <% end %>
+  <% end %>
+  <% if @mailbox.editable_box? %>
+    <br />
+    <%= form_for :item, url: { action: :update }, html: { method: :patch } do |f| %>
+      <table class="show" style="height: 40px;">
+        <tr>
+          <th style="">フォルダー名の変更</th>
+          <td style="">
+            <%= f.text_field :title %>
+            <%= f.submit '変更する' %>
+          </td>
+        </tr>
+      </table>
+    <% end %>
+    <br />
+    <%= form_for :item, url: { action: :update }, html: { method: :patch } do |f| %>
+      <table class="show" style="height: 40px;">
+        <tr>
+          <th style="">フォルダーの移動</th>
+          <td style="">
+            <%= f.select :path, @mailboxes.select { |box| box.selectable_as_parent? && box.name != @mailbox.name && box.name.index("#{@mailbox.name}.") != 0 }
+              .map { |box| [box.slashed_title, "#{box.name}."] }, include_blank: '（ルート階層）' %>
+            <%= f.submit '移動する' %>
+          </td>
+        </tr>
+      </table>
+    <% end %>
+  <% end %>
+  <% if @mailbox.deletable_box? %>
+    <div style="height:150px"></div>
+    <table class="show" style="height: 40px;">
+      <tr>
+        <th style="">フォルダーの削除</th>
+        <td style="">
+          <%= link_to '削除する', url_for(action: :destroy), method: :delete, data: { confirm: '削除してよろしいですか？' } %>
+        </td>
+      </tr>
+    </table>
+  <% end %>
+<% end %>
+
+</div><!-- end #webmailContainer --></td></table>

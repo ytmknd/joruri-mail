@@ -1,8 +1,7 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="ja" lang="ja">
+<!DOCTYPE html>
+<html lang="ja">
 <head>
-<meta http-equiv="content-type" content="text/html;charset=UTF-8" />
-<meta http-equiv="content-style-type" content="text/css" />
+<meta charset="UTF-8" />
 <title><%= Core.title %></title>
 <link href="/_common/themes/admin/login.css" media="screen" rel="stylesheet" type="text/css" />
 </head>
@@ -14,28 +13,23 @@
 <%= hidden_field_tag :uri, h(@uri) %>
 
 <div class="box">
-
+  <p>v<%= Joruri.version %></p>
   <h1>Joruri</h1>
-
   <div class="notice"><%= flash[:notice] %></div>
-
   <div class="fields">
-    <span class="head">ユーザID</span><%= text_field_tag 'account', '' %>
+    <span class="head">ユーザーID</span><%= text_field_tag 'account', '' %>
     <br />
     <br style="line-height: 0.8;" />
     <span class="head">パスワード</span><%= password_field_tag 'password', '' %>
     <br />
   </div>
-
   <% 
-    footer = Joruri.config.application['sys.login_footer']
-    if footer == ""
-      submitter_style = "margin-top:14px"
-    end
+    footer = t('sys.shared.login_footer_html')
+    submitter_style = 'margin-top:14px' if footer.blank?
   %>
   <div class="submitters">
     <input class="login" type="image" src="/_common/images/blank.gif" alt="ログイン" value="" name="commit" style="<%= submitter_style %>" />
-    <%=raw footer %>
+    <%= footer %>
   </div>
 </div>
 

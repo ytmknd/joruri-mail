@@ -1,4 +1,3 @@
-# encoding: utf-8
 class Sys::Lib::Ldap
   attr_accessor :connection
   attr_accessor :host
@@ -37,7 +36,7 @@ class Sys::Lib::Ldap
   def self.connect(params)
     begin
       require 'ldap'
-      timeout(2) do
+      Timeout.timeout(2) do
         conn = LDAP::Conn.new(params[:host], params[:port])
         conn.set_option(LDAP::LDAP_OPT_PROTOCOL_VERSION, 3)
         return conn
@@ -52,7 +51,6 @@ class Sys::Lib::Ldap
   ## Bind.
   def bind(dn, pass)
     if(RUBY_PLATFORM.downcase =~ /mswin(?!ce)|mingw|bccwin/)
-      require 'nkf'
       dn = NKF.nkf('-s -W', dn)
     end
     return connection.bind(dn, pass)

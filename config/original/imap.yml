@@ -1,0 +1,14 @@
+development:
+  address: 192.168.0.4
+  port: 143
+  usessl: false
+
+test:
+  address: 192.168.0.4
+  port: 143
+  usessl: false
+
+production:
+  address: 192.168.0.4
+  port: 143
+  usessl: false

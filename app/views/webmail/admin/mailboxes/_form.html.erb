@@ -1,0 +1,17 @@
+<%= f.error_messages %>
+
+<table class="show">
+  <tr>
+    <th>親フォルダー</th>
+    <td><%= f.select :path, @mailboxes.select(&:selectable_as_parent?)
+      .map {|box| [box.slashed_title, "#{box.name}."] }, include_blank: "（ルート階層）" %></td>
+  </tr>
+  <tr>
+    <th>フォルダー名</th>
+    <td><%= f.text_field :title %></td>
+  </tr>
+</table>
+
+<div class="submitters">
+  <%= f.submit %>
+</div>

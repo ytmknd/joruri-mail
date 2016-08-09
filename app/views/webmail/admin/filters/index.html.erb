@@ -1,0 +1,25 @@
+<div id="signContent">
+<%= render 'menu' %>
+
+<table class="index">
+  <tr>
+    <th style="width: 60px; text-align: center;">詳細</th>
+    <th style="width: ;"><%= Webmail::Filter.human_attribute_name :name %></th>
+    <th style="width: 60px; text-align: right;"><%= Webmail::Filter.human_attribute_name :sort_no %></th>
+    <th style="width: 120px; text-align: center;"><%= Webmail::Filter.human_attribute_name :created_at %></th>
+    <th style="width: 60px; text-align: center;"><%= Webmail::Filter.human_attribute_name :state %></th>
+  </tr>
+  <% @items.each do |item| %>
+    <tr <%= cycle '', 'class="cycle"' %>>
+      <td style="text-align: center;"><%= link_to :show, url_for(item) %></td>
+      <td><%= item.name %></td>
+      <td style="text-align: right;"><%= item.sort_no %></td>
+      <td style="text-align: center;"><%=l item.created_at if item.created_at %></td>
+      <td style="text-align: center;"><%= item.state_text %></td>
+    </tr>
+  <% end %>
+</table>
+
+<%= paginate @items %>
+
+</div>

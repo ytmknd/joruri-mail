@@ -1,18 +1,24 @@
+<%= f.error_messages %>
+
 <%=raw init_tiny_mce %>
 
 <table class="show">
   <tr>
-    <th><%= @item.locale(:state) %></th>
-    <td><%= f.radio_buttons :state, @item.states, :class => 'status' %></td>
+    <th><%= @item.class.human_attribute_name :state %></th>
+    <td><%= f.collection_radio_buttons :state, @item.states, :last, :first, class: 'status' %></td>
   </tr><tr>
-    <th><%= @item.locale(:published_at) %></th>
-    <td><%= f.text_field :published_at, :class => 'datetime pulished_at' %></td>
+    <th><%= @item.class.human_attribute_name :published_at %></th>
+    <td><%= f.text_field :published_at, class: 'datetime pulished_at' %></td>
   </tr><tr>
-    <th><%= @item.locale(:title) %></th>
-    <td><%= f.text_field :title, :class => 'string title' %></td>
+    <th><%= @item.class.human_attribute_name :title %></th>
+    <td><%= f.text_field :title, class: 'string title' %></td>
   </tr><tr>
-    <th colspan="2"><%= @item.locale(:body) %></th>
+    <th colspan="2"><%= @item.class.human_attribute_name :body %></th>
   </tr><tr>
-    <td colspan="2"><%= f.text_area :body, :class => 'string body mceEditor' %></td>
+    <td colspan="2"><%= f.text_area :body, class: 'string body mceEditor' %></td>
   </tr>
 </table>
+
+<div class="submitters">
+  <%= f.submit %>
+</div>

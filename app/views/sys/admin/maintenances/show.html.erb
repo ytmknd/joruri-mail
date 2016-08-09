@@ -1,22 +1,22 @@
-<%=raw init_tiny_mce :readonly => true %>
+<%=raw init_tiny_mce readonly: true %>
 
 <table class="show">
   <tr>
-    <th><%= @item.locale(:state) %></th>
-    <td><%=h safe{@item.status.name} %></td>
+    <th><%= @item.class.human_attribute_name :state %></th>
+    <td><%= @item.status.name if @item.status %></td>
   </tr><tr>
-    <th><%= @item.locale(:published_at) %></th>
-    <td><%=h safe{@item.published_at.strftime("%Y-%m-%d %H:%M")} %></td>
+    <th><%= @item.class.human_attribute_name :published_at %></th>
+    <td><%=l @item.published_at if @item.published_at %></td>
   </tr><tr>
-    <th><%= @item.locale(:title) %></th>
-    <td><%=h @item.title %></td>
+    <th><%= @item.class.human_attribute_name :title %></th>
+    <td><%= @item.title %></td>
   </tr>
 </table>
 
 <table class="show">
   <tr>
-    <th><%= @item.locale(:body) %></th>
+    <th><%= @item.class.human_attribute_name :body %></th>
   </tr><tr>
-    <td><%= text_area_tag 'body', @item.body, :class => 'mceEditor', :style => 'width:100%' %></td>
+    <td><%= text_area_tag 'body', @item.body, class: 'mceEditor', style: 'width:100%' %></td>
   </tr>
 </table>

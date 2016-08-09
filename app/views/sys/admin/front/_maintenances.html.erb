@@ -1,15 +1,3 @@
-<script type="text/javascript">
-function openMaintenances(id){
-  var elm = document.getElementById(id);
-  if (elm.style.display == 'block') {
-    elm.style.display = 'none';
-  } else {
-    elm.style.display = 'block';
-  }
-  return false;
-}
-</script>
-
 <div id="maintenances" class="piace">
 <div class="piaceHeader">
   <div class="title">メンテナンス情報
@@ -25,8 +13,10 @@ function openMaintenances(id){
   <% @maintenances.each do |item| %>
   <% eid = "maintenance#{item.id}" %>
   <li>
-    <p><a href="#" onclick="return openMaintenances('<%= eid %>');">
-      <%= item.title %></a> （<%= item.published_at.strftime('%Y-%m-%d %H:%M') %>）</p>
+    <p>
+      <a href="#showMaintenance" data-id="<%= eid %>">
+      <%= item.title %></a> （<%=l item.published_at if item.published_at %>）
+    </p>
     <div id="<%= eid %>" class="body"><%=raw item.body %></div>
   </li>
   <% end %>
@@ -36,3 +26,14 @@ function openMaintenances(id){
 <div class="piaceFooter"></div>
 
 </div>
+
+<script type="text/javascript">
+//<![CDATA[
+$(function() {
+  $('a[href="#showMaintenance"]').on('click', function() {
+    $('#' + $(this).attr('data-id')).toggle();
+    return false;
+  });
+});
+//]]>
+</script>

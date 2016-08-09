@@ -1,0 +1,192 @@
+<table id="webmailContainer"><tr><td id="webmailMenu">
+<div id="webmailMenuContainer">
+
+<%= render 'menu' %>
+
+<div class="mailbox">
+  <ul class="root">
+    <% if params[:search] %>
+      <li class="folder">
+        <a href="#loadAddresses" id="group0" class="current" data-gid="0">検索結果</a>
+      </li>
+    <% end %>
+    <li class="folder">
+      <a href="#loadAddresses" id="groupAll" class="<%= 'current' unless params[:search] %>" data-gid="All">すべて</a>
+    </li>
+    <%= render 'children', groups: @root_groups %>
+  </ul>
+</div>
+
+<br />
+<div class="actionMenu">
+  <%= link_to 'CSVインポート', import_webmail_addresses_path, style: 'margin-bottom: 10px;' %>
+  <%= link_to 'CSVエクスポート', export_webmail_addresses_path %>
+</div>
+
+</div>
+</td><td id="webmailContent"><div id="addressContent">
+
+<%= render "search" %>
+
+<%= form_for :item, url: { action: :create_mail }, html: { id: 'users', name: 'users', target: '_blank' } do |f| %>
+  <div id="addresses"></div>
+  <script id="addressesTemplate" type="text/x-jsrender">
+    <div id="addresses{{:group_id}}" data-gid="{{:group_id}}">
+      <p class="form">{{>group_name}}</p>
+      <div class="actionMenu">
+        <div class="leftMenu">
+          <a href="#createMail" class="create" title="メール作成">メール作成</a>
+        </div>
+        {{if group_id != 'All' && group_id != '0'}}
+          <div class="rightMenu">
+            <a class="edit" href="<%= webmail_address_groups_path %>/{{:group_id}}/edit">編集</a>
+            <a class="delete" href="<%= webmail_address_groups_path %>/{{:group_id}}" data-method="delete" data-confirm="削除してよろしいですか？" >削除</a>
+          </div>
+        {{/if}}
+        <div style="clear:both;"></div>
+      </div>
+      <table class="index">
+        <tbody>
+          <tr>
+            <th class="checkUI"><a href="#checkAll" title="TO" data-type="to">TO</a></th>
+            <th class="checkUI"><a href="#checkAll" title="CC" data-type="cc">CC</a></th>
+            <th class="checkUI"><a href="#checkAll" title="BCC" data-type="bcc">BCC</a></th>
+            <th style="width: 30%;">
+              <a class="sorter" href="#sortAddresses" data-key="name">名前{^{:sort_key == "name" ? sort_order: ""}}</a>
+            </th>
+            <th style="width: 20%;">
+              <a class="sorter" href="#sortAddresses" data-key="kana">フリガナ{^{:sort_key == "kana" ? sort_order: ""}}</a>
+            </th>
+            <th style="width: ;">
+              <div class="email"><a class="sorter" href="#sortAddresses" data-key="email">メールアドレス{^{:sort_key == "email" ? sort_order: ""}}</a></div>
+              <div class="sortNo">並び順</div>
+            </th>
+          </tr>
+          {^{for addresses}}
+            <tr>
+              <td class="checkUI"><input type="checkbox" name="to[{{:id}}]"  value="1" data-link="checked.to" /></td>
+              <td class="checkUI"><input type="checkbox" name="cc[{{:id}}]"  value="1" data-link="checked.cc" /></td>
+              <td class="checkUI"><input type="checkbox" name="bcc[{{:id}}]" value="1" data-link="checked.bcc" /></td>
+              <td><a href="<%= webmail_addresses_path %>/{{:id}}">{{>name}}</a></td>
+              <td>{{>kana}}</td>
+              <td>
+                <div class="email">{{>email}}</div>
+                <div class="sortNo">{{:sort_no}}</div>
+              </td>
+            </tr>
+          {{/for}}
+        </tbody>
+      </table>
+      <div class="actionMenu">
+        <a href="#createMail" class="create" title="メール作成">メール作成</a>
+      </div>
+    </div>
+  </script>
+<% end %>
+
+</div><!-- end #webmailContainer --></td></table>
+
+<script type="text/javascript">
+//<![CDATA[
+$(function() {
+  var addressView = <%= 
+    g1 = address_view_model('All', 'すべて', @items)
+    g2 = address_view_model('0', '検索結果', @s_items) if params[:search]
+    [g1, g2].compact.to_json.html_safe
+  %>;
+  addressView.loading = false;
+  addressView.findByGid = function(gid) {
+    return $.grep(this, function(g) {
+      return g.group_id == gid;
+    })[0];
+  }
+  addressView.checkAll = function(idx, type) {
+    var grouping = this[idx];
+    var flag = !grouping.checked[type]
+    $.observable(grouping).setProperty('checked.' + type, flag);
+    $.each(grouping.addresses, function() {
+      $.observable(this).setProperty('checked.' + type, flag);
+    });
+  }
+  addressView.sortAddresses = function(idx, key) {
+    var grouping = this[idx];
+    var order = grouping.sort_order.match(/▲/) ? '▼' : '▲';
+    $.observable(grouping).setProperty({sort_key: key, sort_order: order});
+    $.observable(grouping.addresses).refresh(
+      grouping.addresses.slice().sort(function(a, b) {
+        if (order == '▲') {
+          return a[key] > b[key] ? 1 : -1;
+        } else {
+          return a[key] < b[key] ? 1 : -1;
+        }
+      })
+    );
+  }
+  addressView.loadAddresses = function(gid) {
+    if (addressView.loading == true) return;
+    $('[id^="group"][data-gid]').removeClass('current')
+      .filter('[data-gid="' + gid + '"]')
+      .addClass('current');
+    $('[id^=addresses][data-gid]').hide();
+    var grouping = this.findByGid(gid);
+    if (grouping) {
+      $('#addresses' + gid).show();
+    } else {
+      addressView.loading = true;
+      $.get('<%= webmail_address_groups_path %>/' + gid + '.json').done(function(data) {
+        $.observable(addressView).insert(data);
+        $('#addresses' + gid).show();
+        addressView.loading = false;
+      });
+    }
+  }
+
+  $.templates("#addressesTemplate").link('#addresses', addressView)
+    .on('click', 'a[href="#checkAll"]', function() {
+      var i = $.view(this).index;
+      var type = $(this).attr('data-type');
+      addressView.checkAll(i, type);
+      return false;
+    })
+    .on('click', 'a[href="#sortAddresses"]', function() {
+      var i = $.view(this).index;
+      var key = $(this).attr('data-key');
+      addressView.sortAddresses(i, key);
+      return false;
+    });
+
+  <% if params[:search] %>
+  $('#addressesAll').hide();
+  $('#addresses0').show();
+  <% end %>
+
+  $('a[href="#loadAddresses"]').on('click', function() {
+    var gid = $(this).attr('data-gid')
+    addressView.loadAddresses(gid);
+    return false;
+  });
+  $(document).on('click', 'a[href="#createMail"]', function() {
+    var num = {
+      to: $('input[name^="to"]:checked').length,
+      cc: $('input[name^="cc"]:checked').length,
+      bcc: $('input[name^="bcc"]:checked').length
+    }
+    if (num['to'] + num['cc'] + num['bcc'] == 0) {
+      alert('ユーザーを選択してください。');
+    } else if (num['to'] > 150) {
+      alert('宛先に選択できるのは150件までです。');
+    } else if (num['cc'] > 150) {
+      alert('Ccに選択できるのは150件までです。');
+    } else if (num['bcc'] > 150) {
+      alert('Bccに選択できるのは150件までです。');
+    } else {
+      var w = openMailForm('', '<%=raw mail_form_style %>', "mailForm" + new Date().getTime());
+      var form = $('#users');
+      form.attr('target', w.name);
+      form.submit();
+    }
+    return false;
+  });
+});
+//]]>
+</script>

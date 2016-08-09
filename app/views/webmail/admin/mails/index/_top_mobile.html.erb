@@ -1,0 +1,38 @@
+<% if maintenance = Sys::Maintenance.latest_maintenance %>
+<div id="maintenance">
+<%= link_to "#{maintenance.title} #{l(maintenance.published_at)}", webmail_mails_path('INBOX', mobile: :maintenance), class: 'maintenanceLink' %>
+</div>
+<% end %>
+
+<div class="menu">
+<%= link_to image_tag("/_common/themes/admin/gw/webmail/mobile/images/bt-jyushin.jpg", alt: 'メール受信'),
+  webmail_mails_path(@mailbox.name, mobile: 'top', date: Time.now.to_f.to_s, reload: true), class: 'index', title: 'メール受信', accesskey: '1' %>
+<%= link_to image_tag("/_common/themes/admin/gw/webmail/mobile/images/bt-sakusei.jpg", alt: 'メール作成'),
+  new_webmail_mail_path('INBOX'), class: 'innerLink', accesskey: '2' %>
+</div>
+
+<div class="folderTitle"><img src="/_common/themes/admin/gw/webmail/mobile/images/folder.jpg" alt="フォルダー"/>フォルダー</div>
+<%= render 'webmail/admin/mails/shared/mailbox' %>
+
+<div class="sendMenu">
+<div class="title">
+  <img src="/_common/themes/admin/gw/webmail/mobile/images/send-menu-blue.jpg" alt="送信メニュー" />送信メニュー
+</div>
+<div class="menus">
+<%= link_to 'メール作成', new_webmail_mail_path('INBOX'), class: 'menuItem', accesskey: '3' %><br/>
+<%= link_to t('webmail.menus.sys_address'), webmail_sys_addresses_path, class: 'menuItem', accesskey: '4' %><br/>
+<%= link_to t('webmail.menus.address_group'), webmail_address_groups_path, class: 'menuItem', accesskey: '5' %><br/>
+<%= link_to t('webmail.menus.memo'), webmail_memo_path(0), class: 'menuItem', accesskey: '6' %><br/>
+</div>
+</div>
+
+<% if Joruri.config.sso_settings %>
+<div class="linkMenu">
+<div class="title">
+  リンク
+</div>
+<div class="menus">
+<%= link_to 'グループウェア', _admin_sso_path(to: 'gw') %><br/>
+</div>
+</div>
+<% end %>

@@ -1,0 +1,17 @@
+<% if flash[:notice] %>
+<div id="notice" class="notice"><p><%= flash[:notice] %></p></div>
+
+<script type="text/javascript">
+//<![CDATA[
+$(function() {
+  var timeoutID = undefined;
+  $(window).on('load', function(e) {
+    timeoutID = setTimeout(function() {
+      $('#notice').hide();
+      if (timeoutID) { clearTimeout(timeoutID); }
+    }, 2000);
+  });
+});
+//]]>
+</script>
+<% end %>
