@@ -1,4 +1,4 @@
-class Webmail::Template < ActiveRecord::Base
+class Webmail::Template < ApplicationRecord
   include Sys::Model::Base
   include Sys::Model::Auth::Free
 
@@ -6,8 +6,6 @@ class Webmail::Template < ActiveRecord::Base
   validates :to, :cc, :bcc, email_list: true
 
   after_save :uniq_default_flag, if: :default_flag?
-
-  scope :readable, ->(user = Core.user) { where(user_id: user.id) }
 
   enumerize :default_flag, in: { set: 1, unset: 0 }
 

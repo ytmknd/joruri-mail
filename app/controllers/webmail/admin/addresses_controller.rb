@@ -8,7 +8,7 @@ class Webmail::Admin::AddressesController < Webmail::Controller::Admin::Base
   end
 
   def index
-    return render text: ''
+    return render plain: ''
   end
 
   def show
@@ -88,7 +88,7 @@ class Webmail::Admin::AddressesController < Webmail::Controller::Admin::Base
   def export
     return unless request.post?
 
-    items = Webmail::Address.readable.where(user_id: Core.user.id).order(:id)
+    items = Webmail::Address.where(user_id: Core.user.id).order(:id)
     csv = Webmail::Address.to_csv(items)
     csv = NKF.nkf('-m0 -sx -Lw', csv)
     send_data(csv, type: 'text/csv', filename: "address_groups_#{Time.now.strftime("%Y%m%d_%H%M%S")}.csv" )

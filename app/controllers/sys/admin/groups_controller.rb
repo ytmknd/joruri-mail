@@ -7,13 +7,13 @@ class Sys::Admin::GroupsController < Sys::Controller::Admin::Base
     id      = params[:parent] == '0' ? 1 : params[:parent]
     @parent = Sys::Group.find(id)
 
-    @groups = Sys::Group.readable.where(parent_id: @parent.id).order(:sort_no, :code, :id)
-    @users = Sys::User.readable.joins(:groups).where(sys_groups: { id: @parent.id })
+    @groups = Sys::Group.where(parent_id: @parent.id).order(:sort_no, :code, :id)
+    @users = Sys::User.joins(:groups).where(sys_groups: { id: @parent.id })
       .order("LPAD(account, 15, '0')")
   end
 
   def index
-    @items = Sys::Group.readable.where(parent_id: @parent.id).order(:id)
+    @items = Sys::Group.where(parent_id: @parent.id).order(:id)
       .paginate(page: params[:page], per_page: params[:limit])
     _index @items
   end

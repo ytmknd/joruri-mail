@@ -1,4 +1,4 @@
-class Webmail::Setting < ActiveRecord::Base
+class Webmail::Setting < ApplicationRecord
   include Sys::Model::Base
   include Sys::Model::Auth::Free
 
@@ -188,8 +188,6 @@ class Webmail::Setting < ActiveRecord::Base
     if: lambda {|item| item.name == 'address_order' }
   validates :value, inclusion: Config.find_by(name: :sys_address_order).options.map(&:last),
     if: lambda {|item| item.name == 'sys_address_order' }
-
-  scope :readable, ->(user = Core.user) { where(user_id: user.id) }
 
   def initialize(attributes = nil)
     super

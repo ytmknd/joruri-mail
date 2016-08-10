@@ -1,10 +1,8 @@
-class Webmail::MailNode < ActiveRecord::Base
+class Webmail::MailNode < ApplicationRecord
   include Sys::Model::Base
   include Sys::Model::Auth::Free
 
   validates :user_id, :uid, :mailbox, presence: true
-
-  scope :readable, ->(user = Core.current_user) { where(user_id: user.id) }
 
   def editable?
     Core.current_user.has_auth?(:manager) || user_id == Core.current_user.id

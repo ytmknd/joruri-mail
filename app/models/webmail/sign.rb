@@ -1,12 +1,10 @@
-class Webmail::Sign < ActiveRecord::Base
+class Webmail::Sign < ApplicationRecord
   include Sys::Model::Base
   include Sys::Model::Auth::Free
 
   after_save :uniq_default_flag, if: :default_flag?
 
   validates :user_id, :name, presence: true
-
-  scope :readable, ->(user = Core.user) { where(user_id: user.id) }
 
   enumerize :default_flag, in: { set: 1, unset: 0 }
 

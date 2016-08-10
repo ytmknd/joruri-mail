@@ -1,4 +1,4 @@
-class Webmail::MailAddressHistory < ActiveRecord::Base
+class Webmail::MailAddressHistory < ApplicationRecord
   include Sys::Model::Base
   include Sys::Model::Tree
   include Sys::Model::Auth::Free

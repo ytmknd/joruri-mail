@@ -28,7 +28,6 @@ class Sys::Group < Sys::ManageDatabase
   validates :state, :level_no, :name, :name_en, :ldap, presence: true
   validates :code, presence: true, uniqueness: true
 
-  scope :readable, -> { all }
   scope :enabled_roots, -> { where(parent_id: 1, state: 'enabled') }
 
   scope :enabled_children_counts, -> {

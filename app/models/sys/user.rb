@@ -41,7 +41,6 @@ class Sys::User < Sys::ManageDatabase
   validates :mobile_password, length: { minimum: 4, if: lambda { |u| u.mobile_password && u.mobile_password.length != 0 } }
   validates :account, uniqueness: true
 
-  scope :readable, -> { all }
   scope :with_valid_email, -> { where.not(email: nil).where.not(email: '') }
   scope :search, ->(params) {
     rel = all

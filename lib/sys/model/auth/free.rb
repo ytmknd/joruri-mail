@@ -1,11 +1,6 @@
 module Sys::Model::Auth::Free
   extend ActiveSupport::Concern
 
-  included do
-    scope :readable, -> { all }
-    scope :editable, -> { all }
-  end
- 
   def creatable?
     true
   end
