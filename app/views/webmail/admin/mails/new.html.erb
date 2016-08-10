@@ -60,7 +60,34 @@
 <script type="text/javascript">
 //<![CDATA[
 $(function() {
-  $('input[name="commit_send"], input[name="commit_draft"]').on('click', function() {
+  <% config = Webmail::Setting.user_config_values([:attachment_check, :attachment_check_keywords]) %>
+  var attachmentChecker = new MailKeywordChecker(
+    '<%= config.attachment_check %>',
+    <%= config.attachment_check_keywords.to_s.split(/[\r\n]+/).to_json.html_safe %>
+  );
+  function getBody() {
+    if ($('#item_in_format').val() == 'html') {
+      return convertHtmlToText(tinyMCE.activeEditor.getContent());
+    } else {
+      return $('#item_in_body').val();
+    }
+  }
+  $('input[name="commit_send"]').on('click', function() {
+    var ok = true;
+    var subject = $('#item_in_subject').val();
+    var body = getBody();
+    if (attachmentChecker.isEnabled() &&
+      (attachmentChecker.includeKeyword(subject) || attachmentChecker.includeKeyword(body)) &&
+      $('input[name="item[tmp_attachment_ids][]"]').length == 0) {
+      if (!confirm('添付ファイルがありません。このまま送信してよろしいですか？')) {
+        ok = false;
+      }
+    }
+    if (ok) {
+      checkServerStatus(this);
+    }
+  });
+  $('input[name="commit_draft"]').on('click', function() {
     checkServerStatus(this);
   });
   $('input[name="commit_destroy"]').on('click', function() {

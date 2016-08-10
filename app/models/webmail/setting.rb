@@ -71,6 +71,10 @@ class Webmail::Setting < ApplicationRecord
       options: [['Unicode (UTF-8)','utf-8'],['日本語 (ISO-2022-JP)','']]
     add :mail_form, :sign_position, title: '署名の位置（返信・転送時）',
       options: [['引用文の前（標準）', ''], ['引用文の後', 'bottom']]
+    add :mail_form, :attachment_check, title: '添付忘れ確認',
+      options: [['確認しない（標準）', ''], ['確認する', '1']]
+    add :mail_form, :attachment_check_keywords, title: '添付忘れ確認キーワード', form_type: :text_area,
+      default: "attach\nattachment\nattaching\n添付\n同封\n別添"
     #add :mail_form, :forward, title: '転送先アドレス', form_type: :text_field
     add :sys_address, :sys_address_order, title: '並び順',
       options: [['メールアドレス（標準）', ''], ['名前', 'name'], ['フリガナ', 'kana'], ['役職（担当順）', 'sort_no']]
