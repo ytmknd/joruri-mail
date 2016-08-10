@@ -807,6 +807,7 @@ form.search td input.email {
   width: 9px;
   text-align: center;
   font-size: 0.9em;
+  font-weight: bold;
 }
 #mailContent table.mail td.subject .priority1,
 #mailContent table.mail td.subject .priority2 {

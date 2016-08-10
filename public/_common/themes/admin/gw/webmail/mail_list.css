@@ -157,6 +157,7 @@
   width: 9px;
   text-align: center;
   font-size: 0.9em;
+  font-weight: bold;
 }
 #webmailContent table.mails td.subject .priority1,
 #webmailContent table.mails td.subject .priority2 {

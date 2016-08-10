@@ -505,6 +505,7 @@ table.mails td.subject .priority {
   width: 9px;
   text-align: center;
   font-size: 0.9em;
+  font-weight: bold;
 }
 table.mails td.subject .priority1,
 table.mails td.subject .priority2 {
@@ -779,6 +780,7 @@ table.mail td.subject .priority {
   width: 9px;
   text-align: center;
   font-size: 0.9em;
+  font-weight: bold;
 }
 table.mail td.subject .priority1,
 table.mail td.subject .priority2 {
