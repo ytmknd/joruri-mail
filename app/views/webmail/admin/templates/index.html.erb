@@ -8,7 +8,7 @@
     <th style="width: 120px; text-align: center;"><%= Webmail::Template.human_attribute_name(:created_at) %></th>
   </tr>
   <% @items.each do |item| %>
-    <tr <%= cycle '', 'class="cycle"' %>>
+    <tr class="<%= cycle '', 'cycle' %>">
       <td style="text-align: center;"><%= link_to :show, url_for(item) %></td>
       <td><%= item.name %> <%= '（既定）' if item.default_flag? %></td>
       <td style="text-align: center;"><%=l item.created_at if item.created_at %></td>

@@ -6,7 +6,7 @@ subject_wrap = @conf.mail_list_subject.blank? ? '' : 'autoWrap'
     <%
       from, s_from, from_tooltip = mail_from_display(item, @mailbox, @conf.mail_list_from_address.present?)
     %>
-    <tr class="mail <%= 'unseen' if item.unseen? %> <%= cycle '', 'cycle' %>">
+    <tr class="mail <%= 'unseen' if item.unseen? %>">
       <td class="check"><input type="checkbox" name="item[ids][<%= item.uid %>]" value="1" class="checkUI" /></td>
       <td class="star <%= item.starred? ? 'starOn' : 'starOff' %>" id="mail_star_<%= item.uid %>" title="<%= 'スター' if item.starred? %>" data-uid="<%= item.uid %>">&nbsp;</td>
       <td class="attach subject from date <%= mail_flags(item).join(' ') %> <%= subject_wrap %>">
