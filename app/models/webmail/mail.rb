@@ -1,6 +1,8 @@
 class Webmail::Mail
+  extend Enumerize
   include ActiveModel::Model
   include ActiveModel::Validations::Callbacks
+  include ActiveModel::Naming
   include Webmail::Mails::Imap
   include Webmail::Mails::Base
 
@@ -8,7 +10,7 @@ class Webmail::Mail
   FORMAT_HTML = 'html'
 
   attr_accessor :in_from, :in_to, :in_cc, :in_bcc,
-    :in_subject, :in_body, :in_html_body, :in_format, :in_files, :in_request_mdn,
+    :in_subject, :in_body, :in_html_body, :in_format, :in_priority, :in_files, :in_request_mdn,
     :tmp_id, :tmp_attachment_ids
   attr_reader :in_to_addrs, :in_cc_addrs, :in_bcc_addrs
 
@@ -27,6 +29,8 @@ class Webmail::Mail
     validates :in_html_body, presence: true, if: -> { in_format == FORMAT_HTML }
     validate :validate_address_list
   end
+
+  enumerize :in_priority, in: ['1', '5']
 
   def initialize(attributes = nil)
     @tmp_attachment_ids = []
@@ -117,6 +121,7 @@ class Webmail::Mail
       self.in_body      = ref.text_body
       self.in_format    = FORMAT_TEXT     
     end
+    self.in_priority = ref.priority if ref.priority.present?
     self.in_request_mdn = '1' if ref.has_disposition_notification_to?
 
     init_tmp_attachments_from_ref(ref)
@@ -205,6 +210,7 @@ class Webmail::Mail
     mail.subject     = in_subject.gsub(/\r\n|\n/, ' ')
     #mail.body    = in_body
 
+    mail.header["X-Priority"] = I18n.t('enumerize.webmail/mail.priority_header')[in_priority.to_sym] if in_priority.present?
     mail.header["X-Mailer"] = "Joruri Mail ver. #{Joruri.version}"
     mail.header["User-Agent"] = request.user_agent.force_encoding('us-ascii') if request
     mail.header["Disposition-Notification-To"] = Email.encode_addresses(@in_from_addr, charset) if in_request_mdn == '1'
@@ -465,7 +471,7 @@ class Webmail::Mail
       end
 
       # load from imap
-      header_fields = 'HEADER.FIELDS (DATE FROM TO CC BCC SUBJECT CONTENT-TYPE CONTENT-DISPOSITION DISPOSITION-NOTIFICATION-TO)'
+      header_fields = 'HEADER.FIELDS (DATE FROM TO CC BCC SUBJECT CONTENT-TYPE CONTENT-DISPOSITION DISPOSITION-NOTIFICATION-TO X-PRIORITY)'
       fields = ['UID', 'FLAGS', 'RFC822.SIZE', "BODY.PEEK[#{header_fields}]"]
       fields += ['X-MAILBOX', 'X-REAL-UID'] if mailbox =~ /^virtual/
       imap.uid_fetch(fetch_uids, fields).to_a.each do |msg|
@@ -474,6 +480,7 @@ class Webmail::Mail
         item.mailbox    = mailbox
         item.size       = msg.attr['RFC822.SIZE']
         item.flags      = msg.attr['FLAGS']
+        item.priority   = msg.attr['X-PRIORITY']
         item.x_mailbox  = msg.attr['X-MAILBOX']
         item.x_real_uid = msg.attr['X-REAL-UID']
         items << item
@@ -497,6 +504,7 @@ class Webmail::Mail
             n.has_attachments  = item.has_attachments?
             n.size             = item.size
             n.has_disposition_notification_to = item.has_disposition_notification_to?
+            n.priority         = item.priority
             if mailbox =~ /^virtual/
               n.ref_mailbox = item.x_mailbox
               n.ref_uid     = item.x_real_uid

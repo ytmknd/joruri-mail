@@ -500,6 +500,20 @@ table.mails td.subject .labels .label {
   font-weight: lighter;
   font-size: 0.8em;
 }
+table.mails td.subject .priority {
+  display: inline-block;
+  width: 9px;
+  text-align: center;
+  font-size: 0.9em;
+}
+table.mails td.subject .priority1,
+table.mails td.subject .priority2 {
+  color: #f55;
+}
+table.mails td.subject .priority4,
+table.mails td.subject .priority5 {
+  color: #55f;
+}
 table.mails td.subject span.mailbox {
   float: right;
   color: #000;
@@ -759,6 +773,20 @@ table.mail td.subject .labels .label {
   color: #fff;
   font-weight: lighter;
   font-size: 0.8em;
+}
+table.mail td.subject .priority {
+  display: inline-block;
+  width: 9px;
+  text-align: center;
+  font-size: 0.9em;
+}
+table.mail td.subject .priority1,
+table.mail td.subject .priority2 {
+  color: #f55;
+}
+table.mail td.subject .priority4,
+table.mail td.subject .priority5 {
+  color: #55f;
 }
 table.mails tr td.answered span.subject {
   background-image: url(/_common/themes/admin/gw/images/mailoption/finish_forward.gif);

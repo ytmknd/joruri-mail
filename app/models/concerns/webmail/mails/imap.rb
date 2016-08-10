@@ -3,7 +3,7 @@ module Webmail::Mails::Imap
   extend ActiveSupport::Concern
 
   attr_accessor :uid, :mailbox, :flags, :rfc822, :size, :mail
-  attr_accessor :x_mailbox, :x_real_uid
+  attr_accessor :priority, :x_mailbox, :x_real_uid
 
   def imap
     Core.imap

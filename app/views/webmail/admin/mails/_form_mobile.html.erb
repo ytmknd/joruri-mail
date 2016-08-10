@@ -26,6 +26,9 @@
 <%= f.hidden_field :in_html_body, class: 'html_body', rows: 10, istyle: '1', format: '*M', mode: 'hiragana' %>
 <% end %>
 <div class="confirm">
+  <%= f.select :in_priority, options_for_select(@item.class.in_priority.options, @item.in_priority), include_blank: '# 重要度' %>
+</div>
+<div class="confirm">
   <%= f.check_box :in_request_mdn %>開封確認メッセージを要求する
 </div>
 

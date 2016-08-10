@@ -95,6 +95,23 @@ ja:
         end_date: 削除終了日
 
   enumerize:
+    webmail/mail:
+      in_priority:
+        '1': 重要度：高
+        '5': 重要度：低
+      priority_header:
+        '1': 1 (Highest)
+        '5': 5 (Lowest)
+      priority_label:
+        '1': ！
+        '2': ！
+        '4': ↓
+        '5': ↓
+      priority_title:
+        '1': 重要度：高
+        '2': 重要度：やや高
+        '4': 重要度：やや低
+        '5': 重要度：低
     webmail/filter:
       state:
         enabled: 有効
