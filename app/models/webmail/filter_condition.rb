@@ -1,4 +1,4 @@
-class Webmail::FilterCondition < ActiveRecord::Base
+class Webmail::FilterCondition < ApplicationRecord
   include Sys::Model::Base
   include Sys::Model::Auth::Free
 
@@ -6,8 +6,6 @@ class Webmail::FilterCondition < ActiveRecord::Base
 
   validates :user_id, :column, :inclusion, :value, presence: true
   validates :value, regexp: true, if: "inclusion == '=~'"
-
-  scope :readable, ->(user = Core.user) { where(user_id: user.id) }
 
   enumerize :column, in: [:subject, :from, :to]
   enumerize :inclusion, in: ['<', '!<', '==', '=~']

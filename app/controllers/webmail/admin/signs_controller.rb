@@ -6,7 +6,7 @@ class Webmail::Admin::SignsController < Webmail::Controller::Admin::Base
   end
 
   def index
-    @items = Webmail::Sign.readable.where(user_id: Core.user.id).order(:name, :id)
+    @items = Webmail::Sign.where(user_id: Core.user.id).order(:name, :id)
       .paginate(page: params[:page], per_page: params[:limit])
     _index @items
   end

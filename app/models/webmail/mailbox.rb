@@ -1,4 +1,4 @@
-class Webmail::Mailbox < ActiveRecord::Base
+class Webmail::Mailbox < ApplicationRecord
   include Sys::Model::Base
   include Sys::Model::Auth::Free
   include Webmail::Mailboxes::Imap
@@ -8,8 +8,6 @@ class Webmail::Mailbox < ActiveRecord::Base
 
   validates :title, presence: true
   validate :validate_title
-
-  scope :readable, ->(user = Core.current_user) { where(user_id: user.id) }
 
   after_initialize :set_defaults
 

@@ -1,4 +1,4 @@
-class Webmail::Filter < ActiveRecord::Base
+class Webmail::Filter < ApplicationRecord
   include Sys::Model::Base
   include Sys::Model::Auth::Free
 
@@ -25,8 +25,6 @@ class Webmail::Filter < ActiveRecord::Base
     validates :target_mailbox, presence: true
     validates :conditions, presence: true
   end
-
-  scope :readable, ->(user = Core.user) { where(user_id: user.id) }
 
   enumerize :state, in: [:enabled, :disabled]
   enumerize :action, in: [:move, :delete]

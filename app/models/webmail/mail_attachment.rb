@@ -1,4 +1,4 @@
-class Webmail::MailAttachment < ActiveRecord::Base
+class Webmail::MailAttachment < ApplicationRecord
   include Sys::Model::Base
   include Sys::Model::Base::File
   include Sys::Model::Auth::Free

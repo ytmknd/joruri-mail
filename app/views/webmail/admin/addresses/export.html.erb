@@ -7,7 +7,7 @@
 </td><td id="webmailContent"><div id="addressContent">
 <%= form_tag export_webmail_addresses_path, multipart: true do %>
   <div class="submitters">
-    <%= submit_tag 'エクスポート' %>
+    <%= submit_tag 'エクスポート', data: { disable_with: false } %>
   </div>
 <% end %>
 </div><!-- end #webmailContainer --></td></table>

@@ -36,9 +36,9 @@ class Webmail::Admin::MailAttachmentsController < ApplicationController#Webmail:
     raise item.errors.full_messages.join("\n") unless rs
     raise "ファイルが存在しません。(#{item.upload_path})" unless FileTest.file?(item.upload_path)
 
-    render text: view_context.mail_attachment_view_model(item, tmp_id: params[:tmp_id], status: 'OK').to_json
+    render plain: view_context.mail_attachment_view_model(item, tmp_id: params[:tmp_id], status: 'OK').to_json
   rescue => e
-    render text: { status: 'Error', message: e.to_s }.to_json
+    render plain: { status: 'Error', message: e.to_s }.to_json
   end
 
   def destroy
