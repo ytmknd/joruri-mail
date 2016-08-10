@@ -223,7 +223,7 @@ class Webmail::Mail
     mail.header["Disposition-Notification-To"] = Email.encode_addresses(@in_from_addr, charset) if in_request_mdn == '1'
 
     if in_request_dsn == '1'
-      mail.smtp_envelope_to = @in_to_addrs.map { |addr|
+      mail.smtp_envelope_to = (@in_to_addrs + @in_cc_addrs + @in_bcc_addrs).map { |addr|
         "<#{addr.address}> NOTIFY=SUCCESS,FAILURE ORCPT=rfc822;#{@in_from_addr[0].address}"
       }
     end
