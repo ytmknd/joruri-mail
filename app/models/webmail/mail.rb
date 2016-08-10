@@ -9,17 +9,18 @@ class Webmail::Mail
   FORMAT_TEXT = 'text'
   FORMAT_HTML = 'html'
 
-  attr_accessor :in_from, :in_to, :in_cc, :in_bcc,
+  attr_accessor :in_from, :in_to, :in_cc, :in_bcc, :in_reply_to,
     :in_subject, :in_body, :in_html_body, :in_format, :in_priority, :in_files, :in_request_mdn, :in_request_dsn,
     :tmp_id, :tmp_attachment_ids
-  attr_reader :in_to_addrs, :in_cc_addrs, :in_bcc_addrs
+  attr_reader :in_to_addrs, :in_cc_addrs, :in_bcc_addrs, :in_reply_to_addrs
 
   before_validation :prepare_validation
 
   with_options on: [:send, :draft] do
     validates :in_subject, length: { maximum: 100 }
-    validates :in_to, :in_cc, :in_bcc, email_list: true
-    validates :in_to_addrs, :in_cc_addrs, :in_bcc_addrs, length: { maximum: 150, message: :too_many_addresses }
+    validates :in_to, :in_cc, :in_bcc, :in_reply_to, email_list: true
+    validates :in_to_addrs, :in_cc_addrs, :in_bcc_addrs, :in_reply_to_addrs,
+      length: { maximum: 150, message: :too_many_addresses }
     validate :validate_tmp_attachments
   end
 
@@ -113,6 +114,7 @@ class Webmail::Mail
     self.in_to      = ref.friendly_to_addrs.join(', ')
     self.in_cc      = ref.friendly_cc_addrs.join(', ')
     self.in_bcc     = ref.friendly_bcc_addrs.join(', ')
+    self.in_reply_to = ref.friendly_reply_to_addrs.join(', ')
     self.in_subject = ref.subject
     if format == FORMAT_HTML && ref.html_mail?
       self.in_html_body = ref.html_body_for_edit
@@ -207,6 +209,7 @@ class Webmail::Mail
     mail.to          = Email.encode_addresses(@in_to_addrs, charset)
     mail.cc          = Email.encode_addresses(@in_cc_addrs, charset)
     mail.bcc         = Email.encode_addresses(@in_bcc_addrs, charset)
+    mail.reply_to    = Email.encode_addresses(@in_reply_to_addrs, charset)
     mail.subject     = in_subject.gsub(/\r\n|\n/, ' ')
     #mail.body    = in_body
 
@@ -364,6 +367,7 @@ class Webmail::Mail
     @in_to_addrs  = Email.parse_list(in_to)
     @in_cc_addrs  = Email.parse_list(in_cc)
     @in_bcc_addrs = Email.parse_list(in_bcc)
+    @in_reply_to_addrs = Email.parse_list(in_reply_to)
 
     self.in_subject = '件名なし' if in_subject.blank?
     self.in_subject   = NKF.nkf('-Ww --no-best-fit-chars', in_subject) if in_subject.present?
