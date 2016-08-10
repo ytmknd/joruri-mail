@@ -8,7 +8,7 @@ class Webmail::Mail
   FORMAT_HTML = 'html'
 
   attr_accessor :in_from, :in_to, :in_cc, :in_bcc,
-    :in_subject, :in_body, :in_html_body, :in_format, :in_files, :in_request_mdn,
+    :in_subject, :in_body, :in_html_body, :in_format, :in_files, :in_request_mdn, :in_request_dsn,
     :tmp_id, :tmp_attachment_ids
   attr_reader :in_to_addrs, :in_cc_addrs, :in_bcc_addrs
 
@@ -208,6 +208,12 @@ class Webmail::Mail
     mail.header["X-Mailer"] = "Joruri Mail ver. #{Joruri.version}"
     mail.header["User-Agent"] = request.user_agent.force_encoding('us-ascii') if request
     mail.header["Disposition-Notification-To"] = Email.encode_addresses(@in_from_addr, charset) if in_request_mdn == '1'
+
+    if in_request_dsn == '1'
+      mail.smtp_envelope_to = @in_to_addrs.map { |addr|
+        "<#{addr.address}> NOTIFY=SUCCESS,FAILURE ORCPT=rfc822;#{@in_from_addr[0].address}"
+      }
+    end
 
     if @reference ## for answer
       references = []
