@@ -28,6 +28,14 @@ module Webmail::MailHelper
     end
   end
 
+  def mail_priority_label(mail)
+    I18n.t('enumerize.webmail/mail.priority_label')[mail.priority.to_sym]
+  end
+
+  def mail_priority_title(mail)
+    I18n.t('enumerize.webmail/mail.priority_title')[mail.priority.to_sym]
+  end
+
   def mail_short_date(mail)
     if mail.date && (match = mail.date.match(/\d{4}-(\d{2})-(\d{2})\s*\d{2}:\d{2}/))
       "#{match[1]}/#{match[2]}"

@@ -152,6 +152,20 @@
   font-weight: lighter;
   font-size: 0.8em;
 }
+#webmailContent table.mails td.subject .priority {
+  display: inline-block;
+  width: 9px;
+  text-align: center;
+  font-size: 0.9em;
+}
+#webmailContent table.mails td.subject .priority1,
+#webmailContent table.mails td.subject .priority2 {
+  color: #f55;
+}
+#webmailContent table.mails td.subject .priority4,
+#webmailContent table.mails td.subject .priority5 {
+  color: #55f;
+}
 #webmailContent table.mails td.subject .loading {
   background-image: url(../images/other/loading_16.gif);
   background-repeat: no-repeat;

@@ -802,6 +802,20 @@ form.search td input.email {
   float: right;
   margin-right: 5px;
 }
+#mailContent table.mail td.subject .priority {
+  display: inline-block;
+  width: 9px;
+  text-align: center;
+  font-size: 0.9em;
+}
+#mailContent table.mail td.subject .priority1,
+#mailContent table.mail td.subject .priority2 {
+  color: #f55;
+}
+#mailContent table.mail td.subject .priority4,
+#mailContent table.mail td.subject .priority5 {
+  color: #55f;
+}
 
 #mailContent table.mail td.thumbnailArea span.thumbnail {
   display: inline-block;

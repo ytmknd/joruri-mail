@@ -33,6 +33,9 @@
   <tr>
     <th>件名</th>
     <td class="subject autoWrap">
+      <% if @item.priority.present? %>
+        <span class="priority priority<%= @item.priority %>" title="<%= mail_priority_title(@item) %>"><%= mail_priority_label(@item) %></span>
+      <% end %>
       <%= mail_text_wrap(@item.subject) %>
       <% if @item.has_attachments? %>
       <a href="#attachments" class="attachmentMark" title="<%= @item.attachments.map(&:name).join(', ') %>">添付ファイル有り</a>

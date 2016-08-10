@@ -46,6 +46,9 @@
           <div class="templateSelector">
             <%= select_tag :template, options_for_select(Webmail::Template.user_templates.pluck(:name, :id)), include_blank: '# テンプレート切替' %>
           </div>
+          <div class="prioritySelector">
+            <%= f.select :in_priority, options_for_select(@item.class.in_priority.options, @item.in_priority), include_blank: '# 重要度' %>
+          </div>
         </div>
       <% end %>
     </td>

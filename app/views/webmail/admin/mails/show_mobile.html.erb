@@ -3,6 +3,9 @@
 </div>
 <div class="header">
 <div class="headerTitle">
+  <% if @item.priority.present? %>
+    <span class="priority priority<%= @item.priority %>"><%= mail_priority_label(@item) %></span>
+  <% end %>
   <%= @item.subject %>
   <% if @item.has_attachments? %>
   <img src="/_common/themes/admin/gw/webmail/mobile/images/clip-lightblue.jpg" alt="[有]" />

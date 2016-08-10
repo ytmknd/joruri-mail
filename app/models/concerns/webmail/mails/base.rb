@@ -92,6 +92,10 @@ module Webmail::Mails::Base
     end
   end
 
+  def priority
+    @mail.header[:x_priority].to_s.scan(/^(\d)+/).flatten.first if @mail.header[:x_priority]
+  end
+
   def has_disposition_notification_to?
     @mail.header[:disposition_notification_to].present?
   end

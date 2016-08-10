@@ -139,7 +139,14 @@ a.scheduleLink {
 }
 #mailContent .templateSelector {
   display: inline;
-  margin-right: 20px;
+  margin-right: 10px;
+}
+#mailContent .templateSelector select {
+  max-width: 150px;
+}
+#mailContent .prioritySelector {
+  display: inline;
+  margin-right: 15px;
 }
 #mailContent .addressToggleButtons {
   font-size: 12px;

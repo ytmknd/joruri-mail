@@ -11,6 +11,9 @@
         <%= render 'webmail/admin/mails/shared/label', labels: item.labels, label_confs: @conf.mail_labels %>
       </font>
     <% end %>
+    <% if item.priority.present? %>
+      <span class="priority priority<%= item.priority %>"><%= mail_priority_label(item) %></span>
+    <% end %>
     <font class="subject <%= mail_flags(item).join(' ') %>"><%= link_to mail_text_wrap(truncate(item.subject, length: 30, escape: false).presence || ' ', 1000), { action: :show, id: item.uid } %></font>
     <% if item.has_attachments? %>
     <img src="/_common/themes/admin/gw/webmail/mobile/images/clip.jpg" alt="[有]" />
