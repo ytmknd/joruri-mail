@@ -31,7 +31,7 @@ subject_wrap = @conf.mail_list_subject.blank? ? '' : 'autoWrap'
     <%
       from, s_from, from_tooltip = mail_from_display(item, @mailbox, @conf.mail_list_from_address.present?)
     %>
-    <tr id="mail_<%= item.uid %>" class="mail <%= 'unseen' if item.unseen? %> <%= cycle '', 'cycle' %>"
+    <tr id="mail_<%= item.uid %>" class="mail <%= 'unseen' if item.unseen? %>"
       data-uid="<%= item.uid %>" data-url="<%= url_for(action: :show, id: item.uid, new_window: (@conf.mail_open_window.blank? ? nil : 1)) %>">
       <td class="drag" id="drag_<%= item.uid %>" data-uid="<%= item.uid %>"></td>
       <td class="check"><input type="checkbox" name="item[ids][<%= item.uid %>]" value="1" data-uid="<%= item.uid %>" /></td>
