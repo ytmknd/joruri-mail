@@ -53,15 +53,6 @@ class Webmail::Admin::MailboxesController < Webmail::Controller::Admin::Base
     if @item.valid?
       begin
         @item.rename_mailbox(new_name)
-  
-        uids = Webmail::MailNode.find_ref_nodes(old_name).map{|x| x.uid}
-        Core.imap.select('Star')
-        num = Core.imap.uid_store(uids, "+FLAGS", [:Deleted]).size rescue 0
-        Core.imap.expunge
-        if num > 0
-          Webmail::MailNode.delete_ref_nodes(old_name)
-          reload_starred_mails({new_name => [:all]})
-        end
       rescue => e
         @item.errors.add(:base, e.to_s)
       end
@@ -98,13 +89,6 @@ class Webmail::Admin::MailboxesController < Webmail::Controller::Admin::Base
           if delete_complete
             Core.imap.delete(box.name)
           end
-
-          uids = Webmail::MailNode.find_ref_nodes(box.name).map{|x| x.uid}
-          num = Webmail::Mail.delete_all('Star', uids)
-          if num > 0
-            Webmail::MailNode.delete_ref_nodes(box.name)
-            reload_starred_mails({new_name => [:all]}) unless delete_complete
-          end
         end
       end
 
@@ -112,13 +96,6 @@ class Webmail::Admin::MailboxesController < Webmail::Controller::Admin::Base
         @item.delete_mailbox
       else
         @item.rename_mailbox(new_name)
-      end
-
-      uids = Webmail::MailNode.find_ref_nodes(old_name).map{|x| x.uid}
-      num = Webmail::Mail.delete_all('Star', uids)
-      if num > 0
-        Webmail::MailNode.delete_ref_nodes(old_name)
-        reload_starred_mails({new_name => [:all]}) unless delete_complete
       end
     rescue => e
       @item.errors.add(:base, e.to_s)
@@ -141,9 +118,5 @@ class Webmail::Admin::MailboxesController < Webmail::Controller::Admin::Base
 
   def reload_mailboxes
     @mailboxes = Webmail::Mailbox.load_mailboxes(:all)
-  end
-
-  def reload_starred_mails(mailbox_uids = {'INBOX' => [:all]})
-    Webmail::Mailbox.load_starred_mails(mailbox_uids)
   end
 end

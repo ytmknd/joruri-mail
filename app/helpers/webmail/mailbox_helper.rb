@@ -32,12 +32,16 @@ module Webmail::MailboxHelper
         %Q{<img src="/_common/themes/admin/gw/webmail/mobile/images/dustbox.jpg" alt="ごみ箱" />}
       when 'arvhives'
         %Q{<img src="/_common/themes/admin/gw/webmail/mobile/images/archive.jpg" alt="アーカイブ" />}
-      when 'star'
+      when 'virtual flagged'
         %Q{<img src="/_common/themes/admin/gw/webmail/mobile/images/star.jpg" alt="スター付き" />}
       when 'folder'
         %Q{∟}
       else
-        %Q{<img src="/_common/themes/admin/gw/webmail/mobile/images/folder-white.jpg" alt="フォルダー" />}
+        if mailbox_type =~ /^virtual\s/
+          %Q{<img src="/_common/themes/admin/gw/webmail/mobile/images/folder-search.jpg" alt="検索" />}
+        else
+          %Q{<img src="/_common/themes/admin/gw/webmail/mobile/images/folder-white.jpg" alt="フォルダー" />}
+        end
       end
     img.html_safe
   end

@@ -116,6 +116,8 @@ module Webmail::Mails::Imap
       search_uid = imap.uid_search(['UID', uid] + conditions, 'utf-8').first
       return nil unless search_uid
 
+      fetch += ['X-MAILBOX', 'X-REAL-UID'] if select =~ /^virtual\./
+
       msg = imap.uid_fetch(search_uid, fetch).to_a.first
       return nil unless msg
 
@@ -124,6 +126,10 @@ module Webmail::Mails::Imap
       item.uid     = uid
       item.mailbox = select
       item.flags   = msg.attr['FLAGS'] if msg.attr['FLAGS']
+      if select =~ /^virtual\./
+        item.x_mailbox = msg.attr['X-MAILBOX']
+        item.x_real_uid = msg.attr['X-REAL-UID']
+      end
       item
     end
 
@@ -218,7 +224,7 @@ module Webmail::Mails::Imap
       return 0 if uids.blank?
 
       imap.select(mailbox)
-      if mailbox !~ /^Trash(\.|$)/ && mailbox !~ /^Star(\.|$)/ && !complete
+      if mailbox !~ /^Trash(\.|$)/ && !complete
         move_to('Trash', uids)
       else
         num = imap.uid_store(uids, "+FLAGS", [:Deleted]).to_a.size

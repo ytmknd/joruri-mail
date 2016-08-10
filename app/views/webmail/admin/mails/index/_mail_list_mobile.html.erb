@@ -19,7 +19,7 @@
     <img src="/_common/themes/admin/gw/webmail/mobile/images/clip.jpg" alt="[有]" />
     <% end %>
     <br />
-    <% if @mailbox.star_box? || @mailbox.virtual_box? %>
+    <% if @mailbox.virtual_box? %>
       <font class="mailbox"><%= item.x_mailbox_title %></font><br />
     <% end %>
     <font class="date"><%= mail_short_date(item) %></font>

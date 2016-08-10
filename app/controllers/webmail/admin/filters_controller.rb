@@ -57,17 +57,7 @@ class Webmail::Admin::FiltersController < Webmail::Controller::Admin::Base
 
     @item.apply
 
-    if @item.applied > 0
-      changed_mailbox_uids = {}
-      case @item.action
-      when 'move'
-        changed_mailbox_uids[@item.mailbox] = [:all]
-      when 'delete'
-        changed_mailbox_uids['Trash'] = [:all]
-      end
-      Webmail::Mailbox.load_starred_mails(changed_mailbox_uids)
-      Webmail::Mailbox.load_mailboxes(:all)
-    end
+    Webmail::Mailbox.load_mailboxes(:all)
 
     flash[:notice] = "#{@item.applied}件のメールに適用しました。"
     flash[:error] = "フィルター処理件数が規定値を超えたため、残り#{@item.delayed}件のメールはバックグラウンドで実行します。完了までに時間がかかる場合があります。" if @item.delayed > 0

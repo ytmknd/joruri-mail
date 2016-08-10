@@ -388,7 +388,7 @@ table.root .trash a.empty {
   overflow: hidden;
 }
 table.root .virtual td a {
-  background-image: url("/_common/themes/admin/gw/images/tree/transmit_open.gif");
+  background-image: url("/_common/themes/admin/gw/images/tree/folder_search.gif");
 }
 table.root .flagged td a {
   background-image: url("/_common/themes/admin/gw/images/mailoption/star_on.gif");

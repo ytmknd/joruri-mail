@@ -63,7 +63,7 @@ class Webmail::Filter < ApplicationRecord
 
     process_uids, delay_uids = schedule_mail_uids
     process_uids.each do |mailbox, uids|
-      applied_uids = apply_to(mailbox: mailbox, uids: uids)
+      applied_uids = self.class.apply_uids([self], mailbox: mailbox, uids: uids)
       @processed += uids.size
       @applied += applied_uids.size
     end
@@ -71,23 +71,6 @@ class Webmail::Filter < ApplicationRecord
       Webmail::FilterJob.new(user: Core.current_user, mailbox: mailbox, uids: uids).delay(queue: 'filter').perform
       @delayed += uids.size
     end
-  end
-
-  def apply_to(mailbox:, uids:)
-    applied_uids = self.class.apply_uids([self], mailbox: mailbox, uids: uids)
-
-    if applied_uids.size > 0
-      starred_uids = Webmail::MailNode.find_ref_nodes(mailbox, applied_uids).map{|x| x.uid}
-      if starred_uids.present?
-        Core.imap.select('Star')
-        num = Core.imap.uid_store(starred_uids, '+FLAGS', [:Deleted]).to_a.size
-        Core.imap.expunge
-        if num > 0
-          Webmail::MailNode.delete_nodes('Star', starred_uids)
-        end
-      end
-    end
-    applied_uids
   end
 
   def delete_exceeded_conditions

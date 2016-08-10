@@ -24,23 +24,12 @@ class Webmail::Tool::BatchDelete
 
       Core.imap.select(box.name)
       uids = Core.imap.uid_search(condition)
-      num = Core.imap.uid_store(uids, "+FLAGS", [:Deleted]).size rescue 0
+      num = Core.imap.uid_store(uids, '+FLAGS', [:Deleted]).to_a.size
       Core.imap.expunge
 
-      if num > 0
-        Webmail::MailNode.delete_nodes(box.name, uids)
-        changed_mailboxes << box.name
-      end
+      Webmail::MailNode.delete_nodes(box.name, uids)
 
       delete_num += num
-
-      starred_uids = Webmail::MailNode.find_ref_nodes(box.name, uids).map{|x| x.uid}
-      Core.imap.select('Star')
-      num = Core.imap.uid_store(starred_uids, "+FLAGS", [:Deleted]).size rescue 0
-      Core.imap.expunge
-      if num > 0
-        Webmail::MailNode.delete_ref_nodes(box.name, uids)
-      end
     end
 
     if delete_num > 0

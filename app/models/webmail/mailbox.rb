@@ -67,20 +67,16 @@ class Webmail::Mailbox < ApplicationRecord
     end
   end
 
-  def star_box?(target = :all)
-    case target
-    when :all      ; name =~ /^Star(\.|$)/
-    when :children ; name =~ /^Star\./
-    else           ; name == "Star"
-    end
-  end
-
   def virtual_box?(target = :all)
     case target
     when :all      ; name =~ /^virtual(\.|$)/
     when :children ; name =~ /^virtual\./
     else           ; name == "virtual"
     end
+  end
+
+  def virtual_flagged_box?
+    name == 'virtual.Flagged'
   end
 
   def path
@@ -131,15 +127,15 @@ class Webmail::Mailbox < ApplicationRecord
   end
 
   def special_box?
-    name =~ Regexp.union(/^(INBOX|Drafts|Sent|Archives|Trash|Star|virtual)$/, /^virtual\./)
+    name =~ Regexp.union(/^(INBOX|Drafts|Sent|Archives|Trash|virtual)$/, /^virtual\./)
   end
 
   def creatable_child_box?
-    name !~ /^(Drafts|Trash|Star|virtual)(\.|$)/
+    name !~ /^(Drafts|Trash|virtual)(\.|$)/
   end
 
   def editable_box?
-    name !~ Regexp.union(/^(INBOX|Drafts|Sent|Archives|Trash|Star)$/, /^virtual(\.|$)/)
+    name !~ Regexp.union(/^(INBOX|Drafts|Sent|Archives|Trash)$/, /^virtual(\.|$)/)
   end
 
   def deletable_box?
@@ -147,31 +143,31 @@ class Webmail::Mailbox < ApplicationRecord
   end
 
   def selectable_as_parent?
-    name !~ /^(Drafts|Trash|Star|virtual)(\.|$)/
+    name !~ /^(Drafts|Trash|virtual)(\.|$)/
   end
 
   def mail_droppable_box?
-    name !~ /^(Drafts|Star|virtual)(\.|$)/
+    name !~ /^(Drafts|virtual)(\.|$)/
   end
 
   def mail_movable_box?
-    name !~ /^(Drafts|Trash|Star|virtual)(\.|$)/
+    name !~ /^(Drafts|Trash|virtual)(\.|$)/
   end
 
   def mail_unseen_count_box?
-    name !~ /^(Drafts|Sent|Trash|Star|virtual)(\.|$)/
+    name !~ /^(Drafts|Sent|Trash|virtual)(\.|$)/
   end
 
   def filter_targetable_box?
-    name !~ Regexp.union(/^(Drafts|Sent|Trash|Star|virtual)(\.|$)/, /^INBOX$/)
+    name !~ Regexp.union(/^(Drafts|Sent|Trash|virtual)(\.|$)/, /^INBOX$/)
   end
 
   def filter_appliable_box?
-    name !~ /^(Drafts|Sent|Trash|Star|virtual)(\.|$)/
+    name !~ /^(Drafts|Sent|Trash|virtual)(\.|$)/
   end
 
   def batch_deletable_box?
-    name !~ /^(Star|virtual)(\.|$)/
+    name !~ /^(virtual)(\.|$)/
   end
 
   private

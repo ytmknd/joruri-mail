@@ -27,7 +27,7 @@
       <%= link_to '≪一覧へ戻る', { action: :index }, class: 'index'
       %><span class="separator">|</span
       ><% end %><%= link_to '編集', '#editMail', class: 'edit', title: '編集', target: '_blank',
-        data: { url: url_for(action: :edit) }
+        data: { url: mail_form_url(@item, action: :edit) }
       %><%= link_to '削除', { action: :destroy }, method: :delete, class: :delete, title: '削除'
       %><span class="separator">|</span
       ><%= link_to 'ラベル', '#showLabelMenu', class: 'label', title: 'ラベル'
@@ -39,9 +39,9 @@
       %><span class="separator">|</span
       ><% end %><%= link_to '返信', '#showAnswerMenu', class: 'answer', title: '返信'
       %><%= link_to '転送', '#editMail', class: 'forward', title: '転送', target: '_blank',
-        data: { url: url_for(action: :forward) }
+        data: { url: mail_form_url(@item, action: :forward) }
       %><%= link_to '編集', '#editMail', class: 'edit', title: '編集', target: '_blank',
-        data: { url: url_for(action: :edit) } if @mailbox.sent_box?
+        data: { url: mail_form_url(@item, action: :edit) } if @mailbox.sent_box?
       %><%= link_to '移動', '#moveMail', class: 'move', title: '移動'
       %><%= link_to 'コピー', '#copyMail', class: 'copy', title: 'コピー'
       %><%= link_to '削除', { action: :destroy }, method: :delete, class: :delete, title: '削除'
@@ -52,13 +52,13 @@
     <% end %>
     <div id="answerMenu" class="popupMenu" style="display:none; width:140px">
       <div class="menuItem"><%= link_to '送信者に返信', '#editMail',
-        data: { url: url_for(action: :answer) } %></div>
+        data: { url: mail_form_url(@item, action: :answer) } %></div>
       <div class="menuItem"><%= link_to '送信者に返信（引用あり）', '#editMail',
-        data: { url: url_for(action: :answer, qt: 1) } %></div>
+        data: { url: mail_form_url(@item, action: :answer, qt: 1) } %></div>
       <div class="menuItem"><%= link_to '全員に返信', '#editMail',
-        data: { url: url_for(action: :answer, all: 1) } %></div>
+        data: { url: mail_form_url(@item, action: :answer, all: 1) } %></div>
       <div class="menuItem"><%= link_to '全員に返信（引用あり）', '#editMail',
-        data: { url: url_for(action: :answer, all: 1, qt: 1) } %></div>
+        data: { url: mail_form_url(@item, action: :answer, all: 1, qt: 1) } %></div>
     </div>
     <div id="otherMenu" class="popupMenu" style="display:none; width:100px">
       <div class="menuItem"><%= link_to 'ローカル保存', { action: :download, download: 'eml'} %></div>
@@ -298,13 +298,9 @@ $(function() {
   <% if controller.new_window? && @item.seen_flagged? %>
   if (window.opener) {
     window.opener.syncUnseenClass('<%=raw escape_javascript @mailbox.name %>', '<%= @item.uid %>');
-    <% if @mailbox.star_box? %>
-      <% if @item.node && @item.node.ref_mailbox %>
-        window.opener.syncUnseenClass('<%=raw escape_javascript @item.node.ref_mailbox %>', '');
-      <% end %>
-    <% elsif @item.starred? %>
-      window.opener.syncUnseenClass('Star', '');
-    <% end %> 
+    <% if @item.starred? && @mailbox.virtual_flagged_box? %>
+      window.opener.syncUnseenClass('<%=raw escape_javascript @item.x_mailbox %>', '<%= @item.x_real_uid %>');
+    <% end %>
   }
   <% end %>
 
@@ -377,6 +373,13 @@ $(function() {
       syncStarClass(uid, afterClass);
       if (window.opener) {
         window.opener.syncStarClass(uid, afterClass);
+        <% if @mailbox.virtual_flagged_box? %>
+          window.close();
+        <% end %>
+      } else {
+        <% if @mailbox.virtual_flagged_box? %>
+          window.location = '<%= url_for(action: :index) %>';
+        <% end %>
       }
     })
     .always(function() {

@@ -21,10 +21,9 @@ ja:
         Drafts: 下書き
         Sent: 送信トレイ
         Archives: アーカイブ
-        Star: スター付き
         Trash: ごみ箱
-        virtual.All: すべてのメール
         virtual.Flagged: スター付き
+        virtual.All: 全てのメール
     setting:
       categories:
         mail_list: メール一覧

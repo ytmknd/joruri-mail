@@ -2,8 +2,8 @@ require 'net/imap'
 module Webmail::Mailboxes::Imap
   extend ActiveSupport::Concern
 
-  DEFAULTS = %w(Drafts Sent Archives Trash Star)
-  ORDERS = %w(INBOX Star Drafts Sent Archives virtual _etc Trash)
+  DEFAULTS = %w(Drafts Sent Archives Trash)
+  ORDERS = %w(INBOX virtual Drafts Sent Archives _etc Trash)
 
   def create_mailbox(name)
     transaction do
@@ -134,52 +134,6 @@ module Webmail::Mailboxes::Imap
             recent:   status.attr['RECENT']
           }
           box.save(validate: false) if box.changed?
-        end
-      end
-    end
-
-    def load_starred_mails(mailbox_uids = nil)
-      return if mailbox_uids == nil
-
-      imap.select('Star')
-      unstarred_uids = imap.uid_search(['UNDELETED', 'UNFLAGGED'])
-      if unstarred_uids.present?
-        num = imap.uid_store(unstarred_uids, '+FLAGS', [:Deleted]).to_a.size
-        if num > 0
-          imap.expunge
-          Webmail::MailNode.delete_nodes('Star', unstarred_uids)
-        end
-      end
-
-      mailbox_uids.each do |mailbox, uids|
-        next if mailbox =~ /^(Star)$/
-
-        current_starred_uids = Webmail::MailNode.find_ref_nodes(mailbox).map{|x| x.ref_uid}
-
-        imap.select(mailbox)
-        if uids.empty? || uids.include?('all') ||  uids.include?(:all)
-          new_starred_uids = imap.uid_search(['UNDELETED', 'FLAGGED'])
-        else
-          new_starred_uids = imap.uid_search(['UID', uids, 'UNDELETED', 'FLAGGED'])
-        end
-        new_starred_uids = new_starred_uids.select{|x| !current_starred_uids.include?(x) }
-        next if new_starred_uids.blank?
-
-        imap.select('Star')
-        next_uid = imap.status('Star', ['UIDNEXT'])['UIDNEXT']
-
-        imap.select(mailbox)
-        res = imap.uid_copy(new_starred_uids, 'Star')
-        next if res.name != 'OK'
-
-        # create cache
-        items = Webmail::Mail.fetch((next_uid...next_uid+new_starred_uids.size).to_a, 'Star')
-        items.each_with_index do |item, i|
-          if node = item.node
-            node.ref_mailbox = mailbox
-            node.ref_uid = new_starred_uids[i]
-            node.save
-          end
         end
       end
     end

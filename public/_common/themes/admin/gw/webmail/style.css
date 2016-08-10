@@ -344,7 +344,7 @@ form.search td input.email {
   background-position: 5px 5px;
 }
 #webmailMenu .mailbox li.virtual a {
-  background-image: url(../images/tree/transmit_open.gif);
+  background-image: url(../images/tree/folder_search.gif);
 }
 #webmailMenu .mailbox li.flagged a {
   background-image: url(../images/mailoption/star_on.gif);
