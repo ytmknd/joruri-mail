@@ -64,6 +64,10 @@ class Webmail::Mail
     @reference = reference
   end
 
+  def user_signs
+    @signs ||= Webmail::Sign.user_signs.to_a
+  end
+
   def tmp_attachments
     return [] unless tmp_id
     Webmail::MailAttachment.where(id: tmp_attachment_ids, tmp_id: tmp_id)
