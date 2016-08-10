@@ -17,12 +17,16 @@
   </tr><tr id="bccContainer" style="<%= 'display:none;' unless @item.in_bcc.present? %>">
     <th>Bcc ：</th>
     <td><%= f.text_area :in_bcc, class: 'bcc' %></td>
+  </tr><tr id="replyToContainer" style="<%= 'display:none;' unless @item.in_reply_to.present? %>">
+    <th>Reply-To：</th>
+    <td><%= f.text_area :in_reply_to, class: 'reply_to' %></td>
   </tr><tr>
     <th></th>
     <td style="padding-bottom:0">
       <div class="addressToggleButtons">
         <%= link_to 'Ccを追加', '#showCcAddress', style: "#{'display:none' if @item.in_cc.present? }" %>
         <%= link_to 'Bccを追加', '#showBccAddress', style: "#{'display:none' if @item.in_bcc.present? }" %>
+        <%= link_to 'Reply-Toを追加', '#showReplyToAddress', style: "#{'display:none' if @item.in_reply_to.present? }" %>
       </div>
     </td>
   </tr>
@@ -173,6 +177,11 @@ $(function() {
   });
   $('a[href="#showBccAddress"]').on('click', function() {
     $('#bccContainer').show();
+    $(this).hide();
+    return false;
+  });
+  $('a[href="#showReplyToAddress"]').on('click', function() {
+    $('#replyToContainer').show();
     $(this).hide();
     return false;
   });

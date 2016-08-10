@@ -77,7 +77,8 @@ a.scheduleLink {
   line-height: 1.2;
 }
 #mailContent textarea.cc,
-#mailContent textarea.bcc {
+#mailContent textarea.bcc,
+#mailContent textarea.reply_to {
   width: 90%;
   height: 2.5em;
 }
@@ -146,7 +147,7 @@ a.scheduleLink {
 }
 #mailContent .addressToggleButtons a {
   display:inline-block;
-  width: 80px;
+  width: 100px;
   border: 1px solid #aaa;
   background-color: #fff;
   background-image: url(../images/bt/bg-link_check.jpg);
