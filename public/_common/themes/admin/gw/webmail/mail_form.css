@@ -138,6 +138,13 @@ a.scheduleLink {
   display: inline;
   margin-right: 10px;
 }
+#mailContent .signSelector {
+  display: inline;
+  margin-right: 10px;
+}
+#mailContent .signSelector select {
+  max-width: 150px;
+}
 #mailContent .templateSelector {
   display: inline;
   margin-right: 10px;

@@ -47,6 +47,9 @@
             <%= link_to 'TEXT', '#toggleEditor', data: { format: 'text' }, title: 'TEXT形式' %>
             <%= link_to 'HTML', '#toggleEditor', data: { format: 'html' }, title: 'HTML形式' %>
           </div>
+          <div class="signSelector">
+            <%= select_tag :sign, options_for_select(@item.user_signs.map {|sign| [sign.name, sign.id] }), include_blank: '# 署名挿入' %>
+          </div>
           <div class="templateSelector">
             <%= select_tag :template, options_for_select(Webmail::Template.user_templates.pluck(:name, :id)), include_blank: '# テンプレート切替' %>
           </div>
@@ -308,6 +311,22 @@ $(function() {
       $('a[href="#showBccAddress"]').click();
     }
   }
+});
+$(function() {
+  <% signs = @item.user_signs.map { |sign| [sign.id.to_s, sign.body] }.flatten %>
+  var signs = <%= Hash[*signs].to_json.html_safe %>
+  $('#sign').on('change', function() {
+    var sign = signs[$(this).find('option:selected').val()];
+    if (sign) {
+      if ($('#item_in_format').val() == 'html') {
+        tinyMCE.activeEditor.execCommand('mceInsertContent', true, convertTextToHtml(sign));
+      } else {
+        $('#item_in_body').range(sign);
+      }
+      $('#sign').val('');
+    }
+    return false;
+  });
 });
 $(function() {
   $('a[href="#openScheduleWindow"]').on('click', function() {
