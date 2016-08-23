@@ -6,12 +6,16 @@
   %>
   <div class="<%= li_class %>">
     <%= mailbox_mobile_image_tag(mailbox_type) %>
-    <%= link_to h(box.title), { action: :index, mailbox: box.name }, class: nm_class %>
-    <% if box.unseen > 0 %>
-      <font class="unseenNum">(<font class="num"><%= box.unseen %></font>)</font>
-    <% end %>
-    <% if box.trash_box?(:root) && (box.messages > 0 || box.children.length > 0) %>
-      <%= link_to '≫空にする', { action: :empty, mailbox: box.name }, class: 'empty' %>
+    <% if box.noselect? || box.nonexistent? %>
+      <a class="noselect"><%= box.title %></a>
+    <% else %>
+      <%= link_to h(box.title), { action: :index, mailbox: box.name }, class: nm_class %>
+      <% if box.unseen > 0 %>
+        <font class="unseenNum">(<font class="num"><%= box.unseen %></font>)</font>
+      <% end %>
+      <% if box.use_as_trash? && (box.messages > 0 || box.children.length > 0) %>
+        <%= link_to '≫空にする', { action: :empty, mailbox: box.name }, class: 'empty' %>
+      <% end %>
     <% end %>
     <% if box.children.size > 0 %>
       <div class="children level<%= box.level_no %>">

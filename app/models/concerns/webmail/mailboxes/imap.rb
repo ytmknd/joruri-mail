@@ -2,8 +2,19 @@ require 'net/imap'
 module Webmail::Mailboxes::Imap
   extend ActiveSupport::Concern
 
-  DEFAULTS = %w(Drafts Sent Archives Trash)
-  ORDERS = %w(INBOX virtual Drafts Sent Archives _etc Trash)
+  SPECIAL_USE_MAILBOX_MAP = {
+    # special_use  => mailbox
+    'Archive'      => 'Archives',
+    'Drafts'       => 'Drafts',
+    'Junk'         => 'Junk',
+    'Sent'         => 'Sent',
+    'Trash'        => 'Trash',
+    'All'          => 'virtual.All',
+    'Flagged'      => 'virtual.Flagged',
+  }
+  SPECIAL_USES = SPECIAL_USE_MAILBOX_MAP.keys
+  REQUIRED_SPECIAL_USES = %w(Archive Drafts Sent Trash)
+  ORDERS = %w(INBOX virtual Drafts Sent Archives Junk _etc Trash)
 
   def create_mailbox(name)
     transaction do
@@ -36,105 +47,69 @@ module Webmail::Mailboxes::Imap
   end
 
   class_methods do
-    def name_to_title(name)
-      name = Net::IMAP.decode_utf7(name)
-      I18n.t('webmail.mailbox.titles').each do |key, title|
-        name = name.gsub(/^#{key}(\.|$)/, title + '\1')
-      end
-      name
-    end
-
-    def imap_sorted_list_and_status(status_mailboxes = [:all], returns = ['MESSAGES', 'UNSEEN', 'RECENT'])
-      boxes, statuses = imap_list_status(status_mailboxes, returns)
-
-      need_boxes = DEFAULTS - boxes.map(&:name)
-      if need_boxes.size > 0
-        need_boxes.each { |box| imap.create(box) }
-        imap_sorted_list_and_status(status_mailboxes, returns)
-      end
-
-      return sort_list(boxes), statuses
-    end
-
-    def imap_list_status(status_mailboxes = [:all], returns = ['MESSAGES', 'UNSEEN', 'RECENT'])
-      nonexistent_or_noselect = ->(attr) {
-        attr.in?([:Nonexistent, :Noselect])
-      }
-
-      if imap.capabilities.include?('LIST-STATUS')
-        boxes, statuses = imap.list_status('', '*', returns)
-        boxes.reject! { |box| box.attr.any?(&nonexistent_or_noselect) }
-        statuses.reject! {|status| !status_mailboxes.include?(status.mailbox) } unless status_mailboxes.include?(:all)
-      else
-        boxes = imap.list('', '*')
-        boxes.reject! { |box| box.attr.any?(&nonexistent_or_noselect) }
-        statuses = []
-        boxes.each do |box|
-          if status_mailboxes.include?(:all) || status_mailboxes.include?(box.name)
-            status = imap.status(box.name, returns)
-            statuses << Net::IMAP::StatusData.new(box.name, status)
-          end
+    def decode_name(name, delim)
+      names = Net::IMAP.decode_utf7(name).split(delim)
+      if names[0]
+        I18n.t('webmail.mailbox.titles').each do |path, title|
+          names[1] = names[1].gsub(/#{Regexp.escape(path)}/i, title + '\1') if names[0] == 'virtual' && names[1]
+          names[0] = names[0].gsub(/#{Regexp.escape(path)}/i, title + '\1')
         end
       end
-      return boxes, statuses
-    end
-
-    def sort_list(boxes)
-      boxes = boxes.sort { |a, b| name_to_title(a.name).downcase <=> name_to_title(b.name).downcase }
-      boxes = boxes.group_by do |box|
-        name = box.name.split('.').first
-        name.in?(ORDERS) ? name : '_etc'
-      end
-      ORDERS.map { |name| boxes[name] }.compact.flatten
+      names.join(delim)
     end
 
     def load_mailbox(mailbox)
-      unless box = self.find_by(user_id: Core.current_user.id, name: mailbox)
+      unless item = self.find_by(user_id: Core.current_user.id, name: mailbox)
         sync_mailboxes([mailbox])
-        box = self.find_by(user_id: Core.current_user.id, name: mailbox)
+        item = self.find_by(user_id: Core.current_user.id, name: mailbox)
       end
-      box
+      item
     end
 
     def load_mailboxes(reloads = nil)
       reloads = Array(reloads)
-      boxes = self.where(user_id: Core.current_user.id).order(:sort_no).to_a
-      reloads << :all if boxes.size < DEFAULTS.size
+      items = self.where(user_id: Core.current_user.id).order(:sort_no).to_a
+      reloads << :all if items.size < REQUIRED_SPECIAL_USES.size
 
       if reloads.present?
-        Util::Database.lock_by_name(Core.current_user.account) do
+        ApplicationRecord.lock_by_name(Core.current_user.account) do
           sync_mailboxes(reloads)
         end
-        boxes = self.where(user_id: Core.current_user.id).order(:sort_no)
+        items = self.where(user_id: Core.current_user.id).order(:sort_no)
       end
 
-      make_tree(boxes)
+      make_tree(items)
     end
 
     def sync_mailboxes(reloads = [:all])
-      boxes = self.where(user_id: Core.current_user.id).order(:sort_no)
-      list_boxes, statuses = imap_sorted_list_and_status(reloads)
+      items = self.where(user_id: Core.current_user.id).order(:sort_no)
+      boxes, statuses = imap_sorted_list_and_status(reloads)
 
       status_by_name = statuses.index_by(&:mailbox)
-      box_by_name = boxes.index_by(&:name)
+      item_by_name = items.index_by(&:name)
 
-      deleted_box_names = boxes.map(&:name) - list_boxes.map(&:name)
-      deleted_box_names.each { |name| box_by_name[name].destroy if box_by_name[name] }
+      deleted_box_names = items.map(&:name) - boxes.map(&:name)
+      deleted_box_names.each { |name| item_by_name[name].destroy if item_by_name[name] }
 
-      list_boxes.each_with_index do |list_box, idx|
-        if status = status_by_name[list_box.name]
-          box = box_by_name[list_box.name] || self.new
-          box.attributes = {
-            user_id:  Core.current_user.id,
-            sort_no:  idx + 1,
-            name:     list_box.name,
-            title:    name_to_title(list_box.name).split('.').last,
+      boxes.each_with_index do |box, idx|
+        item = item_by_name[box.name] || self.new
+        item.attributes = {
+          user_id:  Core.current_user.id,
+          sort_no:  idx + 1,
+          name:     box.name,
+          title:    decode_name(box.name, box.delim).split(box.delim).last,
+          delim:    box.delim,
+          attr:     box.attr.join(' '),
+          special_use: box.special_use,
+        }
+        if status = status_by_name[box.name]
+          item.attributes = {
             messages: status.attr['MESSAGES'],
             unseen:   status.attr['UNSEEN'],
             recent:   status.attr['RECENT']
           }
-          box.save(validate: false) if box.changed?
         end
+        item.save(validate: false) if item.changed?
       end
     end
 
@@ -181,15 +156,65 @@ module Webmail::Mailboxes::Imap
       Core.imap
     end
 
-    def make_tree(mailboxes)
-      hash = mailboxes.index_by(&:name)
-      mailboxes.each do |box|
-        if box.ancestor_name && hash[box.ancestor_name]
-          hash[box.ancestor_name].children.push(box)
-          box.parent = hash[box.ancestor_name]
+    def imap_sorted_list_and_status(targets = [:all])
+      boxes, statuses = imap_list_status(targets, ['MESSAGES', 'UNSEEN', 'RECENT'])
+
+      needs = REQUIRED_SPECIAL_USES - boxes.map { |box| box.special_use.to_s }
+      if needs.size > 0
+        needs.each { |need| imap.create(SPECIAL_USE_MAILBOX_MAP[need]) }
+        imap_sorted_list_and_status(targets)
+      end
+
+      return sort_list(boxes), statuses
+    end
+
+    def imap_list_status(targets, returns)
+      boxes = imap.list('', '*')
+      boxes = append_special_use_flag(boxes)
+
+      if imap.capabilities.include?('LIST-STATUS')
+        _, statuses = imap.list_status('', '*', returns)
+        statuses.reject! {|status| !targets.include?(status.mailbox) } unless targets.include?(:all)
+      else
+        statuses = []
+        boxes.each do |box|
+          if targets.include?(:all) || targets.include?(box.name)
+            status = imap.status(box.name, returns)
+            statuses << Net::IMAP::StatusData.new(box.name, status)
+          end
         end
       end
-      mailboxes
+      return boxes, statuses
+    end
+
+    def append_special_use_flag(boxes)
+      box_by_name = boxes.index_by(&:name)
+      specials = SPECIAL_USES - boxes.map { |box| box.special_use.to_s }
+      specials.each do |special|
+        box = box_by_name[SPECIAL_USE_MAILBOX_MAP[special]]
+        box.special_use = special.to_sym if box
+      end
+      boxes
+    end
+
+    def sort_list(boxes)
+      boxes = boxes.sort { |a, b| decode_name(a.name, a.delim).downcase <=> decode_name(b.name, b.delim).downcase }
+      boxes = boxes.group_by do |box|
+        name = box.name.split(box.delim).first
+        name.in?(ORDERS) ? name : '_etc'
+      end
+      ORDERS.map { |name| boxes[name] }.compact.flatten
+    end
+
+    def make_tree(items)
+      hash = items.index_by(&:name)
+      items.each do |item|
+        if item.ancestor_name && hash[item.ancestor_name]
+          hash[item.ancestor_name].children.push(item)
+          item.parent = hash[item.ancestor_name]
+        end
+      end
+      items
     end
   end
 end

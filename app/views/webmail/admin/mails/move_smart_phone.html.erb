@@ -22,7 +22,7 @@ action_label = params[:copy].blank? ? '移動' : 'コピー'
     <% end %>
     <tr><th><%= action_label %>先フォルダー</th></tr>
     <tr><td>
-      <%= f.select :mailbox, mailboxes, selected: 'Archives', class: 'selectUI' %>
+      <%= f.select :mailbox, mailboxes, selected: @mailboxes.detect(&:use_as_archive?).try(:name), class: 'selectUI' %>
     </td></tr>
   </table>
   <% if mailboxes.size > 0 %>

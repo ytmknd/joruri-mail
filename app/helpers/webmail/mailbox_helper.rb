@@ -1,10 +1,14 @@
 module Webmail::MailboxHelper
   def mailbox_list_class(mailbox)
-    classes = []
-    classes << (mailbox.special_box? ? mailbox.names.map(&:downcase) : 'folder')
+    classes = ['folder']
+    if mailbox.special_use.present?
+      classes << mailbox.special_use.downcase
+    elsif mailbox.inbox? || mailbox.virtual?
+      classes << mailbox.name.downcase
+    end
     if request.smart_phone?
       classes << "level#{mailbox.level_no}"
-      classes << 'cursor' unless mailbox.trash_box?(:root)
+      classes << 'cursor' unless mailbox.use_as_trash?
     end
     classes.join(' ')
   end
@@ -15,6 +19,11 @@ module Webmail::MailboxHelper
     classes << 'unseen' if mailbox.unseen > 0 && !options[:without_unseen]
     classes << 'droppable' if mailbox.mail_droppable_box?
     classes.join(' ')
+  end
+
+  def mailbox_title(mailboxes, name)
+    mailbox = mailboxes.detect { |box| box.name == name }
+    mailbox.try(:title)
   end
 
   def mailbox_mobile_image_tag(mailbox_type)

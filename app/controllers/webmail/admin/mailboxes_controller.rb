@@ -70,35 +70,15 @@ class Webmail::Admin::MailboxesController < Webmail::Controller::Admin::Base
   def destroy
     return http_error(403) unless @item.deletable?
 
-    old_name = @item.name
-    delete_complete = @item.trash_box?(:children)
-    short_name = @item.path.blank? ? @item.name : @item.name[@item.path.size, @item.name.size]
-    new_name = "Trash.#{short_name}"
-
-    if !delete_complete && Core.imap.list('', "Trash.#{short_name}")
-      @item.errors.add(:base, '同じ名前のフォルダーが既に存在します。')
-      return render :index
-    end
-
-    parent = @item.path.to_s.gsub(/\.+$/, '')
-    parent = "INBOX" if parent.blank?
-
     begin
-      if children = Core.imap.list('', "#{@item.name}.*")
-        children.each do |box|
-          if delete_complete
-            Core.imap.delete(box.name)
-          end
-        end
-      end
-
-      if delete_complete
-        @item.delete_mailbox
+      if @item.trash_box?(:children)
+        @item.descendants.each(&:delete_mailbox)
       else
-        @item.rename_mailbox(new_name)
+        trash = @mailboxes.detect(&:use_as_trash?)
+        @item.rename_mailbox("#{trash.name}#{trash.delim}#{@item.names.last}") if trash
       end
     rescue => e
-      @item.errors.add(:base, e.to_s)
+      @item.errors.add(:base, e.to_s.force_encoding('utf-8'))
     end
 
     if @item.errors.present?
@@ -106,7 +86,7 @@ class Webmail::Admin::MailboxesController < Webmail::Controller::Admin::Base
       render :index
     else
       flash[:notice] = '削除処理が完了しました。'
-      redirect_to action: :index, mailbox: parent
+      redirect_to action: :index, mailbox: @item.parent ? @item.parent.name : 'INBOX'
     end
   end
 

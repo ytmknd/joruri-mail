@@ -57,8 +57,8 @@ subject_wrap = @conf.mail_list_subject.blank? ? '' : 'autoWrap'
       </td>
       <% if @mailbox.virtual_box? %>
         <td class="mailbox">
-          <span class="overflowHidden" title="<%= item.x_mailbox_title %>">
-            <%= item.x_mailbox_title %>
+          <span class="overflowHidden" title="<%= mailbox_title(@mailboxes, item.x_mailbox) %>">
+            <%= mailbox_title(@mailboxes, item.x_mailbox) %>
           </span>
         </td>
       <% end %>

@@ -8,12 +8,16 @@
       %>
       <tr class="<%= li_class %>">
         <td>
-          <%= content_tag_if box.trash_box?(:root), :div do %> 
-            <%= content_tag_if box.unseen > 0, :b do %>
-              <%= link_to "#{h(box.title)}#{unseenNum}", { action: :index, mailbox: box.name }, class: nm_class %>
-            <% end %>
-            <% if box.trash_box?(:root) && (box.messages > 0 || box.children.length > 0) %>
-              <%= link_to '≫空にする', { action: :empty, mailbox: box.name }, class: 'empty', data: { confirm: '空にしてよろしいですか？' } %>
+          <%= content_tag_if box.use_as_trash?, :div do %>
+            <% if box.noselect? || box.nonexistent? %>
+              <a class="noselect"><%= box.title %></a>
+            <% else %>
+              <%= content_tag_if box.unseen > 0, :b do %>
+                <%= link_to "#{h(box.title)}#{unseenNum}", { action: :index, mailbox: box.name }, class: nm_class %>
+              <% end %>
+              <% if box.use_as_trash? && (box.messages > 0 || box.children.length > 0) %>
+                <%= link_to '≫空にする', { action: :empty, mailbox: box.name }, class: 'empty', data: { confirm: '空にしてよろしいですか？' } %>
+              <% end %>
             <% end %>
           <% end %>
         </td>

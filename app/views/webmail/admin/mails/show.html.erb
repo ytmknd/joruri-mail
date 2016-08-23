@@ -298,7 +298,7 @@ $(function() {
   <% if controller.new_window? && @item.seen_flagged? %>
   if (window.opener) {
     window.opener.syncUnseenClass('<%=raw escape_javascript @mailbox.name %>', '<%= @item.uid %>');
-    <% if @item.starred? && @mailbox.virtual_flagged_box? %>
+    <% if @item.starred? && @mailbox.flagged_box? %>
       window.opener.syncUnseenClass('<%=raw escape_javascript @item.x_mailbox %>', '<%= @item.x_real_uid %>');
     <% end %>
   }
@@ -373,11 +373,11 @@ $(function() {
       syncStarClass(uid, afterClass);
       if (window.opener) {
         window.opener.syncStarClass(uid, afterClass);
-        <% if @mailbox.virtual_flagged_box? %>
+        <% if @mailbox.flagged_box? %>
           window.close();
         <% end %>
       } else {
-        <% if @mailbox.virtual_flagged_box? %>
+        <% if @mailbox.flagged_box? %>
           window.location = '<%= url_for(action: :index) %>';
         <% end %>
       }

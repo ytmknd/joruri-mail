@@ -67,11 +67,11 @@ class Webmail::Admin::FiltersController < Webmail::Controller::Admin::Base
   private
 
   def item_params
-    params.require(:item).permit(:name, :state, :sort_no, :conditions_chain, :action, :mailbox,
+    params.require(:item).permit(:name, :state, :sort_no, :conditions_chain, :action, :mailbox_name,
       :conditions_attributes => [:id, :column, :inclusion, :value, :_destroy])
   end
 
   def apply_item_params
-    params.require(:item).permit(:target_mailbox, :include_sub)
+    params.require(:item).permit(:apply_mailbox_name, :include_sub)
   end
 end

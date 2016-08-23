@@ -70,20 +70,11 @@ module Webmail::Mails::Imap
     @seen_flagged
   end
 
-  def x_mailbox_title
-    Webmail::Mailbox.name_to_title(x_mailbox.to_s).split('.').last
-  end
-
-  def destroy(complete = false)
+  def destroy
     imap.select(mailbox)
-    if mailbox !~ /^Trash(\.|$)/ && !complete
-      num = self.class.move_to('Trash', [uid])
-      num == 1
-    else
-      num = imap.uid_store(uid, '+FLAGS', [:Deleted]).to_a.size
-      imap.expunge
-      num == 1
-    end
+    num = imap.uid_store(uid, '+FLAGS', [:Deleted]).to_a.size
+    imap.expunge
+    num == 1
   end
 
   def move(to_mailbox)
@@ -104,7 +95,7 @@ module Webmail::Mails::Imap
       if sort && imap.capabilities.include?('SORT')
         imap.uid_sort(sort, conditions, 'utf-8')
       else
-        imap.uid_search(conditions, 'utf-8')
+        imap.uid_search(conditions, 'utf-8').reverse
       end
     end
 
@@ -165,7 +156,7 @@ module Webmail::Mails::Imap
       end
     end
 
-    def paginate_uid(uid, select:, conditions: [], sort: [], starred: nil)
+    def paginate_by_uid(uid, select:, conditions: [], sort: [], starred: nil)
       uids =
         if starred == '1'
           find_uids(select: select, conditions: conditions + ['FLAGGED'], sort: sort) +
@@ -220,48 +211,48 @@ module Webmail::Mails::Imap
       res.name == 'OK' ? uids.size : 0
     end
 
-    def delete_all(mailbox, uids, complete = false)
+    def delete_all(mailbox, uids)
       return 0 if uids.blank?
 
       imap.select(mailbox)
-      if mailbox !~ /^Trash(\.|$)/ && !complete
-        move_to('Trash', uids)
-      else
-        num = imap.uid_store(uids, "+FLAGS", [:Deleted]).to_a.size
-        imap.expunge
-        num
-      end
+      num = imap.uid_store(uids, '+FLAGS', [:Deleted]).to_a.size
+      imap.expunge
+      num
+    end
+
+    def answered_all(mailbox, uids)
+      imap.select(mailbox)
+      imap.uid_store(uids, '+FLAGS', [:Answered]).to_a.size
+    end
+
+    def forwarded_all(mailbox, uids)
+      imap.select(mailbox)
+      imap.uid_store(uids, '+FLAGS', ['$Forwarded']).to_a.size
     end
 
     def seen_all(mailbox, uids)
       imap.select(mailbox)
-      imap.uid_store(uids, "+FLAGS", [:Seen]).to_a.size
+      imap.uid_store(uids, '+FLAGS', [:Seen]).to_a.size
     end
 
     def unseen_all(mailbox, uids)
       imap.select(mailbox)
-      imap.uid_store(uids, "-FLAGS", [:Seen]).to_a.size
+      imap.uid_store(uids, '-FLAGS', [:Seen]).to_a.size
     end
 
     def star_all(mailbox, uids)
       imap.select(mailbox)
-      imap.uid_store(uids, "+FLAGS", [:Flagged]).to_a.size
+      imap.uid_store(uids, '+FLAGS', [:Flagged]).to_a.size
     end
 
     def unstar_all(mailbox, uids)
       imap.select(mailbox)
-      imap.uid_store(uids, "-FLAGS", [:Flagged]).to_a.size
-    end
-
-    def include_starred_uid?(mailbox, uids)
-      imap.select(mailbox)
-      starred_uids = imap.uid_search(['UID', uids, 'UNDELETED', 'FLAGGED'], 'utf-8')
-      uids.inject(false){|result,x| result || starred_uids.include?(x)}
+      imap.uid_store(uids, '-FLAGS', [:Flagged]).to_a.size
     end
 
     def label_all(mailbox, uids, label_id)
       imap.select(mailbox)
-      imap.uid_store(uids, "+FLAGS", ["$label#{label_id}"]).to_a.size
+      imap.uid_store(uids, '+FLAGS', ["$label#{label_id}"]).to_a.size
     end
 
     def unlabel_all(mailbox, uids, label_id = nil)

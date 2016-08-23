@@ -2,6 +2,7 @@ class Webmail::Mailbox < ApplicationRecord
   include Sys::Model::Base
   include Sys::Model::Auth::Free
   include Webmail::Mailboxes::Imap
+  include Webmail::Mailboxes::Mail
 
   attr_accessor :path
   attr_accessor :parent, :children
@@ -24,7 +25,7 @@ class Webmail::Mailbox < ApplicationRecord
   end
 
   def filters
-    Webmail::Filter.where(user_id: user_id, mailbox: name)
+    Webmail::Filter.where(user_id: user_id, mailbox_name: name)
   end
 
   def mail_nodes
@@ -43,58 +44,45 @@ class Webmail::Mailbox < ApplicationRecord
     Core.current_user.has_auth?(:manager) || user_id == Core.current_user.id
   end
 
-  def draft_box?(target = :all)
-    case target
-    when :all      ; name =~ /^Drafts(\.|$)/
-    when :children ; name =~ /^Drafts\./
-    else           ; name == "Drafts"
-    end
+  def attrs
+    @attrs ||= attr.to_s.split(' ')
   end
 
-  def sent_box?(target = :all)
-    case target
-    when :all      ; name =~ /^Sent(\.|$)/
-    when :children ; name =~ /^Sent\./
-    else           ; name == "Sent"
-    end
+  def noselect?
+    attrs.include?('Noselect')
   end
 
-  def trash_box?(target = :all)
-    case target
-    when :all      ; name =~ /^Trash(\.|$)/
-    when :children ; name =~ /^Trash\./
-    else           ; name == "Trash"
-    end
-  end
-
-  def virtual_box?(target = :all)
-    case target
-    when :all      ; name =~ /^virtual(\.|$)/
-    when :children ; name =~ /^virtual\./
-    else           ; name == "virtual"
-    end
-  end
-
-  def virtual_flagged_box?
-    name == 'virtual.Flagged'
+  def nonexistent?
+    attrs.include?('Nonexistent')
   end
 
   def path
     return @path if @path
-    return "" if name !~ /\./
-    name.gsub(/(.*\.).*/, '\\1')
+    names[0..-2] ? names[0..-2].join(delim) + delim : ''
   end
 
   def path_and_encoded_title
     path + Net::IMAP.encode_utf7(title)
   end
 
-  def slashed_title(char = "　 ")
-    self.class.name_to_title(name).gsub('.', '/')
+  def slashed_title
+    self.class.decode_name(name, delim).gsub(delim, '/')
   end
 
   def indented_title(char = "　 ")
     "#{char * level_no}#{title}"
+  end
+
+  def names
+    name.split(delim)
+  end
+
+  def parent_name
+    names[-2]
+  end
+
+  def name_with_delim
+    "#{name}#{delim}"
   end
 
   def root?
@@ -102,16 +90,19 @@ class Webmail::Mailbox < ApplicationRecord
     parent.nil?
   end
 
-  def names
-    name.split('.')
+  def ancestors(items = [])
+    parent.ancestors(items) if parent
+    items << self
   end
 
-  def parent_name
-    names[-2]
+  def descendants(items = [])
+    items << self
+    children.each {|c| c.descendants(items) }
+    items
   end
 
   def ancestor_name
-    ancestor_names.join('.')
+    ancestor_names.join(delim)
   end
 
   def ancestor_names
@@ -119,23 +110,99 @@ class Webmail::Mailbox < ApplicationRecord
   end
 
   def level_no
-    if virtual_box?
-      names.count - 2
-    else
-      names.count - 1
+    names.count - 1
+  end
+
+  def inbox?
+    name.upcase == 'INBOX'
+  end
+
+  def virtual?
+    name.downcase == 'virtual'
+  end
+
+  def use_as_archive?
+    special_use == 'Archive'
+  end
+
+  def use_as_drafts?
+    special_use == 'Drafts'
+  end
+
+  def use_as_sent?
+    special_use == 'Sent'
+  end
+
+  def use_as_junk?
+    special_use == 'Junk'
+  end
+
+  def use_as_trash?
+    special_use == 'Trash'
+  end
+
+  def use_as_all?
+    special_use == 'All'
+  end
+
+  def use_as_flagged?
+    special_use == 'Flagged'
+  end
+
+  def archive_box?(target = :all)
+    in_special_use_box?(target, 'Archive')
+  end
+
+  def draft_box?(target = :all)
+    in_special_use_box?(target, 'Drafts')
+  end
+
+  def junk_box?(target = :all)
+    in_special_use_box?(target, 'Junk')
+  end
+
+  def sent_box?(target = :all)
+    in_special_use_box?(target, 'Sent')
+  end
+
+  def trash_box?(target = :all)
+    in_special_use_box?(target, 'Trash')
+  end
+
+  def all_box?(target = :all)
+    in_special_use_box?(target, 'All')
+  end
+
+  def flagged_box?(target = :all)
+    in_special_use_box?(target, 'Flagged')
+  end
+
+  def virtual_box?(target = :all)
+    in_special_name_box?(target, 'virtual')
+  end
+
+  def in_special_use_box?(target, special_use)
+    has_special_ancestor = ancestors.any? {|box| box.special_use == special_use }
+    case target
+    when :all      ; has_special_ancestor
+    when :children ; has_special_ancestor && self.special_use != special_use
     end
   end
 
-  def special_box?
-    name =~ Regexp.union(/^(INBOX|Drafts|Sent|Archives|Trash|virtual)$/, /^virtual\./)
+  def in_special_name_box?(target, name)
+    has_special_ancestor = ancestors.any? {|box| box.name.downcase == name.downcase }
+    case target
+    when :all      ; has_special_ancestor
+    when :children ; has_special_ancestor && self.name.downcase != name.downcase
+    end
   end
 
   def creatable_child_box?
-    name !~ /^(Drafts|Trash|virtual)(\.|$)/
+    !(draft_box? || junk_box? || trash_box? || all_box? || flagged_box? || virtual_box?)
   end
 
   def editable_box?
-    name !~ Regexp.union(/^(INBOX|Drafts|Sent|Archives|Trash)$/, /^virtual(\.|$)/)
+    !(inbox? || special_use.present? || virtual_box? || noselect?)
   end
 
   def deletable_box?
@@ -143,31 +210,31 @@ class Webmail::Mailbox < ApplicationRecord
   end
 
   def selectable_as_parent?
-    name !~ /^(Drafts|Trash|virtual)(\.|$)/
+    !(draft_box? || junk_box? || trash_box? || all_box? || flagged_box? || virtual_box?)
   end
 
   def mail_droppable_box?
-    name !~ /^(Drafts|virtual)(\.|$)/
+    !(draft_box? || all_box? || flagged_box? || virtual_box?)
   end
 
   def mail_movable_box?
-    name !~ /^(Drafts|Trash|virtual)(\.|$)/
+    !(draft_box? || trash_box? || all_box? || flagged_box? || virtual_box?)
   end
 
   def mail_unseen_count_box?
-    name !~ /^(Drafts|Sent|Trash|virtual)(\.|$)/
+    !(draft_box? || sent_box? || trash_box? || all_box? || flagged_box? || virtual_box?)
   end
 
   def filter_targetable_box?
-    name !~ Regexp.union(/^(Drafts|Sent|Trash|virtual)(\.|$)/, /^INBOX$/)
+    !(inbox? || draft_box? || sent_box? || trash_box? || all_box? || flagged_box? || virtual_box?)
   end
 
   def filter_appliable_box?
-    name !~ /^(Drafts|Sent|Trash|virtual)(\.|$)/
+    !(draft_box? || sent_box? || trash_box? || all_box? || flagged_box? || virtual_box?)
   end
 
   def batch_deletable_box?
-    name !~ /^(virtual)(\.|$)/
+    !(all_box? || flagged_box? || virtual_box?)
   end
 
   private
@@ -183,12 +250,12 @@ class Webmail::Mailbox < ApplicationRecord
   end
 
   def rename_path(name, old_name, new_name)
-    name.gsub(/^#{Regexp.escape(old_name)}(\.|$)/, "#{new_name}\\1")
+    name.gsub(/^#{Regexp.escape(old_name)}(#{Regexp.escape(delim)}|$)/, "#{new_name}\\1")
   end
 
   def update_filters
-    Webmail::Filter.where(user_id: user_id, mailbox: name_was).each do |filter|
-      filter.update_columns(mailbox: rename_path(filter.mailbox, name_was, name))
+    Webmail::Filter.where(user_id: user_id, mailbox_name: name_was).each do |filter|
+      filter.update_columns(mailbox_name: rename_path(filter.mailbox_name, name_was, name))
     end
   end
 
@@ -204,7 +271,7 @@ class Webmail::Mailbox < ApplicationRecord
   end
 
   def disable_filters
-    filters.update_all(state: 'disabled', mailbox: '')
+    filters.update_all(state: 'disabled', mailbox_name: '')
   end
 
   def destroy_mail_nodes

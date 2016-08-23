@@ -310,6 +310,10 @@ form.search td input.email {
   background-color: #bdf;
   color: #00f;
 }
+#webmailMenu .mailbox li a.noselect:hover {
+  background-color: inherit;
+  color: #000;
+}
 #webmailMenu .mailbox li a.ui-active {
   background-color: #bdf;
   color: #00f;
@@ -318,40 +322,39 @@ form.search td input.email {
   background-color: #fdb;
   color: #f00;
 }
-#webmailMenu .mailbox li.inbox a {
+#webmailMenu .mailbox li.folder > a {
+  background-image: url(../images/tree/folder_close.gif);
+}
+#webmailMenu .mailbox li.inbox > a {
   background-image: url(../images/tree/transmit.gif);
 }
-#webmailMenu .mailbox li.inbox.current a {
+#webmailMenu .mailbox li.inbox.current > a {
   background-image: url(../images/tree/transmit_open.gif);
 }
-#webmailMenu .mailbox li.sent a {
+#webmailMenu .mailbox li.sent > a {
   background-image: url(../images/tree/mailbox.gif);
 }
-#webmailMenu .mailbox li.sent.current a {
+#webmailMenu .mailbox li.sent.current > a {
   background-image: url(../images/tree/mailbox_open.gif);
 }
-#webmailMenu .mailbox li.drafts a {
+#webmailMenu .mailbox li.drafts > a {
   background-image: url(../images/tree/draft.gif);
 }
-#webmailMenu .mailbox li.archives a {
+#webmailMenu .mailbox li.archive > a {
   background-image: url(../images/tree/archive.gif);
 }
-#webmailMenu .mailbox li.trash a {
+#webmailMenu .mailbox li.trash > a {
   background-image: url(../images/tree/dustbox.gif);
 }
-#webmailMenu .mailbox li.star a {
-  background-image: url(../images/mailoption/star_on.gif);
-  background-position: 5px 5px;
-}
-#webmailMenu .mailbox li.virtual a {
+#webmailMenu .mailbox li.virtual > a {
   background-image: url(../images/tree/folder_search.gif);
 }
-#webmailMenu .mailbox li.flagged a {
+#webmailMenu .mailbox li.all > a {
+  background-image: url(../images/tree/transmit_open.gif);
+}
+#webmailMenu .mailbox li.flagged > a {
   background-image: url(../images/mailoption/star_on.gif);
   background-position: 5px 5px;
-}
-#webmailMenu .mailbox li.folder a {
-  background-image: url(../images/tree/folder_close.gif);
 }
 #webmailMenu .mailbox li a.unseen {
   color: #00f;

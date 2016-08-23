@@ -247,7 +247,7 @@ $(function() {
     })
     .done(function() {
       syncStarClass(uid, afterClass);
-      <% if @mailbox.virtual_flagged_box? %>
+      <% if @mailbox.flagged_box? %>
         window.location = '<%= url_for(action: :index, mobile: :list) %>';
       <% end %>
     })

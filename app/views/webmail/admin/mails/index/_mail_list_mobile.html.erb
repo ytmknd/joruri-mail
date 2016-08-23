@@ -20,7 +20,7 @@
     <% end %>
     <br />
     <% if @mailbox.virtual_box? %>
-      <font class="mailbox"><%= item.x_mailbox_title %></font><br />
+      <font class="mailbox"><%= mailbox_title(@mailboxes, item.x_mailbox) %></font><br />
     <% end %>
     <font class="date"><%= mail_short_date(item) %></font>
     <font class="from"><%= mail_text_wrap(from.gsub(/["']/, ""), 1000) %></font><br />

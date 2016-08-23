@@ -23,7 +23,7 @@ subject_wrap = @conf.mail_list_subject.blank? ? '' : 'autoWrap'
             <span class="text"><%= mail_text_wrap(truncate(item.subject, length: 70, escape: false).presence || ' ') %></span>
           </span>
           <% if @mailbox.virtual_box? %>
-            <span class="mailbox"><%= item.x_mailbox_title %></span>
+            <span class="mailbox"><%= mailbox_title(@mailboxes, item.x_mailbox) %></span>
           <% end %>
         </a>
       </td>
