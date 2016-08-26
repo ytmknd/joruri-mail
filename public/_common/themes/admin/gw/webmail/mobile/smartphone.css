@@ -319,14 +319,17 @@ table.root td a {
   background-repeat: no-repeat;
   background-position: 8px 15px;
 }
+table.root td a.noselect {
+  cursor: default;
+}
+table.root .folder td a {
+  background-image: url("/_common/themes/admin/gw/images/tree/folder_close.gif");
+}
 table.root .inbox td a {
   background-image: url("/_common/themes/admin/gw/images/tree/transmit.gif");
 }
 table.root .star td a {
   background-image: url("/_common/themes/admin/gw/images/mailoption/star_on.gif");
-}
-table.root .folder td a {
-  background-image: url("/_common/themes/admin/gw/images/tree/folder_close.gif");
 }
 table.root tr.level1 td a {
   padding-left: 45px;
