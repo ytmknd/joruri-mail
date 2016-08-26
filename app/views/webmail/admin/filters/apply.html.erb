@@ -19,7 +19,7 @@
   </tr><tr>
     <th>適用するフォルダー</th>
     <td>
-      <%= f.select :target_mailbox, Webmail::Mailbox.mailbox_options(&:filter_appliable_box?), include_blank: true %>
+      <%= f.select :apply_mailbox_name, Webmail::Mailbox.mailbox_options(&:filter_appliable_box?), include_blank: true %>
       <%= f.check_box :include_sub %><label for="item_include_sub">サブフォルダーを含める</label>
     </td>
   </tr>

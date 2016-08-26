@@ -85,7 +85,8 @@ function syncUnseenClass(mailbox, uid) {
   if (uid != '') {
     $('#mail_' + uid).removeClass('unseen');
   }
-  var mbox = $('#mailbox_' + mailbox);
+  var mbox = $('a[data-mailbox="' + mailbox + '"]');
+
   var unseen = mbox.siblings('span.unseenNum');
   var num = unseen.find('span.num')
   var n = parseInt(unseen.find('span.num').text());

@@ -22,7 +22,7 @@
 <% else %>
   <% if @mailbox.creatable_child_box? %>
     <%= form_for :item, url: { action: :create } do |f| %>
-      <%= f.hidden_field :path, value: "#{@item.name}." %>
+      <%= f.hidden_field :path, value: @item.name_with_delim %>
       <table class="show" style="height: 40px;">
         <tr>
           <th style="">新しいフォルダーの登録</th>
@@ -53,8 +53,9 @@
         <tr>
           <th style="">フォルダーの移動</th>
           <td style="">
-            <%= f.select :path, @mailboxes.select { |box| box.selectable_as_parent? && box.name != @mailbox.name && box.name.index("#{@mailbox.name}.") != 0 }
-              .map { |box| [box.slashed_title, "#{box.name}."] }, include_blank: '（ルート階層）' %>
+            <%= f.select :path, @mailboxes
+              .select { |box| box.selectable_as_parent? && box.name != @mailbox.name && box.name.index(@mailbox.name_with_delim) != 0 }
+              .map { |box| [box.slashed_title, box.name_with_delim] }, include_blank: '（ルート階層）' %>
             <%= f.submit '移動する' %>
           </td>
         </tr>

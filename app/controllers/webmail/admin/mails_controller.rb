@@ -11,7 +11,6 @@ class Webmail::Admin::MailsController < Webmail::Controller::Admin::Base
   before_action :set_address_histories, only: [:index, :show, :move]
   before_action :set_mail_form_size
 
-  before_action :set_mailboxes, only: [:index, :show, :move, :empty]
   after_action :reload_mailboxes, only: [:destroy, :delete, :empty, :move, :seen, :unseen, :star, :register_spam]
 
   before_action :set_quota, only: [:index]
@@ -23,29 +22,30 @@ class Webmail::Admin::MailsController < Webmail::Controller::Admin::Base
   def pre_dispatch
     return redirect_to action: :index, mailbox: params[:mailbox] if params[:reset]
 
-    @mailbox = Webmail::Mailbox.load_mailbox(params[:mailbox] || 'INBOX')
+    @mailboxes = Webmail::Mailbox.load_mailboxes(params[:reload].present? ? :all : nil)
+    @mailbox = @mailboxes.detect { |mailbox| mailbox.name == params[:mailbox] }
     return http_error(404) unless @mailbox
   end
 
   def index
-    last_uid, recent, delayed = Webmail::Filter.apply_recents
+    last_uid, recent, delayed = Webmail::Filter.apply_recents(@mailboxes.detect(&:inbox?))
     if recent
       reload_mailboxes
       reload_quota
     end
-    if @mailbox.name == 'INBOX'
+    if @mailbox.inbox?
       @conditions += ['UID', "1:#{last_uid}"]
     end
     if delayed > 0
       flash.now[:error] = "新着メールのフィルター処理件数が規定値を超えたため、残り#{delayed}件はバックグラウンドで実行します。完了までに時間がかかる場合があります。"
     end
 
-    @items = Webmail::Mail.paginate(select: @mailbox.name, conditions: @conditions,
-      sort: @sort, page: params[:page], limit: @conf.mails_per_page, starred: params[:sort_starred])
+    @items = @mailbox.paginate_mails(conditions: @conditions, sort: @sort,
+      page: params[:page], limit: @conf.mails_per_page, starred: params[:sort_starred])
   end
 
   def show
-    @item = Webmail::Mail.find_by_uid(params[:id], select: @mailbox.name, conditions: ['UNDELETED'])
+    @item = @mailbox.find_mail_by_uid(params[:id], conditions: ['UNDELETED'])
     return error_auth unless @item
 
     if params[:show_html_image]
@@ -64,10 +64,7 @@ class Webmail::Admin::MailsController < Webmail::Controller::Admin::Base
     end
 
     if @item.unseen?
-      mailbox_uids = get_mailbox_uids(@mailbox, @item.uid)
-      mailbox_uids.each do |mailbox, uids|
-        Webmail::Mail.seen_all(mailbox, uids)
-      end
+      @mailbox.seen_mails(@item.uid)
       reload_mailboxes
 
       @item.seen!
@@ -81,14 +78,14 @@ class Webmail::Admin::MailsController < Webmail::Controller::Admin::Base
       end
     end
 
-    @pagination = Webmail::Mail.paginate_uid(params[:id],
-      select: @mailbox.name, conditions: @conditions, sort: @sort, starred: params[:sort_starred])
+    @pagination = @mailbox.paginate_mail_by_uid(params[:id], conditions: @conditions, sort: @sort,
+      starred: params[:sort_starred])
 
     _show @item
   end
 
   def download
-    @item = Webmail::Mail.find_by_uid(params[:id], select: @mailbox.name, conditions: ['UNDELETED'])
+    @item = @mailbox.find_mail_by_uid(params[:id], conditions: ['UNDELETED'])
     return error_auth unless @item
 
     case
@@ -139,7 +136,7 @@ class Webmail::Admin::MailsController < Webmail::Controller::Admin::Base
   end
 
   def edit
-    @ref = Webmail::Mail.find_by_uid(params[:id], select: @mailbox.name, conditions: ['UNDELETED'])
+    @ref = @mailbox.find_mail_by_uid(params[:id], conditions: ['UNDELETED'])
     return http_error(404) unless @ref
 
     @item = Webmail::Mail.new(item_params)
@@ -150,25 +147,19 @@ class Webmail::Admin::MailsController < Webmail::Controller::Admin::Base
   end
 
   def update
-    @ref = Webmail::Mail.find_by_uid(params[:id], select: @mailbox.name, conditions: ['UNDELETED'])
+    @ref = @mailbox.find_mail_by_uid(params[:id], conditions: ['UNDELETED'])
     return http_error(404) unless @ref
 
     @item = Webmail::Mail.new(item_params)
     send_message(@item, @ref) do
       if !params[:remain_draft] && @ref.draft?
-        mailbox_uids = get_mailbox_uids(@mailbox, @ref.uid)
-        mailbox_uids.each do |mailbox, uids|
-          num = Webmail::Mail.delete_all(mailbox, uids, true)
-          if num > 0
-            Webmail::MailNode.delete_nodes(mailbox, uids)
-          end
-        end
+        @mailbox.delete_mails(@ref.uid)
       end
     end
   end
 
   def answer
-    @ref = Webmail::Mail.find_by_uid(params[:id], select: @mailbox.name, conditions: ['UNDELETED'])
+    @ref = @mailbox.find_mail_by_uid(params[:id], conditions: ['UNDELETED'])
     return http_error(404) unless @ref
 
     @item = Webmail::Mail.new(item_params)
@@ -176,11 +167,7 @@ class Webmail::Admin::MailsController < Webmail::Controller::Admin::Base
 
     if request.post?
       return send_message(@item, @ref) do
-        mailbox_uids = get_mailbox_uids(@mailbox, @ref.uid)
-        mailbox_uids.each do |mailbox, uids|
-          Core.imap.select(mailbox)
-          Core.imap.uid_store(uids, "+FLAGS", [:Answered])
-        end
+        @mailbox.answered_mails(@ref.uid)
       end
     end
 
@@ -196,18 +183,14 @@ class Webmail::Admin::MailsController < Webmail::Controller::Admin::Base
   end
 
   def forward
-    @ref = Webmail::Mail.find_by_uid(params[:id], select: @mailbox.name, conditions: ['UNDELETED'])
+    @ref = @mailbox.find_mail_by_uid(params[:id], conditions: ['UNDELETED'])
     return http_error(404) unless @ref
 
     @item = Webmail::Mail.new(item_params)
 
     if request.post?
       return send_message(@item, @ref) do
-        mailbox_uids = get_mailbox_uids(@mailbox, @ref.uid)
-        mailbox_uids.each do |mailbox, uids|
-          Core.imap.select(mailbox)
-          Core.imap.uid_store(uids, "+FLAGS", "$Forwarded")
-        end
+        @mailbox.forwarded_mails(@ref.uid)
       end
     end
 
@@ -273,7 +256,8 @@ class Webmail::Admin::MailsController < Webmail::Controller::Admin::Base
     ## save to 'Sent'
     begin
       mail.header[:bcc].include_in_headers = true
-      Timeout.timeout(60) { Core.imap.append('Sent', mail.to_s, [:Seen], Time.now) }
+      sent = @mailboxes.detect(&:use_as_sent?)
+      Timeout.timeout(60) { Core.imap.append(sent.name, mail.to_s, [:Seen], Time.now) }
     rescue => e
       flash[:error] = "メールは送信できましたが、送信トレイへの保存に失敗しました。（#{e}）"
     end
@@ -291,7 +275,8 @@ class Webmail::Admin::MailsController < Webmail::Controller::Admin::Base
       mail = item.prepare_mail(request)
       mail.header[:bcc].include_in_headers = true
       flags = [:Seen, :Draft].tap { |a| a << :Flagged if ref && ref.starred? }
-      Timeout.timeout(60) { Core.imap.append('Drafts', mail.to_s, flags, Time.now) }
+      draft = @mailboxes.detect(&:use_as_drafts?)
+      Timeout.timeout(60) { Core.imap.append(draft.name, mail.to_s, flags, Time.now) }
     rescue => e
       flash.now[:error] = "下書き保存に失敗しました。（#{e}）"
       respond_to do |format|
@@ -314,41 +299,18 @@ class Webmail::Admin::MailsController < Webmail::Controller::Admin::Base
   end
 
   def destroy
-    @item = Webmail::Mail.find_by_uid(params[:id], select: @mailbox.name, conditions: ['UNDELETED'], fetch: ['FLAGS'])
+    @item = @mailbox.find_mail_by_uid(params[:id], conditions: ['UNDELETED'], fetch: ['FLAGS'])
     return error_auth unless @item
 
-    changed_num = 0
-    changed_mailbox_uids = {}
+    trash = @mailboxes.detect(&:use_as_trash?)
+    num = @mailbox.trash_mails(trash.name, @item.uid)
 
-    mailbox_uids = get_mailbox_uids(@mailbox, @item.uid)
-    mailbox_uids.each do |mailbox, uids|
-      num = Webmail::Mail.delete_all(mailbox, uids)
-      if num > 0
-        Webmail::MailNode.delete_nodes(mailbox, uids)
-        changed_mailbox_uids['Trash'] = [:all]
-      end
-      changed_num += num if mailbox !~ /^(Star)$/
-    end
-
-    if changed_num > 0
-      reload_starred_mails(changed_mailbox_uids) if @item.starred?
-
+    if num > 0
       flash[:notice] = 'メールを削除しました。' unless new_window?
-      respond_to do |format|
-        format.html do
-          redirect_to action: new_window? ? :close : :index
-        end
-        format.xml  { head :ok }
-      end
     else
-      flash[:error] = 'メールの削除に失敗しました。'
-      respond_to do |format|
-        format.html do
-          redirect_to action: new_window? ? :close : :index
-        end
-        format.xml  { render :xml => @item.errors, :status => :unprocessable_entity }
-      end
+      flash[:error] = 'メールの削除に失敗しました。' unless new_window?
     end
+    redirect_to action: new_window? ? :close : :index
   end
 
   def move
@@ -356,45 +318,19 @@ class Webmail::Admin::MailsController < Webmail::Controller::Admin::Base
     return http_error if uids.blank?
 
     if !params[:item][:mailbox]
-      @items = Webmail::Mail.find(select: @mailbox.name, conditions: ['UID', uids] + ['UNDELETED'], sort: @sort)
+      @items = @mailbox.find_mails(conditions: ['UID', uids] + ['UNDELETED'], sort: @sort)
       return render template: 'webmail/admin/mails/move'
     end
 
-    changed_num = 0
-    changed_mailbox_uids = {}
-    include_starred_uid = Webmail::Mail.include_starred_uid?(@mailbox.name, uids)
-
-    mailbox_uids = get_mailbox_uids(@mailbox, uids)
-    mailbox_uids.each do |mailbox, uids|
-      if mailbox =~ /^(Star)$/
-        num = 0
-        if params[:copy].blank? #move
-          num = Webmail::Mail.delete_all(mailbox, uids, true)
-          Webmail::MailNode.delete_nodes(mailbox, uids) if num > 0
-        end
+    num =
+      if params[:copy].present?
+        @mailbox.copy_mails(params[:item][:mailbox], uids)
       else
-        if params[:copy].blank? #move
-          num = Webmail::Mail.move_all(mailbox, params[:item][:mailbox], uids)
-          Webmail::MailNode.delete_nodes(mailbox, uids) if num > 0
-        else
-          num = Webmail::Mail.copy_all(mailbox, params[:item][:mailbox], uids)
-        end
-        changed_num += num
+        @mailbox.move_mails(params[:item][:mailbox], uids)
       end
-      if num > 0
-        changed_mailbox_uids[params[:item][:mailbox]] = [:all]
-      end
-    end
-
-    reload_starred_mails(changed_mailbox_uids) if include_starred_uid
-
-#    num = 0
-#    Webmail::Mail.find(select: @mailbox.name, conditions: cond).each do |item|
-#      num += 1 if item.move(params[:item][:mailbox])
-#    end
 
     label = params[:copy].blank? ? '移動' : 'コピー'
-    flash[:notice] = "#{changed_num}件のメールを#{label}しました。" unless new_window?
+    flash[:notice] = "#{num}件のメールを#{label}しました。" unless new_window?
     redirect_to action: new_window? ? :close : :index
   end
 
@@ -402,27 +338,10 @@ class Webmail::Admin::MailsController < Webmail::Controller::Admin::Base
     uids = params[:item][:ids].keys.map(&:to_i).select(&:positive?)
     return http_error if uids.blank?
 
-    changed_num = 0
-    changed_mailbox_uids = {}
-    include_starred_uid = Webmail::Mail.include_starred_uid?(@mailbox.name, uids)
+    trash = @mailboxes.detect(&:use_as_trash?)
+    num = @mailbox.trash_mails(trash.name, uids)
 
-    mailbox_uids = get_mailbox_uids(@mailbox, uids)
-    mailbox_uids.each do |mailbox, uids|
-      num = Webmail::Mail.delete_all(mailbox, uids)
-      if num > 0
-        Webmail::MailNode.delete_nodes(mailbox, uids)
-        changed_mailbox_uids['Trash'] = [:all]
-      end
-      changed_num += num if mailbox !~ /^(Star)$/
-    end
-
-    reload_starred_mails(changed_mailbox_uids) if include_starred_uid
-
-#    Webmail::Mail.find(select: @mailbox.name, conditions: cond).each do |item|
-#      num += 1 if item.destroy
-#    end
-
-    flash[:notice] = "#{changed_num}件のメールを削除しました。"
+    flash[:notice] = "#{num}件のメールを削除しました。"
     redirect_to action: :index
   end
 
@@ -430,14 +349,9 @@ class Webmail::Admin::MailsController < Webmail::Controller::Admin::Base
     uids = params[:item][:ids].keys.map(&:to_i).select(&:positive?)
     return http_error if uids.blank?
 
-    changed_num = 0
-    mailbox_uids = get_mailbox_uids(@mailbox, uids)
-    mailbox_uids.each do |mailbox, uids|
-      num = Webmail::Mail.seen_all(mailbox, uids)
-      changed_num += num if mailbox !~ /^(Star)$/
-    end
+    num = @mailbox.seen_mails(uids)
 
-    flash[:notice] = "#{changed_num}件のメールを既読にしました。"
+    flash[:notice] = "#{num}件のメールを既読にしました。"
     redirect_to action: :index
   end
 
@@ -445,14 +359,9 @@ class Webmail::Admin::MailsController < Webmail::Controller::Admin::Base
     uids = params[:item][:ids].keys.map(&:to_i).select(&:positive?)
     return http_error if uids.blank?
 
-    changed_num = 0
-    mailbox_uids = get_mailbox_uids(@mailbox, uids)
-    mailbox_uids.each do |mailbox, uids|
-      num = Webmail::Mail.unseen_all(mailbox, uids)
-      changed_num += num if mailbox !~ /^(Star)$/
-    end
+    num = @mailbox.unseen_mails(uids)
 
-    flash[:notice] = "#{changed_num}件のメールを未読にしました。"
+    flash[:notice] = "#{num}件のメールを未読にしました。"
     redirect_to action: :index
   end
 
@@ -460,74 +369,36 @@ class Webmail::Admin::MailsController < Webmail::Controller::Admin::Base
     uids = params[:item][:ids].keys.map(&:to_i).select(&:positive?)
     return http_error if uids.blank?
 
-    items = Webmail::Mail.find(select: @mailbox.name, conditions: ['UID', uids] + ['UNDELETED'])
+    items = @mailbox.find_mails(conditions: ['UID', uids] + ['UNDELETED'])
     return redirect_to action: :index if items.blank?
 
     Webmail::Filter.register_spams(items)
 
-    changed_num = 0
-    changed_mailbox_uids = {}
-    include_starred_uid = Webmail::Mail.include_starred_uid?(@mailbox.name, uids)
-
-    mailbox_uids = get_mailbox_uids(@mailbox, uids)
-    mailbox_uids.each do |mailbox, uids|
-      num = Webmail::Mail.delete_all(mailbox, uids)
-      if num > 0
-        Webmail::MailNode.delete_nodes(mailbox, uids)
-        changed_mailbox_uids['Trash'] = [:all]
-      end
-      changed_num += num if mailbox !~ /^(Star)$/
-    end
-
-    reload_starred_mails(changed_mailbox_uids) if include_starred_uid
+    trash = @mailboxes.detect(&:use_as_trash?)
+    @mailbox.trash_mails(trash.name, uids)
 
     flash[:notice] = "#{items.count}件のメールを迷惑メールに登録しました。"
     redirect_to action: :index
   end
 
   def empty
-    changed_mailbox_uids = {}
-
-    @mailboxes.reverse.each do |box|
-      if box.trash_box?(:children)
-        begin
-          Webmail::MailNode.delete_nodes(box.name)
-          Core.imap.delete(box.name)
-
-          uids = Webmail::MailNode.find_ref_nodes(box.name).map{|x| x.uid}
-          num = Webmail::Mail.delete_all('Star', uids)
-          if num > 0
-            Webmail::MailNode.delete_ref_nodes(box.name)
-            changed_mailbox_uids[box.name] = [:all]
-          end
-        rescue => e
-        end
+    @mailboxes.reverse.each do |mailbox|
+      if mailbox.trash_box?(:children)
+        mailbox.delete_mailbox
       end
     end
 
-    Core.imap.select(@mailbox.name)
-    uids = Core.imap.uid_search(['UNDELETED'], 'utf-8')
+    @mailbox.empty_mails
 
-    mailbox_uids = get_mailbox_uids(@mailbox, uids)
-    mailbox_uids.each do |mailbox, uids|
-      num = Webmail::Mail.delete_all(mailbox, uids, true)
-      if num > 0
-        Webmail::MailNode.delete_nodes(mailbox, uids)
-        changed_mailbox_uids[mailbox] = [:all]
-      end
-    end
-
-    reload_starred_mails(changed_mailbox_uids)
-
-    flash[:notice] = "ごみ箱を空にしました。"
+    flash[:notice] = 'ごみ箱を空にしました。'
     respond_to do |format|
       format.html { redirect_to action: :index }
       format.xml  { head :ok }
     end
   end
-  
+
   def send_mdn
-    @item = Webmail::Mail.find_by_uid(params[:id], select: @mailbox.name, conditions: ['UNDELETED'])
+    @item = @mailbox.find_mail_by_uid(params[:id], conditions: ['UNDELETED'])
     return error_auth unless @item && @item.has_disposition_notification_to?
 
     if request.xhr?
@@ -536,9 +407,9 @@ class Webmail::Admin::MailsController < Webmail::Controller::Admin::Base
     else
       begin
         send_mdn_message(:manual)
-        flash[:notice] = "開封確認メールを送信しました。"
+        flash[:notice] = '開封確認メールを送信しました。'
       rescue => e
-        flash[:notice] = "開封確認メールの送信に失敗しました。"
+        flash[:notice] = '開封確認メールの送信に失敗しました。'
       end
       return redirect_to action: :show
     end
@@ -552,28 +423,17 @@ class Webmail::Admin::MailsController < Webmail::Controller::Admin::Base
   end
 
   def star
-    @item = Webmail::Mail.find_by_uid(params[:id], select: @mailbox.name, conditions: ['UNDELETED'], fetch: ['FLAGS'])
+    @item = @mailbox.find_mail_by_uid(params[:id], conditions: ['UNDELETED'], fetch: ['FLAGS'])
     return error_auth unless @item
 
-    starred = @item.starred?
-    changed_mailbox_uids = {}
-
-    mailbox_uids = get_mailbox_uids(@mailbox, @item.uid)
-    mailbox_uids.each do |mailbox, uids|
-      if starred
-        num = Webmail::Mail.unstar_all(mailbox, uids)
-      else
-        num = Webmail::Mail.star_all(mailbox, uids)
-      end
-      if num > 0
-        changed_mailbox_uids[mailbox] = uids
-      end
+    if @item.starred?
+      @mailbox.unstar_mails(@item.uid)
+    else
+      @mailbox.star_mails(@item.uid)
     end
 
-    reload_starred_mails(changed_mailbox_uids)
-
     if request.mobile?
-      if params[:from] == 'list' || @mailbox.star_box?
+      if params[:from] == 'list' || @mailbox.flagged_box?
         redirect_to action: :index, id: params[:id], mobile: :list
       else
         redirect_to action: :show, id: params[:id]
@@ -584,30 +444,21 @@ class Webmail::Admin::MailsController < Webmail::Controller::Admin::Base
   end
 
   def label
-    @item = Webmail::Mail.find_by_uid(params[:id], select: @mailbox.name, conditions: ['UNDELETED'], fetch: ['FLAGS'])
+    @item = @mailbox.find_mail_by_uid(params[:id], conditions: ['UNDELETED'], fetch: ['FLAGS'])
     return error_auth unless @item
 
     @label_confs = Webmail::Setting.load_label_confs
 
     label_id = params[:label].to_i
-    labeled = @item.labeled?(label_id)
-
-    mailbox_uids = get_mailbox_uids(@mailbox, @item.uid)
-    mailbox_uids.each do |mailbox, uids|
-      if label_id == 0
-        Webmail::Mail.unlabel_all(mailbox, uids)
-      elsif labeled
-        Webmail::Mail.unlabel_all(mailbox, uids, label_id)
-      else
-        Webmail::Mail.label_all(mailbox, uids, label_id)
-      end
-    end
 
     if label_id == 0
+      @mailbox.unlabel_mails(@item.uid)
       @item.flags.clear
-    elsif labeled
+    elsif @item.labeled?(label_id)
+      @mailbox.unlabel_mails(@item.uid, label_id)
       @item.flags.delete("$label#{label_id}")
     else
+      @mailbox.label_mails(@item.uid, label_id)
       @item.flags << "$label#{label_id}"
     end
 
@@ -688,12 +539,6 @@ class Webmail::Admin::MailsController < Webmail::Controller::Admin::Base
     @mail_form_size ||= Webmail::Setting.user_config_value(:mail_form_size, 'medium')
   end
 
-  def set_mailboxes
-    if !new_window?
-      @mailboxes = Webmail::Mailbox.load_mailboxes(params[:reload].present? ? :all : nil)
-    end
-  end
-
   def reload_mailboxes
     @mailboxes = Webmail::Mailbox.load_mailboxes(:all)
   end
@@ -715,12 +560,6 @@ class Webmail::Admin::MailsController < Webmail::Controller::Admin::Base
     @sort = Webmail::Mail.make_sort_from_params(params)
   end
 
-  def reload_starred_mails(mailbox_uids = {'INBOX' => :all})
-    Util::Database.lock_by_name(Core.current_user.account) do
-      Webmail::Mailbox.load_starred_mails(mailbox_uids)
-    end
-  end
-
   def default_sign
     if !request.mobile? && !request.smart_phone?
       Webmail::Sign.default_sign
@@ -740,28 +579,8 @@ class Webmail::Admin::MailsController < Webmail::Controller::Admin::Base
     mail.delivery_method(:smtp, ActionMailer::Base.smtp_settings)
     mail.deliver
 
-    Core.imap.uid_store(@item.uid, "+FLAGS", "$Notified")
-    @item.flags << "$Notified"
-  end
-
-  def get_mailbox_uids(mailbox, uids)
-    mailbox_uids = {}
-    uids = [uids] if uids.is_a?(Fixnum)
-    if mailbox.star_box?
-      nodes = Webmail::MailNode.find_nodes(mailbox.name, uids)
-      nodes = nodes.select{|x| x.ref_mailbox && x.ref_uid}.group_by(&:ref_mailbox)
-      nodes.each do |k,v| 
-        mailbox_uids[k] = v.map{|x| x.ref_uid}
-      end
-    else
-      nodes = Webmail::MailNode.find_ref_nodes(mailbox.name, uids)
-      nodes = nodes.group_by(&:mailbox)
-      nodes.each do |k,v| 
-        mailbox_uids[k] = v.map{|x| x.uid}
-      end
-    end
-    mailbox_uids[mailbox.name] = uids
-    mailbox_uids
+    Core.imap.uid_store(@item.uid, '+FLAGS', '$Notified')
+    @item.flags << '$Notified'
   end
 
   def rescue_mail_action?

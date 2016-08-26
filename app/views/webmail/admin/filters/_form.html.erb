@@ -40,8 +40,8 @@
     <th><%= @item.class.human_attribute_name :action %></th>
     <td><%= f.select :action, @item.class.action.options, include_blank: true %></td>
   </tr><tr>
-    <th><%= @item.class.human_attribute_name :mailbox %></th>
-    <td><%= f.select :mailbox, Webmail::Mailbox.mailbox_options(&:filter_targetable_box?), include_blank: true %></td>
+    <th><%= @item.class.human_attribute_name :mailbox_name %></th>
+    <td><%= f.select :mailbox_name, Webmail::Mailbox.mailbox_options(&:filter_targetable_box?), include_blank: true %></td>
   </tr>
 </table>
 

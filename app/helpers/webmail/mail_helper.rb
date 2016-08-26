@@ -292,4 +292,9 @@ module Webmail::MailHelper
     else 'post'
     end
   end
+
+  def mail_form_url(mail, options = {})
+    options = options.merge(mailbox: mail.x_mailbox, id: mail.x_real_uid) if mail.x_mailbox.present?
+    url_for(options)
+  end
 end

@@ -37,12 +37,12 @@ ja:
         name: フィルター名
         sort_no: 並び順
         action: 動作
-        mailbox: 対象フォルダー
+        mailbox_name: 対象フォルダー
         conditions_chain: 条件の結合
         conditions: 条件
         created_at: 作成日時
         updated_at: 更新日時
-        target_mailbox: 適用するフォルダー
+        apply_mailbox_name: 適用するフォルダー
       webmail/filter_condition: &filter_condition
         column: 条件の適用対象
         inclusion: 条件の演算子
