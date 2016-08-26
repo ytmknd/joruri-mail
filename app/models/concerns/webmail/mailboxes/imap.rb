@@ -3,18 +3,19 @@ module Webmail::Mailboxes::Imap
   extend ActiveSupport::Concern
 
   SPECIAL_USE_MAILBOX_MAP = {
-    # special_use  => mailbox
-    'Archive'      => 'Archives',
-    'Drafts'       => 'Drafts',
-    'Junk'         => 'Junk',
-    'Sent'         => 'Sent',
-    'Trash'        => 'Trash',
-    'All'          => 'virtual.All',
-    'Flagged'      => 'virtual.Flagged',
-  }
+    # special use => mailbox name
+    :Archive      => 'Archives',
+    :Drafts       => 'Drafts',
+    :Junk         => 'Junk',
+    :Sent         => 'Sent',
+    :Trash        => 'Trash',
+    :All          => 'virtual.All',
+    :Flagged      => 'virtual.Flagged',
+  }.merge(Joruri.config.imap_settings[:mailbox_map].to_h)
+
   SPECIAL_USES = SPECIAL_USE_MAILBOX_MAP.keys
-  REQUIRED_SPECIAL_USES = %w(Archive Drafts Sent Trash)
-  ORDERS = %w(INBOX virtual Drafts Sent Archives Junk _etc Trash)
+  REQUIRED_SPECIAL_USES = [:Archive, :Drafts, :Sent, :Trash]
+  ORDERS = Joruri.config.imap_settings[:mailbox_order] || %w(INBOX virtual Drafts Sent Archives Junk *** Trash)
 
   def create_mailbox(name)
     transaction do
@@ -51,8 +52,8 @@ module Webmail::Mailboxes::Imap
       names = Net::IMAP.decode_utf7(name).split(delim)
       if names[0]
         I18n.t('webmail.mailbox.titles').each do |path, title|
-          names[1] = names[1].gsub(/#{Regexp.escape(path)}/i, title + '\1') if names[0] == 'virtual' && names[1]
-          names[0] = names[0].gsub(/#{Regexp.escape(path)}/i, title + '\1')
+          names[1] = title if names[0] == 'virtual' && names[1] == path.to_s
+          names[0] = title if names[0] == path.to_s
         end
       end
       names.join(delim)
@@ -159,7 +160,7 @@ module Webmail::Mailboxes::Imap
     def imap_sorted_list_and_status(targets = [:all])
       boxes, statuses = imap_list_status(targets, ['MESSAGES', 'UNSEEN', 'RECENT'])
 
-      needs = REQUIRED_SPECIAL_USES - boxes.map { |box| box.special_use.to_s }
+      needs = REQUIRED_SPECIAL_USES - boxes.map { |box| box.special_use }
       if needs.size > 0
         needs.each { |need| imap.create(SPECIAL_USE_MAILBOX_MAP[need]) }
         imap_sorted_list_and_status(targets)
@@ -189,7 +190,7 @@ module Webmail::Mailboxes::Imap
 
     def append_special_use_flag(boxes)
       box_by_name = boxes.index_by(&:name)
-      specials = SPECIAL_USES - boxes.map { |box| box.special_use.to_s }
+      specials = SPECIAL_USES - boxes.map { |box| box.special_use }
       specials.each do |special|
         box = box_by_name[SPECIAL_USE_MAILBOX_MAP[special]]
         box.special_use = special.to_sym if box
@@ -201,7 +202,7 @@ module Webmail::Mailboxes::Imap
       boxes = boxes.sort { |a, b| decode_name(a.name, a.delim).downcase <=> decode_name(b.name, b.delim).downcase }
       boxes = boxes.group_by do |box|
         name = box.name.split(box.delim).first
-        name.in?(ORDERS) ? name : '_etc'
+        name.in?(ORDERS) ? name : '***'
       end
       ORDERS.map { |name| boxes[name] }.compact.flatten
     end
