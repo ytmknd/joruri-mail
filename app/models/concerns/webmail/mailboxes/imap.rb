@@ -114,43 +114,6 @@ module Webmail::Mailboxes::Imap
       end
     end
 
-    def load_quota(reload = false)
-      st = Webmail::Setting.where(user_id: Core.current_user.id, name: 'quota_info').first_or_initialize
-
-      if !reload && st.persisted?
-        quota = Hash.from_xml(st.value) || {}
-        return quota.deep_symbolize_keys[:item]
-      end
-
-      if quota = get_quota_info
-        st.value = quota.to_xml(dasherize: false, skip_types: true, root: 'item')
-        st.save(validate: false)
-      end
-      quota
-    end
-
-    def get_quota_info
-      return unless imap.capabilities.include?('QUOTA')
-
-      res = imap.getquotaroot('INBOX')[1]
-      return unless res
-
-      usage_bytes = res.usage.to_i*1024
-      quota_bytes = res.quota.to_i*1024
-      warn_bytes = quota_bytes * Joruri.config.application['webmail.mailbox_quota_alert_rate'].to_f
-      
-      Hash.new.tap do |quota|
-        number_to_human_size = ApplicationController.helpers.method(:number_to_human_size)
-        size_options = { precision: 0, locale: :en }
-        quota[:total_bytes] = quota_bytes
-        quota[:total]       = number_to_human_size.call(quota_bytes, size_options)
-        quota[:used_bytes]  = usage_bytes
-        quota[:used]        = number_to_human_size.call(usage_bytes, size_options)
-        quota[:usage_rate]  = sprintf('%.1f', usage_bytes.to_f / quota_bytes.to_f * 100).to_f
-        quota[:usable]      = number_to_human_size.call(quota_bytes - usage_bytes, size_options) if usage_bytes > warn_bytes 
-      end
-    end
-
     private
 
     def imap

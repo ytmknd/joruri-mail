@@ -544,11 +544,11 @@ class Webmail::Admin::MailsController < Webmail::Controller::Admin::Base
   end
 
   def set_quota
-    @quota = Webmail::Mailbox.load_quota(params[:reload].present?)
+    @quota = Webmail::QuotaRoot.load_quota(params[:reload].present?)
   end
 
   def reload_quota
-    @quota = Webmail::Mailbox.load_quota(true)
+    @quota = Webmail::QuotaRoot.load_quota(true)
   end
 
   def set_conditions_from_params

@@ -29,7 +29,7 @@ class Webmail::Tool::BatchDelete
 
     if delete_num > 0
       Webmail::Mailbox.load_mailboxes(:all)
-      Webmail::Mailbox.load_quota(true)
+      Webmail::QuotaRoot.load_quota(true)
     end
 
     delete_num
