@@ -44,35 +44,11 @@ module Webmail::Mailboxes::Mail
     delete_mails(uids)
   end
 
-  def answered_mails(uids)
-    Webmail::Mail.answered_all(name, uids)
+  def flag_mails(uids, flags)
+    Webmail::Mail.flag_all(name, uids, flags)
   end
 
-  def forwarded_mails(uids)
-    Webmail::Mail.forwarded_all(name, uids)
-  end
-
-  def seen_mails(uids)
-    Webmail::Mail.seen_all(name, uids)
-  end
-
-  def unseen_mails(uids)
-    Webmail::Mail.unseen_all(name, uids)
-  end
-
-  def star_mails(uids)
-    Webmail::Mail.star_all(name, uids)
-  end
-
-  def unstar_mails(uids)
-    Webmail::Mail.unstar_all(name, uids)
-  end
-
-  def label_mails(uids, label_id = nil)
-    Webmail::Mail.label_all(name, uids, label_id)
-  end
-
-  def unlabel_mails(uids, label_id = nil)
-    Webmail::Mail.unlabel_all(name, uids, label_id)
+  def unflag_mails(uids, flags)
+    Webmail::Mail.unflag_all(name, uids, flags)
   end
 end

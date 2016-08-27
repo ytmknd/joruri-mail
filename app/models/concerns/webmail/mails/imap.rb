@@ -220,45 +220,14 @@ module Webmail::Mails::Imap
       num
     end
 
-    def answered_all(mailbox, uids)
+    def flag_all(mailbox, uids, flags)
       imap.select(mailbox)
-      imap.uid_store(uids, '+FLAGS', [:Answered]).to_a.size
+      imap.uid_store(uids, '+FLAGS', flags).to_a.size
     end
 
-    def forwarded_all(mailbox, uids)
+    def unflag_all(mailbox, uids, flags)
       imap.select(mailbox)
-      imap.uid_store(uids, '+FLAGS', ['$Forwarded']).to_a.size
-    end
-
-    def seen_all(mailbox, uids)
-      imap.select(mailbox)
-      imap.uid_store(uids, '+FLAGS', [:Seen]).to_a.size
-    end
-
-    def unseen_all(mailbox, uids)
-      imap.select(mailbox)
-      imap.uid_store(uids, '-FLAGS', [:Seen]).to_a.size
-    end
-
-    def star_all(mailbox, uids)
-      imap.select(mailbox)
-      imap.uid_store(uids, '+FLAGS', [:Flagged]).to_a.size
-    end
-
-    def unstar_all(mailbox, uids)
-      imap.select(mailbox)
-      imap.uid_store(uids, '-FLAGS', [:Flagged]).to_a.size
-    end
-
-    def label_all(mailbox, uids, label_id)
-      imap.select(mailbox)
-      imap.uid_store(uids, '+FLAGS', ["$label#{label_id}"]).to_a.size
-    end
-
-    def unlabel_all(mailbox, uids, label_id = nil)
-      labels = label_id ? ["$label#{label_id}"] : (1..9).map { |id| "$label#{id}" }
-      imap.select(mailbox)
-      imap.uid_store(uids, "-FLAGS", labels).to_a.size
+      imap.uid_store(uids, '-FLAGS', flags).to_a.size
     end
 
     def move_to(mailbox, uids)

@@ -64,7 +64,7 @@ class Webmail::Admin::MailsController < Webmail::Controller::Admin::Base
     end
 
     if @item.unseen?
-      @mailbox.seen_mails(@item.uid)
+      @mailbox.flag_mails(@item.uid, [:Seen])
       reload_mailboxes
 
       @item.seen!
@@ -167,7 +167,7 @@ class Webmail::Admin::MailsController < Webmail::Controller::Admin::Base
 
     if request.post?
       return send_message(@item, @ref) do
-        @mailbox.answered_mails(@ref.uid)
+        @mailbox.flag_mails(@ref.uid, [:Answered])
       end
     end
 
@@ -190,7 +190,7 @@ class Webmail::Admin::MailsController < Webmail::Controller::Admin::Base
 
     if request.post?
       return send_message(@item, @ref) do
-        @mailbox.forwarded_mails(@ref.uid)
+        @mailbox.flag_mails(@ref.uid, ['$Forwarded'])
       end
     end
 
@@ -349,7 +349,7 @@ class Webmail::Admin::MailsController < Webmail::Controller::Admin::Base
     uids = params[:item][:ids].keys.map(&:to_i).select(&:positive?)
     return http_error if uids.blank?
 
-    num = @mailbox.seen_mails(uids)
+    num = @mailbox.flag_mails(uids, [:Seen])
 
     flash[:notice] = "#{num}件のメールを既読にしました。"
     redirect_to action: :index
@@ -359,7 +359,7 @@ class Webmail::Admin::MailsController < Webmail::Controller::Admin::Base
     uids = params[:item][:ids].keys.map(&:to_i).select(&:positive?)
     return http_error if uids.blank?
 
-    num = @mailbox.unseen_mails(uids)
+    num = @mailbox.unflag_mails(uids, [:Seen])
 
     flash[:notice] = "#{num}件のメールを未読にしました。"
     redirect_to action: :index
@@ -427,9 +427,9 @@ class Webmail::Admin::MailsController < Webmail::Controller::Admin::Base
     return error_auth unless @item
 
     if @item.starred?
-      @mailbox.unstar_mails(@item.uid)
+      @mailbox.unflag_mails(@item.uid, [:Flagged])
     else
-      @mailbox.star_mails(@item.uid)
+      @mailbox.flag_mails(@item.uid, [:Flagged])
     end
 
     if request.mobile?
@@ -450,16 +450,14 @@ class Webmail::Admin::MailsController < Webmail::Controller::Admin::Base
     @label_confs = Webmail::Setting.load_label_confs
 
     label_id = params[:label].to_i
+    labels = label_id == 0 ? (1..9).map { |id| "$label#{id}" } : ["$label#{label_id}"]
 
-    if label_id == 0
-      @mailbox.unlabel_mails(@item.uid)
-      @item.flags.clear
-    elsif @item.labeled?(label_id)
-      @mailbox.unlabel_mails(@item.uid, label_id)
-      @item.flags.delete("$label#{label_id}")
+    if label_id == 0 || @item.labeled?(label_id)
+      @mailbox.unflag_mails(@item.uid, labels)
+      @item.flags -= labels
     else
-      @mailbox.label_mails(@item.uid, label_id)
-      @item.flags << "$label#{label_id}"
+      @mailbox.flag_mails(@item.uid, labels)
+      @item.flags += labels
     end
 
     render layout: false
@@ -579,7 +577,7 @@ class Webmail::Admin::MailsController < Webmail::Controller::Admin::Base
     mail.delivery_method(:smtp, ActionMailer::Base.smtp_settings)
     mail.deliver
 
-    Core.imap.uid_store(@item.uid, '+FLAGS', '$MDNSent')
+    @mailbox.flag_mails(@item.uid, ['$MDNSent'])
     @item.flags << '$MDNSent'
   end
 
