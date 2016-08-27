@@ -68,7 +68,7 @@ subject_wrap = @conf.mail_list_subject.blank? ? '' : 'autoWrap'
         </span>
       </td>
       <td class="date"><%= item.date %></td>
-      <td class="size"><%= number_with_delimiter(item.size) %></td>
+      <td class="size"><%= number_with_delimiter((item.size.to_f / 1024).ceil) %> KB</td>
     </tr>
   <% end %>
 </table>

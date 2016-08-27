@@ -27,7 +27,7 @@
 #webmailContent table.mails th.from    { width: 30%; }
 #webmailContent table.mails th.fromOmitAddress { width: 20%; }
 #webmailContent table.mails th.date    { width: 9em; }
-#webmailContent table.mails th.size    { width: 4.5em; text-align: right; }
+#webmailContent table.mails th.size    { width: 4.5em; text-align: right; white-space: nowrap; }
 #webmailContent table.mails th.attach {
   background-image: url(../images/mailoption/clip.gif);
   background-repeat: no-repeat;
