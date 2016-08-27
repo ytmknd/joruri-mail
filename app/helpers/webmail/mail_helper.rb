@@ -24,7 +24,7 @@ module Webmail::MailHelper
     if mailbox.draft_box? || mailbox.sent_box?
       mail.has_disposition_notification_to?
     else
-      mail.has_disposition_notification_to? && mail.notified?
+      mail.has_disposition_notification_to? && mail.mdn_sent?
     end
   end
 

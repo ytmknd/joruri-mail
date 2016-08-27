@@ -69,7 +69,7 @@ class Webmail::Admin::MailsController < Webmail::Controller::Admin::Base
 
       @item.seen!
 
-      if @item.mdn_request_mode == :auto && !@item.notified? && !@mailbox.draft_box? && !@mailbox.sent_box?
+      if @item.mdn_request_mode == :auto && !@item.mdn_sent? && !@mailbox.draft_box? && !@mailbox.sent_box?
         begin
           send_mdn_message(@item.mdn_request_mode)
         rescue => e
@@ -579,8 +579,8 @@ class Webmail::Admin::MailsController < Webmail::Controller::Admin::Base
     mail.delivery_method(:smtp, ActionMailer::Base.smtp_settings)
     mail.deliver
 
-    Core.imap.uid_store(@item.uid, '+FLAGS', '$Notified')
-    @item.flags << '$Notified'
+    Core.imap.uid_store(@item.uid, '+FLAGS', '$MDNSent')
+    @item.flags << '$MDNSent'
   end
 
   def rescue_mail_action?

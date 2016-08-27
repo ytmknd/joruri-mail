@@ -48,8 +48,8 @@ module Webmail::Mails::Imap
     flags.index(:Flagged)
   end
 
-  def notified?
-    flags.index('$Notified')
+  def mdn_sent?
+    flags.index('$Notified') || flags.index('$MDNSent')
   end
 
   def labeled?(label_id = "")
