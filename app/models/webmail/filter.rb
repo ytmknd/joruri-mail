@@ -75,7 +75,7 @@ class Webmail::Filter < ApplicationRecord
       @applied += applied_uids.size
     end
     delay_uids.each do |mailbox, uids|
-      Webmail::FilterJob.new(user: Core.current_user, mailbox: mailbox, uids: uids).delay(queue: 'filter').perform
+      Webmail::FilterJob.perform_later_as_user(Core.current_user, mailbox: mailbox, uids: uids)
       @delayed += uids.size
     end
   end
@@ -170,8 +170,7 @@ class Webmail::Filter < ApplicationRecord
           end
           if delay_uids.present?
             delay_uids.each do |mailbox, uids|
-              Webmail::FilterJob.new(user: Core.current_user, mailbox: mailbox, uids: uids)
-                .delay(queue: 'filter').perform
+              Webmail::FilterJob.perform_later_as_user(Core.current_user, mailbox: mailbox, uids: uids)
               delayed += uids.size
             end
           end
