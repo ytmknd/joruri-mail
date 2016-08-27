@@ -14,7 +14,7 @@ module Webmail::Mailboxes::Imap
   }.merge(Joruri.config.imap_settings[:mailbox_map].to_h)
 
   SPECIAL_USES = SPECIAL_USE_MAILBOX_MAP.keys
-  REQUIRED_SPECIAL_USES = [:Archive, :Drafts, :Sent, :Trash]
+  REQUIRED_SPECIAL_USES = [:Archive, :Drafts, :Junk, :Sent, :Trash]
   ORDERS = Joruri.config.imap_settings[:mailbox_order] || %w(INBOX virtual Drafts Sent Archives Junk *** Trash)
 
   def create_mailbox(name)

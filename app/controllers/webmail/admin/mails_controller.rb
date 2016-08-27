@@ -5,16 +5,16 @@ class Webmail::Admin::MailsController < Webmail::Controller::Admin::Base
 
   before_action :handle_mailto_scheme, if: -> { params[:src] == 'mailto' && params[:uri] }
   before_action :check_user_email, only: [:new, :create, :edit, :update, :answer, :forward]
-  before_action :check_posted_uids, only: [:move, :delete, :seen, :unseen, :register_spam]
+  before_action :check_posted_uids, only: [:move, :delete, :seen, :unseen, :junk]
 
   before_action :set_conf, only: [:index, :show, :move]
   before_action :set_address_histories, only: [:index, :show, :move]
   before_action :set_mail_form_size
 
-  after_action :reload_mailboxes, only: [:destroy, :delete, :empty, :move, :seen, :unseen, :star, :register_spam]
+  after_action :reload_mailboxes, only: [:destroy, :delete, :empty, :move, :seen, :unseen, :star, :junk]
 
   before_action :set_quota, only: [:index]
-  after_action :reload_quota, only: [:destroy, :delete, :empty, :move, :seen, :unseen, :star, :register_spam]
+  after_action :reload_quota, only: [:destroy, :delete, :empty, :move, :seen, :unseen, :star, :junk]
 
   before_action :set_conditions_from_params, only: [:index, :show]
   before_action :set_sort_from_params, only: [:index, :show, :move]
@@ -365,7 +365,7 @@ class Webmail::Admin::MailsController < Webmail::Controller::Admin::Base
     redirect_to action: :index
   end
 
-  def register_spam
+  def junk
     uids = params[:item][:ids].keys.map(&:to_i).select(&:positive?)
     return http_error if uids.blank?
 
@@ -374,8 +374,8 @@ class Webmail::Admin::MailsController < Webmail::Controller::Admin::Base
 
     Webmail::Filter.register_spams(items)
 
-    trash = @mailboxes.detect(&:use_as_trash?)
-    @mailbox.trash_mails(trash.name, uids)
+    junk = @mailboxes.detect(&:use_as_junk?)
+    @mailbox.move_mails(junk.name, uids)
 
     flash[:notice] = "#{items.count}件のメールを迷惑メールに登録しました。"
     redirect_to action: :index

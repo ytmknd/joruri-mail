@@ -65,7 +65,7 @@
       <div class="menuItem"><%= link_to 'ヘッダ表示', { action: :download, header: 1 }, target: '_blank' %></div>
       <div class="menuItem"><%= link_to 'ソース表示', { action: :download, source: 1 }, target: '_blank' %></div>
       <% if Core.current_user.id == Core.user.id %>
-      <div class="menuItem"><%= link_to '迷惑メール登録', '#registerSpamMail' %></div>
+      <div class="menuItem"><%= link_to '迷惑メール登録', '#junkMail' %></div>
       <% end %>
       <div class="menuItem"><%= link_to @item.starred? ? 'スターをはずす' : 'スターを付ける', '#starMail' %></div>
     </div>
@@ -330,9 +330,9 @@ $(function() {
     $('#mailForm').append('<input type="hidden" name="copy" value="1">').submit();
     return false;
   });
-  $('a[href="#registerSpamMail"]').on('click', function() {
-    if (confirm('迷惑メールに登録した後、ごみ箱に移動します。よろしいですか？')) {
-      $('#mailForm').attr('action', '<%=raw escape_javascript url_for(action: :register_spam) %>')
+  $('a[href="#junkMail"]').on('click', function() {
+    if (confirm('迷惑メールに登録します。よろしいですか？')) {
+      $('#mailForm').attr('action', '<%=raw escape_javascript url_for(action: :junk) %>')
         .submit();
     }
   });
