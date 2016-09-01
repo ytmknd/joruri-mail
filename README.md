@@ -4,7 +4,8 @@ Japan Originated Ruby-based RESTful and Integrated Mail
 
 Joruri Mail is a browser-based IMAP client software.
 
-Features:
+## Features
+
 * Simple and intuitive UI
 * User customizable settings (filters, templates, signatures, labels and more)
 * Multilingual mail decoding (especially japanese proper decoding)
@@ -19,12 +20,12 @@ Features:
 
 ## System dependencies
 
-* OS: CentOS 7.2 x86_64 (recommended), CentOS 6.8 x86_64
-* Web server: Apache 2.4 (recommended), Apache 2.2
-* DB server: MySQL 5.6
-* Ruby: 2.3
-* Rails: 4.2
-* Mail server: SMTP, IMAP4
+* CentOS 7.2 x86_64 (recommended), CentOS 6.8 x86_64
+* Apache 2.4 (recommended), Apache 2.2
+* MySQL 5.6
+* Ruby 2.3
+* Rails 5.0
+* SMTP, IMAP4
 
 ## Installation
 
@@ -46,16 +47,23 @@ Execute script below as root user:
 
 [doc/INSTALL.txt](doc/INSTALL.txt)
 
-## Supported IMAP servers
+## IMAP capabilities
 
-IMAP servers with following capabilities are supported:
+Following IMAP capabilities are supported:
 
-* IMAP4REV1: [RFC2060](https://www.ietf.org/rfc/rfc2060.txt), [RFC3501](https://www.ietf.org/rfc/rfc3501.txt)
-* SORT: [RFC5256](https://www.ietf.org/rfc/rfc5256.txt)
-* QUOTA: [RFC2087](https://www.ietf.org/rfc/rfc2087.txt) (recommended)
-* LIST-STATUS: [RFC5819](https://www.ietf.org/rfc/rfc5819.txt) (recommended)
-* MOVE: [RFC6851](https://www.ietf.org/rfc/rfc6851.txt) (recommended)
-* ESORT: [RFC5267](https://www.ietf.org/rfc/rfc5267.txt) (recommended)
+* IMAP4REV1: [RFC2060](https://tools.ietf.org/html/rfc2060), [RFC3501](https://tools.ietf.org/html/rfc3501) (required)
+* SORT: [RFC5256](https://tools.ietf.org/html/rfc5256) (recommended)
+* QUOTA: [RFC2087](https://tools.ietf.org/html/rfc2087) (recommended)
+* LIST-STATUS: [RFC5819](https://tools.ietf.org/html/rfc5819) (recommended)
+* MOVE: [RFC6851](https://tools.ietf.org/html/rfc6851) (recommended)
+* ESORT: [RFC5267](https://tools.ietf.org/html/rfc5267) (recommended)
+* SPECIAL-USE: [RFC6154](https://tools.ietf.org/html/rfc6154) (not required)
+
+## SMTP extensions
+
+Following SMTP extensions are supported:
+
+* Delivery Status Notification: [RFC3461](https://tools.ietf.org/html/rfc3461)
 
 ## Changelog
 
