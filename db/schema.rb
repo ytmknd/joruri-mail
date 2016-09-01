@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20160808053228) do
+ActiveRecord::Schema.define(version: 20160827022751) do
 
   create_table "delayed_jobs", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
     t.integer  "priority",                 default: 0, null: false
@@ -294,7 +294,7 @@ ActiveRecord::Schema.define(version: 20160808053228) do
     t.integer  "sort_no"
     t.string   "name"
     t.string   "action",           limit: 15
-    t.string   "mailbox"
+    t.string   "mailbox_name"
     t.string   "conditions_chain", limit: 15
     t.index ["user_id"], name: "user_id", using: :btree
   end
@@ -334,12 +334,25 @@ ActiveRecord::Schema.define(version: 20160808053228) do
     t.datetime "created_at"
     t.datetime "updated_at"
     t.integer  "sort_no"
-    t.text     "name",       limit: 65535
-    t.text     "title",      limit: 65535
-    t.integer  "messages"
-    t.integer  "unseen"
-    t.integer  "recent"
+    t.text     "name",        limit: 65535
+    t.text     "title",       limit: 65535
+    t.integer  "messages",                  default: 0
+    t.integer  "unseen",                    default: 0
+    t.integer  "recent",                    default: 0
+    t.text     "delim",       limit: 65535
+    t.text     "attr",        limit: 65535
+    t.text     "special_use", limit: 65535
     t.index ["user_id", "sort_no"], name: "user_id", using: :btree
+  end
+
+  create_table "webmail_quota_roots", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
+    t.integer  "user_id"
+    t.text     "mailbox",    limit: 65535
+    t.integer  "quota"
+    t.integer  "usage"
+    t.datetime "created_at",               null: false
+    t.datetime "updated_at",               null: false
+    t.index ["user_id"], name: "index_webmail_quota_roots_on_user_id", using: :btree
   end
 
   create_table "webmail_settings", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
