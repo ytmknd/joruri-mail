@@ -56,6 +56,10 @@ class Webmail::Mailbox < ApplicationRecord
     attrs.include?('Nonexistent')
   end
 
+  def noinferiors?
+    attrs.include?('Noinferiors')
+  end
+
   def path
     return @path if @path
     names[0..-2] ? names[0..-2].join(delim) + delim : ''
@@ -198,7 +202,7 @@ class Webmail::Mailbox < ApplicationRecord
   end
 
   def creatable_child_box?
-    !(draft_box? || junk_box? || trash_box? || all_box? || flagged_box? || virtual_box?)
+    !(draft_box? || junk_box? || trash_box? || all_box? || flagged_box? || virtual_box? || noinferiors?)
   end
 
   def editable_box?
