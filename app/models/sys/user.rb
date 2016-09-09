@@ -31,6 +31,8 @@ class Sys::User < Sys::ManageDatabase
     foreign_key: :user_id, class_name: 'Webmail::Template', dependent: :destroy
   has_many :webmail_mail_address_histories, -> { order(:id) },
     foreign_key: :user_id, class_name: 'Webmail::MailAddressHistory', dependent: :destroy
+  has_many :webmail_quota_roots, -> { order(:id) },
+    foreign_key: :user_id, class_name: 'Webmail::QuotaRoot', dependent: :destroy
 
   attr_accessor :_in_group_id
   #attr_accessor :group, :group_id, :in_group_id
