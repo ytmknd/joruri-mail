@@ -7,8 +7,6 @@ namespace :webmail do
 
   desc 'Delete mail caches'
   task :delete_mail_caches => :environment do
-    Webmail::MailNode.delete_caches do |ids|
-      puts "#{ids.size} deleted"
-    end
+    Webmail::MailNode.delete_all
   end
 end
