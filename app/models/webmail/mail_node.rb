@@ -45,5 +45,9 @@ class Webmail::MailNode < ApplicationRecord
         yield sliced_ids if block_given?
       end
     end
+
+    def delete_expired_caches(ex = Joruri.config.application['webmail.mail_cache_expiration'])
+      self.where("created_at < ?", ex.months.ago).delete_all if ex > 0
+    end
   end
 end

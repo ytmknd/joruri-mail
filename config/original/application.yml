@@ -23,3 +23,5 @@ webmail:
   switch_user_max_count: 5
   # Gwスケジュール連携リンク表示
   show_gw_schedule_link: 0
+  # メールキャッシュ保持期間（月数）
+  mail_cache_expiration: 6

@@ -3,6 +3,7 @@ namespace :webmail do
   task :cleanup => :environment do
     Sys::File.garbage_collect
     Sys::Session.delete_expired_sessions
+    Webmail::MailNode.delete_expired_caches
   end
 
   desc 'Delete mail caches'
