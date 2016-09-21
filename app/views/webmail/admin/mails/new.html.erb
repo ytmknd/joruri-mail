@@ -42,6 +42,10 @@
   </div>
 </div>
 
+<input type="submit" value="送信する" id="commit_send" name="commit_send" style="display: none;" />
+<input type="submit" value="下書き保存" id="commit_draft" name="commit_draft" style="display: none;" />
+<input type="submit" value="破棄する" id="commit_destroy" name="commit_destroy" style="display: none;" />
+<input type="submit" value="ファイル添付" id="commit_file" name="commit_file" style="display: none;" />
 <% end %>
 
 <% if Joruri.config.application['webmail.show_gw_schedule_link'] == 1 %>
@@ -60,38 +64,14 @@
 <script type="text/javascript">
 //<![CDATA[
 $(function() {
-  <% config = Webmail::Setting.user_config_values([:attachment_check, :attachment_check_keywords]) %>
-  var attachmentChecker = new MailKeywordChecker(
-    '<%= config.attachment_check %>',
-    <%= config.attachment_check_keywords.to_s.split(/[\r\n]+/).to_json.html_safe %>
-  );
-  function getBody() {
-    if ($('#item_in_format').val() == 'html') {
-      return convertHtmlToText(tinyMCE.activeEditor.getContent());
-    } else {
-      return $('#item_in_body').val();
-    }
-  }
-  $('input[name="commit_send"]').on('click', function() {
-    var ok = true;
-    var subject = $('#item_in_subject').val();
-    var body = getBody();
-    if (attachmentChecker.isEnabled() &&
-      (attachmentChecker.includeKeyword(subject) || attachmentChecker.includeKeyword(body)) &&
-      $('input[name="item[tmp_attachment_ids][]"]').length == 0) {
-      if (!confirm('添付ファイルがありません。このまま送信してよろしいですか？')) {
-        ok = false;
-      }
-    }
-    if (ok) {
-      checkServerStatus(this);
-    }
+  $('#commit_send1, #commit_send2').on('click', function() {
+    $('#commit_send').click();
   });
-  $('input[name="commit_draft"]').on('click', function() {
-    checkServerStatus(this);
+  $('#commit_draft1, #commit_draft2').on('click', function() {
+    $('#commit_draft').click();
   });
-  $('input[name="commit_destroy"]').on('click', function() {
-    submitMailForm(this);
+  $('#commit_destroy1, #commit_destroy2').on('click', function() {
+    $('#commit_destroy').click();
   });
 });
 //]]>
