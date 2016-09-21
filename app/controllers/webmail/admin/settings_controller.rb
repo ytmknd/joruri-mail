@@ -3,7 +3,6 @@ class Webmail::Admin::SettingsController < Webmail::Controller::Admin::Base
   layout 'admin/webmail/base'
 
   def pre_dispatch
-    return redirect_to(request.env['PATH_INFO']) if params[:reset]
   end
 
   def index
