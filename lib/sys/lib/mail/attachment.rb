@@ -7,7 +7,7 @@ class Sys::Lib::Mail::Attachment
   attr_reader :transfer_encoding
 
   def initialize(attributes = {})
-    attributes.each {|name, value| eval("@#{name} = value")}
+    attributes.each {|name, value| instance_variable_set("@#{name}", value) }
   end
 
   def image?
