@@ -64,9 +64,9 @@ module Webmail::MailHelper
 
   def mail_form_size(size_name)
     rtn = {
-      'small'  => { window: 900, container: 870, textarea: 775 },
-      'medium' => { window: 1000, container: 970, textarea: 875 },
-      'large'  => { window: 1100, container: 1070, textarea: 975 }
+      'small'  => { window: 850, container: 820, textarea: 725 },
+      'medium' => { window: 950, container: 920, textarea: 825 },
+      'large'  => { window: 1050, container: 1020, textarea: 925 }
     }[size_name]
     rtn = {} unless rtn
     rtn
