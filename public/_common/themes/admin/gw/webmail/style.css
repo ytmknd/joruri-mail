@@ -343,6 +343,9 @@ form.search td input.email {
 #webmailMenu .mailbox li.archive > a {
   background-image: url(../images/tree/archive.gif);
 }
+#webmailMenu .mailbox li.junk > a {
+  background-image: url(../images/tree/junk.gif);
+}
 #webmailMenu .mailbox li.trash > a {
   background-image: url(../images/tree/dustbox.gif);
 }

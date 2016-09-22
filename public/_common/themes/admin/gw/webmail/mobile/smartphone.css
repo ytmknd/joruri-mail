@@ -363,6 +363,9 @@ table.root .sent td a {
 table.root .archives td a {
   background-image: url("/_common/themes/admin/gw/images/tree/archive.gif");
 }
+table.root .junk td a {
+  background-image: url("/_common/themes/admin/gw/images/tree/junk.gif");
+}
 table.root .trash td {
   /*line-height: 30px;*/
 }

@@ -39,6 +39,8 @@ module Webmail::MailboxHelper
         %Q{<img src="/_common/themes/admin/gw/webmail/mobile/images/mailbox.jpg" alt="送信トレイ" />}
       when mailbox.use_as_archive?
         %Q{<img src="/_common/themes/admin/gw/webmail/mobile/images/archive.jpg" alt="アーカイブ" />}
+      when mailbox.use_as_junk?
+        %Q{<img src="/_common/themes/admin/gw/webmail/mobile/images/junk.jpg" alt="迷惑メール" />}
       when mailbox.use_as_trash?
         %Q{<img src="/_common/themes/admin/gw/webmail/mobile/images/dustbox.jpg" alt="ごみ箱" />}
       when mailbox.use_as_flagged?
