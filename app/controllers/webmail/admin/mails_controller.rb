@@ -509,8 +509,11 @@ class Webmail::Admin::MailsController < Webmail::Controller::Admin::Base
 
   def item_params
     return {} unless params[:item]
-    params.require(:item).permit(:in_to, :in_cc, :in_bcc, :in_reply_to, :in_subject, :in_body, :in_html_body,
-      :in_format, :in_priority, :in_request_mdn, :in_request_dsn, :tmp_id, :tmp_attachment_ids => [], :in_files => [])
+    params.require(:item).permit(
+      :in_to, :in_cc, :in_bcc, :in_reply_to, :in_subject, :in_body, :in_html_body,
+      :in_format, :in_priority, :in_request_mdn, :in_request_dsn,
+      :tmp_id, :tmp_attachment_ids => [], :in_files => []
+    )
   end
 
   def set_conf
