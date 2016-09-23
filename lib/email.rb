@@ -13,7 +13,7 @@ module Email
 
     def parse_list(str, options = {})
       str = str.split(/[\t\r\n]+/).join(', ')
-      str = NKF.nkf('-WwM', str).gsub(/\n/, '')
+      str.gsub!(/[^[:ascii:]]+/) { |m| Mail::Encodings.b_value_encode(m) }
       Mail::AddressList.new(str).addresses
     rescue Mail::Field::ParseError => e
       if options[:raise_errors]
