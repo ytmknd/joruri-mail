@@ -740,6 +740,7 @@ class Webmail::Admin::MailsController < Webmail::Controller::Admin::Base
     mail.delivery_method(:smtp, ActionMailer::Base.smtp_settings)
     mail.deliver
 
+    Core.imap.select(@mailbox.name)
     Core.imap.uid_store(@item.uid, "+FLAGS", "$Notified")
     @item.flags << "$Notified"
   end
