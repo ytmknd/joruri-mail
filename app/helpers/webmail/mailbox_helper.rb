@@ -46,7 +46,7 @@ module Webmail::MailboxHelper
       when mailbox.use_as_flagged?
         %Q{<img src="/_common/themes/admin/gw/webmail/mobile/images/star.jpg" alt="スター付き" />}
       when mailbox.use_as_all?
-        %Q{<img src="/_common/themes/admin/gw/webmail/mobile/images/star.jpg" alt="すべてのメール" />}
+        %Q{<img src="/_common/themes/admin/gw/webmail/mobile/images/transmit_open.jpg" alt="すべてのメール" />}
       else
         if mailbox.level_no == 0
           %Q{<img src="/_common/themes/admin/gw/webmail/mobile/images/folder-white.jpg" alt="フォルダー" />}
