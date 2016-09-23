@@ -91,8 +91,9 @@
   <tr>
     <th>送信者</th>
     <td class="autoWrap">
-      <% if @from_addr %>
-        <%= link_to 'アドレス帳に登録する', '#addAddress', class: 'addAddress' %>
+      <% if (from = @item.from_address) %>
+        <%= link_to 'アドレス帳に登録する', '#addAddress', class: 'addAddress',
+              data: { email: from.address, name: from.name || from.address } %>
       <% end %>
       <%= mail_text_wrap @item.friendly_from_addr %>
     </td>
@@ -391,8 +392,8 @@ $(function() {
     $.post('<%= webmail_addresses_path(format: :json) %>', {
       authenticity_token: '<%= form_authenticity_token %>',
       "item[easy_entry]" : true,
-      "item[email]" : '<%=raw escape_javascript @from_addr %>',
-      "item[name]"  : '<%=raw escape_javascript @from_name %>'
+      "item[email]" : $(this).attr('data-email'),
+      "item[name]"  : $(this).attr('data-name')
     })
     .done(function() {
       alert('アドレス帳に登録しました。');

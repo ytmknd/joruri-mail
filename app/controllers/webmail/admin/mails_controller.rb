@@ -11,13 +11,12 @@ class Webmail::Admin::MailsController < Webmail::Controller::Admin::Base
   before_action :set_address_histories, only: [:index, :show, :move]
   before_action :set_mail_form_size
 
-  after_action :reload_mailboxes, only: [:destroy, :delete, :empty, :move, :seen, :unseen, :star, :junk]
-
   before_action :set_quota, only: [:index]
-  after_action :reload_quota, only: [:destroy, :delete, :empty, :move, :seen, :unseen, :star, :junk]
-
   before_action :set_conditions_from_params, only: [:index, :show]
   before_action :set_sort_from_params, only: [:index, :show, :move]
+
+  after_action :reload_mailboxes, only: [:destroy, :delete, :empty, :move, :seen, :unseen, :star, :junk]
+  after_action :reload_quota, only: [:destroy, :delete, :empty, :move, :seen, :unseen, :star, :junk]
 
   def pre_dispatch
     return redirect_to action: :index, mailbox: params[:mailbox] if params[:reset]
@@ -56,12 +55,6 @@ class Webmail::Admin::MailsController < Webmail::Controller::Admin::Base
     end
 
     Core.title += " - #{@item.subject} - #{Core.current_user.email}"
-
-    if from = Email.parse(@item.friendly_from_addr)
-      @from_addr = CGI.escapeHTML(from.address)
-      @from_name = ::NKF::nkf('-wx --cp932', from.name).gsub(/\0/, "") if from.name rescue nil
-      @from_name = @from_name || @from_addr
-    end
 
     if @item.unseen?
       @mailbox.flag_mails(@item.uid, [:Seen])
@@ -305,11 +298,7 @@ class Webmail::Admin::MailsController < Webmail::Controller::Admin::Base
     trash = @mailboxes.detect(&:use_as_trash?)
     num = @mailbox.trash_mails(trash.name, @item.uid)
 
-    if num > 0
-      flash[:notice] = 'メールを削除しました。' unless new_window?
-    else
-      flash[:error] = 'メールの削除に失敗しました。' unless new_window?
-    end
+    flash[:notice] = num > 0 ? 'メールを削除しました。' : 'メールの削除に失敗しました。' unless new_window?
     redirect_to action: new_window? ? :close : :index
   end
 

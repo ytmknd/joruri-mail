@@ -19,6 +19,10 @@ module Webmail::Mails::Base
     extract_address_from_mail_list(friendly_from_addr)
   end
 
+  def from_address
+    Email.parse(friendly_from_addr)
+  end
+
   def friendly_from_addr
     field = @mail.header[:from]
     field ? collect_addrs(field).first : 'unknown'
