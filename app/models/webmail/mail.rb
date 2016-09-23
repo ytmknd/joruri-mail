@@ -135,7 +135,7 @@ class Webmail::Mail
 
   def init_for_answer(ref, format:, sign: nil, sign_pos: nil, all: nil, quote: nil)
     self.tmp_id     = Sys::File.new_tmp_id
-    self.in_to      = ref.friendly_reply_to_addrs(all.present?).join(', ')
+    self.in_to      = ref.friendly_reply_to_addrs_for_answer(all.present?).join(', ')
     self.in_cc      = ref.friendly_cc_addrs.join(', ') if all
     self.in_subject = "Re: #{ref.subject}"
 

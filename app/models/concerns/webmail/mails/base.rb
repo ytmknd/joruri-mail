@@ -49,7 +49,13 @@ module Webmail::Mails::Base
     ["#read failed: #{e}"] rescue []
   end
 
-  def friendly_reply_to_addrs(all_members = nil)
+  def friendly_reply_to_addrs
+    collect_addrs(@mail.header[:reply_to])
+  rescue => e
+    ["#read failed: #{e}"] rescue []
+  end
+
+  def friendly_reply_to_addrs_for_answer(all_members = nil)
     addrs = collect_addrs(@mail.header[:reply_to])
     addrs = [friendly_from_addr] if addrs.blank?
     if all_members
