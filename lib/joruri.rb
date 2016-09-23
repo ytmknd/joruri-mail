@@ -1,6 +1,6 @@
 module Joruri
   def self.version
-    "2.1.0.alpha"
+    "2.1.0.beta"
   end
   
   def self.default_config
