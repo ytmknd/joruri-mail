@@ -247,8 +247,13 @@ class Webmail::Filter < ApplicationRecord
         f.state = 'enabled'
         f.sort_no = 0
         f.conditions_chain = 'or'
-        f.action = 'delete'
-        f.mailbox_name = ''
+        if (junk = Webmail::Mailbox.where(user_id: Core.current_user.id, special_use: 'Junk').first)
+          f.action = 'move'
+          f.mailbox_name = junk.name
+        else
+          f.action = 'delete'
+          f.mailbox_name = ''
+        end
       end
       filter.save(validate: false) if filter.new_record?
       filter
