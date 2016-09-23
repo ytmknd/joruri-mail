@@ -33,7 +33,7 @@
   <tr>
     <th>件名</th>
     <td class="subject autoWrap">
-      <% if @item.priority.present? %>
+      <% if @item.priority.in?(%w(1 5)) %>
         <span class="priority priority<%= @item.priority %>" title="<%= mail_priority_title(@item) %>"><%= mail_priority_label(@item) %></span>
       <% end %>
       <%= mail_text_wrap(@item.subject) %>

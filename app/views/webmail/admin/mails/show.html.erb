@@ -121,7 +121,7 @@
         <%= render 'webmail/admin/mails/shared/label', labels: @item.labels, label_confs: @conf.mail_labels %>
       </span>
       <span id="mail_<%= @item.uid %>_label_loading" class="loading label-loading" style="display:none;"></span>
-      <% if @item.priority.present? %>
+      <% if @item.priority.in?(%w(1 5)) %>
         <span class="priority priority<%= @item.priority %>" title="<%= mail_priority_title(@item) %>"><%= mail_priority_label(@item) %></span>
       <% end %>
       <span class="subject"><%= mail_text_wrap(@item.subject) %></span>

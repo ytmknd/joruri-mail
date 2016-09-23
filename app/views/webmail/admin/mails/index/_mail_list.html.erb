@@ -48,7 +48,7 @@ subject_wrap = @conf.mail_list_subject.blank? ? '' : 'autoWrap'
               <%= render 'webmail/admin/mails/shared/label', labels: item.labels, label_confs: @conf.mail_labels if item.labels.present? %>
             </span>
             <span id="mail_<%= item.uid %>_label_loading" class="loading" style="display:none;"></span>
-            <% if item.priority.present? %>
+            <% if item.priority.in?(%w(1 5)) %>
               <span class="priority priority<%= item.priority %>"><%= mail_priority_label(item) %></span>
             <% end %>
             <%= mail_text_wrap(truncate(item.subject, length: 70, escape: false).presence || ' ') %>
