@@ -487,7 +487,7 @@ class Webmail::Mail
       # load from imap
       header_fields = 'HEADER.FIELDS (DATE FROM TO CC BCC SUBJECT CONTENT-TYPE CONTENT-DISPOSITION DISPOSITION-NOTIFICATION-TO X-PRIORITY)'
       fields = ['UID', 'FLAGS', 'RFC822.SIZE', "BODY.PEEK[#{header_fields}]"]
-      fields += ['X-MAILBOX', 'X-REAL-UID'] if mailbox =~ /^virtual/
+      fields += ['X-MAILBOX', 'X-REAL-UID'] if mailbox =~ /^virtual\./
       imap.uid_fetch(fetch_uids, fields).to_a.each do |msg|
         item = self.new(msg.attr["BODY[#{header_fields}]"])
         item.uid        = msg.attr['UID'].to_i
@@ -519,7 +519,7 @@ class Webmail::Mail
             n.size             = item.size
             n.has_disposition_notification_to = item.has_disposition_notification_to?
             n.priority         = item.priority
-            if mailbox =~ /^virtual/
+            if mailbox =~ /^virtual\./
               n.ref_mailbox = item.x_mailbox
               n.ref_uid     = item.x_real_uid
             end
