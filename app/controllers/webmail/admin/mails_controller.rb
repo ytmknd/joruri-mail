@@ -230,7 +230,7 @@ class Webmail::Admin::MailsController < Webmail::Controller::Admin::Base
 
     begin
       mail = item.prepare_mail(request)
-      mail.delivery_method(:smtp, ActionMailer::Base.smtp_settings)
+      mail.delivery_method(:smtp, Webmail::Mail.smtp_settings(Core.current_user))
       mail.deliver
     rescue => e
       flash.now[:error] = "メールの送信に失敗しました。（#{e}）"
@@ -566,7 +566,7 @@ class Webmail::Admin::MailsController < Webmail::Controller::Admin::Base
     mdn = Webmail::Mail.new
     mdn.in_from ||= Core.current_user.email_format
     mail = mdn.prepare_mdn(@item, mdn_mode.to_s, request)
-    mail.delivery_method(:smtp, ActionMailer::Base.smtp_settings)
+    mail.delivery_method(:smtp, Webmail::Mail.smtp_settings(Core.current_user))
     mail.deliver
 
     @mailbox.flag_mails(@item.uid, ['$MDNSent'])

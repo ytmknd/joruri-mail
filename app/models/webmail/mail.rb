@@ -546,6 +546,15 @@ class Webmail::Mail
       end
     end
 
+    def smtp_settings(user)
+      settings = ActionMailer::Base.smtp_settings
+      if settings[:authentication].present?
+        settings[:user_name] ||= user.account
+        settings[:password] ||= user.password
+      end
+      settings
+    end
+
     private
 
     def encode_body_structure(struct, lv)
