@@ -13,28 +13,8 @@ class Webmail::MailNode < ApplicationRecord
   end
 
   class << self
-    def find_nodes(boxname, uids = nil)
-      items = self.where(user_id: Core.current_user.id, mailbox: boxname)
-      items = items.where(uid: uids) if uids
-      items
-    end
-
-    def find_ref_nodes(boxname, uids = nil)
-      items = self.where(user_id: Core.current_user.id, ref_mailbox: boxname)
-      items = items.where(ref_uid: uids) if uids
-      items
-    end
-
-    def delete_nodes(boxname, uids = nil)
-      items = self.where(user_id: Core.current_user.id, mailbox: boxname)
-      items = items.where(uid: uids) if uids
-      items.delete_all
-    end
-
-    def delete_ref_nodes(boxname, uids = nil)
-      items = self.where(user_id: Core.current_user.id, ref_mailbox: boxname)
-      items = items.where(ref_uid: uids) if uids
-      items.delete_all
+    def delete_nodes(boxname, uids)
+      self.where(user_id: Core.current_user.id, mailbox: boxname, uid: uids).delete_all
     end
 
     def delete_caches(batch_size = 10000, sleep_sec = 1)
