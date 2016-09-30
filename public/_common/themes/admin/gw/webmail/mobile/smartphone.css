@@ -319,14 +319,8 @@ table.root td a {
   background-repeat: no-repeat;
   background-position: 8px 15px;
 }
-table.root .inbox td a {
-  background-image: url("/_common/themes/admin/gw/images/tree/transmit.gif");
-}
-table.root .star td a {
-  background-image: url("/_common/themes/admin/gw/images/mailoption/star_on.gif");
-}
-table.root .folder td a {
-  background-image: url("/_common/themes/admin/gw/images/tree/folder_close.gif");
+table.root td a.noselect {
+  cursor: default;
 }
 table.root tr.level1 td a {
   padding-left: 45px;
@@ -351,14 +345,29 @@ table.root tr.level5 td a {
 .unseenNum {
   color: red;
 }
+table.root .folder td a {
+  background-image: url("/_common/themes/admin/gw/images/tree/folder_close.gif");
+}
+table.root .inbox td a {
+  background-image: url("/_common/themes/admin/gw/images/tree/transmit.gif");
+}
 table.root .drafts td a {
   background-image: url("/_common/themes/admin/gw/images/tree/draft.gif");
 }
 table.root .sent td a {
   background-image: url("/_common/themes/admin/gw/images/tree/mailbox.gif");
 }
-table.root .archives td a {
+table.root .archive td a {
   background-image: url("/_common/themes/admin/gw/images/tree/archive.gif");
+}
+table.root .junk td a {
+  background-image: url("/_common/themes/admin/gw/images/tree/junk.gif");
+}
+table.root .all td a {
+  background-image: url("/_common/themes/admin/gw/images/tree/transmit_open.gif");
+}
+table.root .star td a {
+  background-image: url("/_common/themes/admin/gw/images/mailoption/star_on.gif");
 }
 table.root .trash td {
   /*line-height: 30px;*/
@@ -388,7 +397,7 @@ table.root .trash a.empty {
   overflow: hidden;
 }
 table.root .virtual td a {
-  background-image: url("/_common/themes/admin/gw/images/tree/transmit_open.gif");
+  background-image: url("/_common/themes/admin/gw/images/tree/folder_search.gif");
 }
 table.root .flagged td a {
   background-image: url("/_common/themes/admin/gw/images/mailoption/star_on.gif");
@@ -499,6 +508,21 @@ table.mails td.subject .labels .label {
   color: #fff;
   font-weight: lighter;
   font-size: 0.8em;
+}
+table.mails td.subject .priority {
+  display: inline-block;
+  width: 9px;
+  text-align: center;
+  font-size: 0.9em;
+  font-weight: bold;
+}
+table.mails td.subject .priority1,
+table.mails td.subject .priority2 {
+  color: #f55;
+}
+table.mails td.subject .priority4,
+table.mails td.subject .priority5 {
+  color: #55f;
 }
 table.mails td.subject span.mailbox {
   float: right;
@@ -759,6 +783,21 @@ table.mail td.subject .labels .label {
   color: #fff;
   font-weight: lighter;
   font-size: 0.8em;
+}
+table.mail td.subject .priority {
+  display: inline-block;
+  width: 9px;
+  text-align: center;
+  font-size: 0.9em;
+  font-weight: bold;
+}
+table.mail td.subject .priority1,
+table.mail td.subject .priority2 {
+  color: #f55;
+}
+table.mail td.subject .priority4,
+table.mail td.subject .priority5 {
+  color: #55f;
 }
 table.mails tr td.answered span.subject {
   background-image: url(/_common/themes/admin/gw/images/mailoption/finish_forward.gif);

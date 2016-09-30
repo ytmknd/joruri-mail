@@ -1,31 +1,32 @@
 <script type="text/javascript">
 //<![CDATA[
-function submitMailForm(button) {
-  $('#item_form')
-    .append( $('<input />').attr({name: button.name, value: button.value, type: 'hidden'}) )
-    .submit();
-}
-function checkServerStatus(button) {
-  $.post('<%=raw status_webmail_servers_path(format: :json) %>', {
-    authenticity_token: $('input[name="authenticity_token"]').val()
-  })
-  .done(function(data) {
-    switch (data.status) {
-    case 'OK':
-      submitMailForm(button)
-      break;
-    case 'NG TokenError':
-    case '500 This is a secure page.':
-      alert('ログイン状態がリセットされました。画面を閉じて再度ログインしてから送信して下さい。');
-      break;
-    default:
-      alert('サーバーの応答がありません。しばらく時間をおいて送信して下さい。');
-      break;
-    }
-  })
-  .fail(function() {
-    alert('エラーが発生しました。しばらく時間をおいて送信して下さい。');
+$(function() {
+  $('#commit_send, #commit_draft, #commit_file').on('click', function(e) {
+    e.preventDefault();
+    $.post('<%=raw status_webmail_servers_path(format: :json) %>', {
+      authenticity_token: $('input[name="authenticity_token"]').val()
+    })
+    .done(function(data) {
+      switch (data.status) {
+      case 'OK':
+        $('#item_form')
+          .append( $(e.target).clone().attr('type', 'hidden') )
+          .submit();
+        break;
+      case 'NG TokenError':
+      case '500 This is a secure page.':
+        alert('ログイン状態がリセットされました。画面を閉じて再度ログインしてから送信して下さい。');
+        break;
+      default:
+        alert('サーバーの応答がありません。時間をおいて再送信して下さい。');
+        break;
+      }
+    })
+    .fail(function() {
+      alert('通信エラーが発生しました。時間をおいて再送信して下さい。');
+    });
+    return false;
   });
-}
+});
 //]]>
 </script>

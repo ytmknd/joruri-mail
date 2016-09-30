@@ -27,7 +27,7 @@
 #webmailContent table.mails th.from    { width: 30%; }
 #webmailContent table.mails th.fromOmitAddress { width: 20%; }
 #webmailContent table.mails th.date    { width: 9em; }
-#webmailContent table.mails th.size    { width: 4.5em; text-align: right; }
+#webmailContent table.mails th.size    { width: 4.5em; text-align: right; white-space: nowrap; }
 #webmailContent table.mails th.attach {
   background-image: url(../images/mailoption/clip.gif);
   background-repeat: no-repeat;
@@ -151,6 +151,21 @@
   color: #fff;
   font-weight: lighter;
   font-size: 0.8em;
+}
+#webmailContent table.mails td.subject .priority {
+  display: inline-block;
+  width: 9px;
+  text-align: center;
+  font-size: 0.9em;
+  font-weight: bold;
+}
+#webmailContent table.mails td.subject .priority1,
+#webmailContent table.mails td.subject .priority2 {
+  color: #f55;
+}
+#webmailContent table.mails td.subject .priority4,
+#webmailContent table.mails td.subject .priority5 {
+  color: #55f;
 }
 #webmailContent table.mails td.subject .loading {
   background-image: url(../images/other/loading_16.gif);

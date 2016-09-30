@@ -9,6 +9,7 @@
 
 /config/*.yml
 /config/initializers/debug.rb
+/config/initializers/joruri/demo*
 /log
 /public/assets
 /tmp

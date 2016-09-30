@@ -1,4 +1,4 @@
-class Sys::UserLogin < ActiveRecord::Base
+class Sys::UserLogin < ApplicationRecord
   include Sys::Model::Base
 
   belongs_to :user, foreign_key: :user_id, class_name: 'Sys::User'
@@ -14,7 +14,7 @@ class Sys::UserLogin < ActiveRecord::Base
     if (list = user.logins).size > 10
       self.where(user_id: user.id).where("id < ?", list[9].id).delete_all
     end
-    user.logins(true)
+    user.logins.reload
   end
 
   def login_at

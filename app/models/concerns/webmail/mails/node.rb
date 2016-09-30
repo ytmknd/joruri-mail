@@ -35,12 +35,12 @@ module Webmail::Mails::Node
     @node.has_disposition_notification_to?
   end
 
-  def x_mailbox
-    @node.ref_mailbox
+  def priority
+    @node.priority
   end
 
-  def x_mailbox_title
-    Webmail::Mailbox.name_to_title(@node.ref_mailbox.to_s).split('.').last
+  def x_mailbox
+    @node.ref_mailbox
   end
 
   def x_real_uid

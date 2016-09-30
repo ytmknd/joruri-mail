@@ -51,6 +51,20 @@ module Net
       uids
     end
 
+    # SPECIAL-USE [RFC6154]
+    module ResponseParserFixForSpecialUse
+      def mailbox_list
+        list = super
+        list.class.instance_eval { attr_accessor :special_use }
+        special_uses = [:Archive, :Drafts, :Sent, :Junk, :Trash, :All, :Flagged, :Important]
+        list.special_use = (list.attr & special_uses).first
+        list
+      end
+    end
+    class ResponseParser
+      prepend ResponseParserFixForSpecialUse
+    end
+
     # X-MAILBOX and X-REAL-UID response for virtual mailboxes
     class ResponseParser
       private

@@ -5,19 +5,25 @@
 <%= error_messages_for 'item' %>
 <%= form_for :item, url: { action: :mobile_send, id: params[:id].to_i },
   html: { id: 'item_form', class: 'newForm', name: 'newForm', method: :post, multipart: true } do |f| %>
-  <%= render 'form_smart_phone', f: f %>
+  <%= render 'form', f: f %>
   <div class="submitters">
     <input type="button" value="送信する" id="commit_send1" name="commit_send" class="send" />
     <input type="button" value="下書き保存" id="commit_draft1" name="commit_draft" class="draft" />
   </div>
+  <input type="submit" value="送信する" id="commit_send" name="commit_send" style="display: none;" />
+  <input type="submit" value="下書き保存" id="commit_draft" name="commit_draft" style="display: none;" />
+  <input type="submit" value="ファイル添付" id="commit_file" name="commit_file" style="display: none;" />
 <% end %>
 
 <%= render 'webmail/admin/mails/form/status' %>
 <script type="text/javascript">
 //<![CDATA[
 $(function() {
-  $('input[name="commit_send"], input[name="commit_draft"]').on('click', function() {
-    checkServerStatus(this);
+  $('#commit_send1, #commit_send2').on('click', function() {
+    $('#commit_send').click();
+  });
+  $('#commit_draft1, #commit_draft2').on('click', function() {
+    $('#commit_draft').click();
   });
 });
 //]]>

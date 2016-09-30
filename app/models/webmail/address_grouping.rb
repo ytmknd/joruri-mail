@@ -1,4 +1,4 @@
-class Webmail::AddressGrouping < ActiveRecord::Base
+class Webmail::AddressGrouping < ApplicationRecord
   include Sys::Model::Base
 
   belongs_to :group, foreign_key: :group_id, class_name: 'Webmail::AddressGroup'

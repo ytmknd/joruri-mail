@@ -33,6 +33,9 @@
   <tr>
     <th>件名</th>
     <td class="subject autoWrap">
+      <% if @item.priority.in?(%w(1 5)) %>
+        <span class="priority priority<%= @item.priority %>" title="<%= mail_priority_title(@item) %>"><%= mail_priority_label(@item) %></span>
+      <% end %>
       <%= mail_text_wrap(@item.subject) %>
       <% if @item.has_attachments? %>
       <a href="#attachments" class="attachmentMark" title="<%= @item.attachments.map(&:name).join(', ') %>">添付ファイル有り</a>
@@ -144,23 +147,23 @@
 <div class="title"><span>返信メニュー</span></div>
 <div class="menus">
   <span class="answer">
-    <%= link_to '送信者に返信', { action: :answer } %>
+    <%= link_to '送信者に返信', mail_form_url(@item, action: :answer) %>
   </span>
   <% if false %>
   <span class="answerWithQuot">
-    <%= link_to '送信者に返信（引用有り）', { action: :answer, qt: 1 } %>
+    <%= link_to '送信者に返信（引用有り）', mail_form_url(@item, action: :answer, qt: 1) %>
   </span>
   <% end %>
   <span class="answerToAll">
-    <%= link_to '全員に返信', { action: :answer, all: 1 }, class: 'menuItemLink' %>
+    <%= link_to '全員に返信', mail_form_url(@item, action: :answer, all: 1), class: 'menuItemLink' %>
   </span>
   <% if false %>
   <span class="answerToAllWithQuot">
-    <%= link_to '全員に返信（引用有り）', { action: :answer, all: 1, qt: 1 } %>
+    <%= link_to '全員に返信（引用有り）', mail_form_url(@item, action: :answer, all: 1, qt: 1) %>
   </span>
   <% end %>
   <span class="forward">
-    <%= link_to '転送', { action: :forward } %>
+    <%= link_to '転送', mail_form_url(@item, action: :forward) %>
   </span>
 </div>
 </div>
@@ -244,6 +247,9 @@ $(function() {
     })
     .done(function() {
       syncStarClass(uid, afterClass);
+      <% if @mailbox.flagged_box? %>
+        window.location = '<%= url_for(action: :index, mobile: :list) %>';
+      <% end %>
     })
     .always(function() {
       elem.toggle();

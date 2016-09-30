@@ -22,7 +22,7 @@ class Webmail::Admin::AddressGroupsController < Webmail::Controller::Admin::Base
   end
 
   def index
-    @items = Webmail::Address.readable.where(user_id: Core.user.id).order(@orders)
+    @items = Webmail::Address.where(user_id: Core.user.id).order(@orders)
     @s_items = @items.search(params) if params[:search]
 
     @root_groups = Webmail::AddressGroup.user_root_groups.preload_children
@@ -90,7 +90,7 @@ class Webmail::Admin::AddressGroupsController < Webmail::Controller::Admin::Base
   end
 
   def ids_to_addrs(ids)
-    return [] if ids.blank? || !ids.is_a?(Hash)
+    return [] if ids.blank?
     Webmail::Address.where(user_id: Core.user.id, id: ids.keys)
       .where.not(email: nil).where.not(email: '').order(:kana)
       .map(&:email_format)

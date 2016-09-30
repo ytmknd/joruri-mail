@@ -4,7 +4,6 @@
     <td>
       <div id="defaultUploader">
         <%= f.file_field :in_files, name: 'item[in_files][]', size: 90, class: 'file' %><br />
-        <input type="button" value="選択したファイルを添付" id="commit_file" name="commit_file" style="display: none;" />
       </div>
       <div id="fileUploaderProgress" style="display:none;">
         <div class="progressWrapper">
@@ -95,10 +94,6 @@ $(function() {
     $('#fileUploaderProgress .progressBarName').text(this.value);
     $('#fileUploaderProgress').show();
     $('#commit_file').click();
-  });
-  $('#commit_file').on('click', function() {
-    checkServerStatus(this);
-    return false;
   });
   $('a[href="#deleteUploadedFile"]').on('click', function() {
     var id = $(this).attr('data-id')

@@ -46,10 +46,7 @@ class System::ProductSynchro < System::Database
 
     [:sys_users, :sys_groups, :sys_users_groups].each do |table|
       begin
-        conn = ActiveRecord::Base.connection
-        conn.execute("DROP TABLE IF EXISTS #{table}_backups")
-        conn.execute("CREATE TABLE #{table}_backups LIKE #{table}")
-        conn.execute("INSERT INTO #{table}_backups SELECT * FROM #{table}")
+        ApplicationRecord.copy_table("#{table}", "#{table}_backups")
         results[:copy] += 1
       rescue => e
         results[:cerr] += 1

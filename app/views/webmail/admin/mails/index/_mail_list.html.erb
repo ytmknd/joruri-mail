@@ -9,7 +9,7 @@ subject_wrap = @conf.mail_list_subject.blank? ? '' : 'autoWrap'
       onclick="window.location.href='<%=raw escape_javascript url_for(sort_starred: params[:sort_starred] == '1' ? '' : '1') %>';"></th>
     <th class="attach" title="添付ファイル">添</th>
     <th class="subject"><%= link_to_sort '件名', { sort_key: :subject }, class: 'sorter' %></th>
-    <% if @mailbox.star_box? || @mailbox.virtual_box? %>
+    <% if @mailbox.virtual_box? %>
       <th class="mailbox"></th>
     <% end %>
     <th class="<%= @conf.mail_list_from_address.blank? ? 'from' : 'fromOmitAddress' %>">
@@ -31,7 +31,7 @@ subject_wrap = @conf.mail_list_subject.blank? ? '' : 'autoWrap'
     <%
       from, s_from, from_tooltip = mail_from_display(item, @mailbox, @conf.mail_list_from_address.present?)
     %>
-    <tr id="mail_<%= item.uid %>" class="mail <%= 'unseen' if item.unseen? %> <%= cycle '', 'cycle' %>"
+    <tr id="mail_<%= item.uid %>" class="mail <%= 'unseen' if item.unseen? %>"
       data-uid="<%= item.uid %>" data-url="<%= url_for(action: :show, id: item.uid, new_window: (@conf.mail_open_window.blank? ? nil : 1)) %>">
       <td class="drag" id="drag_<%= item.uid %>" data-uid="<%= item.uid %>"></td>
       <td class="check"><input type="checkbox" name="item[ids][<%= item.uid %>]" value="1" data-uid="<%= item.uid %>" /></td>
@@ -48,14 +48,17 @@ subject_wrap = @conf.mail_list_subject.blank? ? '' : 'autoWrap'
               <%= render 'webmail/admin/mails/shared/label', labels: item.labels, label_confs: @conf.mail_labels if item.labels.present? %>
             </span>
             <span id="mail_<%= item.uid %>_label_loading" class="loading" style="display:none;"></span>
+            <% if item.priority.in?(%w(1 5)) %>
+              <span class="priority priority<%= item.priority %>"><%= mail_priority_label(item) %></span>
+            <% end %>
             <%= mail_text_wrap(truncate(item.subject, length: 70, escape: false).presence || ' ') %>
           </a>
         </span>
       </td>
-      <% if @mailbox.star_box? || @mailbox.virtual_box? %>
+      <% if @mailbox.virtual_box? %>
         <td class="mailbox">
-          <span class="overflowHidden" title="<%= item.x_mailbox_title %>">
-            <%= item.x_mailbox_title %>
+          <span class="overflowHidden" title="<%= mailbox_title(@mailboxes, item.x_mailbox) %>">
+            <%= mailbox_title(@mailboxes, item.x_mailbox) %>
           </span>
         </td>
       <% end %>
@@ -65,7 +68,7 @@ subject_wrap = @conf.mail_list_subject.blank? ? '' : 'autoWrap'
         </span>
       </td>
       <td class="date"><%= item.date %></td>
-      <td class="size"><%= number_with_delimiter(item.size) %></td>
+      <td class="size"><%= number_with_delimiter((item.size.to_f / 1024).ceil) %> KB</td>
     </tr>
   <% end %>
 </table>

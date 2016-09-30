@@ -77,7 +77,8 @@ a.scheduleLink {
   line-height: 1.2;
 }
 #mailContent textarea.cc,
-#mailContent textarea.bcc {
+#mailContent textarea.bcc,
+#mailContent textarea.reply_to {
   width: 90%;
   height: 2.5em;
 }
@@ -135,18 +136,28 @@ a.scheduleLink {
 }
 #mailContent .signSelector {
   display: inline;
-  margin-right: 10px;
+  margin-right: 2px;
+}
+#mailContent .signSelector select {
+  max-width: 120px;
 }
 #mailContent .templateSelector {
   display: inline;
-  margin-right: 20px;
+  margin-right: 2px;
+}
+#mailContent .templateSelector select {
+  max-width: 150px;
+}
+#mailContent .prioritySelector {
+  display: inline;
+  margin-right: 15px;
 }
 #mailContent .addressToggleButtons {
   font-size: 12px;
 }
 #mailContent .addressToggleButtons a {
   display:inline-block;
-  width: 80px;
+  width: 100px;
   border: 1px solid #aaa;
   background-color: #fff;
   background-image: url(../images/bt/bg-link_check.jpg);

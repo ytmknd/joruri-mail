@@ -1,10 +1,14 @@
 module Webmail::MailboxHelper
   def mailbox_list_class(mailbox)
-    classes = []
-    classes << (mailbox.special_box? ? mailbox.names.map(&:downcase) : 'folder')
+    classes = ['folder']
+    if mailbox.special_use.present?
+      classes << mailbox.special_use.downcase
+    elsif mailbox.inbox? || mailbox.virtual?
+      classes << mailbox.name.downcase
+    end
     if request.smart_phone?
       classes << "level#{mailbox.level_no}"
-      classes << 'cursor' unless mailbox.trash_box?(:root)
+      classes << 'cursor' if !mailbox.noselect? && !mailbox.use_as_trash?
     end
     classes.join(' ')
   end
@@ -17,27 +21,38 @@ module Webmail::MailboxHelper
     classes.join(' ')
   end
 
-  def mailbox_mobile_image_tag(mailbox_type)
+  def mailbox_title(mailboxes, name)
+    mailbox = mailboxes.detect { |box| box.name == name }
+    mailbox.try(:title)
+  end
+
+  def mailbox_mobile_image_tag(mailbox)
     img =
-      case mailbox_type
-      when 'inbox'
+      case
+      when mailbox.inbox?
         %Q{<img src="/_common/themes/admin/gw/webmail/mobile/images/transmit.jpg" alt="受信トレイ" />}
-      when 'drafts'
+      when mailbox.virtual?
+        %Q{<img src="/_common/themes/admin/gw/webmail/mobile/images/folder-search.jpg" alt="検索" />}
+      when mailbox.use_as_drafts?
         %Q{<img src="/_common/themes/admin/gw/webmail/mobile/images/draft.jpg" alt="下書き" />}
-      when 'sent'
+      when mailbox.use_as_sent?
         %Q{<img src="/_common/themes/admin/gw/webmail/mobile/images/mailbox.jpg" alt="送信トレイ" />}
-      when 'archives'
+      when mailbox.use_as_archive?
         %Q{<img src="/_common/themes/admin/gw/webmail/mobile/images/archive.jpg" alt="アーカイブ" />}
-      when 'trash'
+      when mailbox.use_as_junk?
+        %Q{<img src="/_common/themes/admin/gw/webmail/mobile/images/junk.jpg" alt="迷惑メール" />}
+      when mailbox.use_as_trash?
         %Q{<img src="/_common/themes/admin/gw/webmail/mobile/images/dustbox.jpg" alt="ごみ箱" />}
-      when 'arvhives'
-        %Q{<img src="/_common/themes/admin/gw/webmail/mobile/images/archive.jpg" alt="アーカイブ" />}
-      when 'star'
+      when mailbox.use_as_flagged?
         %Q{<img src="/_common/themes/admin/gw/webmail/mobile/images/star.jpg" alt="スター付き" />}
-      when 'folder'
-        %Q{∟}
+      when mailbox.use_as_all?
+        %Q{<img src="/_common/themes/admin/gw/webmail/mobile/images/transmit_open.jpg" alt="すべてのメール" />}
       else
-        %Q{<img src="/_common/themes/admin/gw/webmail/mobile/images/folder-white.jpg" alt="フォルダー" />}
+        if mailbox.level_no == 0
+          %Q{<img src="/_common/themes/admin/gw/webmail/mobile/images/folder-white.jpg" alt="フォルダー" />}
+        else
+          ''
+        end
       end
     img.html_safe
   end

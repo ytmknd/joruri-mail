@@ -23,7 +23,7 @@
     ><a href="#unseenMails" class="unseen" title="未読にする">未読にする</a
     ><a href="#showLabelMenu" class="label" title="ラベル">ラベル</a
     ><% if Core.current_user.id == Core.user.id 
-    %><a href="#registerSpamMails" class="spam" title="迷惑メール登録">迷惑メール登録</a>
+    %><a href="#junkMails" class="spam" title="迷惑メール登録">迷惑メール登録</a>
     <% end %>
     <a href="#toggleSearchForm" class="search" title="検索">検索</a>
     <div id="labelMenu" class="popupMenu" style="display:none;width:100px;">
@@ -85,7 +85,8 @@ function syncUnseenClass(mailbox, uid) {
   if (uid != '') {
     $('#mail_' + uid).removeClass('unseen');
   }
-  var mbox = $('#mailbox_' + mailbox);
+  var mbox = $('a[data-mailbox="' + mailbox + '"]');
+
   var unseen = mbox.siblings('span.unseenNum');
   var num = unseen.find('span.num')
   var n = parseInt(unseen.find('span.num').text());
@@ -127,9 +128,9 @@ $(function() {
     post('<%=raw escape_javascript url_for(action: :unseen) %>');
     return false;
   });
-  $('a[href="#registerSpamMails"]').on('click', function() {
-    if (confirm('迷惑メールに登録した後、ごみ箱に移動します。よろしいですか？')) { 
-      post('<%=raw escape_javascript url_for(action: :register_spam) %>');
+  $('a[href="#junkMails"]').on('click', function() {
+    if (confirm('迷惑メールに登録します。よろしいですか？')) { 
+      post('<%=raw escape_javascript url_for(action: :junk) %>');
     }
     return false;
   });

@@ -37,12 +37,12 @@ ja:
         name: フィルター名
         sort_no: 並び順
         action: 動作
-        mailbox: 対象フォルダー
+        mailbox_name: 対象フォルダー
         conditions_chain: 条件の結合
         conditions: 条件
         created_at: 作成日時
         updated_at: 更新日時
-        target_mailbox: 適用するフォルダー
+        apply_mailbox_name: 適用するフォルダー
       webmail/filter_condition: &filter_condition
         column: 条件の適用対象
         inclusion: 条件の演算子
@@ -89,12 +89,30 @@ ja:
         in_format: 本文の形式
         in_files: 添付ファイル
         in_request_mdn: 開封確認
+        in_request_dsn: 配送確認
       webmail/tool/batch_delete: 
         mailbox_id: メールボックス
         start_date: 削除開始日
         end_date: 削除終了日
 
   enumerize:
+    webmail/mail:
+      in_priority:
+        '1': 重要度：高
+        '5': 重要度：低
+      priority_header:
+        '1': 1 (Highest)
+        '5': 5 (Lowest)
+      priority_label:
+        '1': ！
+        '2': ！
+        '4': ↓
+        '5': ↓
+      priority_title:
+        '1': 重要度：高
+        '2': 重要度：やや高
+        '4': 重要度：やや低
+        '5': 重要度：低
     webmail/filter:
       state:
         enabled: 有効

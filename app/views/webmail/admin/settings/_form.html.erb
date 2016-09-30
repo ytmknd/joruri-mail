@@ -1,7 +1,7 @@
 <%= f.error_messages %>
 
 <% case @item.config.form_type %>
-<% when :select, :text_field, :password_field %>
+<% when :select, :text_field, :text_area, :password_field %>
   <table class="show">
     <tr>
       <th>設定名</th>
@@ -14,6 +14,8 @@
           <%= f.select :value, @item.config.options %>
         <% when :text_field %>
           <%= f.text_field :value, style: 'width: 500px;' %>
+        <% when :text_area %>
+          <%= f.text_area :value, style: 'width: 500px; height: 200px;' %>
         <% when :password_field %>
           <%= f.password_field :value, style: 'width: 300px;', value: @item.value %>
         <% end %>

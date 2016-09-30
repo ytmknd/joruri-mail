@@ -29,7 +29,7 @@
       <th>メールアドレス</th>
     </tr>
     <% @success_items.each do |item| %>
-      <tr <%= cycle '', 'class="cycle"' %>>
+      <tr class="<%= cycle '', 'cycle' %>">
         <td><%= item.name %></td>
         <td><%= item.email %></td>
       </tr>
@@ -46,7 +46,7 @@
       <th>エラー内容</th>
     </tr>
     <% @error_items.each do |item| %>
-      <tr <%= cycle '', 'class="cycle"' %>>
+      <tr class="<%= cycle '', 'cycle' %>">
         <td><%= item.name %></td>
         <td><%= item.email %></td>
         <td><%= item.errors.full_messages.to_a.join(', ') %></td>

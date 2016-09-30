@@ -1,4 +1,4 @@
-class Webmail::Setting < ActiveRecord::Base
+class Webmail::Setting < ApplicationRecord
   include Sys::Model::Base
   include Sys::Model::Auth::Free
 
@@ -71,6 +71,10 @@ class Webmail::Setting < ActiveRecord::Base
       options: [['Unicode (UTF-8)','utf-8'],['日本語 (ISO-2022-JP)','']]
     add :mail_form, :sign_position, title: '署名の位置（返信・転送時）',
       options: [['引用文の前（標準）', ''], ['引用文の後', 'bottom']]
+    #add :mail_form, :attachment_check, title: '添付忘れ確認',
+    #  options: [['確認しない（標準）', ''], ['確認する', '1']]
+    #add :mail_form, :attachment_check_keywords, title: '添付忘れ確認キーワード', form_type: :text_area,
+    #  default: "attach\nattachment\nattaching\n添付\n同封\n別添"
     #add :mail_form, :forward, title: '転送先アドレス', form_type: :text_field
     add :sys_address, :sys_address_order, title: '並び順',
       options: [['メールアドレス（標準）', ''], ['名前', 'name'], ['フリガナ', 'kana'], ['役職（担当順）', 'sort_no']]
@@ -188,8 +192,6 @@ class Webmail::Setting < ActiveRecord::Base
     if: lambda {|item| item.name == 'address_order' }
   validates :value, inclusion: Config.find_by(name: :sys_address_order).options.map(&:last),
     if: lambda {|item| item.name == 'sys_address_order' }
-
-  scope :readable, ->(user = Core.user) { where(user_id: user.id) }
 
   def initialize(attributes = nil)
     super

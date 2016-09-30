@@ -17,12 +17,16 @@
   </tr><tr id="bccContainer" style="<%= 'display:none;' unless @item.in_bcc.present? %>">
     <th>Bcc ：</th>
     <td><%= f.text_area :in_bcc, class: 'bcc' %></td>
+  </tr><tr id="replyToContainer" style="<%= 'display:none;' unless @item.in_reply_to.present? %>">
+    <th>Reply-To：</th>
+    <td><%= f.text_area :in_reply_to, class: 'reply_to' %></td>
   </tr><tr>
     <th></th>
     <td style="padding-bottom:0">
       <div class="addressToggleButtons">
         <%= link_to 'Ccを追加', '#showCcAddress', style: "#{'display:none' if @item.in_cc.present? }" %>
         <%= link_to 'Bccを追加', '#showBccAddress', style: "#{'display:none' if @item.in_bcc.present? }" %>
+        <%= link_to 'Reply-Toを追加', '#showReplyToAddress', style: "#{'display:none' if @item.in_reply_to.present? }" %>
       </div>
     </td>
   </tr>
@@ -43,8 +47,14 @@
             <%= link_to 'TEXT', '#toggleEditor', data: { format: 'text' }, title: 'TEXT形式' %>
             <%= link_to 'HTML', '#toggleEditor', data: { format: 'html' }, title: 'HTML形式' %>
           </div>
+          <div class="signSelector">
+            <%= select_tag :sign, options_for_select(@item.user_signs.map {|sign| [sign.name, sign.id] }), include_blank: '# 署名挿入' %>
+          </div>
           <div class="templateSelector">
             <%= select_tag :template, options_for_select(Webmail::Template.user_templates.pluck(:name, :id)), include_blank: '# テンプレート切替' %>
+          </div>
+          <div class="prioritySelector">
+            <%= f.select :in_priority, options_for_select(@item.class.in_priority.options, @item.in_priority), include_blank: '# 重要度' %>
           </div>
         </div>
       <% end %>
@@ -66,6 +76,9 @@
 
 <div class="recipientConfirm">
   <%= f.check_box :in_request_mdn %>開封確認メッセージを要求する
+</div>
+<div class="recipientConfirm">
+  <%= f.check_box :in_request_dsn %>配送確認メッセージを要求する
 </div>
 
 </div>
@@ -173,6 +186,11 @@ $(function() {
   });
   $('a[href="#showBccAddress"]').on('click', function() {
     $('#bccContainer').show();
+    $(this).hide();
+    return false;
+  });
+  $('a[href="#showReplyToAddress"]').on('click', function() {
+    $('#replyToContainer').show();
     $(this).hide();
     return false;
   });
@@ -293,6 +311,22 @@ $(function() {
       $('a[href="#showBccAddress"]').click();
     }
   }
+});
+$(function() {
+  <% signs = @item.user_signs.map { |sign| [sign.id.to_s, sign.body] }.flatten %>
+  var signs = <%= Hash[*signs].to_json.html_safe %>
+  $('#sign').on('change', function() {
+    var sign = signs[$(this).find('option:selected').val()];
+    if (sign) {
+      if ($('#item_in_format').val() == 'html') {
+        tinyMCE.activeEditor.execCommand('mceInsertContent', true, convertTextToHtml(sign));
+      } else {
+        $('#item_in_body').range(sign);
+      }
+      $('#sign').val('');
+    }
+    return false;
+  });
 });
 $(function() {
   $('a[href="#openScheduleWindow"]').on('click', function() {

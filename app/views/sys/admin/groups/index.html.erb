@@ -25,7 +25,7 @@
     <th style="width: 60px; text-align: center;">状態</th>
   </tr>
   <% @users.each do |item| %>
-  <tr <%= cycle '', 'class="cycle"' %>>
+  <tr class="<%= cycle '', 'cycle' %>">
     <td style="text-align: center;"><%= link_to '詳細', sys_group_user_path(@parent, item) %></td>
     <td><%= item.account %></td>
     <td><%= item.name %></td>

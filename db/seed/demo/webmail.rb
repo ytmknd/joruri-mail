@@ -32,7 +32,7 @@ Webmail::Filter.create(
   :name             => "迷惑メール",
   :sort_no          => 1,
   :action           => "delete",
-  :mailbox          => "",
+  :mailbox_name     => "",
   :conditions_chain => "and",
   :conditions_attributes => [
     :column       => "subject",

@@ -1,6 +1,6 @@
 module Joruri
   def self.version
-    "2.0.0"
+    "2.1.0"
   end
   
   def self.default_config
@@ -17,6 +17,7 @@ module Joruri
         "webmail.mail_address_history_max_count" => 100,
         "webmail.synchronize_mobile_setting"     => 0,
         "webmail.show_gw_schedule_link"          => 1,
+        "webmail.mail_cache_expiration"          => 6,
         "webmail.thumbnail_width"                => 128,
         "webmail.thumbnail_height"               => 96,
         "webmail.thumbnail_quality"              => 50,

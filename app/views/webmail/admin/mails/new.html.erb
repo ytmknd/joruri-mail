@@ -42,6 +42,10 @@
   </div>
 </div>
 
+<input type="submit" value="送信する" id="commit_send" name="commit_send" style="display: none;" />
+<input type="submit" value="下書き保存" id="commit_draft" name="commit_draft" style="display: none;" />
+<input type="submit" value="破棄する" id="commit_destroy" name="commit_destroy" style="display: none;" />
+<input type="submit" value="ファイル添付" id="commit_file" name="commit_file" style="display: none;" />
 <% end %>
 
 <% if Joruri.config.application['webmail.show_gw_schedule_link'] == 1 %>
@@ -60,11 +64,14 @@
 <script type="text/javascript">
 //<![CDATA[
 $(function() {
-  $('input[name="commit_send"], input[name="commit_draft"]').on('click', function() {
-    checkServerStatus(this);
+  $('#commit_send1, #commit_send2').on('click', function() {
+    $('#commit_send').click();
   });
-  $('input[name="commit_destroy"]').on('click', function() {
-    submitMailForm(this);
+  $('#commit_draft1, #commit_draft2').on('click', function() {
+    $('#commit_draft').click();
+  });
+  $('#commit_destroy1, #commit_destroy2').on('click', function() {
+    $('#commit_destroy').click();
   });
 });
 //]]>

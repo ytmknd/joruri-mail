@@ -3,6 +3,9 @@
 </div>
 <div class="header">
 <div class="headerTitle">
+  <% if @item.priority.in?(%w(1 5)) %>
+    <span class="priority priority<%= @item.priority %>"><%= mail_priority_label(@item) %></span>
+  <% end %>
   <%= @item.subject %>
   <% if @item.has_attachments? %>
   <img src="/_common/themes/admin/gw/webmail/mobile/images/clip-lightblue.jpg" alt="[有]" />
@@ -91,15 +94,15 @@
 
 <div class="replyMenu">
 <div class="title"><img src="/_common/themes/admin/gw/webmail/mobile/images/reply-menu-lightblue.jpg" alt="返信メニュー"/>返信メニュー</div>
-<div class="menuItem"><%= link_to '送信者に返信', { action: :answer }, class: 'menuItemLink', accesskey: '1' %></div>
+<div class="menuItem"><%= link_to '送信者に返信', mail_form_url(@item, action: :answer), class: 'menuItemLink', accesskey: '1' %></div>
 <% if false %>
-<div class="menuItem"><%= link_to '送信者に返信（引用有り）', { action: :answer, qt: 1 }, class: 'menuItemLink', accesskey: '2' %></div>
+<div class="menuItem"><%= link_to '送信者に返信（引用有り）', mail_form_url(@item, action: :answer, qt: 1), class: 'menuItemLink', accesskey: '2' %></div>
 <% end %>
-<div class="menuItem"><%= link_to '全員に返信', { action: :answer, all: 1 }, class: 'menuItemLink', accesskey: '3' %></div>
+<div class="menuItem"><%= link_to '全員に返信', mail_form_url(@item, action: :answer, all: 1), class: 'menuItemLink', accesskey: '3' %></div>
 <% if false %>
-<div class="menuItem"><%= link_to '全員に返信（引用有り）', { action: :answer, all: 1, qt: 1 }, class: 'menuItemLink', accesskey: '4' %></div>
+<div class="menuItem"><%= link_to '全員に返信（引用有り）', mail_form_url(@item, action: :answer, all: 1, qt: 1), class: 'menuItemLink', accesskey: '4' %></div>
 <% end %>
-<div class="menuItem"><%= link_to '転送', { action: :forward }, class: 'menuItemLink', accesskey: '5' %></div>
+<div class="menuItem"><%= link_to '転送', mail_form_url(@item, action: :forward), class: 'menuItemLink', accesskey: '5' %></div>
 </div>
 
 <div class="managementMenu">

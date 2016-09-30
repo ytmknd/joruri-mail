@@ -6,7 +6,7 @@ class Webmail::Admin::TemplatesController < Webmail::Controller::Admin::Base
   end
 
   def index
-    @items = Webmail::Template.readable.where(user_id: Core.user.id).order(:name, :id)
+    @items = Webmail::Template.where(user_id: Core.user.id).order(:name, :id)
       .paginate(page: params[:page], per_page: params[:limit])
     _index @items
   end

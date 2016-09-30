@@ -1,5 +1,5 @@
 {
-  "name": "dsl-generated dependencies",
+  "name": "dsl-generated-dependencies",
   "dependencies": {
     "jquery": "2.2.4",
     "jquery-ujs": "1.2.0",
@@ -8,6 +8,7 @@
     "jquery-cookie": "1.4.1",
     "simple-color-picker": "git://github.com/rachel-carvalho/simple-color-picker#3d4b89bea216afef8e95151edc9e54edbf2963f4",
     "jsviews": "0.9.79",
-    "jquery-file-upload": "9.12.5"
+    "jquery-file-upload": "9.12.5",
+    "jquery.caret": "1.5.2"
   }
 }

@@ -19,6 +19,10 @@ module Webmail::Mails::Base
     extract_address_from_mail_list(friendly_from_addr)
   end
 
+  def from_address
+    Email.parse(friendly_from_addr)
+  end
+
   def friendly_from_addr
     field = @mail.header[:from]
     field ? collect_addrs(field).first : 'unknown'
@@ -49,7 +53,13 @@ module Webmail::Mails::Base
     ["#read failed: #{e}"] rescue []
   end
 
-  def friendly_reply_to_addrs(all_members = nil)
+  def friendly_reply_to_addrs
+    collect_addrs(@mail.header[:reply_to])
+  rescue => e
+    ["#read failed: #{e}"] rescue []
+  end
+
+  def friendly_reply_to_addrs_for_answer(all_members = nil)
     addrs = collect_addrs(@mail.header[:reply_to])
     addrs = [friendly_from_addr] if addrs.blank?
     if all_members
@@ -90,6 +100,10 @@ module Webmail::Mails::Base
       lang = I18n.t(encoding, scope: :language)
       lang !~ /^translation missing/ ? "#{lang}/#{encoding}" : "#{encoding}"
     end
+  end
+
+  def priority
+    @mail.header[:x_priority].to_s.scan(/^(\d)+/).flatten.first if @mail.header[:x_priority]
   end
 
   def has_disposition_notification_to?

@@ -71,9 +71,9 @@ class Webmail::Admin::SysAddressesController < Webmail::Controller::Admin::Base
   private
 
   def ids_to_addrs(ids)
-    if ids.is_a?(Hash)
+    if ids.respond_to?(:keys)
       ids = ids.keys.uniq
-    elsif ids.is_a?(String) && ids.present?
+    elsif ids.present?
       ids = [ids]
     else
       return []

@@ -1,23 +1,26 @@
 class Webmail::Mail
+  extend Enumerize
   include ActiveModel::Model
   include ActiveModel::Validations::Callbacks
+  include ActiveModel::Naming
   include Webmail::Mails::Imap
   include Webmail::Mails::Base
 
   FORMAT_TEXT = 'text'
   FORMAT_HTML = 'html'
 
-  attr_accessor :in_from, :in_to, :in_cc, :in_bcc,
-    :in_subject, :in_body, :in_html_body, :in_format, :in_files, :in_request_mdn,
+  attr_accessor :in_from, :in_to, :in_cc, :in_bcc, :in_reply_to,
+    :in_subject, :in_body, :in_html_body, :in_format, :in_priority, :in_files, :in_request_mdn, :in_request_dsn,
     :tmp_id, :tmp_attachment_ids
-  attr_reader :in_to_addrs, :in_cc_addrs, :in_bcc_addrs
+  attr_reader :in_to_addrs, :in_cc_addrs, :in_bcc_addrs, :in_reply_to_addrs
 
   before_validation :prepare_validation
 
   with_options on: [:send, :draft] do
     validates :in_subject, length: { maximum: 100 }
-    validates :in_to, :in_cc, :in_bcc, email_list: true
-    validates :in_to_addrs, :in_cc_addrs, :in_bcc_addrs, length: { maximum: 150, message: :too_many_addresses }
+    validates :in_to, :in_cc, :in_bcc, :in_reply_to, email_list: true
+    validates :in_to_addrs, :in_cc_addrs, :in_bcc_addrs, :in_reply_to_addrs,
+      length: { maximum: 150, message: :too_many_addresses }
     validate :validate_tmp_attachments
   end
 
@@ -27,6 +30,8 @@ class Webmail::Mail
     validates :in_html_body, presence: true, if: -> { in_format == FORMAT_HTML }
     validate :validate_address_list
   end
+
+  enumerize :in_priority, in: ['1', '5']
 
   def initialize(attributes = nil)
     @tmp_attachment_ids = []
@@ -62,6 +67,10 @@ class Webmail::Mail
 
   def reference=(reference)
     @reference = reference
+  end
+
+  def user_signs
+    @signs ||= Webmail::Sign.user_signs.to_a
   end
 
   def tmp_attachments
@@ -109,6 +118,7 @@ class Webmail::Mail
     self.in_to      = ref.friendly_to_addrs.join(', ')
     self.in_cc      = ref.friendly_cc_addrs.join(', ')
     self.in_bcc     = ref.friendly_bcc_addrs.join(', ')
+    self.in_reply_to = ref.friendly_reply_to_addrs.join(', ')
     self.in_subject = ref.subject
     if format == FORMAT_HTML && ref.html_mail?
       self.in_html_body = ref.html_body_for_edit
@@ -117,6 +127,7 @@ class Webmail::Mail
       self.in_body      = ref.text_body
       self.in_format    = FORMAT_TEXT     
     end
+    self.in_priority = ref.priority if ref.priority.present?
     self.in_request_mdn = '1' if ref.has_disposition_notification_to?
 
     init_tmp_attachments_from_ref(ref)
@@ -124,7 +135,7 @@ class Webmail::Mail
 
   def init_for_answer(ref, format:, sign: nil, sign_pos: nil, all: nil, quote: nil)
     self.tmp_id     = Sys::File.new_tmp_id
-    self.in_to      = ref.friendly_reply_to_addrs(all.present?).join(', ')
+    self.in_to      = ref.friendly_reply_to_addrs_for_answer(all.present?).join(', ')
     self.in_cc      = ref.friendly_cc_addrs.join(', ') if all
     self.in_subject = "Re: #{ref.subject}"
 
@@ -202,12 +213,20 @@ class Webmail::Mail
     mail.to          = Email.encode_addresses(@in_to_addrs, charset)
     mail.cc          = Email.encode_addresses(@in_cc_addrs, charset)
     mail.bcc         = Email.encode_addresses(@in_bcc_addrs, charset)
+    mail.reply_to    = Email.encode_addresses(@in_reply_to_addrs, charset)
     mail.subject     = in_subject.gsub(/\r\n|\n/, ' ')
     #mail.body    = in_body
 
+    mail.header["X-Priority"] = I18n.t('enumerize.webmail/mail.priority_header')[in_priority.to_sym] if in_priority.present?
     mail.header["X-Mailer"] = "Joruri Mail ver. #{Joruri.version}"
     mail.header["User-Agent"] = request.user_agent.force_encoding('us-ascii') if request
     mail.header["Disposition-Notification-To"] = Email.encode_addresses(@in_from_addr, charset) if in_request_mdn == '1'
+
+    if in_request_dsn == '1'
+      mail.smtp_envelope_to = (@in_to_addrs + @in_cc_addrs + @in_bcc_addrs).map { |addr|
+        "<#{addr.address}> NOTIFY=SUCCESS,FAILURE ORCPT=rfc822;#{@in_from_addr[0].address}"
+      }
+    end
 
     if @reference ## for answer
       references = []
@@ -352,6 +371,7 @@ class Webmail::Mail
     @in_to_addrs  = Email.parse_list(in_to)
     @in_cc_addrs  = Email.parse_list(in_cc)
     @in_bcc_addrs = Email.parse_list(in_bcc)
+    @in_reply_to_addrs = Email.parse_list(in_reply_to)
 
     self.in_subject = '件名なし' if in_subject.blank?
     self.in_subject   = NKF.nkf('-Ww --no-best-fit-chars', in_subject) if in_subject.present?
@@ -465,15 +485,16 @@ class Webmail::Mail
       end
 
       # load from imap
-      header_fields = 'HEADER.FIELDS (DATE FROM TO CC BCC SUBJECT CONTENT-TYPE CONTENT-DISPOSITION DISPOSITION-NOTIFICATION-TO)'
+      header_fields = 'HEADER.FIELDS (DATE FROM TO CC BCC SUBJECT CONTENT-TYPE CONTENT-DISPOSITION DISPOSITION-NOTIFICATION-TO X-PRIORITY)'
       fields = ['UID', 'FLAGS', 'RFC822.SIZE', "BODY.PEEK[#{header_fields}]"]
-      fields += ['X-MAILBOX', 'X-REAL-UID'] if mailbox =~ /^virtual/
+      fields += ['X-MAILBOX', 'X-REAL-UID'] if mailbox =~ /^virtual\./
       imap.uid_fetch(fetch_uids, fields).to_a.each do |msg|
         item = self.new(msg.attr["BODY[#{header_fields}]"])
         item.uid        = msg.attr['UID'].to_i
         item.mailbox    = mailbox
         item.size       = msg.attr['RFC822.SIZE']
         item.flags      = msg.attr['FLAGS']
+        item.priority   = msg.attr['X-PRIORITY']
         item.x_mailbox  = msg.attr['X-MAILBOX']
         item.x_real_uid = msg.attr['X-REAL-UID']
         items << item
@@ -497,7 +518,8 @@ class Webmail::Mail
             n.has_attachments  = item.has_attachments?
             n.size             = item.size
             n.has_disposition_notification_to = item.has_disposition_notification_to?
-            if mailbox =~ /^virtual/
+            n.priority         = item.priority
+            if mailbox =~ /^virtual\./
               n.ref_mailbox = item.x_mailbox
               n.ref_uid     = item.x_real_uid
             end
@@ -522,6 +544,15 @@ class Webmail::Mail
         item.mailbox = mailbox
         item
       end
+    end
+
+    def smtp_settings(user)
+      settings = ActionMailer::Base.smtp_settings
+      if settings[:authentication].present?
+        settings[:user_name] ||= user.account
+        settings[:password] ||= user.password
+      end
+      settings
     end
 
     private

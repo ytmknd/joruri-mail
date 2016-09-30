@@ -14,9 +14,9 @@ class Sys::User < Sys::ManageDatabase
     foreign_key: :user_id, class_name: 'Sys::UserLogin', dependent: :delete_all
 
   has_many :webmail_mail_nodes, -> { order(:id) },
-    foreign_key: :user_id, class_name: 'Webmail::MailNode', dependent: :destroy
+    foreign_key: :user_id, class_name: 'Webmail::MailNode', dependent: :delete_all
   has_many :webmail_mailboxes, -> { order(:id) },
-    foreign_key: :user_id, class_name: 'Webmail::Mailbox', dependent: :destroy
+    foreign_key: :user_id, class_name: 'Webmail::Mailbox', dependent: :delete_all
   has_many :webmail_settings, -> { order(:id) },
     foreign_key: :user_id, class_name: 'Webmail::Setting', dependent: :destroy
   has_many :webmail_address_groups, -> { order(:id) },
@@ -30,7 +30,9 @@ class Sys::User < Sys::ManageDatabase
   has_many :webmail_templates, -> { order(:id) },
     foreign_key: :user_id, class_name: 'Webmail::Template', dependent: :destroy
   has_many :webmail_mail_address_histories, -> { order(:id) },
-    foreign_key: :user_id, class_name: 'Webmail::MailAddressHistory', dependent: :destroy
+    foreign_key: :user_id, class_name: 'Webmail::MailAddressHistory', dependent: :delete_all
+  has_many :webmail_quota_roots, -> { order(:id) },
+    foreign_key: :user_id, class_name: 'Webmail::QuotaRoot', dependent: :delete_all
 
   attr_accessor :_in_group_id
   #attr_accessor :group, :group_id, :in_group_id
@@ -41,7 +43,6 @@ class Sys::User < Sys::ManageDatabase
   validates :mobile_password, length: { minimum: 4, if: lambda { |u| u.mobile_password && u.mobile_password.length != 0 } }
   validates :account, uniqueness: true
 
-  scope :readable, -> { all }
   scope :with_valid_email, -> { where.not(email: nil).where.not(email: '') }
   scope :search, ->(params) {
     rel = all

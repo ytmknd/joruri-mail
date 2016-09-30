@@ -6,7 +6,7 @@ subject_wrap = @conf.mail_list_subject.blank? ? '' : 'autoWrap'
     <%
       from, s_from, from_tooltip = mail_from_display(item, @mailbox, @conf.mail_list_from_address.present?)
     %>
-    <tr class="mail <%= 'unseen' if item.unseen? %> <%= cycle '', 'cycle' %>">
+    <tr class="mail <%= 'unseen' if item.unseen? %>">
       <td class="check"><input type="checkbox" name="item[ids][<%= item.uid %>]" value="1" class="checkUI" /></td>
       <td class="star <%= item.starred? ? 'starOn' : 'starOff' %>" id="mail_star_<%= item.uid %>" title="<%= 'スター' if item.starred? %>" data-uid="<%= item.uid %>">&nbsp;</td>
       <td class="attach subject from date <%= mail_flags(item).join(' ') %> <%= subject_wrap %>">
@@ -17,10 +17,13 @@ subject_wrap = @conf.mail_list_subject.blank? ? '' : 'autoWrap'
             <span id="mail_<%= item.uid %>_labels" class="labels">
               <%= render 'webmail/admin/mails/shared/label', labels: item.labels, label_confs: @conf.mail_labels if item.labels.present? %>
             </span>
+            <% if item.priority.in?(%w(1 5)) %>
+              <span class="priority priority<%= item.priority %>"><%= mail_priority_label(item) %></span>
+            <% end %>
             <span class="text"><%= mail_text_wrap(truncate(item.subject, length: 70, escape: false).presence || ' ') %></span>
           </span>
-          <% if @mailbox.star_box? || @mailbox.virtual_box? %>
-            <span class="mailbox"><%= item.x_mailbox_title %></span>
+          <% if @mailbox.virtual_box? %>
+            <span class="mailbox"><%= mailbox_title(@mailboxes, item.x_mailbox) %></span>
           <% end %>
         </a>
       </td>

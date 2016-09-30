@@ -13,7 +13,6 @@ protected
   end
   
   def _show(item)
-    return send(params[:do], item) if params[:do]
     respond_to do |format|
       format.html { render }
       format.xml  { render :xml => item.to_xml(:dasherize => false, :root => 'item') }

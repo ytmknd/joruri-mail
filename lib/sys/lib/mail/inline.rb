@@ -7,7 +7,7 @@ class Sys::Lib::Mail::Inline
   attr_accessor :attachment
   
   def initialize(attributes = {})
-    attributes.each {|name, value| eval("@#{name} = value")}
+    attributes.each {|name, value| instance_variable_set("@#{name}", value) }
   end
 
   def alternative?

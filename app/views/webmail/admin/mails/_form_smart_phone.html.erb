@@ -56,11 +56,18 @@
 
 <%= render 'webmail/admin/mails/form/file', f: f %>
 
+<%= f.hidden_field :in_reply_to %>
 <%= f.hidden_field :in_format %>
 <%= f.hidden_field :tmp_id %>
 
 <div class="recipientConfirm">
+  <%= f.select :in_priority, options_for_select(@item.class.in_priority.options, @item.in_priority), include_blank: '# 重要度' %>
+</div>
+<div class="recipientConfirm">
   <%= f.check_box :in_request_mdn %>開封確認メッセージを要求する
+</div>
+<div class="recipientConfirm">
+  <%= f.check_box :in_request_dsn %>配送確認メッセージを要求する
 </div>
 
 <!-- end #mailForm --></div>

@@ -69,32 +69,20 @@ module Sys::Model::Base::File
     "#{Rails.root}/upload/#{md_dir}/#{id_dir}/#{id_file}"
   end
 
-  def readable
-    return self
-  end
-
-  def editable
-    return self
-  end
-
-  def deletable
-    return self
-  end
-
   def readable?
-    return true
+    true
   end
 
   def creatable?
-    return true
+    true
   end
 
   def editable?
-    return true
+    true
   end
 
   def deletable?
-    return true
+    true
   end
 
   def image_file?

@@ -3,8 +3,7 @@ class Sys::Admin::GroupUsersController < Sys::Controller::Admin::Base
   
   def pre_dispatch
     return error_auth unless Core.user.has_auth?(:manager)
-    return redirect_to(request.env['PATH_INFO']) if params[:reset]
-    
+
     id      = params[:parent] == '0' ? 1 : params[:parent]
     @parent = Sys::Group.find(id)
   end

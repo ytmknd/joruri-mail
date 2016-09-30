@@ -1,10 +1,10 @@
-class Webmail::Filter < ActiveRecord::Base
+class Webmail::Filter < ApplicationRecord
   include Sys::Model::Base
   include Sys::Model::Auth::Free
 
   NUMBER_OF_SLICE_UIDS = 256
 
-  attr_accessor :target_mailbox, :include_sub
+  attr_accessor :apply_mailbox_name, :include_sub
   attr_accessor :matched_uids
   attr_reader :applied, :processed, :delayed
 
@@ -18,15 +18,13 @@ class Webmail::Filter < ActiveRecord::Base
   validates :user_id, :state, :name, :conditions_chain, :action, presence: true
   validates :sort_no, numericality: { greater_than_or_equal_to: 0, only_integer: true }
   validate :validate_conditions
-  validate :validate_mailbox
+  validate :validate_mailbox_name
   validate :validate_name
 
   with_options on: :apply do
-    validates :target_mailbox, presence: true
+    validates :apply_mailbox_name, presence: true
     validates :conditions, presence: true
   end
-
-  scope :readable, ->(user = Core.user) { where(user_id: user.id) }
 
   enumerize :state, in: [:enabled, :disabled]
   enumerize :action, in: [:move, :delete]
@@ -40,19 +38,26 @@ class Webmail::Filter < ActiveRecord::Base
     Core.user.has_auth?(:manager) || user_id == Core.user.id
   end
 
-  def mailbox_name
-    Webmail::Mailbox.name_to_title(mailbox).gsub('.', '/')
+  def mailbox
+    Webmail::Mailbox.find_by(user_id: user_id, name: mailbox_name)
   end
 
-  def target_mailboxes
-    mailboxes = [target_mailbox]
-    mailboxes += Core.imap.list('', "#{mailbox}.*").to_a.map(&:name) if include_sub == '1'
-    mailboxes
+  def mailbox_title
+    mailbox.try(:slashed_title)
+  end
+
+  def apply_mailboxes
+    apply_mailbox = Webmail::Mailbox.load_mailboxes.detect { |box| box.name == apply_mailbox_name }
+    if include_sub == '1'
+      apply_mailbox.descendants
+    else
+      [apply_mailbox]
+    end
   end
 
   def schedule_mail_uids
-    mail_uids = target_mailboxes.each_with_object({}) do |mailbox, hash|
-      uids = Webmail::Mail.find_uids(select: mailbox, conditions: ['UNDELETED'])
+    mail_uids = apply_mailboxes.each_with_object({}) do |mailbox, hash|
+      uids = Webmail::Mail.find_uids(select: mailbox.name, conditions: ['UNDELETED'])
       hash[mailbox] = uids.sort.reverse
     end
     self.class.schedule_mail_uids(mail_uids)
@@ -65,31 +70,14 @@ class Webmail::Filter < ActiveRecord::Base
 
     process_uids, delay_uids = schedule_mail_uids
     process_uids.each do |mailbox, uids|
-      applied_uids = apply_to(mailbox: mailbox, uids: uids)
+      applied_uids = self.class.apply_uids([self], mailbox: mailbox, uids: uids)
       @processed += uids.size
       @applied += applied_uids.size
     end
     delay_uids.each do |mailbox, uids|
-      Webmail::FilterJob.new(user: Core.current_user, mailbox: mailbox, uids: uids).delay(queue: 'filter').perform
+      Webmail::FilterJob.perform_later_as_user(Core.current_user, mailbox: mailbox, uids: uids)
       @delayed += uids.size
     end
-  end
-
-  def apply_to(mailbox:, uids:)
-    applied_uids = self.class.apply_uids([self], mailbox: mailbox, uids: uids)
-
-    if applied_uids.size > 0
-      starred_uids = Webmail::MailNode.find_ref_nodes(mailbox, applied_uids).map{|x| x.uid}
-      if starred_uids.present?
-        Core.imap.select('Star')
-        num = Core.imap.uid_store(starred_uids, '+FLAGS', [:Deleted]).to_a.size
-        Core.imap.expunge
-        if num > 0
-          Webmail::MailNode.delete_nodes('Star', starred_uids)
-        end
-      end
-    end
-    applied_uids
   end
 
   def delete_exceeded_conditions
@@ -112,16 +100,16 @@ class Webmail::Filter < ActiveRecord::Base
     end
   end
 
-  def perform_action(target_mailbox, uids, options = {})
+  def perform_action(target_mailbox, uids)
     case action
     when 'move'
-      Webmail::Mail.move_all(target_mailbox, mailbox, uids)
+      target_mailbox.move_mails(mailbox_name, uids)
     when 'delete'
-      Webmail::Mail.delete_all(target_mailbox, uids)
+      trash = Webmail::Mailbox.where(user_id: Core.current_user.id, special_use: 'Trash').first
+      target_mailbox.trash_mails(trash.name, uids) if trash
     else
       uids = []
     end
-    Webmail::MailNode.delete_nodes(target_mailbox, uids) if options[:delete_cache]
     uids
   rescue => e
     error_log(e)
@@ -130,10 +118,10 @@ class Webmail::Filter < ActiveRecord::Base
 
   private
 
-  def validate_mailbox
-    return true if mailbox.present?
+  def validate_mailbox_name
+    return true if mailbox_name.present?
     return true if action !~ /^(move)$/
-    errors.add :mailbox, :empty
+    errors.add :mailbox_name, :empty
   end
 
   def validate_name
@@ -160,9 +148,9 @@ class Webmail::Filter < ActiveRecord::Base
   end
 
   class << self
-    def apply_recents
+    def apply_recents(inbox)
       st = Webmail::Setting.where(user_id: Core.current_user.id, name: 'last_uid').first_or_initialize(value: 1)
-      next_uid = Core.imap.status('INBOX', ['UIDNEXT'])['UIDNEXT']
+      next_uid = Core.imap.status(inbox.name, ['UIDNEXT'])['UIDNEXT']
       last_uid = (next_uid > 1) ? next_uid - 1 : 1
       imap_cnd = st.value.blank? ? ['RECENT'] : ['UID', "#{st.value.to_i}:#{last_uid}", 'UNSEEN']
 
@@ -172,9 +160,9 @@ class Webmail::Filter < ActiveRecord::Base
         .preload(:conditions).to_a
 
       if filters.size > 0
-        uids = Webmail::Mail.find_uids(select: 'INBOX', conditions: imap_cnd)
-        if uids.present?
-          process_uids, delay_uids = schedule_mail_uids('INBOX' => uids)
+        filter_uids = Webmail::Mail.find_uids(select: inbox.name, conditions: imap_cnd)
+        if filter_uids.present?
+          process_uids, delay_uids = schedule_mail_uids(inbox => filter_uids)
           if process_uids.present?
             process_uids.each do |mailbox, uids|
               apply_uids(filters, mailbox: mailbox, uids: uids)
@@ -182,8 +170,7 @@ class Webmail::Filter < ActiveRecord::Base
           end
           if delay_uids.present?
             delay_uids.each do |mailbox, uids|
-              Webmail::FilterJob.new(user: Core.current_user, mailbox: mailbox, uids: uids)
-                .delay(queue: 'filter').perform
+              Webmail::FilterJob.perform_later_as_user(Core.current_user, mailbox: mailbox, uids: uids)
               delayed += uids.size
             end
           end
@@ -221,16 +208,16 @@ class Webmail::Filter < ActiveRecord::Base
       return process_uids, delay_uids
     end
 
-    def apply_uids(filters, mailbox:, uids:, delete_cache: true)
+    def apply_uids(filters, mailbox:, uids:)
       applied_uids = []
       uids.each_slice(NUMBER_OF_SLICE_UIDS) do |sliced_uids|
-        applied_uids += apply_uids_for_each_slice(filters, mailbox: mailbox, uids: sliced_uids, delete_cache: delete_cache)
+        applied_uids += apply_uids_for_each_slice(filters, mailbox: mailbox, uids: sliced_uids)
       end
       applied_uids
     end
 
-    def apply_uids_for_each_slice(filters, mailbox:, uids:, delete_cache: true)
-      mails = Webmail::Mail.fetch_for_filter(uids, mailbox)
+    def apply_uids_for_each_slice(filters, mailbox:, uids:)
+      mails = Webmail::Mail.fetch_for_filter(uids, mailbox.name)
       mails.each do |mail|
         mail_data = {
           subject: [mail.subject],
@@ -249,7 +236,7 @@ class Webmail::Filter < ActiveRecord::Base
       applied_uids = []
       filters.each do |filter|
         if filter.matched_uids.present?
-          applied_uids += filter.perform_action(mailbox, filter.matched_uids, delete_cache: delete_cache)
+          applied_uids += filter.perform_action(mailbox, filter.matched_uids)
         end
       end
       applied_uids
@@ -260,8 +247,13 @@ class Webmail::Filter < ActiveRecord::Base
         f.state = 'enabled'
         f.sort_no = 0
         f.conditions_chain = 'or'
-        f.action = 'delete'
-        f.mailbox = ''
+        if (junk = Webmail::Mailbox.where(user_id: Core.current_user.id, special_use: 'Junk').first)
+          f.action = 'move'
+          f.mailbox_name = junk.name
+        else
+          f.action = 'delete'
+          f.mailbox_name = ''
+        end
       end
       filter.save(validate: false) if filter.new_record?
       filter

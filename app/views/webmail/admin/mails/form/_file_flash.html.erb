@@ -9,7 +9,6 @@
       </div>
       <div id="defaultUploader" style="display: none;">
         <%= f.file_field :in_files, name: 'item[in_files][]', size: 90, style: 'width: 300px;', class: 'file' %><br />
-        <input type="button" value="選択したファイルを添付" id="commit_file" name="commit_file" style="display: none;" />
       </div>
     </td>
     <td style="vertical-align: bottom;">
@@ -170,9 +169,6 @@ $(function() {
     }
     $('#fileUploaderProgress').show();
     $('#commit_file').click();
-  });
-  $('#commit_file').on('click', function() {
-    checkServerStatus(this);
   });
 });
 //]]>

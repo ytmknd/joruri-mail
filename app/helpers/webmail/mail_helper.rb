@@ -24,8 +24,16 @@ module Webmail::MailHelper
     if mailbox.draft_box? || mailbox.sent_box?
       mail.has_disposition_notification_to?
     else
-      mail.has_disposition_notification_to? && mail.notified?
+      mail.has_disposition_notification_to? && mail.mdn_sent?
     end
+  end
+
+  def mail_priority_label(mail)
+    I18n.t('enumerize.webmail/mail.priority_label')[mail.priority.to_sym]
+  end
+
+  def mail_priority_title(mail)
+    I18n.t('enumerize.webmail/mail.priority_title')[mail.priority.to_sym]
   end
 
   def mail_short_date(mail)
@@ -56,9 +64,9 @@ module Webmail::MailHelper
 
   def mail_form_size(size_name)
     rtn = {
-      'small'  => { window: 800, container: 770, textarea: 675 },
-      'medium' => { window: 900, container: 870, textarea: 775 },
-      'large'  => { window: 1000, container: 970, textarea: 875 }
+      'small'  => { window: 850, container: 820, textarea: 725 },
+      'medium' => { window: 950, container: 920, textarea: 825 },
+      'large'  => { window: 1050, container: 1020, textarea: 925 }
     }[size_name]
     rtn = {} unless rtn
     rtn
@@ -283,5 +291,10 @@ module Webmail::MailHelper
     when 'edit', 'update' then 'patch'
     else 'post'
     end
+  end
+
+  def mail_form_url(mail, options = {})
+    options = options.merge(mailbox: mail.x_mailbox, id: mail.x_real_uid) if mail.x_mailbox.present?
+    url_for(options)
   end
 end

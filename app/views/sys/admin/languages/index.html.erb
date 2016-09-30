@@ -8,7 +8,7 @@
     <th style="width: 60px; text-align: center;">状態</th>
   </tr>
   <% @items.each do |item| %>
-  <tr <%= cycle '', 'class="cycle"' %>>
+  <tr class="<%= cycle '', 'cycle' %>">
     <td style="text-align: center;"><%= link_to :show, url_for(item) %></td>
     <td style="text-align: right;"><%= item.id %></td>
     <td><%= item.name %></td>
