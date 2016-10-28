@@ -71,10 +71,10 @@ module LinkHelper
   def link_to_sort(name, options = {}, html_options = {})
     default = options.delete(:default)
     order, mark =
-      if (params[:sort_key] && params[:sort_key] == options[:sort_key].to_s) ||
-        (params[:sort_key].nil? && default)
-        order = params[:sort_order] || default.to_s
-        order.blank? ? ['reverse', '▲'] : ['', '▼']
+      if params[:sort_key].present? && params[:sort_key] == options[:sort_key].to_s
+        params[:sort_order].blank? ? ['reverse', '▲'] : ['', '▼']
+      elsif params[:sort_key].nil? && !default.nil?
+        default.empty? ? ['reverse', '▲'] : ['', '▼']
       else
         ['', '']
       end
