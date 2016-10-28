@@ -244,7 +244,7 @@ module Webmail::Mails::Imap
       st = limit * (page - 1) + 1
       ed = limit * page
 
-      imap.examine(select)
+      imap.select(select)
       ret = imap.uid_esort(sort, conditions, 'utf-8', "PARTIAL #{st}:#{ed} COUNT")
       if st > ret['COUNT']
         return [], ret['COUNT']
@@ -256,7 +256,7 @@ module Webmail::Mails::Imap
     def paginate_uids_by_sort(select:, conditions:, sort:, page:, limit:, starred:)
       offset = [0, page - 1].max * limit
 
-      imap.examine(select)
+      imap.select(select)
       total_uids =
         if starred == '1'
           find_uids(select: select, conditions: conditions + ['FLAGGED'], sort: sort) +
