@@ -86,13 +86,8 @@ class Sys::Admin::AccountController < Sys::Controller::Admin::Base
     )
 
     require 'net/http'
-    Net::HTTP.version_1_2
     http = Net::HTTP.new(config[:host], config[:port])
-    if config[:usessl]
-      http.use_ssl = true
-      http.verify_mode = OpenSSL::SSL::VERIFY_NONE
-    end
-
+    http.use_ssl = true if config[:usessl]
     http.start do |agent|
       response = agent.post(config[:path], {
         account: Core.user.account,
