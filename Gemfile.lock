@@ -51,6 +51,7 @@ GEM
     addressable (2.4.0)
     arel (7.1.2)
     bower-rails (0.11.0)
+    brakeman (3.4.0)
     builder (3.2.2)
     byebug (9.0.5)
     charlock_holmes (0.7.3)
@@ -203,6 +204,7 @@ DEPENDENCIES
   activerecord-import (~> 0.15.0)
   activerecord-session_store (~> 1.0.0)
   bower-rails (~> 0.11.0)
+  brakeman
   byebug
   charlock_holmes (~> 0.7.3)
   coffee-rails (~> 4.2)
