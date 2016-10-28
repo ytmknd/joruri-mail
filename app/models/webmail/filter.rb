@@ -149,41 +149,42 @@ class Webmail::Filter < ApplicationRecord
 
   class << self
     def apply_recents(inbox)
-      st = Webmail::Setting.where(user_id: Core.current_user.id, name: 'last_uid').first_or_initialize(value: 1)
-      next_uid = Core.imap.status(inbox.name, ['UIDNEXT'])['UIDNEXT']
-      last_uid = (next_uid > 1) ? next_uid - 1 : 1
-      imap_cnd = st.value.blank? ? ['RECENT'] : ['UID', "#{st.value.to_i}:#{last_uid}", 'UNSEEN']
+      st = Webmail::Setting.where(user_id: Core.current_user.id, name: 'last_uid').first_or_initialize(value: 0)
+      curr_uid = st.value.to_i
+      last_uid = Core.imap.status(inbox.name, ['UIDNEXT'])['UIDNEXT'] - 1
 
       delayed = 0
-      filters = self.where(user_id: Core.current_user.id, state: 'enabled')
-        .order(:sort_no, :id)
-        .preload(:conditions).to_a
+      recent = false
 
-      if filters.size > 0
-        filter_uids = Webmail::Mail.find_uids(select: inbox.name, conditions: imap_cnd)
-        if filter_uids.present?
-          process_uids, delay_uids = schedule_mail_uids(inbox => filter_uids)
-          if process_uids.present?
-            process_uids.each do |mailbox, uids|
-              apply_uids(filters, mailbox: mailbox, uids: uids)
+      if last_uid > 0 && last_uid != curr_uid 
+        filters = self.where(user_id: Core.current_user.id, state: 'enabled')
+          .order(:sort_no, :id)
+          .preload(:conditions).to_a
+  
+        if filters.size > 0
+          filter_uids = Webmail::Mail.find_uids(select: inbox.name, conditions: ['UID', "#{curr_uid + 1}:#{last_uid}", 'UNSEEN'])
+          if filter_uids.present?
+            process_uids, delay_uids = schedule_mail_uids(inbox => filter_uids)
+            if process_uids.present?
+              process_uids.each do |mailbox, uids|
+                apply_uids(filters, mailbox: mailbox, uids: uids)
+              end
             end
-          end
-          if delay_uids.present?
-            delay_uids.each do |mailbox, uids|
-              Webmail::FilterJob.perform_later_as_user(Core.current_user, mailbox: mailbox, uids: uids)
-              delayed += uids.size
+            if delay_uids.present?
+              delay_uids.each do |mailbox, uids|
+                Webmail::FilterJob.perform_later_as_user(Core.current_user, mailbox: mailbox, uids: uids)
+                delayed += uids.size
+              end
             end
           end
         end
-      end
 
-      if last_uid != st.value.to_i
         st.value = last_uid
         st.save(validate: false)
         recent = true
-      else
-        recent = false
       end
+
+      last_uid = 1 if last_uid == 0
       return last_uid, recent, delayed
     end
 
