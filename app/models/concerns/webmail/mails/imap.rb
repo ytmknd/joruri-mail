@@ -91,7 +91,7 @@ module Webmail::Mails::Imap
     end
 
     def find_uids(select:, conditions: [], sort: nil)
-      imap.examine(select)
+      imap.examine(select) unless imap.opened?(select)
       if sort && imap.capabilities.include?('SORT')
         imap.uid_sort(sort, conditions, 'utf-8')
       else
@@ -103,7 +103,7 @@ module Webmail::Mails::Imap
       uid = uid.to_i
       return nil if uid == 0
 
-      imap.examine(select)
+      imap.examine(select) unless imap.opened?(select)
       search_uid = imap.uid_search(['UID', uid] + conditions, 'utf-8').first
       return nil unless search_uid
 
@@ -125,7 +125,7 @@ module Webmail::Mails::Imap
     end
 
     def find(select:, conditions: [], sort: nil)
-      imap.examine(select)
+      imap.examine(select) unless imap.opened?(select)
       uids =
         if sort && imap.capabilities.include?('SORT')
           imap.uid_sort(sort, conditions, 'utf-8')
@@ -178,7 +178,7 @@ module Webmail::Mails::Imap
       items = options[:items] || []
       return items if uids.blank?
 
-      imap.examine(mailbox)
+      imap.examine(mailbox) unless imap.opened?(mailbox)
 
       uids   = [uids] if uids.class == Fixnum
       fields = ["UID", "FLAGS", "RFC822.SIZE", "BODY.PEEK[HEADER.FIELDS (DATE FROM TO SUBJECT CONTENT-TYPE)]"]

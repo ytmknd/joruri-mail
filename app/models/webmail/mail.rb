@@ -472,7 +472,7 @@ class Webmail::Mail
       uids = Array(uids)
       return [] if uids.blank?
 
-      imap.examine(mailbox)
+      imap.examine(mailbox) unless imap.opened?(mailbox)
 
       # load from db cache
       if use_cache
@@ -535,7 +535,7 @@ class Webmail::Mail
       uids = Array(uids)
       return [] if uids.blank?
 
-      imap.examine(mailbox)
+      imap.examine(mailbox) unless imap.opened?(mailbox)
 
       fields = ['UID', 'BODY.PEEK[HEADER.FIELDS (FROM TO SUBJECT)]']
       imap.uid_fetch(uids, fields).to_a.map do |msg|

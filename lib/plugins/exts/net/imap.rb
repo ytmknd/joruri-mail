@@ -1,6 +1,43 @@
 require 'net/imap'
 module Net
+  module IMAPFix
+    def select(mailbox)
+      ret = super
+      @selected_mailbox = mailbox
+      @examined_mailbox = nil
+      ret
+    end
+
+    def examine(mailbox)
+      ret = super
+      @selected_mailbox = nil
+      @examined_mailbox = mailbox
+      ret
+    end
+
+    def close
+      ret = super
+      @selected_mailbox = nil
+      @examined_mailbox = nil
+      ret
+    end
+
+    def selected?(mailbox)
+      @selected_mailbox == mailbox
+    end
+
+    def examined?(mailbox)
+      @examined_mailbox == mailbox
+    end
+
+    def opened?(mailbox)
+      selected?(mailbox) || examined?(mailbox)
+    end
+  end
+
   class IMAP
+    prepend IMAPFix
+
     # CAPABILITY cache
     def capabilities
       @capabilities ||= capability
