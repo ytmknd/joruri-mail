@@ -505,7 +505,7 @@ class Webmail::Mail
         nodes = []
         items.each do |item|
           next unless fetch_uids.include?(item.uid)
-          nodes << Webmail::MailNode.new do |n|
+          node = Webmail::MailNode.new do |n|
             n.user_id          = Core.current_user.id
             n.uid              = item.uid
             n.mailbox          = mailbox
@@ -524,6 +524,8 @@ class Webmail::Mail
               n.ref_uid     = item.x_real_uid
             end
           end
+          node.run_callbacks(:create)
+          nodes << node
         end
         Webmail::MailNode.import(nodes)
       end
