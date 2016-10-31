@@ -33,15 +33,23 @@ module Net
     def opened?(mailbox)
       selected?(mailbox) || examined?(mailbox)
     end
+
+    # CAPABILITY cache
+    def login(user, password)
+      ret = super
+      if (code = ret.data.code) && code.name == "CAPABILITY"
+        @capabilities = code.data.split(' ')
+      end
+      ret
+    end
+
+    def capabilities
+      @capabilities ||= capability
+    end
   end
 
   class IMAP
     prepend IMAPFix
-
-    # CAPABILITY cache
-    def capabilities
-      @capabilities ||= capability
-    end
 
     # LIST-STATUS [RFC5819]
     def list_status(refname, mailbox, status)
