@@ -199,11 +199,11 @@ class Webmail::Mail
   end
 
   def init_from_params(params = {})
-    self.in_to      = NKF::nkf('-w', params[:to]) if params[:to]
-    self.in_cc      = NKF::nkf('-w', params[:cc]) if params[:cc]
-    self.in_bcc     = NKF::nkf('-w', params[:bcc]) if params[:bcc]
-    self.in_subject = NKF::nkf('-w', params[:subject]) if params[:subject]
-    self.in_body    = "#{NKF::nkf('-w', params[:body])}\n\n#{in_body}" if params[:body]
+    self.in_to      = params[:to].scrub if params[:to]
+    self.in_cc      = params[:cc].scrub if params[:cc]
+    self.in_bcc     = params[:bcc].scrub if params[:bcc]
+    self.in_subject = params[:subject].scrub if params[:subject]
+    self.in_body    = "#{params[:body].scrub}\n\n#{in_body}" if params[:body]
   end
 
   def prepare_mail(request = nil)
@@ -374,9 +374,9 @@ class Webmail::Mail
     @in_reply_to_addrs = Email.parse_list(in_reply_to)
 
     self.in_subject = '件名なし' if in_subject.blank?
-    self.in_subject   = NKF.nkf('-Ww --no-best-fit-chars', in_subject) if in_subject.present?
-    self.in_body      = NKF.nkf('-Ww --no-best-fit-chars', in_body) if in_body.present?
-    self.in_html_body = NKF.nkf('-Ww --no-best-fit-chars', in_html_body) if in_html_body.present?
+    self.in_subject   = in_subject.scrub if in_subject.present?
+    self.in_body      = in_body.scrub if in_body.present?
+    self.in_html_body = in_html_body.scrub if in_html_body.present?
   end
 
   def validate_address_list
