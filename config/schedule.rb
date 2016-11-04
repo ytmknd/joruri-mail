@@ -22,6 +22,10 @@
 env :PATH, ENV['PATH']
 set :output, 'log/cron.log'
 
+#every '@reboot' do
+#  rake 'unicorn:start'
+#end
+
 every 10.minutes do
   rake 'delayed_job:monitor'
 end
