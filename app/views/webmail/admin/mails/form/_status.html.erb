@@ -1,17 +1,24 @@
 <script type="text/javascript">
 //<![CDATA[
 $(function() {
+  var check_servers = '<%= Joruri.config.application['webmail.check_servers_before_send'] %>';
   $('#commit_send, #commit_draft, #commit_file').on('click', function(e) {
     e.preventDefault();
+    if (check_servers == '1' || check_servers == '2') {
+      checkServers(e.target);
+    } else {
+      submitForm(e.target);
+    }
+    return false;
+  });
+  function checkServers(target) {
     $.post('<%=raw status_webmail_servers_path(format: :json) %>', {
       authenticity_token: $('input[name="authenticity_token"]').val()
     })
     .done(function(data) {
       switch (data.status) {
       case 'OK':
-        $('#item_form')
-          .append( $(e.target).clone().attr('type', 'hidden') )
-          .submit();
+        submitForm(e.target);
         break;
       case 'NG TokenError':
       case '500 This is a secure page.':
@@ -25,8 +32,12 @@ $(function() {
     .fail(function() {
       alert('通信エラーが発生しました。時間をおいて再送信して下さい。');
     });
-    return false;
-  });
+  }
+  function submitForm(target) {
+    $('#item_form')
+      .append( $(target).clone().attr('type', 'hidden') )
+      .submit();
+  }
 });
 //]]>
 </script>
