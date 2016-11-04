@@ -216,9 +216,9 @@ class Sys::User < Sys::ManageDatabase
     group_path = group.ancestors.reverse.select { |g| g.level_no > 1 }
     ous = group_path.map{|g| "ou=#{g.ou_name}"}.join(',')
 
-    Core.ldap.bind_dn
-      .gsub("[base]", Core.ldap.base.to_s)
-      .gsub("[domain]", Core.ldap.domain.to_s)
+    Core.ldap.config[:bind_dn]
+      .gsub("[base]", Core.ldap.config[:base].to_s)
+      .gsub("[domain]", Core.ldap.config[:domain].to_s)
       .gsub("[uid]", self.account.to_s)
       .gsub("[ous]", ous.to_s)
   end
