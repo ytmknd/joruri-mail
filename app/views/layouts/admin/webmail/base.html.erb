@@ -22,7 +22,7 @@
   
   <h1><a href="/webmail">Joruri Mail</a></h1>
   <div class="menu">
-    <span class="user"><%= Core.user_group.name if Core.user_group %>　<%= Core.user.name_with_account if Core.user %></span>
+    <span class="user"><%= Core.user_group.full_name if Core.user_group %>　<%= Core.user.name_with_account if Core.user %></span>
     <span class="link">
       <a class="logout" href="/_admin/logout">ログアウト</a>
     </span>

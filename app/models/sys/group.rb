@@ -46,9 +46,7 @@ class Sys::Group < Sys::ManageDatabase
   end
 
   def full_name
-    n = name
-    n = "#{parent.name}　#{n}" if parent && parent.level_no > 1
-    n
+    ancestors.drop(1).map(&:name).join('　')
   end
 
   def nested_name
