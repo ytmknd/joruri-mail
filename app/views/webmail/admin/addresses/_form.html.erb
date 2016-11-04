@@ -15,31 +15,7 @@
     </tr>
   </table>
   
-</td><td style="width: 16px;"></td><td style="vertical-align: top;">
-
-  <table class="show addressInfo">
-    <tr>
-      <th><%= @item.class.human_attribute_name :group_id %></th>
-      <td>
-        <%= hidden_field_tag "item[group_ids[]" %>
-        <% Webmail::AddressGroup.user_sorted_groups.each do |g| %>
-          <div>
-            <label>
-              <%= '　　' * (g.level_no - 1) %>
-              <%= check_box_tag "item[group_ids[]", g.id, nil, { checked: @item.group_ids.include?(g.id), style: 'width:auto;' } %>
-              <%= g.name %>
-            </label>
-          </div>
-        <% end %>
-      </td>
-    </tr> 
-  </table>
-
-</td></tr></table>
-
-<br />
-<table style="width: 100%;"><tr><td style="width: 49%; vertical-align: top;">
-
+  <br />
   <table class="show addressInfo">
     <tr>
       <th><%= @item.class.human_attribute_name :email %></th>
@@ -64,17 +40,8 @@
       <td><%= f.text_area :address, class: 'address', style: 'height: 2.4em;' %></td>
     </tr>
   </table>
-  
+
   <br />
-  <table class="show addressInfo">
-    <tr>
-      <th><%= @item.class.human_attribute_name :memo %></th>
-      <td><%= f.text_area :memo, style: 'height: 2.4em;' %></td>
-    </tr>
-  </table>
-
-</td><td style="width: 16px;"></td><td style="vertical-align: top;">
-
   <table class="show addressInfo">
     <tr>
       <th><%= @item.class.human_attribute_name :company_name %></th>
@@ -97,6 +64,34 @@
     </tr><tr>
       <th><%= @item.class.human_attribute_name :company_address %></th>
       <td><%= f.text_area :company_address, class: 'address', style: 'height: 2.4em;' %></td>
+    </tr>
+  </table>
+
+</td><td style="width: 16px;"></td><td style="vertical-align: top;">
+
+  <table class="show addressInfo">
+    <tr>
+      <th><%= @item.class.human_attribute_name :group_id %></th>
+      <td>
+        <%= hidden_field_tag "item[group_ids[]" %>
+        <% Webmail::AddressGroup.user_sorted_groups.each do |g| %>
+          <div>
+            <label>
+              <%= '　　' * (g.level_no - 1) %>
+              <%= check_box_tag "item[group_ids[]", g.id, nil, { checked: @item.group_ids.include?(g.id), style: 'width:auto;' } %>
+              <%= g.name %>
+            </label>
+          </div>
+        <% end %>
+      </td>
+    </tr> 
+  </table>
+
+  <br />
+  <table class="show addressInfo">
+    <tr>
+      <th><%= @item.class.human_attribute_name :memo %></th>
+      <td><%= f.text_area :memo, style: 'height: 5em;' %></td>
     </tr>
   </table>
 

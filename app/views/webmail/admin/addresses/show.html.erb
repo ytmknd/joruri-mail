@@ -23,27 +23,7 @@
     </tr>
   </table>
 
-</td><td style="width: 16px;"></td><td style="vertical-align: top;">
-
-  <table class="show addressInfo">
-    <tr>
-      <th><%= @item.class.human_attribute_name :group_id %></th>
-      <td>
-        <% if @item.groups.size > 0 %>
-          <% @item.sorted_groups.each do |g| %>
-            <div><%= g.ancestors.map(&:name).join(' > ') %></div>
-          <% end %>
-        <% else %>未分類
-        <% end %>
-      </td>
-    </tr>
-  </table>
-
-</td></tr></table>
-
-<br />
-<table style="width: 100%;"><tr><td style="width: 49%; vertical-align: top;">
-
+  <br />
   <table class="show addressInfo">
     <tr>
       <th><%= @item.class.human_attribute_name :email %></th>
@@ -69,8 +49,7 @@
     </tr>
   </table>
 
-</td><td style="width: 16px;"></td><td style="vertical-align: top;">
-
+  <br />
   <table class="show addressInfo">
     <tr>
       <th><%= @item.class.human_attribute_name :company_name %></th>
@@ -96,17 +75,30 @@
     </tr>
   </table>
 
-</td></tr></table>
+</td><td style="width: 16px;"></td><td style="vertical-align: top;">
 
-<% if @item.memo.present? %>
-<br />
-<table class="show addressInfo">
-  <tr>
-    <th><%= @item.class.human_attribute_name :memo %></th>
-  </tr><tr>
-    <td><%=hbr @item.memo %></td>
-  </tr>
-</table>
-<% end %>
+  <table class="show addressInfo">
+    <tr>
+      <th><%= @item.class.human_attribute_name :group_id %></th>
+      <td>
+        <% if @item.groups.size > 0 %>
+          <% @item.sorted_groups.each do |g| %>
+            <div><%= g.ancestors.map(&:name).join(' > ') %></div>
+          <% end %>
+        <% else %>未分類
+        <% end %>
+      </td>
+    </tr>
+  </table>
+
+  <br />
+  <table class="show addressInfo">
+    <tr>
+      <th><%= @item.class.human_attribute_name :memo %></th>
+      <td><%=hbr @item.memo %></td>
+    </tr>
+  </table>
+
+</td></tr></table>
 
 </div><!-- end #webmailContainer --></td></tr></table>
