@@ -1,20 +1,3 @@
-<%
-def children(group)
-  %><%= "\n" %><%
-  %><div class="group"><%= "#{group.code} / #{group.name} / #{group.name_en} / #{group.email}" %></div><%
-  if group.users.size > 0
-    %><%= "\n" %><%
-    %><div class="users"><%= group.users.collect{|u| u.name}.join(', ') %></div><%
-  end
-  if group.children.size > 0
-    %><%= "\n" %><%
-    %><div class="groups"><%
-    group.children.each {|c| children(c)}
-    %></div><%
-  end
-end
-
-%>
 <style type="text/css">
 #ldapView { margin-top: 15px; }
 #ldapView .groups { margin: 10px 0px 0px 20px; }
@@ -33,7 +16,7 @@ end
 <% end %>
 
 <div id="ldapView">
-<% @items.each {|group| children(group)} %>
+<%= render 'children', groups: @items %>
 </div>
 
 <script type="text/javascript">

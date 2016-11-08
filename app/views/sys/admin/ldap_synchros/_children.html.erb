@@ -1,0 +1,9 @@
+<% groups.each do |group| %>
+  <div class="group"><%= "#{group.code} / #{group.name} / #{group.name_en} / #{group.email}" %></div>
+  <% if group.users.size > 0 %>
+    <div class="users"><%= group.users.map(&:name).join(', ') %></div>
+  <% end %>
+  <div class="groups">
+    <%= render 'children', groups: group.children if group.children.present? %>
+  </div>
+<% end %>
