@@ -2,8 +2,8 @@
 
 <table class="show">
   <tr>
-    <th><%= @item.class.human_attribute_name :state %></th>
-    <td><%= @item.status.name if @item.status %></td>
+    <th><%= @item.class.human_attribute_name :parent_id %></th>
+    <td><%= @item.parent.name if @item.parent %></td>
   </tr><tr>
     <th><%= @item.class.human_attribute_name :code %></th>
     <td><%= @item.code %></td>
@@ -13,6 +13,9 @@
   </tr><tr>
     <th><%= @item.class.human_attribute_name :name_en %></th>
     <td><%= @item.name_en %></td>
+  </tr><tr>
+    <th><%= @item.class.human_attribute_name :state %></th>
+    <td><%= @item.status.name if @item.status %></td>
   </tr><tr>
     <th><%= @item.class.human_attribute_name :ldap %></th>
     <td><%= @item.ldap_label %></td>

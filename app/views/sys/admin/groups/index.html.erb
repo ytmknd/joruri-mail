@@ -1,19 +1,19 @@
 <div class="crudTree">
 <div class="tree">
-
+  <% if @parent.level_no > 0 %>
   <p>
     <%= link_to :show, sys_group_url(@parent.parent_id, @parent) %>
-    <%= @parent.name %></p>
-  
+    <%= @parent.name %>
+  </p>
+  <% end %>
   <div class="links">
-    <div><%= link_to :up, url_for(parent: @parent.parent_id) if @parent.level_no > 1 %></div>
+    <div><%= link_to :up, url_for(parent: @parent.parent_id) if @parent.level_no >= 1 %></div>
     <% @groups.each do |item| %>
     <%= link_to :show, url_for(action: :show, id: item) %>
     <%= link_to h(item.name), url_for(action: :index, parent: item) %>
     <span class="remark"><%= item.sort_no %></span><br />
     <% end %>
   </div>
-  
 </div>
 <div class="content">
 

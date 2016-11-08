@@ -4,9 +4,7 @@ class Sys::Admin::GroupsController < Sys::Controller::Admin::Base
   def pre_dispatch
     return error_auth unless Core.user.has_auth?(:manager)
 
-    id      = params[:parent] == '0' ? 1 : params[:parent]
-    @parent = Sys::Group.find(id)
-
+    @parent = Sys::Group.find_by(id: params[:parent]) || Sys::Group.new(id: 0, level_no: 0)
     @groups = Sys::Group.where(parent_id: @parent.id).order(:sort_no, :code, :id)
     @users = Sys::User.joins(:groups).where(sys_groups: { id: @parent.id })
       .order("LPAD(account, 15, '0')")
