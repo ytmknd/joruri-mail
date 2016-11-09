@@ -8,9 +8,8 @@ def menu_link(auth, key, label, uri)
 end
 %>
 <div class="mainMenu">
-<%= menu_link   :manager, :maintenance, 'メンテナンス', sys_maintenances_path
-%><%= menu_link :manager, :doc, 'ヘルプ', sys_docs_path
-%><%= menu_link :manager, :user, 'ユーザー', sys_groups_path(0)
-%><%= menu_link :manager, :language, '言語', sys_languages_path
-%>
+<%= menu_link :manager, :maintenance, 'メンテナンス', sys_maintenances_path -%>
+<%= menu_link :manager, :doc, 'ヘルプ', sys_docs_path -%>
+<%= menu_link :manager, :user, 'ユーザー', sys_groups_path(0) -%>
+<%= menu_link :manager, :language, '言語', sys_languages_path -%>
 </div>
