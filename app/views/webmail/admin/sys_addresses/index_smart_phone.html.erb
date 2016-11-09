@@ -5,7 +5,7 @@ if params[:group_id].present?
   @groups = @group.enabled_children
 end
 
-@users = @group.users_having_email.reorder(Webmail::Setting.load_sys_address_orders)
+@users = @group.users_having_email.reorder(Webmail::Setting.sys_address_orders)
 %>
 
 <div class="sysAddressTitle">

@@ -6,7 +6,6 @@ class Webmail::Admin::SysAddressesController < Webmail::Controller::Admin::Base
   def pre_dispatch
     return redirect_to action: :index if params[:reset]
     @limit = 200
-    @orders = Webmail::Setting.load_sys_address_orders
   end
 
   def index
@@ -20,7 +19,7 @@ class Webmail::Admin::SysAddressesController < Webmail::Controller::Admin::Base
       user = Sys::User.includes(:groups).where(state: 'enabled').with_valid_email
       user = user.where(ldap: 1) if Sys::Group.show_only_ldap_user
       user = user.search(params)
-      @users = user.order(@orders).paginate(page: 1, per_page: @limit)
+      @users = user.order(Webmail::Setting.sys_address_orders).paginate(page: 1, per_page: @limit)
       @gid = params[:gid]
       @gname = "検索結果（#{params[:index]}）"
       return render :child_users, layout: false
@@ -60,7 +59,7 @@ class Webmail::Admin::SysAddressesController < Webmail::Controller::Admin::Base
 
   def child_users
     @group = Sys::Group.find(params[:id])
-    @users = @group.users_having_email.reorder(@orders)
+    @users = @group.users_having_email.reorder(Webmail::Setting.sys_address_orders)
       .paginate(page: 1, per_page: 1000)
       .preload(:groups)
     @gid = @group.id

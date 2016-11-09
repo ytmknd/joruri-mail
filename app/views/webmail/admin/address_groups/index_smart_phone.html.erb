@@ -6,7 +6,7 @@ if params[:group_id].present?
   gid = params[:group_id].to_i
   if gid != 0
     @group = Webmail::AddressGroup.find(params[:group_id])
-    @items = @group.addresses.order(Webmail::Setting.load_address_orders)
+    @items = @group.addresses.order(Webmail::Setting.address_orders)
   end
 end
 %>

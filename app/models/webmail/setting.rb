@@ -293,12 +293,16 @@ class Webmail::Setting < ApplicationRecord
       ActiveSupport::OrderedOptions[*values.flatten]
     end
 
-    def load_address_orders
-      [user_config_value(:address_order, 'email'), 'id']
+    def address_orders
+      [user_config_value(:address_order, 'email'), 'id'].map do |c|
+        connection.quote_table_name("#{Webmail::Address.table_name}.#{c}")
+      end
     end
 
-    def load_sys_address_orders
-      [user_config_value(:sys_address_order, 'email'), 'account']
+    def sys_address_orders
+      [user_config_value(:sys_address_order, 'email'), 'account'].map do |c|
+        connection.quote_table_name("#{Sys::User.table_name}.#{c}")
+      end
     end
 
     def load_label_confs

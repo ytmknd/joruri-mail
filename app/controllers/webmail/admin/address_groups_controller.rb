@@ -15,14 +15,10 @@ class Webmail::Admin::AddressGroupsController < Webmail::Controller::Admin::Base
     end
 
     @limit = 200
-
-    if [:index, :show, :child_items].include? params[:action].to_sym
-      @orders = Webmail::Setting.load_address_orders
-    end
   end
 
   def index
-    @items = Webmail::Address.where(user_id: Core.user.id).order(@orders)
+    @items = Webmail::Address.where(user_id: Core.user.id).order(Webmail::Setting.address_orders)
     @s_items = @items.search(params) if params[:search]
 
     @root_groups = Webmail::AddressGroup.user_root_groups.preload_children
@@ -34,7 +30,7 @@ class Webmail::Admin::AddressGroupsController < Webmail::Controller::Admin::Base
     @item = Webmail::AddressGroup.find(params[:id])
     return error_auth unless @item.readable?
 
-    @addresses = @item.addresses.order(@orders)
+    @addresses = @item.addresses.order(Webmail::Setting.address_orders)
 
     render layout: false if request.xhr?
   end
