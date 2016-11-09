@@ -66,8 +66,8 @@ class Sys::Lib::Ldap::Entry
 
   def find_by_dn(dn)
     dns = dn.split(',')
-    @connection.search([dns[0]],
-      base:  dn,
+    search([dns[0]],
+      base: dn,
       scope: LDAP::LDAP_SCOPE_BASE
     ).first
   end
@@ -78,20 +78,16 @@ class Sys::Lib::Ldap::Entry
     return nil if dns.size == 1
 
     search([dns[1]],
-      base:  dns[1..-1].join(','),
+      base: dns[1..-1].join(','),
       scope: LDAP::LDAP_SCOPE_BASE
     ).first
   end
 
   ## Returns the parent groups without self.
-  def parents
-    current = self
-    list = []#[current]
-    while p = current.parent
-      list.unshift(p)
-      current = p
-    end
-    return list
+  def parents(items = [])
+    items.unshift(self)
+    parent.parents(items) if parent
+    items
   end
 
   ## Returns the children.
@@ -102,7 +98,7 @@ class Sys::Lib::Ldap::Entry
     )
   end
 
-  ## Returns the users.
+  ## Returns the domain components.
   def dcs
     @connection.dc.search(nil,
       base: dn,
@@ -110,7 +106,7 @@ class Sys::Lib::Ldap::Entry
     )
   end
 
-  ## Returns the users.
+  ## Returns the groups.
   def groups
     @connection.group.search(nil,
       base: dn,

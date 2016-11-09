@@ -12,7 +12,7 @@ class Sys::Admin::LdapGroupsController < Sys::Controller::Admin::Base
   end
 
   def index
-    @parents = @entry.parents + [@entry]
+    @parents = @entry.parents
     @children = @entry.children.reject(&:user_object?)
     @users  = @entry.users
   end

@@ -1,4 +1,6 @@
 class Sys::Lib::Ldap::Dc < Sys::Lib::Ldap::Entry
+  include Sys::Lib::Ldap::Base::Group
+
   ## Initializer.
   def initialize(connection, attributes = {})
     super
@@ -14,7 +16,19 @@ class Sys::Lib::Ldap::Dc < Sys::Lib::Ldap::Entry
     get(:dc)
   end
 
-  def code
+  def tenant_code
     get(:seeAlso)
+  end
+
+  def code
+    dc
+  end
+
+  def name
+    o
+  end
+
+  def root
+    find_by_dn(@connection.config[:base])
   end
 end

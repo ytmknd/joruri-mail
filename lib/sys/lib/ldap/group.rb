@@ -1,4 +1,6 @@
 class Sys::Lib::Ldap::Group < Sys::Lib::Ldap::Entry
+  include Sys::Lib::Ldap::Base::Group
+
   ## Initializer.
   def initialize(connection, attributes = {})
     super
@@ -27,17 +29,17 @@ class Sys::Lib::Ldap::Group < Sys::Lib::Ldap::Entry
 
   ## Attribute: name(english)
   def name_en
-    group_user ? group_user.get('sn;lang-en') : nil
+    group_user.get('sn;lang-en') if group_user
   end
 
   ## Attribute: email
   def email
-    group_user ? group_user.get(:mail) : nil
+    group_user.get(:mail) if group_user
   end
 
   ## Attribute: group_s_name
   def group_s_name
-    group_user ? group_user.get(:roomNumber) : nil
+    group_user.get(:roomNumber) if group_user
   end
 
   def tel
