@@ -1,15 +1,8 @@
-<div class="navi">
-
-<%= link_to "LDAP", sys_ldap_groups_path(0) %>
-
 <% if @parents %>
-<% @parents.each do |p| %>
-&gt; <%= link_to h(p.ou), url_for(action: :index, parent: p.ou) %>
+<div class="navi">
+<% @parents.each_with_index do |p, i| %>
+  <%= link_to h(p.display_name), { action: :index, parent: p.dn } %>
+  <% if i != @parents.size - 1 %>&gt;<% end %>
 <% end %>
-<% end %>
-
-<% if @parent %>
-&gt; <%= link_to h(@parent.ou), url_for(action: :index, parent: @parent.ou) %>
-<% end %>
-
 </div>
+<% end %>

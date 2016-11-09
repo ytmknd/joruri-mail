@@ -48,11 +48,21 @@ class Sys::Lib::Ldap
     bind(config[:username], config[:password]) if config[:username].present? && config[:password].present?
   end
 
+  ## Entry.
+  def entry
+    Sys::Lib::Ldap::Entry.new(self)
+  end
+
+  ## DomainComponent.
+  def dc
+    Sys::Lib::Ldap::Dc.new(self)
+  end
+
   ## Group.
   def group
     Sys::Lib::Ldap::Group.new(self)
   end
-  
+
   ## User
   def user
     Sys::Lib::Ldap::User.new(self)

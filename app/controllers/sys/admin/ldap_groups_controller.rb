@@ -4,25 +4,16 @@ class Sys::Admin::LdapGroupsController < Sys::Controller::Admin::Base
   def pre_dispatch
     return error_auth unless Core.user.has_auth?(:manager)
 
-    Core.ldap.bind_as_master
-    return render html: 'LDAPサーバーへの接続に失敗しました。', layout: true unless Core.ldap.connection
+    params[:parent] = Core.ldap.config[:base] if params[:parent] == '0'
 
-    if params[:parent] == '0'
-      @parent  = nil
-      @parents = []
-    else
-      @parent  = Core.ldap.group.find(params[:parent])
-      @parents = @parent.parents
-    end
+    Core.ldap.bind_as_master
+    @entry = Core.ldap.entry.find_by_dn(params[:parent])
+    return render html: 'LDAP検索に失敗しました。', layout: true unless @entry
   end
 
   def index
-    if !@parent
-      @groups = Core.ldap.group.children
-      @users  = []
-    else
-      @groups = @parent.children
-      @users  = @parent.users
-    end
+    @parents = @entry.parents + [@entry]
+    @children = @entry.children.reject(&:user_object?)
+    @users  = @entry.users
   end
 end

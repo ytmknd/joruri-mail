@@ -1,23 +1,29 @@
 <div class="crudTree">
 <div class="tree">
   <p>
-    <%= @parent ? @parent.ou : 'LDAP' %></p>
-  
+    <%= @entry.display_name %>
+  </p>
   <div class="links">
-      <% @groups.each do |g| %>
-      <%= link_to h(g.ou), url_for(action: :index, parent: g.ou) %><br />
-      <% end %>
-      <%= 'no groups' if @groups.size == 0 %>
+    <% @children.each do |e| %>
+      <a href="#showSpec" data-index="<%= e.dn %>">詳細</a>&nbsp;
+      <%= link_to h(e.display_name), { action: :index, parent: e.dn } %><br />
+      <div data-index="<%= e.dn %>" style="display: none;">
+      <hr />
+      <% e.attributes.each do |key, values| %><%= "#{key} : #{values.join(",")}" %><br /><% end %>
+      <hr />
+      </div>
+    <% end %>
+    <%= 'no groups' if @children.size == 0 %>
   </div>
 </div>
 <div class="content">
   <table class="index">
     <tr><th>Users</th></tr>
-    <% @users.each_with_index do |u, idx| %>
+    <% @users.each do |u| %>
     <tr><td>
-      <a href="#showSpec" data-index="<%= idx %>">詳細</a>&nbsp;
+      <a href="#showSpec" data-index="<%= u.dn %>">詳細</a>&nbsp;
       <%= u.name %> (<%= u.uid %>) <%= u.email %>
-      <div data-index="<%= idx %>" style="display: none;"><hr />
+      <div data-index="<%= u.dn %>" style="display: none;"><hr />
       <% u.attributes.each do |key, values| %><%= "#{key} : #{values.join(",")}" %><br /><% end %>
       </div>
     </td></tr>
