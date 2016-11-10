@@ -43,19 +43,22 @@ class Sys::Admin::Groups::ImportController < Sys::Controller::Admin::Base
     CSV.parse(csv, headers: true, header_converters: :symbol) do |data|
       code        = data[:code]
       parent_code = data[:parent_code]
+      tenant_code = data[:tenant_code]
 
-      if code.blank? || parent_code.blank?
+      if code.blank? || tenant_code.blank?
         @results[2] += 1
         next
       end
 
-      unless parent = Sys::Group.find_by(code: parent_code)
-        @results[2] += 1
-        next
+      if parent_code.present?
+        unless parent = Sys::Group.find_by(tenant_code: tenant_code, code: parent_code)
+          @results[2] += 1
+          next
+        end
       end
 
-      group = Sys::Group.where(code: code).first_or_initialize
-      group.parent_id    = parent.id
+      group = Sys::Group.where(tenant_code: tenant_code, code: code).first_or_initialize
+      group.parent_id    = parent.try!(:id).to_i
       group.state        = data[:state]
       group.web_state    = data[:web_state]
       group.level_no     = data[:level_no]
@@ -83,13 +86,14 @@ class Sys::Admin::Groups::ImportController < Sys::Controller::Admin::Base
     CSV.parse(csv, headers: true, header_converters: :symbol) do |data|
       account     = data[:account]
       group_code  = data[:group_code]
+      tenant_code = data[:tenant_code]
 
-      if account.blank? || group_code.blank?
+      if account.blank? || group_code.blank? || tenant_code.blank?
         @results[2] += 1
         next
       end
 
-      unless group = Sys::Group.find_by(code: group_code)
+      unless group = Sys::Group.find_by(tenant_code: tenant_code, code: group_code)
         @results[2] += 1
         next
       end

@@ -17,7 +17,7 @@ class Sys::Lib::Ldap::Dc < Sys::Lib::Ldap::Entry
   end
 
   def tenant_code
-    get(:seeAlso)
+    get(:physicalDeliveryOfficeName) || dc
   end
 
   def code

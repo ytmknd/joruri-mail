@@ -277,10 +277,10 @@ class Webmail::Mail
   def mdn_request_mode
     return if !seen_flagged? || !has_disposition_notification_to?
 
+    addr = disposition_notification_to_addrs.try!(:first)
+    domains = Core.current_user.tenant.try!(:mail_domains) || []
     @mdn_request_mode ||=
-      if (domain = Core.config['mail_domain']).present? &&
-         (addrs = disposition_notification_to_addrs) &&
-         addrs[0] && addrs[0].address =~ /[@\.]#{Regexp.escape(domain)}$/i
+      if addr.present? && domains.any? { |d| addr.address =~ /[@\.]#{Regexp.escape(d)}$/i }
         :auto
       else
         :manual

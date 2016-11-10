@@ -30,13 +30,14 @@ map_key    = Util::Config.load :core, :map_key
 ## sys
 
 Sys::Group.create(
+  :tenant_code => 'soshiki',
   :parent_id => 0,
   :level_no  => 1,
   :sort_no   => 1,
   :state     => 'enabled',
   :web_state => 'closed',
   :ldap      => 0,
-  :code      => "root",
+  :code      => "soshiki",
   :name      => "組織",
   :name_en   => "soshiki"
 )

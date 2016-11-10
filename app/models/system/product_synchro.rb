@@ -21,8 +21,9 @@ class System::ProductSynchro < System::Database
     
     @results = { group: 0, gerr: 0, user: 0, uerr: 0 }
 
+    parent = create_root_temporaries(version)
     groups = System::LdapTemporary.where(version: version, parent_id: 0, data_type: 'group').order(:sort_no, :code)
-    groups.each { |group| copy_ldap_temporaries(group, nil) }
+    groups.each { |group| copy_ldap_temporaries(group, parent) }
 
     messages = []
     messages << "グループ #{@results[:group]}件"
@@ -91,10 +92,31 @@ class System::ProductSynchro < System::Database
     end
   end
 
+  def create_root_temporaries(version)
+    unless root = Sys::Group.find_by(level_no: 1, ldap: 1)
+      raise '最上位グループが見つかりませんでした。'
+    end
+
+    sg                = Sys::LdapSynchro.new
+    sg.tenant_code    = root.tenant_code
+    sg.parent_id      = 0
+    sg.version        = version
+    sg.entry_type     = 'group'
+    sg.code           = root.code
+    sg.name           = root.name
+    sg.name_en        = root.name_en
+    sg.email          = root.email
+    sg.sort_no        = root.sort_no
+    sg.group_s_name   = root.group_s_name
+    sg.save(validate: false)
+    sg
+  end
+
   def copy_ldap_temporaries(group, parent)
     ## group
     sg                = Sys::LdapSynchro.new
-    sg.parent_id      = parent ? parent.id : 0
+    sg.tenant_code    = parent.tenant_code
+    sg.parent_id      = parent.id
     sg.version        = group.version
     sg.entry_type     = group.data_type
     sg.code           = group.code
@@ -117,6 +139,7 @@ class System::ProductSynchro < System::Database
     ## users
     group.ldap_users.each do |user|
       su                = Sys::LdapSynchro.new
+      su.tenant_code    = parent.tenant_code
       su.parent_id      = sg.id
       su.version        = user.version
       su.entry_type     = user.data_type

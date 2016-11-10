@@ -19,22 +19,48 @@ protected
   end
   
   def new_login(_account, _password)
-    unless user = Sys::User.authenticate(_account, _password)
-      return false
-    end
-    set_current_user(user)
-  end
-  
-  def new_login_mobile(_account, _password, _mobile_password)
-    if user = Sys::User.authenticate(_account, _password)
-      if user.authenticate_mobile_password(_mobile_password)
+    if (user = Sys::User.authenticate(_account, _password))
+      if valid_login?(user)
         set_current_user(user)
         return true
       end
     end
-    return false
+    false
   end
   
+  def new_login_mobile(_account, _password, _mobile_password)
+    if (user = Sys::User.authenticate(_account, _password)) && user.authenticate_mobile_password(_mobile_password)
+      if valid_login?(user)
+        set_current_user(user)
+        return true
+      end
+    end
+    false
+  end
+
+  def valid_login?(user)
+    valid_login_password?(user) && valid_login_access?(user)
+  end
+
+  def valid_login_password?(user)
+    if user.tenant
+      if user.tenant.default_pass_limit == 'enabled' && user.password == "#{user.tenant.default_pass_prefix}#{user.account}"
+        flash.now[:notice] = "初期パスワードではログインできません。<br />パスワードを変更してください。".html_safe
+        return false
+      end
+    end
+    true
+  end
+
+  def valid_login_access?(user)
+    return true if !request.mobile? && !request.smart_phone?
+    if user.tenant && user.tenant.mobile_access == 0
+      flash.now[:notice] = "携帯端末からのアクセスは許可されていません。"
+      return false
+    end
+    true
+  end
+
   def set_current_user(user)
     @@current_user = user
     

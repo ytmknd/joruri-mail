@@ -24,14 +24,15 @@ class Sys::Admin::Groups::ExportController < Sys::Controller::Admin::Base
   def export_groups
     data = CSV.generate do |csv|
       csv << [
-        :code, :parent_code, :state, :web_state, :level_no, :sort_no,
+        :tenant_code, :code, :parent_code, :state, :web_state, :level_no, :sort_no,
         :layout_id, :ldap, :ldap_version, :name, :name_en, :tel, :outline_uri, :email
       ]
-      all_groups = Sys::Group.roots.map(&:descendants).flatten.reject(&:root?)
+      all_groups = Sys::Group.roots.map(&:descendants).flatten
       all_groups.each do |group|
         row = []
+        row << group.tenant_code
         row << group.code
-        row << group.parent.code
+        row << group.parent.try!(:code)
         row << group.state
         row << group.web_state
         row << group.level_no
@@ -55,7 +56,7 @@ class Sys::Admin::Groups::ExportController < Sys::Controller::Admin::Base
   def export_users
     data = CSV.generate do |csv|
       csv << [
-        :account, :state, :name, :name_en, :email, :auth_no, :password, :ldap, :ldap_version, :group_code
+        :account, :state, :name, :name_en, :email, :auth_no, :password, :ldap, :ldap_version, :tenant_code, :group_code
       ]
       Sys::User.order(:id).each do |user|
         next unless user.groups[0]
@@ -69,6 +70,7 @@ class Sys::Admin::Groups::ExportController < Sys::Controller::Admin::Base
         row << user.password
         row << user.ldap
         row << user.ldap_version
+        row << user.groups[0].tenant_code
         row << user.groups[0].code
         csv << row
       end

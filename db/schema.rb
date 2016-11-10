@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20160923023239) do
+ActiveRecord::Schema.define(version: 20161110044554) do
 
   create_table "delayed_jobs", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
     t.integer  "priority",                 default: 0, null: false
@@ -53,6 +53,7 @@ ActiveRecord::Schema.define(version: 20160923023239) do
   end
 
   create_table "sys_groups", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
+    t.string   "tenant_code"
     t.string   "state",        limit: 15
     t.string   "web_state",    limit: 15
     t.datetime "created_at"
@@ -70,6 +71,7 @@ ActiveRecord::Schema.define(version: 20160923023239) do
     t.string   "outline_uri"
     t.text     "email",        limit: 65535
     t.string   "group_s_name"
+    t.index ["tenant_code"], name: "index_sys_groups_on_tenant_code", using: :btree
   end
 
   create_table "sys_groups_backups", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
@@ -102,6 +104,7 @@ ActiveRecord::Schema.define(version: 20160923023239) do
   end
 
   create_table "sys_ldap_synchros", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
+    t.string   "tenant_code"
     t.integer  "parent_id"
     t.datetime "created_at"
     t.datetime "updated_at"
@@ -116,6 +119,7 @@ ActiveRecord::Schema.define(version: 20160923023239) do
     t.string   "official_position"
     t.string   "assigned_job"
     t.string   "group_s_name"
+    t.index ["tenant_code"], name: "index_sys_ldap_synchros_on_tenant_code", using: :btree
     t.index ["version", "parent_id", "entry_type"], name: "version", using: :btree
   end
 
@@ -146,6 +150,18 @@ ActiveRecord::Schema.define(version: 20160923023239) do
     t.integer  "version"
     t.integer  "value"
     t.index ["name", "version"], name: "name", using: :btree
+  end
+
+  create_table "sys_tenants", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
+    t.string   "code"
+    t.string   "name"
+    t.string   "mail_domain"
+    t.string   "default_pass_limit"
+    t.string   "default_pass_prefix"
+    t.integer  "mobile_access"
+    t.datetime "created_at",          null: false
+    t.datetime "updated_at",          null: false
+    t.index ["code"], name: "index_sys_tenants_on_code", using: :btree
   end
 
   create_table "sys_user_logins", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|

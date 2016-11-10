@@ -7,6 +7,8 @@ class Sys::Group < Sys::ManageDatabase
   belongs_to_active_hash :status, foreign_key: :state, class_name: 'Sys::Base::Status'
   belongs_to_active_hash :web_status, foreign_key: :web_state, class_name: 'Sys::Base::Status'
 
+  belongs_to :tenant, primary_key: :code, foreign_key: :tenant_code, class_name: 'Sys::Tenant'
+
   belongs_to :parent, foreign_key: :parent_id, class_name: 'Sys::Group'
   has_many :children, -> { order(:sort_no) }, 
     foreign_key: :parent_id, class_name: 'Sys::Group', dependent: :destroy
@@ -21,14 +23,19 @@ class Sys::Group < Sys::ManageDatabase
   has_many :enabled_users, -> { where(state: 'enabled').order('sys_users.email, sys_users.account') },
     through: :users_groups, source: :user
 
-  attr_accessor :call_update_child_level_no
-  after_save :update_child_level_no
+  attr_accessor :update_include_descendants
+  after_save :update_descendants_after_save
   before_destroy :disable_users
   
   validates :state, :level_no, :name, :name_en, :ldap, presence: true
-  validates :code, presence: true, uniqueness: true
+  validates :code, presence: true, uniqueness: { scope: :tenant_code }
+  validates :tenant_code, presence: true
+  validates :tenant_code, uniqueness: true, if: :root?
 
-  scope :enabled_roots, -> { where(parent_id: 1, state: 'enabled') }
+  scope :in_tenant, ->(tenant_code) { where(tenant_code: tenant_code) }
+  scope :enabled_tenant_roots, ->(tenant_code = Core.user_group.tenant_code) {
+    in_tenant(tenant_code).where(level_no: 2, state: 'enabled')
+  }
 
   scope :enabled_children_counts, -> {
     joins(:enabled_children).group(:id).count('enabled_children_sys_groups.id')
@@ -46,7 +53,7 @@ class Sys::Group < Sys::ManageDatabase
   end
 
   def full_name
-    ancestors.drop(1).map(&:name).join('　')
+    ancestors.map(&:name).join('　')
   end
 
   def nested_name
@@ -112,11 +119,14 @@ class Sys::Group < Sys::ManageDatabase
     return true
   end
 
-  def update_child_level_no
-    if call_update_child_level_no && level_no_changed?
+  def update_descendants_after_save
+    return unless update_include_descendants
+
+    if (changes.keys & %w(level_no tenant_code)).present?
       children.each do |c|
         c.level_no = level_no + 1
-        c.call_update_child_level_no = true
+        c.tenant_code = tenant_code
+        c.update_include_descendants = true
         c.save(validate: false)
       end
     end

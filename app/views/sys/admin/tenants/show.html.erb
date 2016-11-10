@@ -1,0 +1,21 @@
+<table class="show">
+  <tr>
+    <th><%= @item.class.human_attribute_name :code %></th>
+    <td><%= @item.code %></td>
+  </tr><tr>
+    <th><%= @item.class.human_attribute_name :name %></th>
+    <td><%= @item.name %></td>
+  </tr><tr>
+    <th><%= @item.class.human_attribute_name :mail_domain %></th>
+    <td><%= @item.mail_domain %></td>
+  </tr><tr>
+    <th><%= @item.class.human_attribute_name :default_pass_limit %></th>
+    <td><%= @item.default_pass_limit.text %></td>
+  </tr><tr>
+    <th><%= @item.class.human_attribute_name :default_pass_prefix %></th>
+    <td><%= @item.default_pass_prefix %></td>
+  </tr><tr>
+    <th><%= @item.class.human_attribute_name :mobile_access %></th>
+    <td><%= @item.mobile_access.text %></td>
+  </tr>
+</table>

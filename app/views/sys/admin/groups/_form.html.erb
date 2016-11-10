@@ -3,10 +3,18 @@
 <p class="form">基本情報</p>
 
 <table class="show">
+  <% if @parent.id == 0 %>
+    <tr>
+      <th><%= @item.class.human_attribute_name :tenant_code %></th>
+      <td><%= f.text_field :tenant_code %><%= f.hidden_field :parent_id %></td>
+    </tr>
+  <% else %>
+    <tr>
+      <th><%= @item.class.human_attribute_name :parent_id %></th>
+      <td><%= f.select :parent_id, @item.root? ? [['', 0]] : Sys::Group.select_options_except(@item) %></td>
+    </tr>
+  <% end %>
   <tr>
-    <th><%= @item.class.human_attribute_name :parent_id %></th>
-    <td><%= f.select :parent_id, @item.root? ? [['', 0]] : Sys::Group.select_options_except(@item) %></td>
-  </tr><tr>
     <th><%= @item.class.human_attribute_name :code %></th>
     <td><%= f.text_field :code, class: 'id' %></td>
   </tr><tr>

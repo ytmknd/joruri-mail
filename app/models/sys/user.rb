@@ -44,6 +44,13 @@ class Sys::User < Sys::ManageDatabase
   validates :account, uniqueness: true
 
   scope :with_valid_email, -> { where.not(email: nil).where.not(email: '') }
+  scope :in_tenant, ->(tenant_code) {
+    groups = Sys::Group.arel_table
+    joins(:groups).where(groups[:tenant_code].eq(tenant_code))
+  }
+  scope :enabled_tenant_users, ->(tenant_code = Core.user_group.tenant_code) {
+    in_tenant(tenant_code).state_enabled
+  }
   scope :search, ->(params) {
     rel = all
     params.each do |n, vs|
@@ -78,6 +85,10 @@ class Sys::User < Sys::ManageDatabase
     end
     rel
   }
+
+  def tenant
+    groups.first.try!(:tenant)
+  end
 
   def creatable?
     Core.user.has_auth?(:manager)

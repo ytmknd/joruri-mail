@@ -14,9 +14,18 @@ end
 ## sys/groups
 
 def create(parent, level_no, sort_no, code, name, name_en)
-  Sys::Group.create :parent_id => (parent == 0 ? 0 : parent.id), :level_no => level_no, :sort_no => sort_no,
-    :state => 'enabled', :web_state => 'closed',
-    :ldap => 0, :code => code, :name => name, :name_en => name_en
+  Sys::Group.create(
+    :tenant_code => 'soshiki',
+    :parent_id => (parent == 0 ? 0 : parent.id),
+    :level_no => level_no,
+    :sort_no => sort_no,
+    :state => 'enabled',
+    :web_state => 'closed',
+    :ldap => 0,
+    :code => code,
+    :name => name,
+    :name_en => name_en
+  )
 end
 
 r = Sys::Group.find(1)
@@ -57,10 +66,17 @@ p = create r, 2, 20, '019'   , '公民館'        , 'kominkan'
 ## sys/users
 
 def create(auth_no, name, account, password, email)
-  Sys::User.create :state => 'enabled', :ldap => 0, :auth_no => auth_no,
-    :name => name, :account => account, :password => password,
-    :mobile_access => 1, :mobile_password => password,
+  Sys::User.create(
+    :state => 'enabled',
+    :ldap => 0,
+    :auth_no => auth_no,
+    :name => name,
+    :account => account,
+    :password => password,
+    :mobile_access => 1,
+    :mobile_password => password,
     :email => email
+  )
 end
 
 u2 = create 2, '徳島　太郎'  , 'user1', 'user1', 'user1@demo.joruri.org' # 秘書広報課

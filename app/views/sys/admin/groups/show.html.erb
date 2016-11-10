@@ -1,10 +1,18 @@
 <p class="form">基本情報</p>
 
 <table class="show">
+  <% if @parent.id == 0 %>
+    <tr>
+      <th><%= @item.class.human_attribute_name :tenant_code %></th>
+      <td><%= @item.tenant_code %></td>
+    </tr>
+  <% else %>
+    <tr>
+      <th><%= @item.class.human_attribute_name :parent_id %></th>
+      <td><%= @item.parent.name if @item.parent %></td>
+    </tr>
+  <% end %>
   <tr>
-    <th><%= @item.class.human_attribute_name :parent_id %></th>
-    <td><%= @item.parent.name if @item.parent %></td>
-  </tr><tr>
     <th><%= @item.class.human_attribute_name :code %></th>
     <td><%= @item.code %></td>
   </tr><tr>

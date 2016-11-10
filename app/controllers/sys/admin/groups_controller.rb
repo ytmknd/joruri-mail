@@ -5,15 +5,13 @@ class Sys::Admin::GroupsController < Sys::Controller::Admin::Base
     return error_auth unless Core.user.has_auth?(:manager)
 
     @parent = Sys::Group.find_by(id: params[:parent]) || Sys::Group.new(id: 0, level_no: 0)
-    @groups = Sys::Group.where(parent_id: @parent.id).order(:sort_no, :code, :id)
-    @users = Sys::User.joins(:groups).where(sys_groups: { id: @parent.id })
-      .order("LPAD(account, 15, '0')")
   end
 
   def index
-    @items = Sys::Group.where(parent_id: @parent.id).order(:id)
-      .paginate(page: params[:page], per_page: params[:limit])
-    _index @items
+    @groups = Sys::Group.where(parent_id: @parent.id).order(:sort_no, :tenant_code, :code, :id)
+    @users = Sys::User.joins(:groups).where(sys_groups: { id: @parent.id })
+      .order("LPAD(account, 15, '0')")
+    _index @groups
   end
 
   def show
@@ -24,8 +22,8 @@ class Sys::Admin::GroupsController < Sys::Controller::Admin::Base
 
   def new
     @item = Sys::Group.new(
-      state: 'enabled',
       parent_id: @parent.id,
+      state: 'enabled',
       ldap: 0,
       web_state: 'public'
     )
@@ -33,18 +31,22 @@ class Sys::Admin::GroupsController < Sys::Controller::Admin::Base
 
   def create
     @item = Sys::Group.new(item_params)
-    parent = Sys::Group.find_by(id: @item.parent_id)
-    @item.level_no = parent ? parent.level_no + 1 : 1
-    @item.call_update_child_level_no = true
+
+    @item.tenant_code = @item.parent.tenant_code if @item.parent
+    @item.level_no = @item.parent.try!(:level_no).to_i + 1
+    @item.update_include_descendants = true
+
     _create @item
   end
 
   def update
     @item = Sys::Group.find(params[:id])
     @item.attributes = item_params
-    parent = Sys::Group.find_by(id: @item.parent_id)
-    @item.level_no = parent ? parent.level_no + 1 : 1
-    @item.call_update_child_level_no = true
+
+    @item.tenant_code = @item.parent.tenant_code if @item.parent
+    @item.level_no = @item.parent.try!(:level_no).to_i + 1
+    @item.update_include_descendants = true
+
     _update @item
   end
 
@@ -91,6 +93,8 @@ class Sys::Admin::GroupsController < Sys::Controller::Admin::Base
   end
 
   def item_params
-    params.require(:item).permit(:state, :parent_id, :code, :name, :name_en, :ldap, :sort_no)
+    params.require(:item).permit(
+      :tenant_code, :state, :parent_id, :code, :name, :name_en, :ldap, :sort_no
+    )
   end
 end

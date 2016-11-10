@@ -37,48 +37,45 @@ class Sys::LdapSynchro < ApplicationRecord
 
     def create_synchro(version = Time.now.to_i)
       opts = { version: version, group: 0, gerr: 0, user: 0, uerr: 0 }
-      create_synchros(opts)
+
+      dcs = Core.ldap.dc.children || [Core.ldap.dc.root].compact
+      dcs.each do |dc|
+        opts[:tenant_code] = dc.tenant_code
+        create_synchros(opts, dc)
+      end
       opts
     end
 
     def synchronize(version)
-      unless parent = Sys::Group.find_by(parent_id: 0)
-        raise "グループのRootが見つかりません。"
-      end
-
       Sys::Group.update_all(ldap_version: nil)
       Sys::User.update_all(ldap_version: nil)
 
-      opts = { version: version, group: 0, gerr: 0, user: 0, uerr: 0, udel: 0, gdel: 0, error: '' }
+      opts = { version: version, group: 0, gerr: 0, user: 0, uerr: 0, udel: 0, gdel: 0 }
 
       items = Sys::LdapSynchro.where(version: version, parent_id: 0, entry_type: 'group').order(:sort_no, :code)
-      items.each { |group| do_synchro(opts, group, parent) }
+      items.each { |group| do_synchro(opts, group) }
 
       opts[:udel] = Sys::User.where(ldap: 1, ldap_version: nil).destroy_all.size
-      opts[:gdel] = Sys::Group.where(parent_id: 0, ldap: 1, ldap_version: nil).destroy_all.size
+      opts[:gdel] = Sys::Group.where(ldap: 1, ldap_version: nil).destroy_all.size
       opts
     end
 
     private
 
-    def create_synchros(opts, entry = nil, group_id = nil)
-      if entry.nil?
-        Core.ldap.group.children.each do |e|
-          create_synchros(opts, e, 0)
-        end
-        return true
-      end
-
+    def create_synchros(opts, entry, parent = nil)
       group = Sys::LdapSynchro.new(
-        parent_id:    group_id,
+        parent_id:    parent.try!(:id).to_i,
         version:      opts[:version],
+        tenant_code:  opts[:tenant_code],
         entry_type:   'group',
         code:         entry.code,
         name:         entry.name,
         name_en:      entry.name_en,
         email:        entry.email,
         group_s_name: entry.group_s_name,
+        sort_no:      entry.sort_no
       )
+
       if group.save
         opts[:group] += 1
       else
@@ -90,6 +87,7 @@ class Sys::LdapSynchro < ApplicationRecord
         user = Sys::LdapSynchro.new(
           parent_id:         group.id,
           version:           opts[:version],
+          tenant_code:       opts[:tenant_code],
           entry_type:        'user',
           code:              e.uid,
           name:              e.name,
@@ -108,24 +106,24 @@ class Sys::LdapSynchro < ApplicationRecord
         end
       end
 
-      entry.children.each do |e|
-        create_synchros(opts, e, group.id)
+      entry.groups.each do |e|
+        create_synchros(opts, e, group)
       end
     end
 
     def do_synchro(opts, group, parent = nil)
       ## group
-      sg                = Sys::Group.where(code: group.code).first_or_initialize
+      sg                = Sys::Group.where(tenant_code: group.tenant_code, code: group.code).first_or_initialize
       sg.code           = group.code
-      sg.parent_id      = parent.id
+      sg.parent_id      = parent.try!(:id).to_i
       sg.state        ||= 'enabled'
       sg.web_state    ||= 'public'
       sg.name           = group.name
       sg.name_en        = group.name_en if group.name_en.present?
       sg.email          = group.email if group.email.present?
       sg.group_s_name   = group.group_s_name
-      sg.level_no       = parent.level_no + 1
-      #sg.sort_no        = group.sort_no
+      sg.level_no       = parent.try!(:level_no).to_i + 1
+      sg.sort_no        = group.sort_no
       sg.ldap         ||= 1
       sg.ldap_version   = group.version
 
@@ -168,9 +166,7 @@ class Sys::LdapSynchro < ApplicationRecord
       end
 
       ## next
-      if group.children.size > 0
-        group.children.each { |g| do_synchro(opts, g, sg) }
-      end
+      group.children.each { |g| do_synchro(opts, g, sg) }
     end
   end
 end

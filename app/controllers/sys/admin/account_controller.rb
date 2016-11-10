@@ -15,28 +15,18 @@ class Sys::Admin::AccountController < Sys::Controller::Admin::Base
     @uri = NKF::nkf('-w', @uri)
     return unless request.post?
 
-    if params[:password].to_s == 'p' + params[:account].to_s
-      if Sys::User.where(account: params[:account]).first
-        flash.now[:notice] = "初期パスワードではログインできません。<br />パスワードを変更してください。".html_safe
-        respond_to do |format|
-          format.html { render }
-          format.xml  { render(:xml => '<errors />') }
-        end
-        return true
+    login_ok = 
+      if request.mobile? || request.smart_phone?
+        new_login_mobile(params[:account], params[:password], params[:mobile_password])
+      else
+        new_login(params[:account], params[:password])
       end
-    end
-
-    if request.mobile? || request.smart_phone?
-      login_ok = new_login_mobile(params[:account], params[:password], params[:mobile_password])
-    else
-      login_ok = new_login(params[:account], params[:password])
-    end
 
     if login_ok
       Util::Syslog.info 'login succeeded', account: params[:account]
     else
       Util::Syslog.info 'login failed', account: params[:account]
-      flash.now[:notice] = "ユーザーＩＤ・パスワードを正しく入力してください"
+      flash.now[:notice] ||= "ユーザーＩＤ・パスワードを正しく入力してください"
       respond_to do |format|
         format.html { render }
         format.xml  { render(:xml => '<errors />') }

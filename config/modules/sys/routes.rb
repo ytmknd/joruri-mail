@@ -14,6 +14,7 @@ Joruri::Application.routes.draw do
             post :synchronize
           end
         end
+        resources :tenants
         resources :users
         resources :groups, path: ':parent/groups' do
           collection do

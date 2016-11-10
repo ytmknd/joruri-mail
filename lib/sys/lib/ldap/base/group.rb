@@ -18,4 +18,8 @@ module Sys::Lib::Ldap::Base::Group
   def group_s_name
     nil
   end
+
+  def sort_no
+    nil
+  end
 end

@@ -23,8 +23,8 @@ pri_search_field_options = [['名前', 's_name_or_kana'], ['メールアドレ�
       <td rowspan="3" class="addressesColumn">
         <div id="sysAddresses" class="addresses" style="display:none">
           <ul id="sysAddressesRoot">
-          <% counts = Sys::Group.enabled_roots.enabled_children_counts %>
-          <% Sys::Group.enabled_roots.order(:sort_no).each do |g| %>
+          <% counts = Sys::Group.enabled_tenant_roots.enabled_children_counts %>
+          <% Sys::Group.enabled_tenant_roots.order(:sort_no).each do |g| %>
             <li class="group" id="sysGroup<%= g.id %>">
             <% if counts[g.id].to_i > 0 %>
               <%= link_to '+', '#', id: "sysToggleItems#{g.id}", class: "toggleItems toggleItemsClose",
