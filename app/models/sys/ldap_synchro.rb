@@ -55,7 +55,7 @@ class Sys::LdapSynchro < ApplicationRecord
       items.each { |group| do_synchro(opts, group, parent) }
 
       opts[:udel] = Sys::User.where(ldap: 1, ldap_version: nil).destroy_all.size
-      opts[:gdel] = Sys::Group.where(parent_id: 0, ldap: 1, ldap_version: nil).destroy_all.size
+      opts[:gdel] = Sys::Group.where.not(parent_id: 0).where(ldap: 1, ldap_version: nil).destroy_all.size
       opts
     end
 
