@@ -34,7 +34,7 @@ class Sys::Admin::GroupsController < Sys::Controller::Admin::Base
 
     @item.tenant_code = @item.parent.tenant_code if @item.parent
     @item.level_no = @item.parent.try!(:level_no).to_i + 1
-    @item.update_include_descendants = true
+    @item.update_with_descendants = true
 
     _create @item
   end
@@ -45,7 +45,7 @@ class Sys::Admin::GroupsController < Sys::Controller::Admin::Base
 
     @item.tenant_code = @item.parent.tenant_code if @item.parent
     @item.level_no = @item.parent.try!(:level_no).to_i + 1
-    @item.update_include_descendants = true
+    @item.update_with_descendants = true
 
     _update @item
   end

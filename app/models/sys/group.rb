@@ -23,7 +23,7 @@ class Sys::Group < Sys::ManageDatabase
   has_many :enabled_users, -> { where(state: 'enabled').order('sys_users.email, sys_users.account') },
     through: :users_groups, source: :user
 
-  attr_accessor :update_include_descendants
+  attr_accessor :update_with_descendants
   after_save :update_descendants_after_save
   before_destroy :disable_users
   
@@ -140,13 +140,13 @@ class Sys::Group < Sys::ManageDatabase
   end
 
   def update_descendants_after_save
-    return unless update_include_descendants
+    return unless update_with_descendants
 
     if (changes.keys & %w(level_no tenant_code)).present?
       children.each do |c|
         c.level_no = level_no + 1
         c.tenant_code = tenant_code
-        c.update_include_descendants = true
+        c.update_with_descendants = true
         c.save(validate: false)
       end
     end
