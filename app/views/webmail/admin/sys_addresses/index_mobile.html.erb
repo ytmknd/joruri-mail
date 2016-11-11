@@ -1,27 +1,29 @@
 <%
 params[:group_id] = nil if params[:clear]
 if params[:group_id].present?
-  @group = Sys::Group.find_by(id: params[:group_id]) || @root
-  @groups = @group.enabled_children
+  @group = Sys::Group.find_by!(id: params[:group_id])
+  @group_options = @group.ancestors_and_children_options(with_root: @roots.size != 1)
+  @users = @group.users_having_email.reorder(Webmail::Setting.sys_address_orders)
+else
+  @group = nil
+  @group_options = @groups.map { |g| [g.name, g.id] }
+  @users = []
 end
-
-@users = @group.users_having_email.reorder(Webmail::Setting.sys_address_orders)
 %>
 
 <div class="groups"><%= t('webmail.menus.sys_address') %></div>
 <%= form_tag webmail_sys_addresses_path, { id: 'groupForm', name: 'groupForm', class: 'groupForm', method: :get } do |f| %>
   <%= select_tag :group_id, options_for_select(
-    [["// 選択してください",0]] + @group.ancestors_and_children_without_root_options, @group.id), class: 'selectUI' %><br/>
+    [["// 選択してください",'']] + @group_options, params[:group_id].to_i), class: 'selectUI' %><br/>
   <%= submit_tag "検索", name: 'select', class: 'menuItem' %>
   <%= submit_tag "リセット", name: 'clear', class: 'menuItem' %>
 <% end %>
 
-<% if @group != @root %>
-<div class="group"><%= @group.name %></div>
-<% end %>
+<div class="group"><%= @group.name if @group %></div>
+
 <%= form_for :item, url: mobile_manage_webmail_sys_addresses_path, html: { id: 'mailForm', class: 'mailForm', name: 'mailForm' } do |f| %>
   <% if @users.blank? %>
-  <% if @group != @root %>
+  <% if params[:group_id].present? %>
   <div class="notice">次の階層を選択してください。</div>
   <% end %>
   <% else %>

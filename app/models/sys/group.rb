@@ -33,8 +33,9 @@ class Sys::Group < Sys::ManageDatabase
   validates :tenant_code, uniqueness: true, if: :root?
 
   scope :in_tenant, ->(tenant_code) { where(tenant_code: tenant_code) }
-  scope :enabled_tenant_roots, ->(tenant_code = Core.user_group.tenant_code) {
-    in_tenant(tenant_code).where(level_no: 2, state: 'enabled')
+  scope :enabled_roots_in_tenant, ->(tenant_code = nil) {
+    tenant_code ||= Core.user.groups.map(&:tenant_code).uniq
+    in_tenant(tenant_code).where(level_no: 1, state: 'enabled')
   }
 
   scope :enabled_children_counts, -> {
@@ -117,8 +118,12 @@ class Sys::Group < Sys::ManageDatabase
     return nil
   end
 
-  def ancestors_and_children_without_root_options
-    ancestors_and_children[1..-1].map { |g| [g.nested_name.sub(/　　/, ''), g.id] }
+  def ancestors_and_children_options(with_root: true)
+    if with_root
+      ancestors_and_children.map { |g| [g.nested_name, g.id] }
+    else
+      ancestors_and_children.drop(1).map { |g| [g.nested_name.sub('　　', ''), g.id] }
+    end
   end
 
   private

@@ -9,15 +9,12 @@ class Webmail::Admin::SysAddressesController < Webmail::Controller::Admin::Base
   end
 
   def index
-    @root = Core.user_group.ancestors.first
-    @parents = []
-    @group   = @root
-    @groups  = @group.enabled_children
+    @roots = Sys::Group.enabled_roots_in_tenant.order(:sort_no, :tenant_code)
+    @groups = @roots.size == 1 ? @roots.first.enabled_children : @roots
 
     if params[:search]
-      user = Sys::User.enabled_tenant_users.with_valid_email
+      user = Sys::User.enabled_users_in_tenant.with_valid_email.search(params)
       user = user.where(ldap: 1) if Sys::Group.show_only_ldap_user
-      user = user.search(params)
       @users = user.order(Webmail::Setting.sys_address_orders).paginate(page: 1, per_page: @limit)
       @gid = params[:gid]
       @gname = "検索結果（#{params[:index]}）"
@@ -26,7 +23,7 @@ class Webmail::Admin::SysAddressesController < Webmail::Controller::Admin::Base
   end
 
   def show
-    item = Sys::User.enabled_tenant_users.with_valid_email.where(id: params[:id])
+    item = Sys::User.enabled_users_in_tenant.with_valid_email.where(id: params[:id])
     item = item.where(ldap: 1) if Sys::Group.show_only_ldap_user
     @item = item.first
     return http_error(404) if @item.blank? || @item.email.blank?
@@ -76,7 +73,7 @@ class Webmail::Admin::SysAddressesController < Webmail::Controller::Admin::Base
     else
       return []
     end
-    item = Sys::User.enabled_tenant_users.with_valid_email.where(id: ids)
+    item = Sys::User.enabled_users_in_tenant.with_valid_email.where(id: ids)
     item = item.where(ldap: 1) if Sys::Group.show_only_ldap_user
     item.order(:email).map(&:email_format)
   end

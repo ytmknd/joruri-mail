@@ -1,0 +1,11 @@
+<% counts = groups.enabled_children_counts %>
+<% groups.each do |group| %>
+  <li class="folder">
+    <% if counts[group.id].to_i > 0 %>
+      <a href="#toggleGroups" id="toggleGroup<%= group.id %>" data-gid="<%= group.id %>" class="toggleGroups toggleGroupsClose">+</a>
+    <% else %>
+      <a href="#" class="toggleGroups" style="visibility:hidden;">+</a>
+    <% end %>
+    <a href="#loadAddresses" id="group<%= group.id %>" data-gid="<%= group.id %>"><%= group.name %></a>
+  </li>
+<% end %>

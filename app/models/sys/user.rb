@@ -46,9 +46,10 @@ class Sys::User < Sys::ManageDatabase
   scope :with_valid_email, -> { where.not(email: nil).where.not(email: '') }
   scope :in_tenant, ->(tenant_code) {
     groups = Sys::Group.arel_table
-    joins(:groups).where(groups[:tenant_code].eq(tenant_code))
+    joins(:groups).where(groups[:tenant_code].in(tenant_code))
   }
-  scope :enabled_tenant_users, ->(tenant_code = Core.user_group.tenant_code) {
+  scope :enabled_users_in_tenant, ->(tenant_code = nil) {
+    tenant_code ||= Core.user.groups.map(&:tenant_code).uniq
     in_tenant(tenant_code).state_enabled
   }
   scope :search, ->(params) {

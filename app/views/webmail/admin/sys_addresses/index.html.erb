@@ -16,33 +16,23 @@
       </ul>
     </li>
   </ul>
-  <ul class="root" id="folderRoot">
-    <% counts = @groups.enabled_children_counts %>
-    <% @groups.each do |group| %>
-      <li class="folder">
-        <% if counts[group.id].to_i > 0 %>
-          <a href="#toggleGroups" id="toggleGroup<%= group.id %>" data-gid="<%= group.id %>" class="toggleGroups toggleGroupsClose">+</a>
-        <% else %>
-          <a href="#" class="toggleGroups" style="visibility:hidden;">+</a>
-        <% end %>
-        <a href="#loadAddresses" id="group<%= group.id %>" data-gid="<%= group.id %>"><%= group.name %></a>
-      </li>
-    <% end %>
-    <script id="childGroupsTemplate" type="text/x-jsrender">
-      <ul class="children" id="childGroups{{:id}}">
-        {{for children}}
-          <li class="folder">
-            {{if has_children}}
-              <a href="#toggleGroups" id="toggleGroup{{:id}}" data-gid="{{:id}}" class="toggleGroups toggleGroupsClose">+</a>
-            {{else}}
-              <a href="#" class="toggleGroups" style="visibility:hidden;">+</a>
-            {{/if}}
-            <a href="#loadAddresses" id="group{{:id}}" data-gid="{{:id}}">{{>name}}</a>
-          </li>
-        {{/for}}
-      </ul>
-    </script>
+  <ul id="folderRoot" class="root">
+    <%= render 'children', parent: nil, groups: @groups %>
   </ul>
+  <script id="childGroupsTemplate" type="text/x-jsrender">
+    <ul class="children" id="childGroups{{:id}}">
+      {{for children}}
+        <li class="folder">
+          {{if has_children}}
+            <a href="#toggleGroups" id="toggleGroup{{:id}}" data-gid="{{:id}}" class="toggleGroups toggleGroupsClose">+</a>
+          {{else}}
+            <a href="#" class="toggleGroups" style="visibility:hidden;">+</a>
+          {{/if}}
+          <a href="#loadAddresses" id="group{{:id}}" data-gid="{{:id}}">{{>name}}</a>
+        </li>
+      {{/for}}
+    </ul>
+  </script>
 </div>
 
 </div>

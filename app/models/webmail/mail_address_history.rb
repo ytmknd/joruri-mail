@@ -65,7 +65,7 @@ class Webmail::MailAddressHistory < ApplicationRecord
     end
 
     def load_sys_address_map(emails)
-      addrs = Sys::User.enabled_tenant_users.where(email: emails).pluck(:email, :name).flatten
+      addrs = Sys::User.enabled_users_in_tenant.where(email: emails).pluck(:email, :name).flatten
       Hash[*addrs]
     end
   end
