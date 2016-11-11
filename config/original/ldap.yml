@@ -2,13 +2,19 @@ development:
   host: 192.168.0.3
   port: 389
   base: dc=soshiki,dc=joruri,dc=org
+  username:
+  password:
 
 test:
   host: 192.168.0.3
   port: 389
   base: dc=soshiki,dc=joruri,dc=org
+  username:
+  password:
 
 production:
   host: 192.168.0.3
   port: 389
   base: dc=soshiki,dc=joruri,dc=org
+  username:
+  password:

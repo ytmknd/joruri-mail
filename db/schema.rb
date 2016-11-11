@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20161110044554) do
+ActiveRecord::Schema.define(version: 20161110044632) do
 
   create_table "delayed_jobs", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
     t.integer  "priority",                 default: 0, null: false
@@ -101,6 +101,16 @@ ActiveRecord::Schema.define(version: 20161110044554) do
     t.integer  "sort_no"
     t.string   "name"
     t.text     "title",      limit: 65535
+  end
+
+  create_table "sys_ldap_synchro_tasks", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
+    t.integer  "version"
+    t.string   "target_tenant_code"
+    t.text     "fetch_log",          limit: 65535
+    t.text     "synchro_log",        limit: 65535
+    t.datetime "created_at",                       null: false
+    t.datetime "updated_at",                       null: false
+    t.index ["version"], name: "index_sys_ldap_synchro_tasks_on_version", using: :btree
   end
 
   create_table "sys_ldap_synchros", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|

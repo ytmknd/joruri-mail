@@ -2,6 +2,9 @@ class Sys::Tenant < ApplicationRecord
   include Sys::Model::Base
   include Sys::Model::Auth::Manager
 
+  has_one :root_group, -> { where(level_no: 1) },
+    primary_key: :code, foreign_key: :tenant_code, class_name: 'Sys::Group'
+
   validates :code, presence: true, uniqueness: true
   validates :name, presence: true
 

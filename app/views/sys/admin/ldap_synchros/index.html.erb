@@ -2,6 +2,7 @@
   <tr>
     <th style="width: 60px; text-align: center;">詳細</th>
     <th style="width:; text-align: center;">バージョン</th>
+    <th style="width: 120px;">対象テナント</th>
     <th style="width: 120px; text-align: right;">グループ数</th>
     <th style="width: 120px; text-align: right;">ユーザー数</th>
     <th style="width: 120px; text-align: center;">作成日時</th>
@@ -9,9 +10,10 @@
   <% @items.each do |item| %>
   <tr class="<%= cycle '', 'cycle' %>">
     <td style="text-align: center;"><%= link_to :show, url_for(action: :show, id: item.version) %></td>
-    <td style="text-align: center;"><%= item.version%></td>
-    <td style="text-align: right;"><%=number_with_delimiter item.group_count %></td>
-    <td style="text-align: right;"><%=number_with_delimiter item.user_count %></td>
+    <td style="text-align: center;"><%= item.version %></td>
+    <td><%= item.target_tenant_name %></td>
+    <td style="text-align: right;"><%=number_with_delimiter item.ldap_synchro_groups.count %></td>
+    <td style="text-align: right;"><%=number_with_delimiter item.ldap_synchro_users.count %></td>
     <td style="text-align: center;"><%=l item.created_at if item.created_at %></td>
   </tr>
   <% end %>

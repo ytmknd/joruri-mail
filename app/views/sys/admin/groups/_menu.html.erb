@@ -15,4 +15,6 @@
 <%= action_menu :show %>
 <%= action_menu :edit    if safe{@item.editable?} %>
 <%= action_menu :destroy if safe{@item.deletable?} %>
+<%= link_to 'LDAP同期', sys_ldap_synchros_path(tenant_code: @item.tenant_code),
+  method: :post, data: { confirm: 'LDAP中間データを作成します。よろしいですか？' } if action_name == 'show' && @item.root? && @item.ldap == 1 %>
 </div>

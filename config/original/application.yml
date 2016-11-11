@@ -5,6 +5,8 @@ sys:
   session_expiration_for_mobile: 1
   # PCサイト/携帯サイト強制表示
   force_site: ''
+  # LDAP同期履歴最大保持件数
+  ldap_synchro_max_count: 90
 
 webmail:
   # メールボックス容量警告使用割合

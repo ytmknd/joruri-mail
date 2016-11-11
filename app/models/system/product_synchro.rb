@@ -21,9 +21,24 @@ class System::ProductSynchro < System::Database
     
     @results = { group: 0, gerr: 0, user: 0, uerr: 0 }
 
-    parent = create_root_temporaries(version)
+    root = make_root_temporaries(version)
+
+    task = Sys::LdapSynchroTask.new(version: version, target_tenant_code: root.tenant_code)
+    unless task.save
+      update_attributes(state: 'failure')
+      return false
+    end
+
+    unless root.save(validate: false)
+      update_attributes(state: 'failure')
+      return false
+    end
+
     groups = System::LdapTemporary.where(version: version, parent_id: 0, data_type: 'group').order(:sort_no, :code)
-    groups.each { |group| copy_ldap_temporaries(group, parent) }
+    groups.each { |group| copy_ldap_temporaries(group, root) }
+
+    task.fetch_log = Sys::LdapSynchroTask.make_fetch_log(@results)
+    task.save
 
     messages = []
     messages << "グループ #{@results[:group]}件"
@@ -70,7 +85,9 @@ class System::ProductSynchro < System::Database
   def synchronize
     update_attributes(state: 'sync')
 
-    results = Sys::LdapSynchro.synchronize(version)
+    task = Sys::LdapSynchroTask.find_by!(version: version)
+    task.synchronize
+    results = task.synchro_results
 
     messages = []
     messages << "グループ"
@@ -92,10 +109,8 @@ class System::ProductSynchro < System::Database
     end
   end
 
-  def create_root_temporaries(version)
-    unless root = Sys::Group.find_by(level_no: 1, ldap: 1)
-      raise '最上位グループが見つかりませんでした。'
-    end
+  def make_root_temporaries(version)
+    root = Sys::Group.find_by!(level_no: 1, ldap: 1)
 
     sg                = Sys::LdapSynchro.new
     sg.tenant_code    = root.tenant_code
@@ -108,7 +123,6 @@ class System::ProductSynchro < System::Database
     sg.email          = root.email
     sg.sort_no        = root.sort_no
     sg.group_s_name   = root.group_s_name
-    sg.save(validate: false)
     sg
   end
 

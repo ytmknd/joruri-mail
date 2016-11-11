@@ -72,6 +72,11 @@ ja:
         group_id: "グループ"
         in_group_id: "グループ"
         role_name: "ロール権限"
+
+      sys/ldap_synchro_task:
+        target_tenant_code: "対象テナント"
+        fetch_log: "中間データ作成ログ"
+        synchro_log: "同期ログ"
       
       sys/role_name: 
         name: "ロールID"
