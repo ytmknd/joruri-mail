@@ -7,7 +7,7 @@ class Sys::Lib::Ldap
     self.config = Util::Config.load(:ldap).symbolize_keys
     self.config = config.merge!(params)
 
-    config[:bind_dn] ||= "uid=[uid],[ous],[base]"
+    config[:bind_dn] ||= "uid=[uid],[groups]"
     config[:charset] ||= "utf-8"
   end
 
@@ -36,6 +36,7 @@ class Sys::Lib::Ldap
 
   ## Bind.
   def bind(dn, pass)
+    connection.unbind if connection.bound?
     if(RUBY_PLATFORM.downcase =~ /mswin(?!ce)|mingw|bccwin/)
       dn = NKF.nkf('-s -W', dn)
     end

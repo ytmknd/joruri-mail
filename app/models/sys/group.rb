@@ -61,6 +61,21 @@ class Sys::Group < Sys::ManageDatabase
     "#{'　　'*nested_count}#{name}"
   end
 
+  def ldap_name
+    if level_no == 1
+      "dc=#{code}"
+    else
+      "ou=#{code}#{name}"
+    end
+  end
+
+  def ldap_dn
+    bases = Core.ldap.config[:base].split(',')
+    dns = ancestors.reverse.map(&:ldap_name)
+    dns.pop if dns.last == bases.first
+    (dns + bases).join(',')
+  end
+
   def self.show_only_ldap_user
     Joruri.config.application['webmail.show_only_ldap_user'] == 1
   end
