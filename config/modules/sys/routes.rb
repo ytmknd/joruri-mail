@@ -7,7 +7,6 @@ Joruri::Application.routes.draw do
         resources :messages
         resources :languages
         resources :ldap_groups, path: ':parent/ldap_groups'
-        resources :ldap_users, path: ':parent/ldap_users'
         resources :ldap_synchros do
           member do
             get :synchronize
