@@ -22,6 +22,7 @@ class Sys::Admin::GroupsController < Sys::Controller::Admin::Base
 
   def new
     @item = Sys::Group.new(
+      tenant_code: @parent.tenant_code,
       parent_id: @parent.id,
       state: 'enabled',
       ldap: 0,

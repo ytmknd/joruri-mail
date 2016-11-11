@@ -22,8 +22,9 @@ class Sys::Admin::UsersController < Sys::Controller::Admin::Base
   def new
     @item = Sys::User.new(
       state: 'enabled',
-      ldap: '0',
-      auth_no: 2
+      ldap: 0,
+      auth_no: 2,
+      mobile_access: 0
     )
   end
 
@@ -46,7 +47,9 @@ class Sys::Admin::UsersController < Sys::Controller::Admin::Base
   private
 
   def item_params
-    params.require(:item).permit(:in_group_id, :account, :name, :kana, :name_en, :email, :sort_no,
-      :official_position, :assigned_job, :state, :auth_no, :ldap, :password, :mobile_access, :mobile_password)
+    params.require(:item).permit(
+      :in_group_id, :account, :name, :kana, :name_en, :email, :sort_no,
+      :official_position, :assigned_job, :state, :auth_no, :ldap, :password, :mobile_access, :mobile_password
+    )
   end
 end

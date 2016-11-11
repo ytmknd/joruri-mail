@@ -14,6 +14,6 @@ class Sys::Admin::LdapGroupsController < Sys::Controller::Admin::Base
   def index
     @parents = @entry.parents
     @children = @entry.children.reject(&:user_object?)
-    @users  = @entry.users
+    @users = @entry.users
   end
 end
