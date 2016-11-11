@@ -44,7 +44,7 @@ class Sys::Lib::Ldap::Entry
   end
 
   def display_name
-    get(:cn) || get(:ou) || get(:o) || get(:dn)
+    get(:cn) || get(:ou) || get(:o) || dn.split(',').first
   end
 
   def dn
