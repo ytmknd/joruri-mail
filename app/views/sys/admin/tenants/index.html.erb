@@ -6,6 +6,8 @@
     <th style="width: ;"><%= Sys::Tenant.human_attribute_name :mail_domain %></th>
     <th style="width: 100px;"><%= Sys::Tenant.human_attribute_name :mobile_access %></th>
     <th style="width: 120px; text-align: center;"><%= Sys::Tenant.human_attribute_name :updated_at %></th>
+    <th style="width: 70px; text-align: right;">グループ数</th>
+    <th style="width: 70px; text-align: right;">ユーザー数</th>
   </tr>
   <% @items.each do |item| %>
     <tr class="<%= cycle '', 'cycle' %>">
@@ -13,8 +15,10 @@
       <td><%= item.code %></td>
       <td><%= item.name %></td>
       <td><%= item.mail_domain %></td>
-      <td><%= item.mobile_access.text %></td>
+      <td><%= item.mobile_access_text %></td>
       <td style="text-align: center;"><%=l item.updated_at if item.updated_at %></td>
+      <td style="text-align: right;"><%= item.groups.count %></td>
+      <td style="text-align: right;"><%= item.users.count %></td>
     </tr>
   <% end %>
 </table>

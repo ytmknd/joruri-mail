@@ -2,6 +2,8 @@ class Sys::Tenant < ApplicationRecord
   include Sys::Model::Base
   include Sys::Model::Auth::Manager
 
+  has_many :groups,
+    primary_key: :code, foreign_key: :tenant_code, class_name: 'Sys::Group'
   has_one :root_group, -> { where(level_no: 1) },
     primary_key: :code, foreign_key: :tenant_code, class_name: 'Sys::Group'
 
@@ -10,6 +12,10 @@ class Sys::Tenant < ApplicationRecord
 
   enumerize :default_pass_limit, in: [:enabled, :disabled]
   enumerize :mobile_access, in: [1, 0]
+
+  def users
+    Sys::User.in_tenant(code)
+  end
 
   def mail_domains
     domains = []
