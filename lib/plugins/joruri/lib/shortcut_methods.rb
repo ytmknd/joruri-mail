@@ -1,7 +1,11 @@
 def error_log(message)
-  Rails.logger.error "[ USER ERROR #{Time.now.strftime('%Y-%m-%d %H:%M:%S')} ]: #{message}"
+  Rails.logger.error message
 end
 
 def debug_log(data)
-  Rails.logger.debug "[ DEBUG #{Time.now.strftime('%Y-%m-%d %H:%M:%S')} ]: #{data.pretty_inspect}"
+  Rails.logger.debug data.pretty_inspect
+end
+
+def stdout_log(data)
+  Logger.new(STDOUT).info data
 end
