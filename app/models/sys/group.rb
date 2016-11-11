@@ -42,7 +42,7 @@ class Sys::Group < Sys::ManageDatabase
     joins(:enabled_children).group(:id).count('enabled_children_sys_groups.id')
   }
   scope :enabled_users_counts, -> {
-    if self.show_only_ldap_user
+    if show_only_ldap_user?
       joins(:ldap_users).group(:id).count('sys_users.id')
     else
       joins(:enabled_users).group(:id).count('sys_users.id')
@@ -77,12 +77,8 @@ class Sys::Group < Sys::ManageDatabase
     (dns + bases).join(',')
   end
 
-  def self.show_only_ldap_user
-    Joruri.config.application['webmail.show_only_ldap_user'] == 1
-  end
-
   def users_having_email
-    if self.class.show_only_ldap_user
+    if self.class.show_only_ldap_user?
       ldap_users.with_valid_email
     else
       enabled_users.with_valid_email
@@ -153,6 +149,10 @@ class Sys::Group < Sys::ManageDatabase
   end
 
   class << self
+    def show_only_ldap_user?
+      Joruri.config.application['webmail.show_only_ldap_user'] == 1
+    end
+
     def select_options
       self.roots.select(:id, :name, :level_no)
         .map {|g| g.descendants {|rel| rel.select(:id, :name, :level_no) } }

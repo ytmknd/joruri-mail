@@ -50,7 +50,9 @@ class Sys::User < Sys::ManageDatabase
   }
   scope :enabled_users_in_tenant, ->(tenant_code = nil) {
     tenant_code ||= Core.user.groups.map(&:tenant_code).uniq
-    in_tenant(tenant_code).state_enabled
+    rels = in_tenant(tenant_code).state_enabled
+    rels = rels.where(ldap: 1) if Sys::Group.show_only_ldap_user?
+    rels
   }
   scope :search, ->(params) {
     rel = all

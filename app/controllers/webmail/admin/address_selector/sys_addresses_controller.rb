@@ -3,9 +3,7 @@ class Webmail::Admin::AddressSelector::SysAddressesController < Webmail::Control
   end
 
   def index
-    item = Sys::User.enabled_users_in_tenant.with_valid_email
-    item = item.where(ldap: 1) if Sys::Group.show_only_ldap_user
-    @items = item.search(params)
+    @items = Sys::User.enabled_users_in_tenant.with_valid_email.search(params)
       .order(Webmail::Setting.sys_address_orders)
       .paginate(page: 1, per_page: 200)
   end
