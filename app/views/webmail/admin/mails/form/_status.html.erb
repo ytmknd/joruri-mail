@@ -18,7 +18,7 @@ $(function() {
     .done(function(data) {
       switch (data.status) {
       case 'OK':
-        submitForm(e.target);
+        submitForm(target);
         break;
       case 'NG TokenError':
       case '500 This is a secure page.':
