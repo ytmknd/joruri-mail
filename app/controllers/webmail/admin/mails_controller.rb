@@ -479,7 +479,7 @@ class Webmail::Admin::MailsController < Webmail::Controller::Admin::Base
   end
 
   def handle_mailto_scheme
-    mailto = Webmail::Util::Mailto.parse(params[:uri].to_s)
+    mailto = Webmail::Lib::Mailto.parse(params[:uri].to_s)
     [:to, :cc, :bcc, :subject, :body].each { |k| mailto[k] = params[k] if params[k] }
     redirect_to new_webmail_mail_path(mailto.merge(mailbox: 'INBOX'))
   end

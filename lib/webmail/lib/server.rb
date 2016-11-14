@@ -1,4 +1,4 @@
-class Webmail::Util::Server
+class Webmail::Lib::Server
   class << self
     def check_status
       { imap: check_imap_status, smtp: check_smtp_status }
