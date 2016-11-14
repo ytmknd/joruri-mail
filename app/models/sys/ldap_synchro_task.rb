@@ -217,11 +217,12 @@ class Sys::LdapSynchroTask < ApplicationRecord
       task
     end
 
-    def cleanup
-      max = Joruri.config.application['sys.ldap_synchro_max_count'].to_i
-      return if max == 0
-
-      Sys::LdapSynchroTask.order(id: :desc).offset(max).destroy_all
+    def cleanup(max = Joruri.config.application['sys.ldap_synchro_max_count'].to_i)
+      if max > 0
+        self.order(id: :desc).offset(max).destroy_all.size
+      else
+        0
+      end
     end
 
     def make_fetch_log(result)

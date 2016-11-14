@@ -20,10 +20,10 @@ class Sys::File < ApplicationRecord
       SecureRandom.hex(16)
     end
 
-    def garbage_collect
+    def cleanup(exp = 2)
       self.where.not(tmp_id: nil).where(parent_unid: nil)
-        .where("created_at < ?", 2.days.ago)
-        .find_each(&:destroy)
+        .where("created_at < ?", exp.days.ago)
+        .destroy_all.size
     end
   end
 end

@@ -31,7 +31,7 @@ every 10.minutes do
 end
 
 every 1.day, at: '3:00 am' do
-  rake 'webmail:cleanup'
+  rake 'sys:cleanup'
 end
 
 #every 1.day, at: '1:00 am' do

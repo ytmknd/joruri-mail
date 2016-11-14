@@ -45,8 +45,12 @@ class Webmail::MailNode < ApplicationRecord
       end
     end
 
-    def delete_expired_caches(ex = Joruri.config.application['webmail.mail_cache_expiration'])
-      self.where("created_at < ?", ex.months.ago).delete_all if ex > 0
+    def cleanup(exp = Joruri.config.application['webmail.mail_cache_expiration'].to_i)
+      if exp > 0
+        self.where("created_at < ?", exp.months.ago).delete_all
+      else
+        0
+      end
     end
   end
 end
