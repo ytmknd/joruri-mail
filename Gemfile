@@ -35,7 +35,7 @@ gem 'activerecord-session_store', '~> 1.0.0'
 gem 'active_hash', '~> 1.4.1'
 gem 'enumerize', '~> 2.0.0'
 gem 'ruby-ldap', '~> 0.9.11'
-gem 'will_paginate', '~> 3.1.3'
+gem 'will_paginate', '~> 3.1.5'
 gem 'jpmobile', '~> 5.0.0'
 gem 'rmagick', '~> 2.16.0'
 gem 'nokogiri', '~> 1.6.8'
@@ -60,6 +60,8 @@ gem 'whenever', '~> 0.9.7', require: false
 group :development, :test do
   # Call 'byebug' anywhere in the code to stop execution and get a debugger console
   gem 'byebug', platform: :mri
+
+  gem 'brakeman', require: false
 end
 
 group :development do

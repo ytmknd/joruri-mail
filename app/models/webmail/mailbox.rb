@@ -62,7 +62,7 @@ class Webmail::Mailbox < ApplicationRecord
 
   def path
     return @path if @path
-    names[0..-2] ? names[0..-2].join(delim) + delim : ''
+    names[0..-2].present? ? names[0..-2].join(delim) + delim : ''
   end
 
   def path_and_encoded_title

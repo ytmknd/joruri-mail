@@ -39,5 +39,14 @@ module Util::String
     end
     rslt
   end
-  
+
+  def self.encode_utf8mb4(str)
+    str.gsub(/[^\u{0}-\u{FFFF}]/) { '&#x%X;' % $&.ord }
+  end
+
+  def self.decode_utf8mb4(str)
+    str.gsub(/&#(x(([0-9a-fA-F]{5,6}))|\d{5,7});/) {
+      (defined?($2) ? $2.to_i(16): $1.to_i(10)).chr('UTF-8')
+    }
+  end
 end

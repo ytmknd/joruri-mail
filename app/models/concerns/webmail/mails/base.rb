@@ -363,14 +363,14 @@ module Webmail::Mails::Base
     if charset
       case charset.downcase
       when /^unicode-1-1-utf-7$/
-        return Net::IMAP.decode_utf7(str.gsub(/\+([\w\+\/]+)-/, '&\1-'))
-      when /^utf-8$/, /^iso-2022-jp/, /^shift[_-]jis$/, /^euc-jp$/
-        return NKF::nkf('-wx --cp932', str).gsub(/\0/, "")
+        Net::IMAP.decode_utf7(str.gsub(/\+([\w\+\/]+)-/, '&\1-'))
+      when /^iso-2022-jp/, /^shift[_-]jis$/, /^euc-jp$/
+        NKF::nkf('-wx --cp932', str).gsub(/\0/, "")
       else
-        return str.force_encoding(charset).encode('utf-8', undef: :replace, invalid: :replace)
+        str.force_encoding(charset).encode('utf-8', undef: :replace, invalid: :replace)
       end
     else
-      return NKF::nkf('-wx --cp932', str).gsub(/\0/, "")
+      NKF::nkf('-wx --cp932', str).gsub(/\0/, "")
     end
   end
 

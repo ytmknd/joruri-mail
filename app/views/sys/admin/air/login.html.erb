@@ -15,7 +15,7 @@ window.onload = function() {
 </script>
 
 <%= form_tag params[:path], name: 'form' do %>
-  <% if params[:item] && params[:item].is_a?(Hash) %>
+  <% if params[:item] %>
     <% params[:item].each do |key, value| %>
       <%= hidden_field_tag key, Base64.decode64(value) %>
     <% end %>

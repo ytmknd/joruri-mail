@@ -25,3 +25,5 @@ webmail:
   show_gw_schedule_link: 0
   # メールキャッシュ保持期間（月数）
   mail_cache_expiration: 6
+  # メール送信前サーバー接続確認（0:しない, 1:アプリサーバーのみ, 2:アプリサーバー+メールサーバー）
+  check_servers_before_send: 1

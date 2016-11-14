@@ -4,12 +4,31 @@ class Webmail::MailNode < ApplicationRecord
 
   validates :user_id, :uid, :mailbox, presence: true
 
+  before_create :encode_utf8mb4
+  after_initialize :decode_utf8mb4
+
   def editable?
     Core.current_user.has_auth?(:manager) || user_id == Core.current_user.id
   end
   
   def deletable?
     Core.current_user.has_auth?(:manager) || user_id == Core.current_user.id
+  end
+
+  private
+
+  def encode_utf8mb4
+    [:from, :to, :cc, :bcc, :subject].each do |column|
+      val = self.read_attribute(column)
+      self[column] = Util::String.encode_utf8mb4(val) if val.present?
+    end
+  end
+
+  def decode_utf8mb4
+    [:from, :to, :cc, :bcc, :subject].each do |column|
+      val = self.read_attribute(column)
+      self[column] = Util::String.decode_utf8mb4(val) if val.present?
+    end
   end
 
   class << self

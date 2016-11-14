@@ -22,6 +22,10 @@
 env :PATH, ENV['PATH']
 set :output, 'log/cron.log'
 
+#every '@reboot' do
+#  rake 'unicorn:start'
+#end
+
 every 10.minutes do
   rake 'delayed_job:monitor'
 end
@@ -29,6 +33,10 @@ end
 every 1.day, at: '3:00 am' do
   rake 'webmail:cleanup'
 end
+
+#every 1.day, at: '1:00 am' do
+#  rake 'sys:ldap_synchro:run'
+#end
 
 #every 10.minutes do
 #  rake 'system:product_synchro:check'

@@ -76,8 +76,8 @@ class Sys::Admin::AccountController < Sys::Controller::Admin::Base
   end
 
   def sso
-    params[:to] ||= 'gw'
-    raise 'SSOの設定がありません。' unless config = Joruri.config.sso_settings[params[:to].to_sym]
+    config = load_sso_config
+    raise 'SSOの設定がありません。' unless config
 
     @uri = URI::HTTP.build(
       scheme: config[:usessl] ? 'https' : 'http',
@@ -86,13 +86,8 @@ class Sys::Admin::AccountController < Sys::Controller::Admin::Base
     )
 
     require 'net/http'
-    Net::HTTP.version_1_2
-    http = Net::HTTP.new(config[:host], config[:port])
-    if config[:usessl]
-      http.use_ssl = true
-      http.verify_mode = OpenSSL::SSL::VERIFY_NONE
-    end
-
+    http = Net::HTTP.new(@uri.host, @uri.port)
+    http.use_ssl = true if config[:usessl]
     http.start do |agent|
       response = agent.post(config[:path], {
         account: Core.user.account,
@@ -113,5 +108,12 @@ class Sys::Admin::AccountController < Sys::Controller::Admin::Base
       }.to_query
       return redirect_to @uri.to_s
     end
+  end
+
+  private
+
+  def load_sso_config
+    to = Joruri.config.sso_settings.keys.detect { |key| key == params[:to].to_sym } || :gw
+    Joruri.config.sso_settings[to]
   end
 end

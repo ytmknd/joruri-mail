@@ -1,10 +1,55 @@
 require 'net/imap'
 module Net
-  class IMAP
+  module IMAPFix
+    def select(mailbox)
+      ret = super
+      @selected_mailbox = mailbox
+      @examined_mailbox = nil
+      ret
+    end
+
+    def examine(mailbox)
+      ret = super
+      @selected_mailbox = nil
+      @examined_mailbox = mailbox
+      ret
+    end
+
+    def close
+      ret = super
+      @selected_mailbox = nil
+      @examined_mailbox = nil
+      ret
+    end
+
+    def selected?(mailbox)
+      @selected_mailbox == mailbox
+    end
+
+    def examined?(mailbox)
+      @examined_mailbox == mailbox
+    end
+
+    def opened?(mailbox)
+      selected?(mailbox) || examined?(mailbox)
+    end
+
     # CAPABILITY cache
+    def login(user, password)
+      ret = super
+      if (code = ret.data.code) && code.name == "CAPABILITY"
+        @capabilities = code.data.split(' ')
+      end
+      ret
+    end
+
     def capabilities
       @capabilities ||= capability
     end
+  end
+
+  class IMAP
+    prepend IMAPFix
 
     # LIST-STATUS [RFC5819]
     def list_status(refname, mailbox, status)
