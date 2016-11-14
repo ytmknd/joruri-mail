@@ -7,7 +7,7 @@ class Webmail::Admin::ServersController < Webmail::Controller::Admin::Base
         'NG TokenError'
       else
         if Joruri.config.application['webmail.check_servers_before_send'] == 2
-          ret = Webmail::Util::Server.check_status
+          ret = Webmail::Lib::Server.check_status
           ret[:imap] && ret[:smtp] ? 'OK' : 'NG'
         else
           'OK'
