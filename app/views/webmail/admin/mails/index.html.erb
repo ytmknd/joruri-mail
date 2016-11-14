@@ -164,11 +164,7 @@ $(function() {
       })
       .always(function() {
         loading.hide();
-        if (labels.children('span').length) {
-          labels.show();
-        } else {
-          labels.hide();
-        }
+        labels.show();
       });
     });
   });

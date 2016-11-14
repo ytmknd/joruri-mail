@@ -283,6 +283,18 @@
 
 <script type="text/javascript">
 //<![CDATA[
+var windowOpener = getWindowOpener();
+function getWindowOpener() {
+  try {
+    if (window.opener && window.opener.document) {
+      return window.opener;
+    } else {
+      return null;
+    }
+  } catch (e) {
+    return null;
+  }
+}
 function syncStarClass(uid, starClass) {
   var title = { starOn: 'スター', starOff: '' };
   var menuText = { starOn: 'スターをはずす', starOff: 'スターを付ける' };
@@ -297,10 +309,10 @@ function syncLabels(uid, html) {
 }
 $(function() {
   <% if controller.new_window? && @item.seen_flagged? %>
-  if (window.opener) {
-    window.opener.syncUnseenClass('<%=raw escape_javascript @mailbox.name %>', '<%= @item.uid %>');
+  if (windowOpener) {
+    windowOpener.syncUnseenClass('<%=raw escape_javascript @mailbox.name %>', '<%= @item.uid %>');
     <% if @item.starred? && @mailbox.flagged_box? %>
-      window.opener.syncUnseenClass('<%=raw escape_javascript @item.x_mailbox %>', '<%= @item.x_real_uid %>');
+      windowOpener.syncUnseenClass('<%=raw escape_javascript @item.x_mailbox %>', '<%= @item.x_real_uid %>');
     <% end %>
   }
   <% end %>
@@ -349,8 +361,8 @@ $(function() {
     })
     .done(function(data) {
         syncLabels(uid, data);
-        if (window.opener) {
-          window.opener.syncLabels(uid, data);
+        if (windowOpener) {
+          windowOpener.syncLabels(uid, data);
         }
     })
     .always(function() {
@@ -372,8 +384,8 @@ $(function() {
     })
     .done(function() {
       syncStarClass(uid, afterClass);
-      if (window.opener) {
-        window.opener.syncStarClass(uid, afterClass);
+      if (windowOpener) {
+        windowOpener.syncStarClass(uid, afterClass);
         <% if @mailbox.flagged_box? %>
           window.close();
         <% end %>
