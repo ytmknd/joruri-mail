@@ -16,7 +16,9 @@ class Sys::Admin::LdapSynchrosController < Sys::Controller::Admin::Base
 
   def show
     @item = Sys::LdapSynchroTask.find_by!(version: params[:id])
-    @items = @item.ldap_synchros.where(parent_id: 0, entry_type: 'group').order(:sort_no, :code)
+    @items = @item.ldap_synchros.where(parent_id: 0, entry_type: 'group')
+      .order(:sort_no, :code)
+      .preload_children_and_users
     _show @items
   end
 

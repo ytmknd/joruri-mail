@@ -6,13 +6,15 @@ class Sys::LdapSynchro < ApplicationRecord
 
   validates :version, :entry_type, :code, :name, presence: true
 
-  def children
-    return @_children if @_children
-    @_children = self.class.where(version: version, parent_id: id, entry_type: 'group').order(:sort_no, :code)
-  end
+  has_many :children, -> { where(entry_type: 'group').order(:sort_no, :code) },
+    class_name: self.name, foreign_key: :parent_id
+  has_many :users, -> { where(entry_type: 'user').order(:sort_no, :code) },
+    class_name: self.name, foreign_key: :parent_id
 
-  def users
-    return @_users if @_users
-    @_users = self.class.where(version: version, parent_id: id, entry_type: 'user').order(:sort_no, :code)
-  end
+  scope :preload_children_and_users, -> {
+    children_assoc = ->(depth = 3) {
+      { users: nil, children: depth > 0 ? children_assoc.call(depth-1) : nil }
+    }
+    preload(children_assoc.call)
+  }
 end

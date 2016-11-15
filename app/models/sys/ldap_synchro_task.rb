@@ -9,16 +9,12 @@ class Sys::LdapSynchroTask < ApplicationRecord
     primary_key: :target_tenant_code, foreign_key: :tenant_code, class_name: 'Sys::Group'
 
   has_many :ldap_synchros, primary_key: :version, foreign_key: :version, dependent: :delete_all
+  has_many :ldap_synchro_groups, -> { where(entry_type: 'group') },
+    class_name: 'Sys::LdapSynchro', primary_key: :version, foreign_key: :version
+  has_many :ldap_synchro_users, -> { where(entry_type: 'user') },
+    class_name: 'Sys::LdapSynchro', primary_key: :version, foreign_key: :version
 
   validates :version, uniqueness: true
-
-  def ldap_synchro_groups
-    ldap_synchros.where(entry_type: 'group')
-  end
-
-  def ldap_synchro_users
-    ldap_synchros.where(entry_type: 'user')
-  end
 
   def target_tenant_name
     if target_tenant_code.present?
