@@ -9,6 +9,7 @@ class Sys::Admin::UsersController < Sys::Controller::Admin::Base
   def index
     @items = Sys::User.search(params).order("LPAD(account, 15, '0')")
       .paginate(page: params[:page], per_page: params[:limit])
+      .merge(Sys::Group.preload_ancestors)
     _index @items
   end
 
