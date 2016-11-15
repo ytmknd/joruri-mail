@@ -232,9 +232,9 @@ class Webmail::Admin::MailsController < Webmail::Controller::Admin::Base
       mail = item.prepare_mail(request)
       mail.delivery_method(:smtp, Webmail::Mail.smtp_settings(Core.current_user))
       mail.deliver
-      Util::Syslog.info 'mail delivery succeeded', account: Core.current_user.account
+      Util::Syslog.info 'mail delivery succeeded.', account: Core.current_user.account
     rescue => e
-      Util::Syslog.info 'mail delivery failed', account: Core.current_user.account, e: e.to_s
+      Util::Syslog.info 'mail delivery failed.', account: Core.current_user.account, e: e.to_s
       flash.now[:error] = "メールの送信に失敗しました。（#{e}）"
       respond_to do |format|
         format.html { render :action => :new }

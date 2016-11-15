@@ -4,7 +4,7 @@ module Util::Syslog
       return unless syslog_enabled?
 
       log = message
-      log << ": #{options_to_string(options)}"  if options.present?
+      log << " #{options_to_string(options)}"  if options.present?
       Syslog.open('jorurimail') { |syslog| syslog.log(Syslog::LOG_INFO, log) }
     end
 

@@ -23,9 +23,9 @@ class Sys::Admin::AccountController < Sys::Controller::Admin::Base
       end
 
     if login_ok
-      Util::Syslog.info 'login succeeded', account: params[:account]
+      Util::Syslog.info 'login succeeded.', account: params[:account]
     else
-      Util::Syslog.info 'login failed', account: params[:account]
+      Util::Syslog.info 'login failed.', account: params[:account]
       flash.now[:notice] ||= "ユーザーＩＤ・パスワードを正しく入力してください"
       respond_to do |format|
         format.html { render }
