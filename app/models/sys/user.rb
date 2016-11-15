@@ -49,12 +49,6 @@ class Sys::User < Sys::ManageDatabase
     groups = Sys::Group.arel_table
     joins(:groups).where(groups[:tenant_code].in(tenant_code))
   }
-  scope :enabled_users_in_tenant, ->(tenant_code = nil) {
-    tenant_code ||= Core.user.groups.map(&:tenant_code).uniq
-    rels = in_tenant(tenant_code).state_enabled
-    rels = rels.where(ldap: 1) if Sys::Group.show_only_ldap_user?
-    rels
-  }
   scope :search, ->(params) {
     rel = all
     params.each do |n, vs|

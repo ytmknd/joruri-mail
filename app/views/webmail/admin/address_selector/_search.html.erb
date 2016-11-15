@@ -24,7 +24,7 @@ pri_search_field_options = [['名前', 's_name_or_kana'], ['メールアドレ�
         <div id="sysAddresses" class="addresses" style="display:none">
           <ul id="sysAddressesRoot">
           <%
-            groups = Sys::Group.enabled_roots_in_tenant.order(:sort_no, :tenant_code)
+            groups = Sys::Group.enabled_roots.order(:sort_no, :tenant_code)
             groups = groups.first.enabled_children if groups.size == 1
             counts = groups.enabled_children_counts
           %>

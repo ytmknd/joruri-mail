@@ -3,17 +3,19 @@ class Webmail::Admin::SysAddressesController < Webmail::Controller::Admin::Base
   include Webmail::Admin::Mobile::Address
   layout 'admin/webmail/base'
 
+  around_action :set_ldap_scope
+
   def pre_dispatch
     return redirect_to action: :index if params[:reset]
     @limit = 200
   end
 
   def index
-    @roots = Sys::Group.enabled_roots_in_tenant.order(:sort_no, :tenant_code)
+    @roots = Sys::Group.enabled_roots.order(:sort_no, :tenant_code)
     @groups = @roots.size == 1 ? @roots.first.enabled_children : @roots
 
     if params[:search]
-      @users = Sys::User.enabled_users_in_tenant.with_valid_email.search(params)
+      @users = Sys::User.state_enabled.with_valid_email.search(params)
         .order(Webmail::Setting.sys_address_orders)
         .paginate(page: 1, per_page: @limit)
       @gid = params[:gid]
@@ -23,7 +25,7 @@ class Webmail::Admin::SysAddressesController < Webmail::Controller::Admin::Base
   end
 
   def show
-    @item = Sys::User.enabled_users_in_tenant.with_valid_email.find(params[:id])
+    @item = Sys::User.state_enabled.with_valid_email.find(params[:id])
     render layout: false if request.xhr?
   end
 
@@ -69,7 +71,7 @@ class Webmail::Admin::SysAddressesController < Webmail::Controller::Admin::Base
     else
       return []
     end
-    Sys::User.enabled_users_in_tenant.with_valid_email.where(id: ids)
+    Sys::User.state_enabled.with_valid_email.where(id: ids)
       .order(:email).map(&:email_format)
   end
 end

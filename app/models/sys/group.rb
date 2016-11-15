@@ -18,8 +18,6 @@ class Sys::Group < Sys::ManageDatabase
   has_many :users_groups, foreign_key: :group_id
   has_many :users, -> { order('sys_users.email, sys_users.account') },
     through: :users_groups, source: :user
-  has_many :ldap_users, -> { where(ldap: 1, state: 'enabled').order('sys_users.email, sys_users.account') },
-    through: :users_groups, source: :user
   has_many :enabled_users, -> { where(state: 'enabled').order('sys_users.email, sys_users.account') },
     through: :users_groups, source: :user
 
@@ -33,20 +31,16 @@ class Sys::Group < Sys::ManageDatabase
   validates :tenant_code, uniqueness: true, if: :root?
 
   scope :in_tenant, ->(tenant_code) { where(tenant_code: tenant_code) }
-  scope :enabled_roots_in_tenant, ->(tenant_code = nil) {
-    tenant_code ||= Core.user.groups.map(&:tenant_code).uniq
-    in_tenant(tenant_code).where(level_no: 1, state: 'enabled')
+  scope :enabled_roots, ->(tenant_code = nil) {
+    where(level_no: 1, state: 'enabled')
   }
 
   scope :enabled_children_counts, -> {
     joins(:enabled_children).group(:id).count('enabled_children_sys_groups.id')
   }
   scope :enabled_users_counts, -> {
-    if show_only_ldap_user?
-      joins(:ldap_users).group(:id).count('sys_users.id')
-    else
-      joins(:enabled_users).group(:id).count('sys_users.id')
-    end
+    users = Sys::User.arel_table
+    joins(:users).where(users[:state].eq('enabled')).group(:id).count('sys_users.id')
   }
 
   def ou_name
@@ -78,11 +72,7 @@ class Sys::Group < Sys::ManageDatabase
   end
 
   def users_having_email
-    if self.class.show_only_ldap_user?
-      ldap_users.with_valid_email
-    else
-      enabled_users.with_valid_email
-    end
+    enabled_users.with_valid_email
   end
 
   def creatable?
@@ -149,10 +139,6 @@ class Sys::Group < Sys::ManageDatabase
   end
 
   class << self
-    def show_only_ldap_user?
-      Joruri.config.application['webmail.show_only_ldap_user'] == 1
-    end
-
     def select_options
       self.roots.select(:id, :name, :level_no)
         .map {|g| g.descendants {|rel| rel.select(:id, :name, :level_no) } }
