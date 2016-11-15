@@ -140,7 +140,7 @@ class Sys::Group < Sys::ManageDatabase
 
   class << self
     def select_options
-      self.roots.select(:id, :name, :level_no).preload_children
+      self.roots.select(:id, :name, :level_no).preload_descendants
         .flat_map(&:descendants)
         .map { |g| [g.nested_name, g.id] }
     end

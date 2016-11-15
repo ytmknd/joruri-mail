@@ -21,7 +21,7 @@ class Webmail::Admin::AddressGroupsController < Webmail::Controller::Admin::Base
     @items = Webmail::Address.where(user_id: Core.user.id).order(Webmail::Setting.address_orders)
     @s_items = @items.search(params) if params[:search]
 
-    @root_groups = Webmail::AddressGroup.user_root_groups.preload_children
+    @root_groups = Webmail::AddressGroup.user_root_groups.preload_descendants
 
     _index @s_items || @items
   end
