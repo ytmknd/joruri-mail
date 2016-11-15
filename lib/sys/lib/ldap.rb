@@ -11,6 +11,10 @@ class Sys::Lib::Ldap
     config[:charset] ||= "utf-8"
   end
 
+  def bases
+    config[:base].to_s.split(',')
+  end
+
   def connection
     if config[:host].present? && config[:port].present?
       @connection ||= self.class.connect(config)
@@ -84,7 +88,5 @@ class Sys::Lib::Ldap
     end
     
     return entries
-  rescue
-    return []
   end
 end

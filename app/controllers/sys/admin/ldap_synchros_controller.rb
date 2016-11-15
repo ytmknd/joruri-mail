@@ -37,7 +37,13 @@ class Sys::Admin::LdapSynchrosController < Sys::Controller::Admin::Base
     end
 
     if error.nil?
-      flash[:notice] = "中間データを作成しました。"
+      results = @item.fetch_results
+      messages = ["中間データを作成しました。"]
+      messages << "グループ #{results[:group]}件"
+      messages << "-- 失敗 #{results[:gerr]}件" if results[:gerr] > 0
+      messages << "ユーザー #{results[:user]}件"
+      messages << "-- 失敗 #{results[:uerr]}件" if results[:uerr] > 0
+      flash[:notice] = messages.join('<br />').html_safe
       redirect_to url_for(action: :show, id: @item.version)
     else
       flash[:notice] = "中間データの作成に失敗しました。［ #{error} ］"
@@ -61,7 +67,17 @@ class Sys::Admin::LdapSynchrosController < Sys::Controller::Admin::Base
     end
 
     if error.nil?
-      flash[:notice] = "同期処理が完了しました。"
+      results = @item.synchro_results
+      messages = ["同期処理が完了しました。"]
+      messages << "グループ"
+      messages << "-- 更新 #{results[:group]}件"
+      messages << "-- 削除 #{results[:gdel]}件" if results[:gdel] > 0
+      messages << "-- 失敗 #{results[:gerr]}件" if results[:gerr] > 0
+      messages << "ユーザー"
+      messages << "-- 更新 #{results[:user]}件"
+      messages << "-- 削除 #{results[:udel]}件" if results[:udel] > 0
+      messages << "-- 失敗 #{results[:uerr]}件" if results[:uerr] > 0
+      flash[:notice] = messages.join('<br />').html_safe
     else
       flash[:notice] = "同期処理に失敗しました。［ #{error} ］"
     end

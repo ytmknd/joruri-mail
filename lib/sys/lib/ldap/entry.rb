@@ -75,7 +75,7 @@ class Sys::Lib::Ldap::Entry
   ## Returns the parent group.
   def parent
     dns = dn.split(',')
-    return nil if dns.size == 1
+    return nil if dns.size == 1 || dns.size == @connection.bases.size
 
     search([dns[1]],
       base: dns[1..-1].join(','),

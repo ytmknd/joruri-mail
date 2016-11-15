@@ -31,11 +31,16 @@ class Sys::LdapSynchroTask < ApplicationRecord
   def create_synchro
     @fetch_results = { group: 0, gerr: 0, user: 0, uerr: 0 }
 
-    dcs = Core.ldap.dc.children || [Core.ldap.dc.root].compact
-    dcs.each do |dc|
-      next if target_tenant_code.present? && target_tenant_code != dc.tenant_code
-      create_synchros(dc.tenant_code, dc)
+    transaction do
+      dcs = Core.ldap.dc.children || [Core.ldap.dc.root].compact
+      dcs.each do |dc|
+        next if target_tenant_code.present? && target_tenant_code != dc.tenant_code
+        create_synchros(dc.tenant_code, dc)
+      end
     end
+
+    @fetch_results[:group] = ldap_synchro_groups.size
+    @fetch_results[:user] = ldap_synchro_users.size
 
     self.fetch_log = self.class.make_fetch_log(@fetch_results)
     self.save
@@ -45,12 +50,10 @@ class Sys::LdapSynchroTask < ApplicationRecord
   def synchronize
     @synchro_results = { group: 0, gerr: 0, user: 0, uerr: 0, udel: 0, gdel: 0, uskip: 0, gskip: 0 }
 
-    transaction do
-      if target_tenant_code.present?
-        synchronize_for_tenant(target_tenant_code)
-      else
-        synchronize_for_all
-      end
+    if target_tenant_code.present?
+      synchronize_for_tenant(target_tenant_code)
+    else
+      synchronize_for_all
     end
 
     self.synchro_log = self.class.make_synchro_log(@synchro_results)
@@ -110,27 +113,27 @@ class Sys::LdapSynchroTask < ApplicationRecord
   end
 
   def synchronize_for_all
-    Sys::Group.update_all(ldap_version: nil)
-    Sys::User.update_all(ldap_version: nil)
-
-    items = ldap_synchro_groups.where(parent_id: 0).order(:sort_no, :code)
-    items.each { |group| do_synchro(group) }
-
-    @synchro_results[:udel] = Sys::User.where(ldap: 1, ldap_version: nil).destroy_all.size
-    @synchro_results[:gdel] = Sys::Group.where(ldap: 1, ldap_version: nil).destroy_all.size
+    tenant_codes = ldap_synchro_groups.where(parent_id: 0).pluck(:tenant_code)
+    tenant_codes += Sys::Group.where(ldap: 1, parent_id: 0).pluck(:tenant_code)
+    tenant_codes.uniq.sort.each do |tenant_code|
+      synchronize_for_tenant(tenant_code)
+    end
   end
 
   def synchronize_for_tenant(tenant_code)
-    gids = Sys::Group.in_tenant(tenant_code).pluck(:id)
     uids = Sys::User.in_tenant(tenant_code).pluck(:id)
-    Sys::Group.where(id: gids).update_all(ldap_version: nil)
-    Sys::User.where(id: uids).update_all(ldap_version: nil)
+    gids = Sys::Group.in_tenant(tenant_code).pluck(:id)
 
-    items = ldap_synchro_groups.where(parent_id: 0).order(:sort_no, :code)
-    items.each { |group| do_synchro(group) }
+    transaction do
+      Sys::User.where(id: uids).update_all(ldap_version: nil)
+      Sys::Group.where(id: gids).update_all(ldap_version: nil)
 
-    @synchro_results[:udel] = Sys::User.where(id: uids, ldap: 1, ldap_version: nil).destroy_all.size
-    @synchro_results[:gdel] = Sys::Group.where(id: gids, ldap: 1, ldap_version: nil).destroy_all.size
+      items = ldap_synchro_groups.where(tenant_code: tenant_code, parent_id: 0).order(:sort_no, :code)
+      items.each { |group| do_synchro(group) }
+
+      @synchro_results[:udel] += Sys::User.where(id: uids, ldap: 1, ldap_version: nil).destroy_all.size
+      @synchro_results[:gdel] += Sys::Group.where(id: gids, ldap: 1, ldap_version: nil).destroy_all.size
+    end
   end
 
   def do_synchro(group, parent = nil)
@@ -200,14 +203,15 @@ class Sys::LdapSynchroTask < ApplicationRecord
       Core.ldap.bind_as_master
 
       task = Sys::LdapSynchroTask.new(version: Time.now.to_i)
-      unless task.save
+      unless task.valid?
         task.fetch_log = 'ERROR: LDAP同期タスクの作成に失敗しました。'
         return task
       end
 
       task.create_synchro
 
-      if task.fetch_results[:group] == 0 || task.fetch_results[:user] == 0
+      if task.fetch_results[:group] == 0 || task.fetch_results[:user] == 0 ||
+         task.fetch_results[:gerr] != 0 || task.fetch_results[:uerr] != 0
         task.fetch_log = "ERROR: LDAP検索に失敗しました。 #{task.fetch_log}"
         task.save
         return task
