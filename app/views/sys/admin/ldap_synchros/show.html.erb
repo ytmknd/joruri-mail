@@ -10,6 +10,10 @@
 
 <table class="show">
   <tr>
+    <th><%= @item.class.human_attribute_name :version %></th>
+    <td><%= @item.version %></td>
+  </tr>
+  <tr>
     <th><%= @item.class.human_attribute_name :target_tenant_code %></th>
     <td><%= @item.target_tenant_name %></td>
   </tr>

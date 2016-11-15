@@ -68,6 +68,7 @@ ja:
         in_group_id: グループ
         role_name: ロール権限
       sys/ldap_synchro_task:
+        version: バージョン
         target_tenant_code: 対象テナント
         fetch_log: 中間データ作成ログ
         synchro_log: 同期ログ
