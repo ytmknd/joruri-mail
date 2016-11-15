@@ -11,7 +11,7 @@
   <% else %>
     <tr>
       <th><%= @item.class.human_attribute_name :parent_id %></th>
-      <td><%= f.select :parent_id, @item.root? ? [['', 0]] : Sys::Group.select_options_except(@item) %></td>
+      <td><%= f.select :parent_id, @item.root? ? [['', 0]] : Sys::Group.select_options_except(@item, only_tenant_groups: true) %></td>
     </tr>
   <% end %>
   <tr>

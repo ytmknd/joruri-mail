@@ -140,15 +140,17 @@ class Sys::Group < Sys::ManageDatabase
 
   class << self
     def select_options
-      self.roots.select(:id, :name, :level_no)
-        .map {|g| g.descendants {|rel| rel.select(:id, :name, :level_no) } }
-        .flatten.map {|g| [g.nested_name, g.id] }
+      self.roots.select(:id, :name, :level_no).preload_children
+        .flat_map(&:descendants)
+        .map { |g| [g.nested_name, g.id] }
     end
 
-    def select_options_except(group)
-      self.roots.select(:id, :name, :level_no)
-        .map {|g| g.descendants {|rel| rel.select(:id, :name, :level_no).where.not(id: group.id) } }
-        .flatten.map {|g| [g.nested_name, g.id] }
+    def select_options_except(group, only_tenant_groups: true)
+      groups = self.roots
+      groups = groups.where(tenant_code: group.tenant_code) if only_tenant_groups
+      groups.select(:id, :name, :level_no)
+        .flat_map { |g| g.descendants { |rel| rel.select(:id, :name, :level_no).where.not(id: group.id) } }
+        .map { |g| [g.nested_name, g.id] }
     end
   end
 end

@@ -5,6 +5,11 @@ module Sys::Model::Tree
     belongs_to :parent, class_name: name
     has_many :children, class_name: name, foreign_key: :parent_id, dependent: :destroy
     scope :roots, -> { where(parent_id: [0, nil]) }
+    scope :preload_children, -> {
+      assocs = {}
+      (1..3).inject(assocs) { |assoc, _| assoc[:children] = { children: {} } }
+      preload(assocs)
+    }
   end
 
   def ancestors(items = [])

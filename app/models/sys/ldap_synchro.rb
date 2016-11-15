@@ -12,9 +12,8 @@ class Sys::LdapSynchro < ApplicationRecord
     class_name: self.name, foreign_key: :parent_id
 
   scope :preload_children_and_users, -> {
-    children_assoc = ->(depth = 3) {
-      { users: nil, children: depth > 0 ? children_assoc.call(depth-1) : nil }
-    }
-    preload(children_assoc.call)
+    assocs = { users: nil }
+    (1..3).inject(assocs) { |assoc, _| assoc[:children] = { users: nil, children: {} } }
+    preload(assocs)
   }
 end

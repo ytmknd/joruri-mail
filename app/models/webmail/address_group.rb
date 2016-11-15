@@ -16,9 +16,6 @@ class Webmail::AddressGroup < ApplicationRecord
   scope :user_root_groups, -> {
     where(parent_id: 0, level_no: 1, user_id: Core.user.id).order(:name, :id)
   }
-  scope :preload_children, ->(depth = 3) {
-    (depth -= 1) <= 0 ? all : preload(children: :children).preload_children(depth)
-  }
 
   scope :children_counts, -> {
     joins(:children).group(:id).count('children_webmail_address_groups.id')
