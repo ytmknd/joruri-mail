@@ -7,7 +7,8 @@ class Sys::User < Sys::ManageDatabase
   belongs_to_active_hash :status, foreign_key: :state, class_name: 'Sys::Base::Status'
   has_many :group_rels, foreign_key: :user_id,
     class_name: 'Sys::UsersGroup', primary_key: :id
-  has_many :users_groups, foreign_key: :user_id
+
+  has_many :users_groups, foreign_key: :user_id, dependent: :destroy
   has_many :groups, through: :users_groups, source: :group
 
   has_many :logins, -> { order(id: :desc) },
