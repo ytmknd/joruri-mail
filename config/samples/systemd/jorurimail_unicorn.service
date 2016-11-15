@@ -1,0 +1,17 @@
+[Unit]
+Description=unicorn for Joruri Mail
+After=mysqld.service
+
+[Service]
+Type=simple
+User=joruri
+WorkingDirectory=/var/share/joruri-mail/
+Environment=RAILS_ENV=production
+SyslogIdentifier=jorurimail_unicorn
+PIDFile=/var/share/jorurimail/tmp/pids/unicorn.pid
+ExecStart=/usr/local/rbenv/shims/bundle exec unicorn_rails -c config/unicorn.rb -E production
+ExecStop=/usr/bin/kill -QUIT $MAINPID
+ExecReload=/bin/kill -USR2 $MAINPID
+
+[Install]
+WantedBy=multi-user.target
