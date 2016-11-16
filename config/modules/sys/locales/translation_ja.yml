@@ -92,6 +92,17 @@ ja:
         title: 表示ファイル名
 
   enumerize:
+    sys/group:
+      ldap:
+        '0': 非同期
+        '1': 同期
+    sys/user:
+      ldap:
+        '0': 非同期
+        '1': 同期
+      mobile_access:
+        '0': 拒否
+        '1': 許可
     sys/tenant:
       default_pass_limit:
         enabled: 有効

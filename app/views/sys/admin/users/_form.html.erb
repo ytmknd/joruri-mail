@@ -42,13 +42,13 @@
 <table class="show">
   <tr>
     <th><%= @item.class.human_attribute_name :ldap %></th>
-    <td><%= f.collection_radio_buttons :ldap, @item.ldap_states, :last, :first, class: 'status' %></td>
+    <td><%= f.collection_radio_buttons :ldap, @item.class.ldap.options, :last, :first, class: 'status' %></td>
   </tr><tr>
     <th><%= @item.class.human_attribute_name :password %><br />※非同期時に使用</th>
     <td><%= f.text_field :password, class: 'id' %></td>
   </tr><tr>
     <th><%= @item.class.human_attribute_name :mobile_access %></th>
-    <td><%= f.select :mobile_access, @item.mobile_access_states %></td>
+    <td><%= f.collection_radio_buttons :mobile_access, @item.class.mobile_access.options, :last, :first %></td>
   </tr><tr>
     <th><%= @item.class.human_attribute_name :mobile_password %><br />※携帯端末ログイン時に使用</th>
     <td><%= f.text_field :mobile_password, class: 'mobilePassword' %></td>

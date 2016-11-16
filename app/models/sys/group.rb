@@ -43,6 +43,8 @@ class Sys::Group < Sys::ManageDatabase
     joins(:users).where(users[:state].eq('enabled')).group(:id).count('sys_users.id')
   }
 
+  enumerize :ldap, in: [1, 0]
+
   def ou_name
     "#{code}#{name}"
   end
@@ -89,19 +91,6 @@ class Sys::Group < Sys::ManageDatabase
 
   def deletable?
     Core.user.has_auth?(:manager)
-  end
-
-  def ldap_states
-    [['同期',1],['非同期',0]]
-  end
-
-  def web_states
-    [['公開','public'],['非公開','closed']]
-  end
-
-  def ldap_label
-    ldap_states.each {|a| return a[0] if a[1] == ldap }
-    return nil
   end
 
   def ancestors_and_children_options(with_root: true)

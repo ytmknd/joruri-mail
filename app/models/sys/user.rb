@@ -84,6 +84,9 @@ class Sys::User < Sys::ManageDatabase
     rel
   }
 
+  enumerize :ldap, in: [1, 0]
+  enumerize :mobile_access, in: [1, 0]
+
   def tenant
     groups.first.try!(:tenant)
   end
@@ -111,24 +114,6 @@ class Sys::User < Sys::ManageDatabase
 
   def auth_name
     authes.each { |a| return a[0] if a[1] == auth_no }
-    return nil
-  end
-
-  def ldap_states
-    [['同期',1],['非同期',0]]
-  end
-
-  def ldap_label
-    ldap_states.each { |a| return a[0] if a[1] == ldap }
-    return nil
-  end
-
-  def mobile_access_states
-    [['不許可',0],['許可',1]]
-  end
-
-  def mobile_access_label
-    mobile_access_states.each { |a| return a[0] if a[1] == mobile_access }
     return nil
   end
 

@@ -28,7 +28,7 @@
     <td><%= f.collection_radio_buttons :state, @item.states, :last, :first, class: 'status' %></td>
   </tr><tr>
     <th><%= @item.class.human_attribute_name :ldap %></th>
-    <td><%= f.collection_radio_buttons :ldap, @item.ldap_states, :last, :first, class: 'status' %></td>
+    <td><%= f.collection_radio_buttons :ldap, @item.class.ldap.options, :last, :first, class: 'status' %></td>
   </tr><tr>
     <th><%= @item.class.human_attribute_name :sort_no %></th>
     <td><%= f.text_field :sort_no, class: 'number' %></td>
