@@ -19,7 +19,7 @@
   </div>
 </div>
 
-<% if Joruri.config.sso_settings[:gw] %>
+<% if Joruri.config.sso_settings.dig(:gw, :host).present? %>
 <div class="linkMenu">
   <div class="title">リンク</div>
   <div class="menus">
