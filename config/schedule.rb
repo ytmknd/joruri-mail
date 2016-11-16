@@ -26,9 +26,9 @@ set :output, 'log/cron.log'
 #  rake 'unicorn:start'
 #end
 
-every 10.minutes do
-  rake 'delayed_job:monitor'
-end
+#every 10.minutes do
+#  rake 'delayed_job:monitor'
+#end
 
 every 1.day, at: '3:00 am' do
   rake 'sys:cleanup'
