@@ -126,7 +126,7 @@ module Webmail::Mailboxes::Imap
       needs = REQUIRED_SPECIAL_USES - boxes.map { |box| box.special_use }
       if needs.size > 0
         needs.each { |need| imap.create(SPECIAL_USE_MAILBOX_MAP[need]) }
-        imap_sorted_list_and_status(targets)
+        return imap_sorted_list_and_status(targets)
       end
 
       return sort_list(boxes), statuses
