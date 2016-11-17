@@ -5,10 +5,10 @@ After=mysqld.service
 [Service]
 Type=forking
 User=joruri
-WorkingDirectory=/var/share/joruri-mail/
+WorkingDirectory=/var/share/jorurimail/
 Environment=RAILS_ENV=production
 SyslogIdentifier=jorurimail_delayed_job
-PIDFile=/var/share/joruri-mail/tmp/pids/delayed_job_monitor.pid
+PIDFile=/var/share/jorurimail/tmp/pids/delayed_job_monitor.pid
 ExecStart=/usr/local/rbenv/shims/bundle exec rake delayed_job:start
 
 [Install]
