@@ -56,6 +56,7 @@ gem 'dynamic_form', '~> 1.1.4'
 
 gem 'bower-rails', '~> 0.11.0'
 gem 'whenever', '~> 0.9.7', require: false
+gem 'get_process_mem', '~> 0.2.1', require: false
 
 group :development, :test do
   # Call 'byebug' anywhere in the code to stop execution and get a debugger console

@@ -37,10 +37,14 @@ namespace :delayed_job do
   task monitor: :environment do
     pids = delayed_job_pids
     next if pids.blank?
-    procs = `ps -p #{pids.join(',')} -o pid,rss -h`.split("\n").map(&:split)
-    mems = procs.map { |p| p[1].to_i }
-    if mems.any? { |mem| mem > 1024*1024 } && !Delayed::Job.where.not(locked_at: nil).exists?
-      Rake::Task['delayed_job:restart'].invoke
+
+    require 'get_process_mem'
+    pids.each do |pid|
+      mem = GetProcessMem.new(pid)
+      if mem.mb >= 512 && !Delayed::Job.where.not(locked_at: nil).exists?
+        Rake::Task['delayed_job:restart'].invoke
+        break
+      end
     end
   end
 end
