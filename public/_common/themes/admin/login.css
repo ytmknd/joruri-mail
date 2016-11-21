@@ -97,13 +97,12 @@ h1 {
   background-repeat: no-repeat;
 }
 .submitters .department {
-    height: 30px;
-    margin-top: 20px;
-    padding-left: 40px;
-    background-image: url("/_common/themes/admin/images/login-tokushimakenlogo_.gif");
-    background-position: 45% 50%;
-    background-repeat: no-repeat;
-    line-height: 2;
+  height: 30px;
+  margin-top: 20px;
+  background-image: url("/_common/themes/admin/images/login-tokushimakenlogo_.gif");
+  background-position: 45% 50%;
+  background-repeat: no-repeat;
+  line-height: 2;
 }
 .submitters .changePass {
   margin-top: 10px;
