@@ -2,7 +2,7 @@
 <div class="tree">
   <% if @parent.level_no > 0 %>
   <p>
-    <%= link_to :show, sys_group_url(@parent.parent_id, @parent) %>
+    <%= link_to :show, sys_group_path(@parent.parent_id, @parent) %>
     <%= @parent.name %>
   </p>
   <% end %>
