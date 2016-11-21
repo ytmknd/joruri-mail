@@ -45,6 +45,11 @@ Joruri::Application.routes.draw do
             post :synchronize
           end
         end
+        resources :tests do
+          collection do
+            get :timeout
+          end
+        end
       end
     end
   end
