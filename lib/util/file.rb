@@ -60,6 +60,7 @@ class Util::File
         if uniques.include?(name)
           for n in 1..255
             seqname = "#{File.basename(name, ".*")}_#{n}#{File.extname(name)}"
+            seqname = seqname.encode(name.encoding) if name.encoding != seqname.encoding
             unless uniques.include?(seqname)
               name = seqname
               break
