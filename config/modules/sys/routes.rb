@@ -6,7 +6,8 @@ Joruri::Application.routes.draw do
         resources :maintenances
         resources :messages
         resources :languages
-        resources :ldap_groups, path: ':parent/ldap_groups'
+        resources :ldap_groups, path: ':parent/ldap_groups', only: :index,
+          constraints: { parent: /[^\/]+/ }
         resources :ldap_synchros do
           member do
             get :synchronize
