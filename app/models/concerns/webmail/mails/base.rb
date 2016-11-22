@@ -377,12 +377,14 @@ module Webmail::Mails::Base
   def collect_addrs(field)
     return [] unless field
 
-    if field.errors.blank?
-      field.address_list.addresses.map do |addr|
-        addr.name ? "#{Email.quote_phrase(addr.name)} <#{addr.address}>" : addr.address
+    addresses =
+      if field.errors.blank?
+        field.address_list.addresses
+      else
+        Email.parse_list(NKF.nkf('-w', field.value))
       end
-    else
-      Email.parse_list(NKF.nkf('-w', field.value))
+    addresses.map do |addr|
+      addr.name ? "#{Email.quote_phrase(addr.name)} <#{addr.address}>" : addr.address
     end
   end
 
