@@ -42,9 +42,6 @@
 /* =========================================================
    AddressContent
 ========================================================= */
-#addressContent .actionMenu .create {
-  width: 58px;
-}
 #addressContent .actionMenu .leftMenu {
   float: left;
 }
