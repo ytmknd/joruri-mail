@@ -47,7 +47,7 @@ class Sys::Lib::Ldap::Group < Sys::Lib::Ldap::Entry
   end
 
   def sort_no
-    get(:description)
+    get(:destinationIndicator)
   end
 
   ## Return the group user for group's attributes.
