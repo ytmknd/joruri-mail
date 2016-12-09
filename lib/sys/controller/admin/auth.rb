@@ -53,10 +53,16 @@ protected
   end
 
   def valid_login_access?(user)
-    return true if !request.mobile? && !request.smart_phone?
-    if user.tenant && user.tenant.mobile_access == 0
-      flash.now[:notice] = "携帯端末からのアクセスは許可されていません。"
-      return false
+    if user.tenant
+      case user.tenant.login_control.to_i
+      when 1
+        if request.mobile? || request.smart_phone?
+          flash.now[:notice] = "携帯端末からのアクセスは許可されていません。"
+          return false
+        end
+      when 2
+        return false
+      end
     end
     true
   end

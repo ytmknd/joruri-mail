@@ -11,7 +11,7 @@ class Sys::Tenant < ApplicationRecord
   validates :name, presence: true
 
   enumerize :default_pass_limit, in: [:enabled, :disabled]
-  enumerize :mobile_access, in: [1, 0]
+  enumerize :login_control, in: [0, 1, 2]
 
   def users
     Sys::User.in_tenant(code)

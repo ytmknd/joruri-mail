@@ -19,7 +19,7 @@ class Sys::Admin::TenantsController < Sys::Controller::Admin::Base
   def new
     @item = Sys::Tenant.new(
       default_pass_limit: 'disabled',
-      mobile_access: 0
+      login_control: 0
     )
   end
 
@@ -43,7 +43,7 @@ class Sys::Admin::TenantsController < Sys::Controller::Admin::Base
 
   def item_params
     params.require(:item).permit(
-      :code, :name, :mail_domain, :default_pass_limit, :default_pass_prefix, :mobile_access
+      :code, :name, :mail_domain, :default_pass_limit, :default_pass_prefix, :login_control
     )
   end
 end

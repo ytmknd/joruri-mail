@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20161110044632) do
+ActiveRecord::Schema.define(version: 20161209073623) do
 
   create_table "delayed_jobs", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
     t.integer  "priority",                 default: 0, null: false
@@ -168,7 +168,7 @@ ActiveRecord::Schema.define(version: 20161110044632) do
     t.string   "mail_domain"
     t.string   "default_pass_limit"
     t.string   "default_pass_prefix"
-    t.integer  "mobile_access"
+    t.integer  "login_control"
     t.datetime "created_at",          null: false
     t.datetime "updated_at",          null: false
     t.index ["code"], name: "index_sys_tenants_on_code", using: :btree

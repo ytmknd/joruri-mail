@@ -20,7 +20,7 @@ ja:
         mail_domain: メールドメイン
         default_pass_limit: 初期パスワードログイン制限
         default_pass_prefix: 初期パスワード接頭辞
-        mobile_access: モバイルアクセス
+        login_control: ログイン制御
         created_at: 作成日時
         updated_at: 更新日時
       sys/group:
@@ -107,6 +107,7 @@ ja:
       default_pass_limit:
         enabled: 有効
         disabled: 無効
-      mobile_access:
-        '0': 拒否
-        '1': 許可
+      login_control:
+        '0': 許可
+        '1': モバイル端末のみ拒否
+        '2': 拒否

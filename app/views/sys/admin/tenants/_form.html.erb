@@ -17,8 +17,8 @@
     <th><%= @item.class.human_attribute_name :default_pass_prefix %></th>
     <td><%= f.text_field :default_pass_prefix %></td>
   </tr><tr>
-    <th><%= @item.class.human_attribute_name :mobile_access %></th>
-    <td><%= f.collection_radio_buttons :mobile_access, @item.class.mobile_access.options, :last, :first %></td>
+    <th><%= @item.class.human_attribute_name :login_control %></th>
+    <td><%= f.collection_radio_buttons :login_control, @item.class.login_control.options, :last, :first %></td>
   </tr>
 </table>
 
