@@ -53,6 +53,7 @@ gem 'delayed_job_active_record', '~> 4.1.1'
 gem 'daemons', '~> 1.2.4'
 
 gem 'dynamic_form', '~> 1.1.4'
+gem 'rails_autolink', '~> 1.1.6'
 
 gem 'bower-rails', '~> 0.11.0'
 gem 'whenever', '~> 0.9.7', require: false
