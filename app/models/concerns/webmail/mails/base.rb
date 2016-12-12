@@ -507,13 +507,14 @@ module Webmail::Mails::Base
         end
       end
     ))
-    return Nokogiri::HTML5(html).xpath('//body').inner_html, sanitize_image
+
+    html_body = Nokogiri::HTML5(html).xpath('//body').inner_html
+    html_body = CGI.unescapeHTML(html_body)
+    return html_body, sanitize_image
   end
 
   def convert_html_to_text(html)
-    text = html.gsub(/[\r\n]/, "").gsub(/<br\s*\/?>/, "\n").gsub(/<[^>]*>/, "")
-    text = CGI.unescapeHTML(text).gsub(/&nbsp;/, " ")
-    text
+    Premailer.new(html, with_html_string: true, input_encoding: 'utf-8').to_plain_text
   end
 
   def extract_address_from_mail_list(from)
