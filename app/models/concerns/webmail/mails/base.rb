@@ -508,8 +508,9 @@ module Webmail::Mails::Base
       end
     ))
 
-    html_body = Nokogiri::HTML5(html).xpath('//body').inner_html
-    html_body = CGI.unescapeHTML(html_body)
+    html_body = Nokogiri::HTML(html).xpath('//body').inner_html
+    html_body.gsub!(Nokogiri::HTML('&nbsp;').text, '&nbsp;')
+
     return html_body, sanitize_image
   end
 
