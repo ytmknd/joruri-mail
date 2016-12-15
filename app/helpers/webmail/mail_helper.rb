@@ -72,27 +72,37 @@ module Webmail::MailHelper
     rtn
   end
 
-  def mail_text_wrap(text, col = 1, options = {})
+  def insert_wbr_tag(text, col)
+    text = text.gsub("\t", '  ')
+    if !request.mobile? && request.user_agent !~ /MSIE/
+      text = text_wrap(text, col, "\t")
+      text = html_escape(text).gsub("\t", '<wbr></wbr>')
+    end
+    text.gsub(' ', '&nbsp;')
+  end
+
+  def insert_wbr_tag_with_autolink(text, col)
     text = html_escape(text)
-    text = mail_text_autolink(text) if options[:auto_link]
+    text = mail_text_autolink(text)
 
     doc = Nokogiri::HTML.fragment(text)
     doc.xpath('descendant::text()').each do |node|
       next unless node.content
-
-      str = node.content.gsub("\t", "  ")
-      if !request.mobile? && request.user_agent !~ /MSIE/
-        str = text_wrap(str, col, "\t")
-        str = html_escape(str).gsub("\t", '<wbr></wbr>')
-      end
-      str = str.gsub(' ', '&nbsp;')
-      node.replace(str)
+      node.replace(insert_wbr_tag(node.content, col))
     end
     text = doc.to_s
 
     nbsp = Nokogiri::HTML('&nbsp;').text
-    text = text.gsub(nbsp, '&nbsp;')
+    text.gsub(nbsp, '&nbsp;')
+  end
 
+  def mail_text_wrap(text, col = 1, options = {})
+    text =
+      if options[:auto_link]
+        insert_wbr_tag_with_autolink(text, col)
+      else
+        insert_wbr_tag(text, col)
+      end
     br(text)
   end
 
