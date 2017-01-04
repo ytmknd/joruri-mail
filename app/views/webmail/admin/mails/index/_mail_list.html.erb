@@ -24,8 +24,8 @@ subject_wrap = @conf.mail_list_subject.blank? ? '' : 'autoWrap'
         <%= link_to "≪絞込解除", { s_from: nil, page: 1 }, class: 'cancelFromSearch' %>
       <% end %>
     </th>
-    <th class="date"><%= link_to_sort '送信日時', { sort_key: :date, default: :reverse }, class: 'sorter' %></th>
-    <th class="size"><%= link_to_sort 'サイズ', { sort_key: :size }, class: 'sorter' %></th>
+    <th class="date"><%= link_to_sort '送信日時', { sort_key: :date, default_key: true, default_order: :reverse }, class: 'sorter' %></th>
+    <th class="size"><%= link_to_sort 'サイズ', { sort_key: :size, default_order: :reverse }, class: 'sorter' %></th>
   </tr>
   <% items.each do |item| %>
     <%
