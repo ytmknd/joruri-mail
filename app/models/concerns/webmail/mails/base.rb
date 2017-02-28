@@ -13,6 +13,15 @@ module Webmail::Mails::Base
 
   def date(format = '%Y-%m-%d %H:%M', nullif = nil)
     @mail.date.blank? ? nullif : @mail.date.in_time_zone.strftime(format)
+  rescue Mail::Field::ParseError => e
+    date_from_raw_value(format)
+  end
+
+  def date_from_raw_value(format)
+    raw = @mail.header[:date].instance_variable_get('@raw_value')
+    raw.present? ? Time.parse(raw).strftime(format) : ''
+  rescue => e
+    ''
   end
 
   def from_addr
