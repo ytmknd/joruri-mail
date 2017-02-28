@@ -97,6 +97,7 @@ module Webmail::MailHelper
   end
 
   def mail_text_wrap(text, col = 1, options = {})
+    return '' if text.blank?
     text =
       if options[:auto_link]
         insert_wbr_tag_with_autolink(text, col)
