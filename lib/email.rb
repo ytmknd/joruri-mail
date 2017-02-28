@@ -1,7 +1,7 @@
 module Email
   class << self
     def parse(str, options = {})
-      str = NKF.nkf('-WwM', str).gsub(/\n/, '')
+      str = NKF.nkf('-WwM', str.to_s).gsub(/\n/, '')
       Mail::Address.new(str)
     rescue Mail::Field::ParseError => e
       if options[:raise_errors]
