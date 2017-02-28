@@ -24,8 +24,7 @@ module Webmail::Mails::Base
   end
 
   def friendly_from_addr
-    field = @mail.header[:from]
-    field ? collect_addrs(field).first : 'unknown'
+    collect_addrs(@mail.header[:from]).first || 'unknown'
   rescue => e
     "#read failed: #{e}" rescue ''
   end
