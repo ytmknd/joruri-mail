@@ -213,7 +213,12 @@ module Webmail::Mails::Base
     attached_files = lambda do |part, level|
       if part.attachment? && part.filename.present?
         seqno = @attachments.size
-        body = part.decoded
+        begin
+          body = part.decoded
+        rescue => e
+          write_error_log(e)
+          body = part.raw_source
+        end
         @attachments << Sys::Lib::Mail::Attachment.new(
           seqno:             seqno,
           content_type:      part.mime_type,
