@@ -13,15 +13,9 @@ module Webmail::Mails::Base
 
   def date(format = '%Y-%m-%d %H:%M', nullif = nil)
     @mail.date.blank? ? nullif : @mail.date.in_time_zone.strftime(format)
-  rescue Mail::Field::ParseError => e
-    date_from_raw_value(format)
-  end
-
-  def date_from_raw_value(format)
-    raw = @mail.header[:date].instance_variable_get('@raw_value')
-    raw.present? ? Time.parse(raw).strftime(format) : ''
   rescue => e
-    ''
+    write_error_log(e)
+    fallback_date_field(@mail.header[:date], format)
   end
 
   def from_addr
@@ -36,14 +30,14 @@ module Webmail::Mails::Base
     collect_addrs(@mail.header[:from]).first || 'unknown'
   rescue => e
     write_error_log(e)
-    "#read failed: #{e}" rescue ''
+    fallback_text_field(@mail.header[:from])
   end
 
   def friendly_to_addrs
     collect_addrs(@mail.header[:to])
   rescue => e
     write_error_log(e)
-    ["#read failed: #{e}"] rescue []
+    [fallback_text_field(@mail.header[:to])]
   end
 
   def simple_to_addr
@@ -55,21 +49,21 @@ module Webmail::Mails::Base
     collect_addrs(@mail.header[:cc])
   rescue => e
     write_error_log(e)
-    ["#read failed: #{e}"] rescue []
+    [fallback_text_field(@mail.header[:cc])]
   end
 
   def friendly_bcc_addrs
     collect_addrs(@mail.header[:bcc])
   rescue => e
     write_error_log(e)
-    ["#read failed: #{e}"] rescue []
+    [fallback_text_field(@mail.header[:bcc])]
   end
 
   def friendly_reply_to_addrs
     collect_addrs(@mail.header[:reply_to])
   rescue => e
     write_error_log(e)
-    ["#read failed: #{e}"] rescue []
+    [fallback_text_field(@mail.header[:reply_to])]
   end
 
   def friendly_reply_to_addrs_for_answer(all_members = nil)
@@ -83,7 +77,7 @@ module Webmail::Mails::Base
     addrs
   rescue => e
     write_error_log(e)
-    ["#read failed: #{e}"] rescue []
+    [fallback_text_field(@mail.header[:reply_to])]
   end
 
   def sender
@@ -91,7 +85,7 @@ module Webmail::Mails::Base
     field ? field.decoded : friendly_from_addr 
   rescue => e
     write_error_log(e)
-    "#read failed: #{e}" rescue ''
+    fallback_text_field(@mail.header[:sender])
   end
 
   def subject
@@ -104,7 +98,7 @@ module Webmail::Mails::Base
     end
   rescue => e
     write_error_log(e)
-    "#read failed: #{e}" rescue ''
+    fallback_text_field(@mail.header[:subject])
   end
 
   def subject_language
@@ -437,11 +431,11 @@ module Webmail::Mails::Base
     if part.charset.present?
       part.decoded.force_encoding('utf-8')
     else
-      decode(part.body.decoded, part.charset)
+      decode(part.body.decoded)
     end
   rescue => e
     write_error_log(e)
-    "# read failed: #{e}"
+    fallback_body_part(part)
   end
 
   def decode_html_part(part, options = {})
@@ -479,7 +473,7 @@ module Webmail::Mails::Base
     body
   rescue => e
     write_error_log(e)
-    "# read failed: #{e}"
+    fallback_body_part(part)
   end
 
   def secure_html_body(html, options = {})
@@ -556,6 +550,27 @@ module Webmail::Mails::Base
 
   def valid_encoding_regexps
     [/utf/, /unicode/, /^iso-2022-jp/, /^euc-jp$/, /^shift[-_]jis$/, /^x-sjis$/, /ascii/]
+  end
+
+  def fallback_date_field(field, format)
+    return '' unless field
+    raw_value = field.instance_variable_get('@raw_value')
+    raw_value.present? ? Time.parse(raw_value).strftime(format) : ''
+  rescue => e
+    ''
+  end
+
+  def fallback_text_field(field)
+    return '' unless field
+    decode(field.instance_variable_get('@raw_value'))
+  rescue => e
+    "#read failed: #{e.force_encoding('utf-8')}"
+  end
+
+  def fallback_body_part(part)
+    decode(part.raw_source)
+  rescue => e
+    "#read failed: #{e.force_encoding('utf-8')}"
   end
 
   def write_error_log(e)
