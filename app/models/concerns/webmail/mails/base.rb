@@ -35,12 +35,14 @@ module Webmail::Mails::Base
   def friendly_from_addr
     collect_addrs(@mail.header[:from]).first || 'unknown'
   rescue => e
+    write_error_log(e)
     "#read failed: #{e}" rescue ''
   end
 
   def friendly_to_addrs
     collect_addrs(@mail.header[:to])
   rescue => e
+    write_error_log(e)
     ["#read failed: #{e}"] rescue []
   end
 
@@ -52,18 +54,21 @@ module Webmail::Mails::Base
   def friendly_cc_addrs
     collect_addrs(@mail.header[:cc])
   rescue => e
+    write_error_log(e)
     ["#read failed: #{e}"] rescue []
   end
 
   def friendly_bcc_addrs
     collect_addrs(@mail.header[:bcc])
   rescue => e
+    write_error_log(e)
     ["#read failed: #{e}"] rescue []
   end
 
   def friendly_reply_to_addrs
     collect_addrs(@mail.header[:reply_to])
   rescue => e
+    write_error_log(e)
     ["#read failed: #{e}"] rescue []
   end
 
@@ -77,6 +82,7 @@ module Webmail::Mails::Base
     end
     addrs
   rescue => e
+    write_error_log(e)
     ["#read failed: #{e}"] rescue []
   end
 
@@ -84,6 +90,7 @@ module Webmail::Mails::Base
     field = @mail.header[:sender]
     field ? field.decoded : friendly_from_addr 
   rescue => e
+    write_error_log(e)
     "#read failed: #{e}" rescue ''
   end
 
@@ -96,6 +103,7 @@ module Webmail::Mails::Base
       field.decoded
     end
   rescue => e
+    write_error_log(e)
     "#read failed: #{e}" rescue ''
   end
 
@@ -122,7 +130,7 @@ module Webmail::Mails::Base
     dnt = @mail.header[:disposition_notification_to]
     dnt.try(:field).try(:addrs) || []
   rescue => e
-    error_log(e)
+    write_error_log(e)
     []
   end
 
@@ -432,6 +440,7 @@ module Webmail::Mails::Base
       decode(part.body.decoded, part.charset)
     end
   rescue => e
+    write_error_log(e)
     "# read failed: #{e}"
   end
 
@@ -469,6 +478,7 @@ module Webmail::Mails::Base
 
     body
   rescue => e
+    write_error_log(e)
     "# read failed: #{e}"
   end
 
@@ -546,5 +556,12 @@ module Webmail::Mails::Base
 
   def valid_encoding_regexps
     [/utf/, /unicode/, /^iso-2022-jp/, /^euc-jp$/, /^shift[-_]jis$/, /^x-sjis$/, /ascii/]
+  end
+
+  def write_error_log(e)
+    error_log e
+    error_log e.backtrace.join("\n")
+  rescue => e
+    ''
   end
 end
