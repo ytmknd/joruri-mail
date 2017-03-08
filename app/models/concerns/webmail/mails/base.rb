@@ -217,7 +217,7 @@ module Webmail::Mails::Base
           body = part.decoded
         rescue => e
           write_error_log(e)
-          body = part.raw_source
+          body = part.body.raw_source
         end
         @attachments << Sys::Lib::Mail::Attachment.new(
           seqno:             seqno,
@@ -573,7 +573,7 @@ module Webmail::Mails::Base
   end
 
   def fallback_body_part(part)
-    decode(part.raw_source)
+    decode(part.body.raw_source)
   rescue => e
     "#read failed: #{e.force_encoding('utf-8')}"
   end
