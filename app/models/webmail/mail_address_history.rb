@@ -39,11 +39,11 @@ class Webmail::MailAddressHistory < ApplicationRecord
     end
 
     def load_user_histories(count)
-      items = self.select('count(*) as count, address')
+      items = self.select('count(*) as count, created_at, address')
         .where(user_id: Core.current_user.id)
         .group(:address)
         .limit(count)
-        .order('count DESC, created_at DESC')
+        .order('count DESC, created_at DESC, address ASC')
 
       emails = items.map(&:address)
       address_map = load_address_map(emails)

@@ -8,9 +8,9 @@ class Sys::Group < Sys::ManageDatabase
   belongs_to_active_hash :web_status, foreign_key: :web_state, class_name: 'Sys::Base::Status'
 
   belongs_to :parent, foreign_key: :parent_id, class_name: 'Sys::Group'
-  has_many :children, -> { order(:sort_no) }, 
+  has_many :children, -> { order(:sort_no, :code) }, 
     foreign_key: :parent_id, class_name: 'Sys::Group', dependent: :destroy
-  has_many :enabled_children, -> { where(state: 'enabled').order(:sort_no) },
+  has_many :enabled_children, -> { where(state: 'enabled').order(:sort_no, :code) },
     foreign_key: :parent_id, class_name: 'Sys::Group', dependent: :destroy
 
   has_many :users_groups, foreign_key: :group_id

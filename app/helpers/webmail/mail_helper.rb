@@ -72,74 +72,50 @@ module Webmail::MailHelper
     rtn
   end
 
-  def mail_text_wrap(text, col = 1, options = {})
-    to_nbsp = lambda do |txt|
-      txt.gsub(/(^|\t| ) +/) {|m| m.gsub(' ', '&nbsp;')}
+  def insert_wbr_tag(text, col)
+    text = text.gsub("\t", '  ')
+    if !request.mobile? && request.user_agent !~ /MSIE/
+      text = text_wrap(text, col, "\t")
+      text = html_escape(text).gsub("\t", '<wbr></wbr>')
     end
+    text.gsub(' ', '&nbsp;')
+  end
 
-    text = "#{text}".force_encoding('utf-8')
-    text = text.gsub(/\t/, "  ")
-    text = text_wrap(text, col, "\t") unless request.env['HTTP_USER_AGENT'] =~ /MSIE/
-    if options[:auto_link]
-      text = mail_text_autolink(text)
-      text = to_nbsp.call(text)
-    else
-      text = h(text)
-      text = to_nbsp.call(text)
+  def insert_wbr_tag_with_autolink(text, col)
+    text = html_escape(text)
+    text = mail_text_autolink(text)
+
+    doc = Nokogiri::HTML.fragment(text)
+    doc.xpath('descendant::text()').each do |node|
+      next unless node.content
+      node.replace(insert_wbr_tag(node.content, col))
     end
-    text = text.gsub(/\t/, '<wbr></wbr>')
+    text = doc.to_s
+
+    nbsp = Nokogiri::HTML('&nbsp;').text
+    text.gsub(nbsp, '&nbsp;')
+  end
+
+  def mail_text_wrap(text, col = 1, options = {})
+    return '' if text.blank?
+    text =
+      if options[:auto_link]
+        insert_wbr_tag_with_autolink(text, col)
+      else
+        insert_wbr_tag(text, col)
+      end
     br(text)
-  rescue => e
-    #error_log("#{e}: #{text}")
-    "#read failed: #{e}"
   end
 
   def mail_text_autolink(text)
-    http_pattern = 'h\t?t\t?t\t?p\t?s?\t?:\t?\/\t?\/[a-zA-Z0-9_\.\/~%:#\?=&;\-@\+\$,!\*\'\(\)\t]+'
-    mail_pattern = '\w\t?[\w\._\-\+\t]*@[\w\._\-\+\t]+'
-
-    target = text
-    text = ''.html_safe
-    while target && match = target.match(/(#{http_pattern})|(#{mail_pattern})/i)
-      if match[1]
-        text << h(target[0, match.begin(1)])
-        text << link_to(match[1], match[1].gsub("\t", ''), target: '_blank')
-        target = target[match.end(1), target.size]
-      elsif match[2]
-        text << h(target[0, match.begin(2)])
-        addr = match[2].gsub("\t", '')
-        uri = new_webmail_mail_path(to: addr)
-        text << link_to(match[2], uri, onclick: open_mail_form(uri))
-        target = target[match.end(2), target.size]
-      end
-    end
-    text << h(target) if target
+    auto_link(text, sanitize: false, html: { target: '_blank' })
+  rescue => e
+    error_log "#{e}\n#{e.backtrace.join("\n")}"
+    text
   end
 
   def mail_html_autolink(html)
-    autolink_for_text = lambda do |text|
-      ret = ''
-      text = CGI::unescapeHTML(text)
-      while text && match = text.match(/(&[a-zA-Z0-9#]+;)/i) do
-        if match[1]
-          ret << mail_text_autolink(text[0, match.begin(1)])
-          ret << match[1]
-          text = text[match.end(1), text.size]
-        end
-      end
-      ret << mail_text_autolink(text) if text
-    end
-
-    ret = ''
-    target = html
-    while target && match = target.match(/>([^<]+)</im) do
-      if match[1]
-        ret << target[0, match.begin(1)]
-        ret << autolink_for_text.call(match[1])
-        target = target[match.end(1), target.size]
-      end
-    end
-    ret << target if target
+    mail_text_autolink(html)
   end
 
   def omit_from_address_in_mail_list(from)

@@ -25,11 +25,10 @@ module Webmail::Mailboxes::Mail
   end
 
   def trash_mails(trash_name, uids)
-    Webmail::MailNode.delete_nodes(name, uids)
     if trash_box?
-      Webmail::Mail.delete_all(name, uids)
+      delete_mails(uids)
     else
-      Webmail::Mail.move_all(name, trash_name, uids)
+      move_mails(trash_name, uids)
     end
   end
 

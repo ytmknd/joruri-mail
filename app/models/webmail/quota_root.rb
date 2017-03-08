@@ -5,6 +5,7 @@ class Webmail::QuotaRoot < ApplicationRecord
   def display_info
     usage_bytes = usage.to_i*1024
     quota_bytes = quota.to_i*1024
+    usable_bytes = quota_bytes - usage_bytes
     warn_bytes = quota_bytes * Joruri.config.application['webmail.mailbox_quota_alert_rate'].to_f
 
     hash = HashWithIndifferentAccess.new
@@ -13,7 +14,7 @@ class Webmail::QuotaRoot < ApplicationRecord
     hash[:used_bytes]  = usage_bytes
     hash[:used]        = human_size(usage_bytes)
     hash[:usage_rate]  = sprintf('%.1f', usage_bytes.to_f / quota_bytes.to_f * 100).to_f
-    hash[:usable]      = human_size(quota_bytes - usage_bytes) if usage_bytes > warn_bytes 
+    hash[:usable]      = human_size([0, usable_bytes].max) if usage_bytes > warn_bytes 
     hash
   end
 

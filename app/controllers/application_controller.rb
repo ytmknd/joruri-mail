@@ -96,8 +96,8 @@ class ApplicationController < ActionController::Base
 
     @message = message
     return respond_to do |format|
-      format.html { render file: file, layout: false, status: status }
-      format.xml  { render xml: "<errors><error>#{status} #{message}</error></errors>" }
+      format.any { render file: file, layout: false, status: status }
+      format.xml { render xml: "<errors><error>#{status} #{message}</error></errors>" }
     end
   end
 end
