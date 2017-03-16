@@ -221,7 +221,7 @@ module Webmail::Mails::Base
         end
         @attachments << Sys::Lib::Mail::Attachment.new(
           seqno:             seqno,
-          content_type:      part.mime_type,
+          content_type:      part.mime_type || 'application/octet-stream',
           name:              part.filename.strip,
           body:              body,
           size:              body.bytesize,
