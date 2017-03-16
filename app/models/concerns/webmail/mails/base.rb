@@ -558,11 +558,11 @@ module Webmail::Mails::Base
   end
 
   def fallback_date_field(field, format)
-    return '' unless field
+    return nil unless field
     raw_value = field.instance_variable_get('@raw_value')
-    raw_value.present? ? Time.parse(raw_value).strftime(format) : ''
+    raw_value.present? ? Time.parse(raw_value).strftime(format) : nil
   rescue => e
-    ''
+    nil
   end
 
   def fallback_text_field(field)
