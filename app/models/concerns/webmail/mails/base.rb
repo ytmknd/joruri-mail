@@ -91,10 +91,12 @@ module Webmail::Mails::Base
   def subject
     field = @mail.header[:subject]
     return 'no subject' unless field
-    if (lang = subject_language) && lang.present?
-      "【#{lang}】#{field.decoded}"
+
+    decoded = decode(field.decoded.to_s)
+    if (lang = subject_language).present?
+      "【#{lang}】#{decoded}"
     else
-      field.decoded
+      decoded
     end
   rescue => e
     write_error_log(e)
@@ -374,21 +376,6 @@ module Webmail::Mails::Base
   
   private
 
-  def decode(str, charset = nil)
-    if charset
-      case charset.downcase
-      when /^unicode-1-1-utf-7$/
-        Net::IMAP.decode_utf7(str.gsub(/\+([\w\+\/]+)-/, '&\1-'))
-      when /^iso-2022-jp/, /^shift[_-]jis$/, /^euc-jp$/
-        NKF::nkf('-wx --cp932', str).gsub(/\0/, "")
-      else
-        str.force_encoding(charset).encode('utf-8', undef: :replace, invalid: :replace)
-      end
-    else
-      NKF::nkf('-wx --cp932', str).gsub(/\0/, "")
-    end
-  end
-
   def collect_addrs(field)
     return [] unless field
 
@@ -432,23 +419,26 @@ module Webmail::Mails::Base
     end
   end
 
-  def decode_text_part(part)
-    if part.charset.present?
-      part.decoded.force_encoding('utf-8')
+  def decode(str)
+    detection = CharlockHolmes::EncodingDetector.detect(str.to_s)
+    charset = detection[:encoding].to_s.downcase if detection && detection[:encoding]
+    case charset
+    when /^iso-2022-jp/, /^shift[_-]jis$/, /^euc-jp$/
+      NKF::nkf('-wx --cp932', str).gsub(/\0/, "")
     else
-      decode(part.body.decoded)
+      str.dup.force_encoding('utf-8').encode('utf-8', undef: :replace, invalid: :replace)
     end
+  end
+
+  def decode_text_part(part)
+    decode(part.decoded.to_s)
   rescue => e
     write_error_log(e)
     fallback_body_part(part)
   end
 
   def decode_html_part(part, options = {})
-    if part.charset.present?
-      body = part.decoded.force_encoding('utf-8')
-    else
-      body = decode(part.body.decoded, part.charset)
-    end
+    body = decode_text_part(part)
     body, image_was_omitted = secure_html_body(body, options)
     @html_image_was_omitted = image_was_omitted
 
@@ -569,13 +559,13 @@ module Webmail::Mails::Base
     return '' unless field
     decode(field.instance_variable_get('@raw_value'))
   rescue => e
-    "#read failed: #{e.force_encoding('utf-8')}"
+    "#read failed: #{e.to_s.force_encoding('utf-8')}"
   end
 
   def fallback_body_part(part)
     decode(part.body.raw_source)
   rescue => e
-    "#read failed: #{e.force_encoding('utf-8')}"
+    "#read failed: #{e.to_s.force_encoding('utf-8')}"
   end
 
   def write_error_log(e)
