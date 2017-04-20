@@ -36,6 +36,11 @@ module Mail
       value
     end
 
+    def self.adjust_charset(value)
+      # sanitize 'charset = utf-8'
+      value.gsub(/;\s*charset\s+=\s+/i, '; charset=')
+    end
+
     def self.adjust_mime_type(value)
       case
       when value =~ /^\s*name=(.*)$/im
