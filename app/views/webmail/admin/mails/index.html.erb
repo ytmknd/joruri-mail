@@ -199,15 +199,14 @@ $(function() {
       target.removeClass('loading');
     });
   });
-  $('#mails .mail .drag').draggable({
-    opacity: 0.8,
+  $('#mails .mail .draggable').draggable({
     cursor: 'move',
     helper: function(e) {
-      var container = $('<td />').css('width', '50%');
+      var container = $('<div />').css({'width': '50%', 'background-color': '#fff', 'opacity': '0.8'});
       var mail = $(e.currentTarget).parents('#mails .mail');
       $('#mails .mail').each(function() {
         if ($(this).get(0) == mail.get(0) || $(this).find('input').is(':checked')) {
-          container.append($('<span />')
+          container.append($('<div />')
             .text($(this).find('.subject a').text())
             .css('padding', '0px 12px')
           );

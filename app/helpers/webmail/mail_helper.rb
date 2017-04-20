@@ -72,50 +72,19 @@ module Webmail::MailHelper
     rtn
   end
 
-  def insert_wbr_tag(text, col)
-    text = text.gsub("\t", '  ')
-    if !request.mobile? && request.user_agent !~ /MSIE/
-      text = text_wrap(text, col, "\t")
-      text = html_escape(text).gsub("\t", '<wbr></wbr>')
-    end
-    text.gsub(' ', '&nbsp;')
-  end
-
-  def insert_wbr_tag_with_autolink(text, col)
-    text = html_escape(text)
-    text = mail_text_autolink(text)
-
-    doc = Nokogiri::HTML.fragment(text)
-    doc.xpath('descendant::text()').each do |node|
-      next unless node.content
-      node.replace(insert_wbr_tag(node.content, col))
-    end
-    text = doc.to_s
-
-    nbsp = Nokogiri::HTML('&nbsp;').text
-    text.gsub(nbsp, '&nbsp;')
-  end
-
-  def mail_text_wrap(text, col = 1, options = {})
+  def mail_text_wrap(text, options = {})
     return '' if text.blank?
-    text =
-      if options[:auto_link]
-        insert_wbr_tag_with_autolink(text, col)
-      else
-        insert_wbr_tag(text, col)
-      end
+    text = html_escape(text)
+    text = text.gsub(' ', '&nbsp;')
+    text = mail_autolink(text) if options[:auto_link]
     br(text)
   end
 
-  def mail_text_autolink(text)
+  def mail_autolink(text)
     auto_link(text, sanitize: false, html: { target: '_blank' })
   rescue => e
     error_log "#{e}\n#{e.backtrace.join("\n")}"
     text
-  end
-
-  def mail_html_autolink(html)
-    mail_text_autolink(html)
   end
 
   def omit_from_address_in_mail_list(from)

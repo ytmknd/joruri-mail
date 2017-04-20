@@ -72,6 +72,3 @@ hr {
 img {
   border-style: none;
 }
-wbr:after {
-  content: "\00200B"
-}

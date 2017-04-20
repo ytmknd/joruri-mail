@@ -7,6 +7,7 @@
 /* mails table
 --------------------------------------------------------- */
 #webmailContent table.mails {
+  table-layout: fixed;
   width: 100%;
 }
 #webmailContent table.mails tr {
@@ -57,7 +58,8 @@
   padding: 0px 0px 0px 4px;
   border-bottom: 1px solid #ddd;
   background-color: #fff;
-  word-break: break-all;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
   line-height: 1.6;
 }
 #webmailContent table.mails td.autoWrap {
@@ -67,6 +69,9 @@
   display: block;
   overflow: hidden;
   height: 1.65em;
+  word-break: break-all;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
 }
 #webmailContent table.mails td span.autoWrap {
   height: 100%;
@@ -215,20 +220,20 @@
   background-image: url(../images/mailoption/mdn_request.gif);
   background-position: 0 0.2em;
 }
-#webmailContent table.mails td.drag {
+#webmailContent table.mails .draggable {
   cursor: move;
   background-image: url(../images/ic_mail_drag.gif);
   background-repeat: no-repeat;
   background-position: center center;
 }
-#webmailContent table.mails td.ui-draggable-dragging {
+#webmailContent table.mails .ui-draggable-dragging {
   height: auto;
   padding: 0px 0px 0px 4px;
   border-bottom: 1px solid #ddd;
   background-color: #fff;
   line-height: auto;
 }
-#webmailContent table.mails td.ui-draggable-dragging span {
+#webmailContent table.mails .ui-draggable-dragging span {
   display: block;
   overflow: hidden;
   height: 1.65em;

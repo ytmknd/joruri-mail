@@ -13,7 +13,7 @@ action_label = params[:copy].blank? ? '移動' : 'コピー'
 <div class="title"><%= action_label %>するメール</div>
 <div class="mails">
 <% @items.each do |item| %>
-  <div class="mail">・<%= mail_text_wrap(item.subject, 1000) %></div>
+  <div class="mail">・<%= mail_text_wrap(item.subject) %></div>
 <% end %>
 </div>
 <%= form_for :item, url: { action: :move }, html: { id: 'moveForm', name: 'moveForm' } do |f| %>

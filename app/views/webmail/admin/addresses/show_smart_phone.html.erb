@@ -2,7 +2,7 @@
   <%= Joruri.config.application['webmail.address_group_menu'] %>
 </div>
 
-<table class="show">
+<table class="show address">
   <tr>
     <th><%= @item.class.human_attribute_name :name %></th>
     <td><%= @item.name %></td>
@@ -17,7 +17,7 @@
   </tr>
   <tr>
     <th><%= @item.class.human_attribute_name :email %></th>
-    <td><%= mail_text_wrap @item.email %></td>
+    <td><%= @item.email %></td>
   </tr>
   <tr>
     <th><%= @item.class.human_attribute_name :mobile_tel %></th>
@@ -25,7 +25,7 @@
   </tr>
   <tr>
     <th><%= @item.class.human_attribute_name :uri %></th>
-    <td><%= mail_text_wrap @item.uri %></td>
+    <td><%= @item.uri %></td>
   </tr>
   <tr>
     <th><%= @item.class.human_attribute_name :tel %></th>

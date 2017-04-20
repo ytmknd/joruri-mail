@@ -11,10 +11,10 @@ ssopts = [["",""],["スター付き優先","1"]]
 
 <%= form_tag url_for(action: :index), method: :get, id: 'searchForm', class: 'searchForm' do %>
   <%= hidden_field_tag :search, 1 %>
-  <table>
+  <table class="show">
     <tr>
       <th>キーワード</th>
-      <td>:</td>
+      <td class="separator">:</td>
       <td>
         <%= text_field_tag :s_keyword, params[:s_keyword], class: 'keyword', size: 15 %>
         <%= select_tag :s_column, options_for_select(kopts, params[:s_column]) %>

@@ -12,19 +12,17 @@
 
 /* Common
 --------------------------------------------------------- */
-.autoWrap wbr {
-}
 .mailBodyText {
   font-family: "MS Gothic";
-  word-break: break-all;
   word-wrap: break-word;
+  overflow-wrap: break-word;
   line-height: 1.20;
 }
 .mailBodyText pre {
   overflow: auto;
   white-space: pre-wrap;
-  word-break: break-all;
   word-wrap: break-word;
+  overflow-wrap: break-word;
 }
 
 /* Content
@@ -491,6 +489,7 @@ form.search td input.email {
   text-decoration: none;
   word-break: break-all;
   word-wrap: break-word;
+  overflow-wrap: break-word;
 }
 #webmailMenu .addressHistory ul li a:hover {
   border-top: 1px solid #def;
@@ -729,6 +728,7 @@ form.search td input.email {
 ------------------------------------- */
 #mailContent table.mail {
   clear: both;
+  table-layout: fixed;
   width: 100%;
   border: 1px solid #8bd;
   border-bottom-width: 0px;
@@ -742,7 +742,8 @@ form.search td input.email {
 #mailContent table.mail td {
   padding: 5px 10px;
   border-bottom: 1px solid #8bd;
-  word-break: break-all;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
 }
 #mailContent table.mail td.subject {
   font-weight: bold;
@@ -1025,8 +1026,13 @@ form.search td input.email {
 #templateContent {
   padding: 10px 10px 10px 10px;
 }
+#templateContent table.template {
+  table-layout: fixed;
+  width: 100%;
+}
 #templateContent table.template td {
-  word-break: break-all;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
 }
 
 /* memo content

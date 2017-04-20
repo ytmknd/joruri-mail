@@ -7,7 +7,7 @@
     <td><%= @item.name %></td>
   </tr><tr>
     <th><%= @item.class.human_attribute_name :body %></th>
-    <td class="autoWrap mailBodyText"><%=mail_text_wrap @item.body, 10 %></td>
+    <td class="autoWrap mailBodyText"><%=br @item.body %></td>
   </tr><tr>
     <th><%= @item.class.human_attribute_name :default_flag %></th>
     <td><%= @item.default_flag_text %></td>

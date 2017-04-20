@@ -27,7 +27,7 @@ end
 <%= form_for :item, url: mobile_manage_webmail_address_groups_path, html: { id: 'mailForm', name: 'mailForm', class: 'mailForm' } do |f| %>
   <%= hidden_field_tag :group_id, params[:group_id] %>
 
-  <div class="groupTitle"><%= @group.name%></div>
+  <div class="groupTitle"><%= @group.name %></div>
 
   <% if @items.blank? %>
     <div class="notice">登録アドレスはありません。</div>
@@ -44,7 +44,7 @@ end
         <td class="checkUI"><input type="checkbox" name="to[<%= u.id %>]" value="1" class="checkUI" /></td>
         <td class="checkUI"><input type="checkbox" name="cc[<%= u.id %>]" value="1" class="checkUI" /></td>
         <td class="checkUI"><input type="checkbox" name="bcc[<%= u.id %>]" value="1" class="checkUI" /></td>
-        <td><%= link_to mail_text_wrap("#{u.name} <#{u.email}>"), webmail_address_path(u.id, group_id: @group.id), class: 'address' %></td>
+        <td><%= link_to "#{u.name} <#{u.email}>", webmail_address_path(u.id, group_id: @group.id), class: 'address' %></td>
       </tr>
       <% end %>
     </table>
@@ -53,14 +53,14 @@ end
 
   <% if [:to, :cc, :bcc].any? { |type| session[:mobile] && session[:mobile][type].present? } %>
     <div class="selectedAddressesTitle">選択済みアドレス</div>
-    <table class="selectedAddresses">
+    <table class="index selectedAddresses">
     <% [:to, :cc, :bcc].each do |type| %>
       <% if session[:mobile][type].present? %>
-        <tr><th colspan="2"><%= type.upcase %></th></tr>
+        <tr><th class="delete"><%= type.upcase %></th><th></th></tr>
         <% session[:mobile][type].each_with_index do |u, idx| %>
         <tr>
           <td><%= submit_tag '削除', name: "deleteAddress=#{type}_#{idx}", class: 'deleteAddress' %></td>
-          <td><%= mail_text_wrap u %></td>
+          <td><%= u %></td>
         </tr>
         <% end %>
       <% end %>
