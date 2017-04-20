@@ -160,8 +160,8 @@ module Webmail::MailHelper
   end
 
   def user_agent_info(user_agent)
-    [ /(MSIE) (\d+)\.(\d*)/,
-      /(Trident).+rv:(\d+)\.(\d*)/,
+    [ /(Trident)\/(\d+)\.(\d*)/,
+      /(MSIE) (\d+)\.(\d*)/,
       /(Firefox)\/(\d+)\.(\d*)/,
       /(?=.*(Opera)[\s|\/])(?=.*Version\/(\d+)\.(\d*))/,
       /(Chrome)\/(\d+)\.(\d*)/,
@@ -175,33 +175,47 @@ module Webmail::MailHelper
   end
 
   def data_uri_scheme_limit_size
-    limit_size = 1024**3
     agent, version, subversion = user_agent_info(request.user_agent)
 
+    max_size = 1024**3
     case agent
+    when 'Trident'
+      if version < 4
+        0
+      elsif version == 4 # same as IE8
+        32*1024
+      else
+        max_size
+      end
     when 'MSIE'
       if version < 8
-        limit_size = 0
+        0
       elsif version == 8
-        limit_size = 32*1024
+        32*1024
+      else
+        max_size
       end
     when 'Firefox'
       if version < 2
-        limit_size = 0
+        0
       elsif version == 2
-        limit_size = 100*1024
+        100*1024
+      else
+        max_size
       end
     when 'Opera'
       if version < 7
-        limit_size = 0 
+        0
       elsif version == 7 && subversion < 20
-        limit_size = 4*1024
+        4*1024
+      else
+        max_size
       end
-    when 'Chrome', 'Safari', 'Trident'
+    when 'Chrome', 'Safari'
+      max_size
     else
-      limit_size = 0
+      0
     end
-    return limit_size
   end
 
   def attachment_thumbnail_options
