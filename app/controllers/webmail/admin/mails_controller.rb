@@ -105,7 +105,7 @@ class Webmail::Admin::MailsController < Webmail::Controller::Admin::Base
   def download_attachment(no)
     return http_error(404) unless at = @item.attachments[no.to_i]
 
-    if params[:thumbnail].present? && (data = at.thumbnail(attachment_thumbnail_options))
+    if params[:thumbnail].present? && (data = at.thumbnail(self.class.helpers.attachment_thumbnail_options))
       type = 'image/jpeg'
     else
       data = at.body
