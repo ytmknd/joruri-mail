@@ -1,5 +1,5 @@
 <% if Joruri.config.application['webmail.attachment_file_upload_from_smart_phone'] == 1 %>
-<table id="mailAddresses" class="mailAttributes fileUploader" style="margin-bottom: 5px;">
+<table id="mailAddresses" class="show mailAttributes fileUploader" style="margin-bottom: 5px;">
   <tr>
     <td>
       <div id="defaultUploader">
@@ -40,7 +40,7 @@
         {{>title}}
       {{/if}}
     </td>
-    <td>
+    <td class="delete">
       <a href="#deleteUploadedFile" data-id="{{:id}}" class="deleteUploadedFile" title="削除">x</a>
       <input type="hidden" value="{{:id}}" name="item[tmp_attachment_ids][]">
     </td>

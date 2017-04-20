@@ -1,7 +1,7 @@
 <%
 subject_wrap = @conf.mail_list_subject.blank? ? '' : 'autoWrap'
 %>
-<table id="mails" class="mails">
+<table id="mails" class="index mails">
   <% items.each do |item| %>
     <%
       from, s_from, from_tooltip = mail_from_display(item, @mailbox, @conf.mail_list_from_address.present?)
@@ -12,7 +12,7 @@ subject_wrap = @conf.mail_list_subject.blank? ? '' : 'autoWrap'
       <td class="attach subject from date <%= mail_flags(item).join(' ') %> <%= subject_wrap %>">
         <a href="<%= url_for(action: :show, id: item.uid, new_window: (@conf.mail_open_window.blank? ? nil : 1)) %>">
           <span class="date"><%= item.date %></span>
-          <span class="from"><%= mail_text_wrap(from) %></span><br />
+          <span class="from"><%= from %></span><br />
           <span class="subject overflowHidden <%= subject_wrap %>" title="<%= item.subject %>">
             <span id="mail_<%= item.uid %>_labels" class="labels">
               <%= render 'webmail/admin/mails/shared/label', labels: item.labels, label_confs: @conf.mail_labels if item.labels.present? %>

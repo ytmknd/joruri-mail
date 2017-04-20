@@ -15,7 +15,7 @@
 </div>
 <div class="showItem">
   <font class="field">送信者</font>
-  <font class="value"><%= mail_text_wrap(omit_from_address_in_mail_list(@item.friendly_from_addr)[0], 1000) %></font>
+  <font class="value"><%= omit_from_address_in_mail_list(@item.friendly_from_addr)[0] %></font>
 </div>
 <div class="showItem">
   <font class="field"><%= @item.draft? ? '保存日時' : '送信日時' %></font>
@@ -53,7 +53,7 @@
         <div id="htmlPreview_<%= inline.seqno %>"><%=raw inline.html_body %></div>
       <% else %>
         <div id="textBody_<%= inline.seqno %>" class="autoWrap mailBodyText">
-          <%= mail_text_wrap(inline.text_body, 1000, auto_link: true) %>
+          <%= mail_text_wrap(inline.text_body, auto_link: true) %>
         </div>
       <% end %>
     </div>

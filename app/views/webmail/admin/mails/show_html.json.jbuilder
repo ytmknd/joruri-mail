@@ -8,6 +8,6 @@ inlines = @item.inline_contents(
 json.array! inlines do |inline|
   if inline.alternative? || inline.content_type == 'text/html'
     json.seqno inline.seqno
-    json.html mail_html_autolink(inline.html_body)
+    json.html mail_autolink(inline.html_body)
   end
 end

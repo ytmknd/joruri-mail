@@ -29,9 +29,9 @@ action_label = params[:copy].blank? ? '移動' : 'コピー'
 <% end %>
 
 <table class="index">
-  <tr><th><%= action_label %>するメール</th></tr>
+  <tr><th style="width: 100%;"><%= action_label %>するメール</th></tr>
   <% @items.each do |item| %>
-  <tr><td class="autoWrap" style="word-break:break-all;"><%= mail_text_wrap(item.subject) %></td></tr>
+  <tr><td class="autoWrap"><%= mail_text_wrap(item.subject) %></td></tr>
   <% end %>
 </table>
 <br />

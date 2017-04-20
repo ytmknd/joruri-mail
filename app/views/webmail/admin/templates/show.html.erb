@@ -11,19 +11,19 @@
 <table class="show template">
   <tr>
     <th><%= @item.class.human_attribute_name :to %></th>
-    <td class="autoWrap"><%= mail_text_wrap @item.to %></td>
+    <td class="autoWrap"><%=br @item.to %></td>
   </tr><tr>
     <th><%= @item.class.human_attribute_name :cc %></th>
-    <td class="autoWrap"><%= mail_text_wrap @item.cc %></td>
+    <td class="autoWrap"><%=br @item.cc %></td>
   </tr><tr>
     <th><%= @item.class.human_attribute_name :bcc %></th>
-    <td class="autoWrap"><%= mail_text_wrap @item.bcc %></td>
+    <td class="autoWrap"><%=br @item.bcc %></td>
   </tr><tr>
     <th><%= @item.class.human_attribute_name :subject %></th>
-    <td class="autoWrap"><%= mail_text_wrap @item.subject %></td>
+    <td class="autoWrap"><%=br @item.subject %></td>
   </tr><tr>
     <th><%= @item.class.human_attribute_name :body %></th>
-    <td class="autoWrap mailBodyText"><%= mail_text_wrap @item.body, 10 %></td>
+    <td class="autoWrap mailBodyText"><%=br @item.body %></td>
   </tr><tr>
     <th><%= @item.class.human_attribute_name :default_flag %></th>
     <td><%= @item.default_flag_text %></td>
