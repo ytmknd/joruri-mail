@@ -92,6 +92,7 @@ table.show th {
 }
 table.index td,
 table.show td {
+  word-break: break-all;
   word-wrap: break-word;
   overflow-wrap: break-word;
 }
@@ -556,6 +557,9 @@ table.mails td.from {
 }
 table.mails td.from span.from {
   color: #000;
+  word-break: break-all;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
 }
 table.mails td.date span.date {
   float: right;

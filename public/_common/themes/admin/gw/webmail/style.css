@@ -742,6 +742,7 @@ form.search td input.email {
 #mailContent table.mail td {
   padding: 5px 10px;
   border-bottom: 1px solid #8bd;
+  word-break: break-all;
   word-wrap: break-word;
   overflow-wrap: break-word;
 }
