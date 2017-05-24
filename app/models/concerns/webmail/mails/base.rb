@@ -14,7 +14,7 @@ module Webmail::Mails::Base
   def date(format = '%Y-%m-%d %H:%M', nullif = nil)
     @mail.date.blank? ? nullif : @mail.date.in_time_zone.strftime(format)
   rescue => e
-    write_error_log(e)
+    write_log(e)
     fallback_date_field(@mail.header[:date], format)
   end
 
@@ -29,14 +29,14 @@ module Webmail::Mails::Base
   def friendly_from_addr
     collect_addrs(@mail.header[:from]).first || 'unknown'
   rescue => e
-    write_error_log(e)
+    write_log(e)
     fallback_text_field(@mail.header[:from])
   end
 
   def friendly_to_addrs
     collect_addrs(@mail.header[:to])
   rescue => e
-    write_error_log(e)
+    write_log(e)
     [fallback_text_field(@mail.header[:to])]
   end
 
@@ -48,21 +48,21 @@ module Webmail::Mails::Base
   def friendly_cc_addrs
     collect_addrs(@mail.header[:cc])
   rescue => e
-    write_error_log(e)
+    write_log(e)
     [fallback_text_field(@mail.header[:cc])]
   end
 
   def friendly_bcc_addrs
     collect_addrs(@mail.header[:bcc])
   rescue => e
-    write_error_log(e)
+    write_log(e)
     [fallback_text_field(@mail.header[:bcc])]
   end
 
   def friendly_reply_to_addrs
     collect_addrs(@mail.header[:reply_to])
   rescue => e
-    write_error_log(e)
+    write_log(e)
     [fallback_text_field(@mail.header[:reply_to])]
   end
 
@@ -76,7 +76,7 @@ module Webmail::Mails::Base
     end
     addrs
   rescue => e
-    write_error_log(e)
+    write_log(e)
     [fallback_text_field(@mail.header[:reply_to])]
   end
 
@@ -84,7 +84,7 @@ module Webmail::Mails::Base
     field = @mail.header[:sender]
     field ? field.decoded : friendly_from_addr 
   rescue => e
-    write_error_log(e)
+    write_log(e)
     fallback_text_field(@mail.header[:sender])
   end
 
@@ -99,7 +99,7 @@ module Webmail::Mails::Base
       decoded
     end
   rescue => e
-    write_error_log(e)
+    write_log(e)
     fallback_text_field(@mail.header[:subject])
   end
 
@@ -126,7 +126,7 @@ module Webmail::Mails::Base
     dnt = @mail.header[:disposition_notification_to]
     dnt.try(:field).try(:addrs) || []
   rescue => e
-    write_error_log(e)
+    write_log(e)
     []
   end
 
@@ -218,7 +218,7 @@ module Webmail::Mails::Base
         begin
           body = part.decoded
         rescue => e
-          write_error_log(e)
+          write_log(e)
           body = part.body.raw_source
         end
         @attachments << Sys::Lib::Mail::Attachment.new(
@@ -433,7 +433,7 @@ module Webmail::Mails::Base
   def decode_text_part(part)
     decode(part.decoded.to_s)
   rescue => e
-    write_error_log(e)
+    write_log(e)
     fallback_body_part(part)
   end
 
@@ -467,7 +467,7 @@ module Webmail::Mails::Base
 
     body
   rescue => e
-    write_error_log(e)
+    write_log(e)
     fallback_body_part(part)
   end
 
@@ -568,9 +568,8 @@ module Webmail::Mails::Base
     "#read failed: #{e.to_s.force_encoding('utf-8')}"
   end
 
-  def write_error_log(e)
-    error_log e
-    error_log e.backtrace.join("\n")
+  def write_log(e)
+    warn_log "#{e}\n#{e.backtrace.join("\n")}"
   rescue => e
     ''
   end
