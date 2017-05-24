@@ -83,11 +83,11 @@ class Webmail::Admin::MailsController < Webmail::Controller::Admin::Base
 
     case
     when params[:download] == 'eml'
-      filename = @item.subject + '.eml'
+      filename = "#{@item.subject.presence || '件名なし'}.eml"
       msg = @item.rfc822
       send_data(msg, filename: filename, type: 'message/rfc822', disposition: 'attachment')
     when params[:download] == 'all'
-      filename = sprintf("%07d_%s.zip", @item.uid, Util::File.filesystemize(@item.subject, length: 100))
+      filename = sprintf("%07d_%s.zip", @item.uid, Util::File.filesystemize(@item.subject.presence || '件名なし', length: 100))
       zipdata = @item.zip_attachments(encoding: request.user_agent =~ /Windows/ ? 'shift_jis' : 'utf-8')
       send_data(zipdata, type: 'application/zip', filename: filename, disposition: 'attachment')
     when params[:download]
