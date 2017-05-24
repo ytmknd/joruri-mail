@@ -69,21 +69,22 @@ module Webmail::Mailboxes::Imap
 
     def load_mailboxes(reloads = nil)
       reloads = Array(reloads)
-      items = self.where(user_id: Core.current_user.id).order(:sort_no).to_a
-      reloads << :all if items.size < REQUIRED_SPECIAL_USES.size
+
+      unloaded = REQUIRED_SPECIAL_USES.map(&:to_s) - self.where(user_id: Core.current_user.id).pluck(:special_use).uniq
+      reloads << :all if unloaded.present?
 
       if reloads.present?
         ApplicationRecord.lock_by_name(Core.current_user.account) do
           sync_mailboxes(reloads)
         end
-        items = self.where(user_id: Core.current_user.id).order(:sort_no)
       end
 
+      items = self.uncached { self.where(user_id: Core.current_user.id).order(:sort_no).to_a }
       make_tree(items)
     end
 
     def sync_mailboxes(reloads = [:all])
-      items = self.where(user_id: Core.current_user.id).order(:sort_no)
+      items = self.uncached { self.where(user_id: Core.current_user.id).order(:sort_no).to_a }
       boxes, statuses = imap_sorted_list_and_status(reloads)
 
       status_by_name = statuses.index_by(&:mailbox)
