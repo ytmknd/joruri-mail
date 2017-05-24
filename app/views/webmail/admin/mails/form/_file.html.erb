@@ -64,7 +64,7 @@ $(function() {
   $('#fileupload').fileupload({
     url: '<%= webmail_mail_attachments_path %>',
     type: 'post',
-    dataType: 'html', // for IE9 + jquery-file-uploader
+    dataType: 'json',
     formData: {
       //authenticity_token: '<%= form_authenticity_token %>',
       tmp_id: '<%= @item.tmp_id %>',
@@ -83,7 +83,7 @@ $(function() {
     data.context = $( $('#fileUploaderProgressTemplate').render(opts) ).appendTo('#fileUploaderProgress');
   })
   .on('fileuploaddone', function(e, data) {
-    var result = $.parseJSON(data.result);
+    var result = data.result;
     if (result.status == 'OK') {
       $('#uploadedFiles').append( $('#uploadedFilesTemplate').render(result) );
     } else {
