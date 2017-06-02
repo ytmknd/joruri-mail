@@ -30,8 +30,11 @@ module Email
 
     def encode_address(address, encoding = 'utf-8')
       if address.display_name.present?
-        opt = encoding.downcase == 'iso-2022-jp' ? '-WjM' : '-WwM'
-        display_name = NKF.nkf(opt, quote_phrase(address.display_name))
+        display_name = quote_phrase(address.display_name)
+        unless display_name.ascii_only?
+          opt = encoding.downcase == 'iso-2022-jp' ? '-Wj' : '-Ww'
+          display_name = Mail::Encodings.b_value_encode(NKF.nkf(opt, display_name))
+        end
         "#{display_name} <#{address.address}>"
       else
         address.address
