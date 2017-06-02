@@ -92,7 +92,7 @@ module Webmail::Mails::Base
     field = @mail.header[:subject]
     return 'no subject' unless field
 
-    decoded = decode(field.decoded.to_s)
+    decoded = decode(field.decoded.to_s, auto_detect: field.value !~ Mail::Constants::ENCODED_VALUE)
     if (lang = subject_language).present?
       "【#{lang}】#{decoded}"
     else
@@ -419,19 +419,23 @@ module Webmail::Mails::Base
     end
   end
 
-  def decode(str)
-    detection = CharlockHolmes::EncodingDetector.detect(str.to_s)
-    charset = detection[:encoding].to_s.downcase if detection && detection[:encoding]
-    case charset
-    when /^iso-2022-jp/, /^shift[_-]jis$/, /^euc-jp$/
-      NKF::nkf('-wx --cp932', str).gsub(/\0/, "")
-    else
-      str.dup.force_encoding('utf-8').encode('utf-8', undef: :replace, invalid: :replace)
+  def decode(str, auto_detect: false)
+    str = str.to_s
+
+    if auto_detect && (detection = CharlockHolmes::EncodingDetector.detect(str))
+      charset = detection[:encoding].to_s
+      if charset.downcase =~ Regexp.union(/^iso-2022-jp/, /^shift[_-]jis$/, /^euc-jp$/)
+        str = NKF::nkf('-wx --cp932', str).gsub(/\0/, "")
+      elsif (encoding = Encoding.find(charset) rescue nil) && encoding != Encoding::UTF_8
+        str = str.dup.force_encoding(encoding).encode('utf-8', undef: :replace, invalid: :replace)
+      end
     end
+
+    str.dup.force_encoding('utf-8').encode('utf-8', undef: :replace, invalid: :replace)
   end
 
   def decode_text_part(part)
-    decode(part.decoded.to_s)
+    decode(part.decoded.to_s, auto_detect: !part.has_charset?)
   rescue => e
     write_log(e)
     fallback_body_part(part)
@@ -549,21 +553,20 @@ module Webmail::Mails::Base
 
   def fallback_date_field(field, format)
     return nil unless field
-    raw_value = field.instance_variable_get('@raw_value')
-    raw_value.present? ? Time.parse(raw_value).strftime(format) : nil
+    field.value.present? ? Time.parse(field.value).strftime(format) : nil
   rescue => e
     nil
   end
 
   def fallback_text_field(field)
     return '' unless field
-    decode(field.instance_variable_get('@raw_value'))
+    decode(field.value, auto_detect: true)
   rescue => e
     "#read failed: #{e.to_s.force_encoding('utf-8')}"
   end
 
   def fallback_body_part(part)
-    decode(part.body.raw_source)
+    decode(part.body.raw_source, auto_detect: true)
   rescue => e
     "#read failed: #{e.to_s.force_encoding('utf-8')}"
   end
