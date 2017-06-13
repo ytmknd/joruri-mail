@@ -225,7 +225,7 @@
         <td class="thumbnailArea">
         <% @item.attachments.each do |at| %>
           <% file_title = "#{at.name}(#{at.eng_unit})" %>
-          <% if at.image? %>
+          <% if at.display_as_thumbnail? %>
             <span class="thumbnail">
               <span class="box" title="<%= file_title %>">
                 <a class="box" href="<%= url_for(action: :download, download: at.seqno, size: at.size) %>" target="_blank">
