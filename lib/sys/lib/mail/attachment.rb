@@ -15,7 +15,8 @@ class Sys::Lib::Mail::Attachment
   end
 
   def display_as_thumbnail?
-    !(@content_type =~ /^image\/(jpeg|gif|png)/i).nil? && size && size < 5*1024**2 # 5MB
+    !(@content_type =~ /^image\/(jpeg|gif|png)/i).nil? &&
+      size && size < Joruri.config.application['webmail.thumbnail_max_size'].to_i*1024**2
   end
 
   def disposition
