@@ -57,6 +57,8 @@ class Webmail::Setting < ApplicationRecord
       options: [['表示する（標準）', ''], ['表示しない', 'omit_address']]
     add :mail_list, :mail_address_history, title: 'クイックアドレス帳',
       options: [['表示しない', '0'], ['5件表示', '5'], ['10件表示（標準）', ''], ['15件表示', '15'], ['20件表示', '20']]
+    add :mail_list, :mail_refresh_interval, title: '画面自動更新',
+      options: [['使用しない（標準）', ''], ['5分', '5'], ['10分', '10'], ['20分', '20'], ['30分', '30']]
     add :mail_detail, :html_mail_view, title: 'HTMLメールの表示',
       options: [['HTML形式で表示する（標準）', ''], ['テキスト形式で表示する', 'text']]
     add :mail_detail, :mail_attachment_view, title: '添付ファイルの表示',

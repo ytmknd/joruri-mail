@@ -1,0 +1,16 @@
+<div id="refresh_notice" class="notice" style="display: none;"><p>画面を更新しています...</p></div>
+
+<script type="text/javascript">
+//<![CDATA[
+$(function() {
+  var baseUrl = '<%=raw escape_javascript URI::Generic.build(
+    path: request.path,
+    query: request.query_parameters.present? ? request.query_parameters.except(:reload).to_query : nil
+  ).to_s %>';
+  setInterval(function() {
+    $('#refresh_notice').show();
+    document.location.href = baseUrl;
+  }, <%= interval.to_i*60*1000 %>);
+});
+//]]>
+</script>
