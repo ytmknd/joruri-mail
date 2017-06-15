@@ -507,7 +507,7 @@ class Webmail::Admin::MailsController < Webmail::Controller::Admin::Base
 
   def set_conf
     @conf = Webmail::Setting.user_config_values([
-      :mails_per_page, :mail_list_subject, :mail_list_from_address, :mail_address_history,
+      :mails_per_page, :mail_list_subject, :mail_list_from_address, :mail_refresh_interval, :mail_address_history,
       :html_mail_view, :mail_attachment_view, :mail_open_window,
       :mail_form_size,
     ])

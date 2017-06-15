@@ -187,6 +187,20 @@ a#fontExtraLarge {
   border-top: none;
 }
 
+#contentHeader .refreshing {
+  background-image: url(../images/other/loading_32.gif);
+  background-repeat: no-repeat;
+  background-position: center center;
+  width: 32px;
+  height: 32px;
+  position: absolute;
+  top: 0px;
+  right: 0px;
+  bottom: 0px;
+  left: 0px;
+  margin: auto;
+}
+
 /* Mail
 --------------------------------------------------------- */
 #webmailContainer {

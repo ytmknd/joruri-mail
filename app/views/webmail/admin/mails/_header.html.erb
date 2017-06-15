@@ -1,1 +1,5 @@
 <%= render 'webmail/admin/base/header', current: :mail %>
+
+<%- if action_name == 'index' && @conf && @conf.mail_refresh_interval.present? -%>
+<%= render 'layouts/admin/webmail/refresh', interval: @conf.mail_refresh_interval.to_i %>
+<%- end -%>

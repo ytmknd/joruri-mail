@@ -1,11 +1,12 @@
 class ApplicationController < ActionController::Base
   include Jpmobile::ViewSelector
+  include ExceptionHandler
+  include ContentRefresher
   prepend ParamsKeeper
   protect_from_forgery with: :exception
   before_action :initialize_application
   after_action :inline_css_for_mobile
   after_action :set_content_type_for_mobile
-  rescue_from Exception, with: :rescue_exception
   trans_sid
 
   def initialize_application
@@ -71,16 +72,6 @@ class ApplicationController < ActionController::Base
   end
 
   private
-
-  def rescue_exception(e)
-    @exception = e
-    error_log("#{@exception}\n" + @exception.backtrace.join("\n")) if Rails.env == 'production'
-    if !params.key?(:format) || params[:format] == 'html'
-      render template: 'application/exception', layout: true, status: 500
-    else
-      raise @exception
-    end
-  end
 
   def http_error(status, message = nil)
     if status != 404
