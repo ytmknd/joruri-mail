@@ -83,11 +83,11 @@ class Webmail::Admin::MailsController < Webmail::Controller::Admin::Base
 
     case
     when params[:download] == 'eml'
-      filename = @item.subject + '.eml'
+      filename = "#{@item.subject.presence || '件名なし'}.eml"
       msg = @item.rfc822
       send_data(msg, filename: filename, type: 'message/rfc822', disposition: 'attachment')
     when params[:download] == 'all'
-      filename = sprintf("%07d_%s.zip", @item.uid, Util::File.filesystemize(@item.subject, length: 100))
+      filename = sprintf("%07d_%s.zip", @item.uid, Util::File.filesystemize(@item.subject.presence || '件名なし', length: 100))
       zipdata = @item.zip_attachments(encoding: request.user_agent =~ /Windows/ ? 'shift_jis' : 'utf-8')
       send_data(zipdata, type: 'application/zip', filename: filename, disposition: 'attachment')
     when params[:download]
@@ -105,7 +105,7 @@ class Webmail::Admin::MailsController < Webmail::Controller::Admin::Base
   def download_attachment(no)
     return http_error(404) unless at = @item.attachments[no.to_i]
 
-    if params[:thumbnail].present? && (data = at.thumbnail(attachment_thumbnail_options))
+    if params[:thumbnail].present? && (data = at.thumbnail(self.class.helpers.attachment_thumbnail_options))
       type = 'image/jpeg'
     else
       data = at.body
@@ -507,7 +507,7 @@ class Webmail::Admin::MailsController < Webmail::Controller::Admin::Base
 
   def set_conf
     @conf = Webmail::Setting.user_config_values([
-      :mails_per_page, :mail_list_subject, :mail_list_from_address, :mail_address_history,
+      :mails_per_page, :mail_list_subject, :mail_list_from_address, :mail_refresh_interval, :mail_address_history,
       :html_mail_view, :mail_attachment_view, :mail_open_window,
       :mail_form_size,
     ])

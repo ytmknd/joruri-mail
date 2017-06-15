@@ -12,19 +12,17 @@
 
 /* Common
 --------------------------------------------------------- */
-.autoWrap wbr {
-}
 .mailBodyText {
   font-family: "MS Gothic";
-  word-break: break-all;
   word-wrap: break-word;
+  overflow-wrap: break-word;
   line-height: 1.20;
 }
 .mailBodyText pre {
   overflow: auto;
   white-space: pre-wrap;
-  word-break: break-all;
   word-wrap: break-word;
+  overflow-wrap: break-word;
 }
 
 /* Content
@@ -187,6 +185,20 @@ a#fontExtraLarge {
   border: 1px solid #238;
   border-top: 1px solid #ccc;
   border-top: none;
+}
+
+#contentHeader .refreshing {
+  background-image: url(../images/other/loading_32.gif);
+  background-repeat: no-repeat;
+  background-position: center center;
+  width: 32px;
+  height: 32px;
+  position: absolute;
+  top: 0px;
+  right: 0px;
+  bottom: 0px;
+  left: 0px;
+  margin: auto;
 }
 
 /* Mail
@@ -491,6 +503,7 @@ form.search td input.email {
   text-decoration: none;
   word-break: break-all;
   word-wrap: break-word;
+  overflow-wrap: break-word;
 }
 #webmailMenu .addressHistory ul li a:hover {
   border-top: 1px solid #def;
@@ -729,6 +742,7 @@ form.search td input.email {
 ------------------------------------- */
 #mailContent table.mail {
   clear: both;
+  table-layout: fixed;
   width: 100%;
   border: 1px solid #8bd;
   border-bottom-width: 0px;
@@ -743,6 +757,8 @@ form.search td input.email {
   padding: 5px 10px;
   border-bottom: 1px solid #8bd;
   word-break: break-all;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
 }
 #mailContent table.mail td.subject {
   font-weight: bold;
@@ -1025,8 +1041,13 @@ form.search td input.email {
 #templateContent {
   padding: 10px 10px 10px 10px;
 }
+#templateContent table.template {
+  table-layout: fixed;
+  width: 100%;
+}
 #templateContent table.template td {
-  word-break: break-all;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
 }
 
 /* memo content

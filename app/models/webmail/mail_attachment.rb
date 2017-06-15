@@ -63,13 +63,13 @@ class Webmail::MailAttachment < ApplicationRecord
   private
 
   def validate_image(filedata)
-    begin
-      image = Magick::Image.from_blob(filedata).shift
-      if image.format =~ /(GIF|JPEG|PNG)/
-        return [image.columns, image.rows]
-      end
-    rescue Exception
-      return false
+    image = Magick::Image.from_blob(filedata).shift
+    if image.format =~ /(GIF|JPEG|PNG)/
+      return [image.columns, image.rows]
     end
+  rescue Exception
+    return false
+  ensure
+    image.destroy! if image
   end
 end

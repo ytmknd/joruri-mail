@@ -14,7 +14,7 @@ module Webmail::Mails::Base
   def date(format = '%Y-%m-%d %H:%M', nullif = nil)
     @mail.date.blank? ? nullif : @mail.date.in_time_zone.strftime(format)
   rescue => e
-    write_error_log(e)
+    write_log(e)
     fallback_date_field(@mail.header[:date], format)
   end
 
@@ -29,14 +29,14 @@ module Webmail::Mails::Base
   def friendly_from_addr
     collect_addrs(@mail.header[:from]).first || 'unknown'
   rescue => e
-    write_error_log(e)
+    write_log(e)
     fallback_text_field(@mail.header[:from])
   end
 
   def friendly_to_addrs
     collect_addrs(@mail.header[:to])
   rescue => e
-    write_error_log(e)
+    write_log(e)
     [fallback_text_field(@mail.header[:to])]
   end
 
@@ -48,21 +48,21 @@ module Webmail::Mails::Base
   def friendly_cc_addrs
     collect_addrs(@mail.header[:cc])
   rescue => e
-    write_error_log(e)
+    write_log(e)
     [fallback_text_field(@mail.header[:cc])]
   end
 
   def friendly_bcc_addrs
     collect_addrs(@mail.header[:bcc])
   rescue => e
-    write_error_log(e)
+    write_log(e)
     [fallback_text_field(@mail.header[:bcc])]
   end
 
   def friendly_reply_to_addrs
     collect_addrs(@mail.header[:reply_to])
   rescue => e
-    write_error_log(e)
+    write_log(e)
     [fallback_text_field(@mail.header[:reply_to])]
   end
 
@@ -76,7 +76,7 @@ module Webmail::Mails::Base
     end
     addrs
   rescue => e
-    write_error_log(e)
+    write_log(e)
     [fallback_text_field(@mail.header[:reply_to])]
   end
 
@@ -84,20 +84,22 @@ module Webmail::Mails::Base
     field = @mail.header[:sender]
     field ? field.decoded : friendly_from_addr 
   rescue => e
-    write_error_log(e)
+    write_log(e)
     fallback_text_field(@mail.header[:sender])
   end
 
   def subject
     field = @mail.header[:subject]
     return 'no subject' unless field
-    if (lang = subject_language) && lang.present?
-      "【#{lang}】#{field.decoded}"
+
+    decoded = decode(field.decoded.to_s, auto_detect: field.value !~ Mail::Constants::ENCODED_VALUE)
+    if (lang = subject_language).present?
+      "【#{lang}】#{decoded}"
     else
-      field.decoded
+      decoded
     end
   rescue => e
-    write_error_log(e)
+    write_log(e)
     fallback_text_field(@mail.header[:subject])
   end
 
@@ -124,7 +126,7 @@ module Webmail::Mails::Base
     dnt = @mail.header[:disposition_notification_to]
     dnt.try(:field).try(:addrs) || []
   rescue => e
-    write_error_log(e)
+    write_log(e)
     []
   end
 
@@ -216,12 +218,12 @@ module Webmail::Mails::Base
         begin
           body = part.decoded
         rescue => e
-          write_error_log(e)
+          write_log(e)
           body = part.body.raw_source
         end
         @attachments << Sys::Lib::Mail::Attachment.new(
           seqno:             seqno,
-          content_type:      part.mime_type,
+          content_type:      part.mime_type || 'application/octet-stream',
           name:              part.filename.strip,
           body:              body,
           size:              body.bytesize,
@@ -374,21 +376,6 @@ module Webmail::Mails::Base
   
   private
 
-  def decode(str, charset = nil)
-    if charset
-      case charset.downcase
-      when /^unicode-1-1-utf-7$/
-        Net::IMAP.decode_utf7(str.gsub(/\+([\w\+\/]+)-/, '&\1-'))
-      when /^iso-2022-jp/, /^shift[_-]jis$/, /^euc-jp$/
-        NKF::nkf('-wx --cp932', str).gsub(/\0/, "")
-      else
-        str.force_encoding(charset).encode('utf-8', undef: :replace, invalid: :replace)
-      end
-    else
-      NKF::nkf('-wx --cp932', str).gsub(/\0/, "")
-    end
-  end
-
   def collect_addrs(field)
     return [] unless field
 
@@ -432,23 +419,30 @@ module Webmail::Mails::Base
     end
   end
 
-  def decode_text_part(part)
-    if part.charset.present?
-      part.decoded.force_encoding('utf-8')
-    else
-      decode(part.body.decoded)
+  def decode(str, auto_detect: false)
+    str = str.to_s
+
+    if auto_detect && (detection = CharlockHolmes::EncodingDetector.detect(str))
+      charset = detection[:encoding].to_s
+      if charset.downcase =~ Regexp.union(/^iso-2022-jp/, /^shift[_-]jis$/, /^euc-jp$/)
+        str = NKF::nkf('-wx --cp932', str).gsub(/\0/, "")
+      elsif (encoding = Encoding.find(charset) rescue nil) && encoding != Encoding::UTF_8
+        str = str.dup.force_encoding(encoding).encode('utf-8', undef: :replace, invalid: :replace)
+      end
     end
+
+    str.dup.force_encoding('utf-8').encode('utf-8', undef: :replace, invalid: :replace)
+  end
+
+  def decode_text_part(part)
+    decode(part.decoded.to_s, auto_detect: !part.has_charset?)
   rescue => e
-    write_error_log(e)
+    write_log(e)
     fallback_body_part(part)
   end
 
   def decode_html_part(part, options = {})
-    if part.charset.present?
-      body = part.decoded.force_encoding('utf-8')
-    else
-      body = decode(part.body.decoded, part.charset)
-    end
+    body = decode_text_part(part)
     body, image_was_omitted = secure_html_body(body, options)
     @html_image_was_omitted = image_was_omitted
 
@@ -477,7 +471,7 @@ module Webmail::Mails::Base
 
     body
   rescue => e
-    write_error_log(e)
+    write_log(e)
     fallback_body_part(part)
   end
 
@@ -558,29 +552,27 @@ module Webmail::Mails::Base
   end
 
   def fallback_date_field(field, format)
-    return '' unless field
-    raw_value = field.instance_variable_get('@raw_value')
-    raw_value.present? ? Time.parse(raw_value).strftime(format) : ''
+    return nil unless field
+    field.value.present? ? Time.parse(field.value).strftime(format) : nil
   rescue => e
-    ''
+    nil
   end
 
   def fallback_text_field(field)
     return '' unless field
-    decode(field.instance_variable_get('@raw_value'))
+    decode(field.value, auto_detect: true)
   rescue => e
-    "#read failed: #{e.force_encoding('utf-8')}"
+    "#read failed: #{e.to_s.force_encoding('utf-8')}"
   end
 
   def fallback_body_part(part)
-    decode(part.body.raw_source)
+    decode(part.body.raw_source, auto_detect: true)
   rescue => e
-    "#read failed: #{e.force_encoding('utf-8')}"
+    "#read failed: #{e.to_s.force_encoding('utf-8')}"
   end
 
-  def write_error_log(e)
-    error_log e
-    error_log e.backtrace.join("\n")
+  def write_log(e)
+    warn_log "#{e}\n#{e.backtrace.join("\n")}"
   rescue => e
     ''
   end

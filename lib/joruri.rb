@@ -1,6 +1,6 @@
 module Joruri
   def self.version
-    "2.1.2"
+    "2.1.3"
   end
   
   def self.default_config
@@ -22,6 +22,7 @@ module Joruri
         "webmail.thumbnail_height"               => 96,
         "webmail.thumbnail_quality"              => 50,
         "webmail.thumbnail_method"               => 'thumbnail',
+        "webmail.thumbnail_max_size"             => 10
     }}
   end
   

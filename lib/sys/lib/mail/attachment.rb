@@ -14,6 +14,11 @@ class Sys::Lib::Mail::Attachment
     !(@content_type =~ /^image/i).nil?
   end
 
+  def display_as_thumbnail?
+    !(@content_type =~ /^image\/(jpeg|gif|png)/i).nil? &&
+      size && size < Joruri.config.application['webmail.thumbnail_max_size'].to_i*1024**2
+  end
+
   def disposition
     image? ? 'inline' : 'attachment'
   end
@@ -33,13 +38,16 @@ class Sys::Lib::Mail::Attachment
       else
         image.resize!(thumb_w, thumb_h)
       end
-      image.to_blob { self.quality = quality }
+      thumb = image.to_blob { self.quality = quality }
     else
-      image.to_blob
+      thumb = image.to_blob
     end
+    thumb
   rescue => e
     error_log(e)
     nil
+  ensure
+    image.destroy! if image
   end
 
   def css_class

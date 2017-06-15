@@ -50,19 +50,11 @@ class Sys::Lib::File::NoUploadedFile
   end
   
   def validate_image
-    begin
-      image = Magick::Image.from_blob(@data).shift
-      if image.format =~ /(GIF|JPEG|PNG)/
-        return image
-      end
-    rescue LoadError
-      return nil
-    rescue Magick::ImageMagickError
-      return nil
-    rescue NoMethodError
-      return nil
-    rescue
-      return nil
+    image = Magick::Image.from_blob(@data).shift
+    if image.format =~ /(GIF|JPEG|PNG)/
+      return image
     end
+  rescue Exception
+    return nil
   end
 end

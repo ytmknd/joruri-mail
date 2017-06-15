@@ -33,7 +33,9 @@ subject_wrap = @conf.mail_list_subject.blank? ? '' : 'autoWrap'
     %>
     <tr id="mail_<%= item.uid %>" class="mail <%= 'unseen' if item.unseen? %>"
       data-uid="<%= item.uid %>" data-url="<%= url_for(action: :show, id: item.uid, new_window: (@conf.mail_open_window.blank? ? nil : 1)) %>">
-      <td class="drag" id="drag_<%= item.uid %>" data-uid="<%= item.uid %>"></td>
+      <td class="drag">
+        <div class="draggable" id="drag_<%= item.uid %>" data-uid="<%= item.uid %>">　</div>
+      </td>
       <td class="check"><input type="checkbox" name="item[ids][<%= item.uid %>]" value="1" data-uid="<%= item.uid %>" /></td>
       <td class="star <%= item.starred? ? 'starOn' : 'starOff' %>" id="mail_star_<%= item.uid %>" title="<%= 'スター' if item.starred? %>" data-uid="<%= item.uid %>"></td>
       <td class="attach">
@@ -64,7 +66,7 @@ subject_wrap = @conf.mail_list_subject.blank? ? '' : 'autoWrap'
       <% end %>
       <td class="from">
         <span class="overflowHidden" title="<%= from_tooltip %>">
-          <%= link_to mail_text_wrap(from), { s_from: s_from, page: 1 } %>
+          <%= link_to from, { s_from: s_from, page: 1 } %>
         </span>
       </td>
       <td class="date"><%= item.date %></td>

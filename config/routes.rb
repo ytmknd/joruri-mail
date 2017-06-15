@@ -22,5 +22,5 @@ Rails.application.routes.draw do
 
   ## Exception
   match '404.:format' => 'exception#index', via: :get
-  match '*path'       => 'exception#index', via: :get
+  match '*path'       => 'exception#index', via: [:get, :post, :put, :patch, :delete, :options]
 end
