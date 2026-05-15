@@ -1,0 +1,20 @@
+development:
+  title: Joruri Mail
+  uri: http://localhost:3000/
+  proxy:
+  map_key:
+  mail_domain: localhost.localdomain.jp
+
+test:
+  title: Joruri Mail
+  uri: http://localhost:3000/
+  proxy:
+  map_key:
+  mail_domain: localhost.localdomain.jp
+
+production:
+  title: Joruri Mail
+  uri: http://localhost:3000/
+  proxy:
+  map_key:
+  mail_domain: localhost.localdomain.jp

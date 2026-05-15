@@ -1,0 +1,23 @@
+development:
+  address: imap
+  port: 3025
+  domain: localhost.localdomain.jp
+  user_name:
+  password:
+  authentication:
+
+test:
+  address: imap
+  port: 3025
+  domain: localhost.localdomain.jp
+  user_name:
+  password:
+  authentication:
+
+production:
+  address: imap
+  port: 3025
+  domain: localhost.localdomain.jp
+  user_name:
+  password:
+  authentication:

@@ -1,0 +1,14 @@
+development:
+  address: imap
+  port: 3143
+  usessl: false
+
+test:
+  address: imap
+  port: 3143
+  usessl: false
+
+production:
+  address: imap
+  port: 3143
+  usessl: false

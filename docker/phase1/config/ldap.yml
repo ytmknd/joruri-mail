@@ -1,0 +1,14 @@
+development:
+  host: ldap
+  port: 389
+  base: dc=example,dc=local
+
+test:
+  host: ldap
+  port: 389
+  base: dc=example,dc=local
+
+production:
+  host: ldap
+  port: 389
+  base: dc=example,dc=local

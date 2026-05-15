@@ -1,0 +1,91 @@
+services:
+  imap:
+    image: greenmail/standalone:2.1.8
+    platform: linux/amd64
+    environment:
+      GREENMAIL_OPTS: >-
+        -Dgreenmail.setup.test.all
+        -Dgreenmail.hostname=0.0.0.0
+        -Dgreenmail.users=admin:admin,user1:user1,user2:user2,user3:user3
+      JAVA_OPTS: -Djava.net.preferIPv4Stack=true
+    ports:
+      - "3025:3025"
+      - "3143:3143"
+      - "8081:8080"
+
+  db:
+    image: mysql:5.7
+    platform: linux/amd64
+    environment:
+      MYSQL_ROOT_PASSWORD: pass
+      MYSQL_DATABASE: jorurimail
+      MYSQL_USER: joruri
+      MYSQL_PASSWORD: pass
+    command:
+      - --character-set-server=utf8
+      - --collation-server=utf8_general_ci
+      - --sql-mode=STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_AUTO_CREATE_USER,NO_ENGINE_SUBSTITUTION
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./docker/mysql/init:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "-uroot", "-ppass"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  app:
+    build:
+      context: .
+      dockerfile: docker/ubuntu18-ruby2/Dockerfile
+      args:
+        RUBY_VERSION: "2.3.8"
+        BUNDLER_VERSION: "1.11.2"
+    image: joruri-mail:ubuntu18-ruby2
+    platform: linux/amd64
+    working_dir: /var/share/jorurimail
+    environment:
+      RAILS_ENV: development
+      BUNDLE_APP_CONFIG: /var/share/jorurimail/.bundle
+      BUNDLE_BIN: /var/share/jorurimail/vendor/bundle/bin
+      BUNDLE_PATH: /var/share/jorurimail/vendor/bundle
+      CHOWN_SOURCE_TREE: "1"
+      LANG: ja_JP.UTF-8
+      LC_ALL: ja_JP.UTF-8
+    ports:
+      - "3000:3000"
+    depends_on:
+      db:
+        condition: service_healthy
+      imap:
+        condition: service_started
+    volumes:
+      - .:/var/share/jorurimail:cached
+      - bundle:/var/share/jorurimail/vendor/bundle
+      - bundle_config:/var/share/jorurimail/.bundle
+      - bower_components:/var/share/jorurimail/vendor/assets/bower_components
+      - log:/var/share/jorurimail/log
+      - public_assets:/var/share/jorurimail/public/assets
+      - tmp:/var/share/jorurimail/tmp
+      - upload:/var/share/jorurimail/upload
+      - ./docker/phase1/config/application.yml:/var/share/jorurimail/config/application.yml:ro
+      - ./docker/phase1/config/core.yml:/var/share/jorurimail/config/core.yml:ro
+      - ./docker/phase1/config/database.yml:/var/share/jorurimail/config/database.yml:ro
+      - ./docker/phase1/config/imap.yml:/var/share/jorurimail/config/imap.yml:ro
+      - ./docker/phase1/config/ldap.yml:/var/share/jorurimail/config/ldap.yml:ro
+      - ./docker/phase1/config/secrets.yml:/var/share/jorurimail/config/secrets.yml:ro
+      - ./docker/phase1/config/smtp.yml:/var/share/jorurimail/config/smtp.yml:ro
+      - ./docker/phase1/config/sso.yml:/var/share/jorurimail/config/sso.yml:ro
+    command: ["bundle", "exec", "rails", "server", "-b", "0.0.0.0", "-p", "3000"]
+    stdin_open: true
+    tty: true
+
+volumes:
+  mysql_data:
+  bundle:
+  bundle_config:
+  bower_components:
+  log:
+  public_assets:
+  tmp:
+  upload:

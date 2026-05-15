@@ -1,0 +1,23 @@
+sys:
+  session_expiration: 24
+  session_expiration_for_mobile: 1
+  force_site: ""
+
+webmail:
+  mailbox_quota_alert_rate: 0.85
+  attachment_file_max_size: 5
+  attachment_file_upload_method: auto
+  show_only_ldap_user: 0
+  filter_condition_max_count: 100
+  filter_max_mail_count_at_once: 500
+  mail_address_history_max_count: 200
+  switch_user_max_count: 5
+  synchronize_mobile_setting: 0
+  show_gw_schedule_link: 0
+  mail_cache_expiration: 6
+  check_servers_before_send: 0
+  thumbnail_width: 128
+  thumbnail_height: 96
+  thumbnail_quality: 50
+  thumbnail_method: thumbnail
+  thumbnail_max_size: 10
