@@ -40,6 +40,8 @@ class Webmail::QuotaRoot < ApplicationRecord
         quota: res.quota.to_i
       )
       item.display_info
+    rescue Net::IMAP::Error, TypeError
+      nil
     end
 
     private
