@@ -136,6 +136,32 @@ docker compose --profile ruby-upgrade run --rm app-ruby25 bundle exec rake db:se
 
 Rails 5.2 removes `ActiveSupport.halt_callback_chains_on_return_false=` and rejects string callback/validation conditions. Keep the legacy default initializer guarded and use symbol, proc, lambda, or block conditions.
 
+## Ruby 2.7 Verification
+
+After Rails 5.2 is stable, verify the app on Ruby 2.7 with:
+
+```sh
+bin/docker-phase2 ruby27-build
+bin/docker-phase2 ruby27-check
+```
+
+Run the phase gate checks against `app-ruby27`:
+
+```sh
+docker compose --profile ruby-upgrade run --rm app-ruby27 bundle exec rake assets:precompile
+docker compose --profile ruby-upgrade run --rm app-ruby27 bundle exec rake db:schema:load
+docker compose --profile ruby-upgrade run --rm app-ruby27 bundle exec rake db:seed
+docker compose --profile ruby-upgrade run --rm app-ruby27 bundle exec rake db:seed:demo
+```
+
+Then start the app on port `3003`:
+
+```sh
+bin/docker-phase2 ruby27-up
+```
+
+The Ruby 2.7 service keeps Ubuntu 18.04 and Bundler 1.17.3 for this migration step, but switches to Ubuntu's OpenSSL 1.1 development package instead of the Ruby 2.3/2.5 OpenSSL 1.0 compatibility package.
+
 ## Notes
 
 Use `app` for the frozen phase 0/1 baseline and `app-phase2` for Rails/Ruby migration work. Do not share bundle volumes between them.

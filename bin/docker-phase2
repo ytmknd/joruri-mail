@@ -10,6 +10,9 @@ Usage:
   bin/docker-phase2 ruby25-build
   bin/docker-phase2 ruby25-check
   bin/docker-phase2 ruby25-up
+  bin/docker-phase2 ruby27-build
+  bin/docker-phase2 ruby27-check
+  bin/docker-phase2 ruby27-up
   bin/docker-phase2 bundle-update-rails50
   bin/docker-phase2 bundle-update-rails51
   bin/docker-phase2 bundle-update-rails52
@@ -22,6 +25,9 @@ Commands:
   ruby25-build          Build the Ubuntu 18.04 / Ruby 2.5 app image.
   ruby25-check          Print Ruby version and verify Rails boots on Ruby 2.5.
   ruby25-up             Start the Ruby 2.5 Rails app on http://localhost:3002/.
+  ruby27-build          Build the Ubuntu 18.04 / Ruby 2.7 app image.
+  ruby27-check          Print Ruby version and verify Rails boots on Ruby 2.7.
+  ruby27-up             Start the Ruby 2.7 Rails app on http://localhost:3003/.
   bundle-update-rails50 Update Rails to the latest allowed Rails 5.0.x patch in Gemfile.lock.
   bundle-update-rails51 Update Rails and known Rails 5.1 blockers in the Ruby 2.5 service.
   bundle-update-rails52 Update Rails and known Rails 5.2 blockers in the Ruby 2.5 service.
@@ -51,6 +57,16 @@ case "$cmd" in
     ;;
   ruby25-up)
     docker compose --profile ruby-upgrade up app-ruby25
+    ;;
+  ruby27-build)
+    docker compose --profile ruby-upgrade build app-ruby27
+    ;;
+  ruby27-check)
+    docker compose --profile ruby-upgrade run --rm app-ruby27 ruby -v
+    docker compose --profile ruby-upgrade run --rm app-ruby27 bundle exec rails runner 'puts "Rails #{Rails.version} booted"'
+    ;;
+  ruby27-up)
+    docker compose --profile ruby-upgrade up app-ruby27
     ;;
   bundle-update-rails50)
     docker compose run --rm app-phase2 bundle update rails --conservative

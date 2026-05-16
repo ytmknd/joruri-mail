@@ -178,6 +178,56 @@ services:
     stdin_open: true
     tty: true
 
+  app-ruby27:
+    profiles:
+      - ruby-upgrade
+    build:
+      context: .
+      dockerfile: docker/ubuntu18-ruby27/Dockerfile
+      args:
+        RUBY_VERSION: "2.7.8"
+        BUNDLER_VERSION: "1.17.3"
+    image: joruri-mail:phase2-ubuntu18-ruby27
+    platform: linux/amd64
+    working_dir: /var/share/jorurimail
+    environment:
+      RAILS_ENV: development
+      BUNDLE_APP_CONFIG: /var/share/jorurimail/.bundle
+      BUNDLE_BIN: /var/share/jorurimail/vendor/bundle/bin
+      BUNDLE_PATH: /var/share/jorurimail/vendor/bundle
+      BUNDLER_VERSION: "1.17.3"
+      CHOWN_SOURCE_TREE: "1"
+      EXECJS_RUNTIME: Node
+      LANG: ja_JP.UTF-8
+      LC_ALL: ja_JP.UTF-8
+    ports:
+      - "3003:3000"
+    depends_on:
+      db:
+        condition: service_healthy
+      imap:
+        condition: service_started
+    volumes:
+      - .:/var/share/jorurimail:cached
+      - bundle_ruby27:/var/share/jorurimail/vendor/bundle
+      - bundle_config_ruby27:/var/share/jorurimail/.bundle
+      - bower_components_ruby27:/var/share/jorurimail/vendor/assets/bower_components
+      - log_ruby27:/var/share/jorurimail/log
+      - public_assets_ruby27:/var/share/jorurimail/public/assets
+      - tmp_ruby27:/var/share/jorurimail/tmp
+      - upload_ruby27:/var/share/jorurimail/upload
+      - ./docker/phase1/config/application.yml:/var/share/jorurimail/config/application.yml:ro
+      - ./docker/phase1/config/core.yml:/var/share/jorurimail/config/core.yml:ro
+      - ./docker/phase1/config/database.yml:/var/share/jorurimail/config/database.yml:ro
+      - ./docker/phase1/config/imap.yml:/var/share/jorurimail/config/imap.yml:ro
+      - ./docker/phase1/config/ldap.yml:/var/share/jorurimail/config/ldap.yml:ro
+      - ./docker/phase1/config/secrets.yml:/var/share/jorurimail/config/secrets.yml:ro
+      - ./docker/phase1/config/smtp.yml:/var/share/jorurimail/config/smtp.yml:ro
+      - ./docker/phase1/config/sso.yml:/var/share/jorurimail/config/sso.yml:ro
+    command: ["bundle", "exec", "rails", "server", "-b", "0.0.0.0", "-p", "3000"]
+    stdin_open: true
+    tty: true
+
 volumes:
   mysql_data:
   bundle:
@@ -201,3 +251,10 @@ volumes:
   public_assets_ruby25:
   tmp_ruby25:
   upload_ruby25:
+  bundle_ruby27:
+  bundle_config_ruby27:
+  bower_components_ruby27:
+  log_ruby27:
+  public_assets_ruby27:
+  tmp_ruby27:
+  upload_ruby27:
