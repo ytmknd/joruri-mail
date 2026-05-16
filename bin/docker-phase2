@@ -7,6 +7,9 @@ Usage:
   bin/docker-phase2 build
   bin/docker-phase2 check
   bin/docker-phase2 up
+  bin/docker-phase2 ruby25-build
+  bin/docker-phase2 ruby25-check
+  bin/docker-phase2 ruby25-up
   bin/docker-phase2 bundle-update-rails50
   bin/docker-phase2 all
 
@@ -14,6 +17,9 @@ Commands:
   build                 Build the Ubuntu 18.04 / Ruby 2.3 app image for Rails 5 migration.
   check                 Print Ruby version and verify Rails boots.
   up                    Start the phase 2 Rails app on http://localhost:3001/.
+  ruby25-build          Build the Ubuntu 18.04 / Ruby 2.5 app image.
+  ruby25-check          Print Ruby version and verify Rails boots on Ruby 2.5.
+  ruby25-up             Start the Ruby 2.5 Rails app on http://localhost:3002/.
   bundle-update-rails50 Update Rails to the latest allowed Rails 5.0.x patch in Gemfile.lock.
   all                   Run build, check, then up.
 USAGE
@@ -31,6 +37,16 @@ case "$cmd" in
     ;;
   up)
     docker compose up app-phase2
+    ;;
+  ruby25-build)
+    docker compose --profile ruby-upgrade build app-ruby25
+    ;;
+  ruby25-check)
+    docker compose --profile ruby-upgrade run --rm app-ruby25 ruby -v
+    docker compose --profile ruby-upgrade run --rm app-ruby25 bundle exec rails runner 'puts "Rails #{Rails.version} booted"'
+    ;;
+  ruby25-up)
+    docker compose --profile ruby-upgrade up app-ruby25
     ;;
   bundle-update-rails50)
     docker compose run --rm app-phase2 bundle update rails --conservative

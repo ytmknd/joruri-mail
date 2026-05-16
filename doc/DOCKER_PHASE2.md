@@ -13,7 +13,7 @@ This keeps the phase 0/1 `app` service intact and adds `app-phase2`:
 
 The initial Rails upgrade target is the latest Rails 5.0.x patch while keeping Ruby 2.3.8. After that, move to Ruby 2.4/2.5, then Rails 5.1 and Rails 5.2 in separate code commits.
 
-The `app-ruby25` service and `docker/ubuntu18-ruby25/Dockerfile` are provided for the later Ruby 2.5 verification step. That service is behind the `ruby-upgrade` Compose profile. ExecJS uses Node.js from the Docker image; `therubyracer` and `libv8` are no longer part of the bundle.
+The `app-ruby25` service and `docker/ubuntu18-ruby25/Dockerfile` are provided for the Ruby 2.5 verification step. That service is behind the `ruby-upgrade` Compose profile. ExecJS uses Node.js from the Docker image; `therubyracer` and `libv8` are no longer part of the bundle.
 
 ## Commands
 
@@ -57,6 +57,33 @@ docker compose run --rm app-phase2 bundle exec rake db:schema:load
 docker compose run --rm app-phase2 bundle exec rake db:seed
 docker compose run --rm app-phase2 bundle exec rake db:seed:demo
 ```
+
+## Ruby 2.5 Verification
+
+Build and boot-check the Ruby 2.5 service with:
+
+```sh
+bin/docker-phase2 ruby25-build
+bin/docker-phase2 ruby25-check
+```
+
+Run the phase gate checks against `app-ruby25`:
+
+```sh
+docker compose --profile ruby-upgrade run --rm app-ruby25 bundle exec rake bower:install
+docker compose --profile ruby-upgrade run --rm app-ruby25 bundle exec rake assets:precompile
+docker compose --profile ruby-upgrade run --rm app-ruby25 bundle exec rake db:schema:load
+docker compose --profile ruby-upgrade run --rm app-ruby25 bundle exec rake db:seed
+docker compose --profile ruby-upgrade run --rm app-ruby25 bundle exec rake db:seed:demo
+```
+
+Then start the app on port `3002`:
+
+```sh
+bin/docker-phase2 ruby25-up
+```
+
+The Ruby 2.5 lockfile uses Bundler 1.17.3 and updates `delayed_job` / `delayed_job_active_record` so Rails can boot without the old `yaml_as` compatibility error.
 
 ## Notes
 
