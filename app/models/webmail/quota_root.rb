@@ -34,7 +34,7 @@ class Webmail::QuotaRoot < ApplicationRecord
       res = imap.getquotaroot('INBOX')[1]
       return unless res
 
-      item.update_attributes(
+      item.update(
         mailbox: res.mailbox,
         usage: res.usage.to_i,
         quota: res.quota.to_i

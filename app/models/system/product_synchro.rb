@@ -17,7 +17,7 @@ class System::ProductSynchro < System::Database
   private
 
   def copy_ldap_temporary
-    update_attributes(state: 'temp')
+    update(state: 'temp')
     
     @results = { group: 0, gerr: 0, user: 0, uerr: 0 }
 
@@ -29,10 +29,10 @@ class System::ProductSynchro < System::Database
     messages << "-- 失敗 #{@results[:gerr]}件" if @results[:gerr] > 0
     messages << "ユーザー #{@results[:user]}件"
     messages << "-- 失敗 #{@results[:uerr]}件" if @results[:uerr] > 0
-    update_attributes(remark_temp: messages.join("\n"))
+    update(remark_temp: messages.join("\n"))
 
     if @results[:gerr] > 0 || @results[:uerr] > 0
-      update_attributes(state: 'failure')
+      update(state: 'failure')
       return false
     end
 
@@ -40,7 +40,7 @@ class System::ProductSynchro < System::Database
   end
 
   def backup_table
-    update_attributes(state: 'back')
+    update(state: 'back')
 
     results = { copy: 0, cerr: 0 }
 
@@ -56,10 +56,10 @@ class System::ProductSynchro < System::Database
     messages = []
     messages << "テーブル #{results[:copy]}件"
     messages << "--失敗 #{results[:cerr]}件" if results[:cerr] > 0
-    update_attributes(remark_back: messages.join("\n"))
+    update(remark_back: messages.join("\n"))
 
     if results[:cerr] > 0
-      update_attributes(state: 'failure')
+      update(state: 'failure')
       return false
     end
 
@@ -67,7 +67,7 @@ class System::ProductSynchro < System::Database
   end
 
   def synchronize
-    update_attributes(state: 'sync')
+    update(state: 'sync')
 
     results = Sys::LdapSynchro.synchronize(version)
 
@@ -80,13 +80,13 @@ class System::ProductSynchro < System::Database
     messages << "-- 更新 #{results[:user]}件"
     messages << "-- 削除 #{results[:udel]}件" if results[:udel] > 0
     messages << "-- 失敗 #{results[:uerr]}件" if results[:uerr] > 0
-    update_attributes(remark_sync: messages.join("\n"))
+    update(remark_sync: messages.join("\n"))
 
     if results[:gerr] > 0 || results[:uerr] > 0
-      update_attributes(state: 'failure')
+      update(state: 'failure')
       return false
     else
-      update_attributes(state: 'success')
+      update(state: 'success')
       return true
     end
   end

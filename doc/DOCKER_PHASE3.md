@@ -36,3 +36,15 @@ The first compatibility updates in this phase are:
 
 - `charlock_holmes` `0.7.9`, for ICU 66.
 - `mysql2` `0.5.7`, for the Ubuntu 20.04 MariaDB client library.
+
+## Rails 6.0 Preparation On Ubuntu 20.04
+
+Keep Ruby at 2.7 and Ubuntu at 20.04 while removing Rails 6.0 blockers.
+
+- `sass-rails` 5.x depends on `railties < 6`; update it to 6.x before raising
+  Rails.
+- Replace deprecated Rails APIs that are easy to verify under Rails 5.2 first:
+  `render text:` becomes `render plain:`, and `update_attributes` becomes
+  `update`.
+- Keep the first Rails 6.0 upgrade on the classic autoloader unless Zeitwerk has
+  been audited separately.
