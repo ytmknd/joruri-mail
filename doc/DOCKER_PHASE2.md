@@ -85,6 +85,32 @@ bin/docker-phase2 ruby25-up
 
 The Ruby 2.5 lockfile uses Bundler 1.17.3 and updates `delayed_job` / `delayed_job_active_record` so Rails can boot without the old `yaml_as` compatibility error.
 
+## Rails 5.1 Update
+
+After Ruby 2.5 is stable, update Rails and the Rails 5.1 dependency blockers with:
+
+```sh
+bin/docker-phase2 bundle-update-rails51
+```
+
+The Rails 5.1 update raises:
+
+- `rails` to `5.1.7`
+- `activerecord-session_store` to `1.1.3`
+- `jbuilder` to a Rails 5.1-compatible 2.x release
+
+Then run the Ruby 2.5 gate checks again:
+
+```sh
+bin/docker-phase2 ruby25-check
+docker compose --profile ruby-upgrade run --rm app-ruby25 bundle exec rake assets:precompile
+docker compose --profile ruby-upgrade run --rm app-ruby25 bundle exec rake db:schema:load
+docker compose --profile ruby-upgrade run --rm app-ruby25 bundle exec rake db:seed
+docker compose --profile ruby-upgrade run --rm app-ruby25 bundle exec rake db:seed:demo
+```
+
+Rails 5.1 is stricter about named connection pools. Optional named connections such as `joruri_manage`, `dev_jgw_core`, and `session` should only call `establish_connection` when the matching database configuration exists.
+
 ## Notes
 
 Use `app` for the frozen phase 0/1 baseline and `app-phase2` for Rails/Ruby migration work. Do not share bundle volumes between them.

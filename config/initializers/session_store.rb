@@ -7,5 +7,5 @@
 # (create the session table with "rake db:sessions:create")
 Rails.application.config.session_store :active_record_store
 Rails.application.config.session_options = { cookie_only: false }
-ActiveRecord::SessionStore::Session.establish_connection :session rescue nil
+ActiveRecord::SessionStore::Session.establish_connection :session if ActiveRecord::Base.configurations.key?('session')
 ActiveRecord::SessionStore::Session.validates :session_id, presence: true

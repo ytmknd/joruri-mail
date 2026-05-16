@@ -2,7 +2,7 @@ source 'https://rubygems.org'
 
 
 # Bundle edge Rails instead: gem 'rails', github: 'rails/rails'
-gem 'rails', '~> 5.0.7', '>= 5.0.7.2'
+gem 'rails', '~> 5.1.7'
 # Use mysql as the database for Active Record
 gem 'mysql2', '>= 0.3.13', '< 0.5'
 # Use Puma as the app server
@@ -20,7 +20,7 @@ gem 'coffee-rails', '~> 4.2'
 # Turbolinks makes navigating your web application faster. Read more: https://github.com/turbolinks/turbolinks
 #gem 'turbolinks', '~> 5'
 # Build JSON APIs with ease. Read more: https://github.com/rails/jbuilder
-gem 'jbuilder', '~> 2.5'
+gem 'jbuilder', '~> 2.7'
 # Use Redis adapter to run Action Cable in production
 # gem 'redis', '~> 3.0'
 # Use ActiveModel has_secure_password
@@ -30,12 +30,12 @@ gem 'jbuilder', '~> 2.5'
 # gem 'capistrano-rails', group: :development
 
 gem 'activerecord-import', '~> 0.15.0'
-gem 'activerecord-session_store', '~> 1.0.0'
+gem 'activerecord-session_store', '~> 1.1.3'
 gem 'active_hash', '~> 1.4.1'
 gem 'enumerize', '~> 2.0.0'
 gem 'ruby-ldap', '~> 0.9.11'
 gem 'will_paginate', '~> 3.1.5'
-gem 'jpmobile', '~> 5.0.0'
+gem 'jpmobile', '~> 5.1.0'
 gem 'rmagick', '~> 2.16.0'
 gem 'nokogiri', '~> 1.6.8'
 gem 'nokogumbo', '~> 1.4.9'
