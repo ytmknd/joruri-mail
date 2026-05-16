@@ -2,7 +2,7 @@ source 'https://rubygems.org'
 
 
 # Bundle edge Rails instead: gem 'rails', github: 'rails/rails'
-gem 'rails', '5.0.0.1'
+gem 'rails', '~> 5.0.7', '>= 5.0.7.2'
 # Use mysql as the database for Active Record
 gem 'mysql2', '>= 0.3.13', '< 0.5'
 # Use Puma as the app server
@@ -43,6 +43,8 @@ gem 'nokogumbo', '~> 1.4.9'
 gem 'hpricot', '~> 0.8.6'
 gem 'premailer', '~> 1.8.7'
 gem 'sanitize', '~> 4.3.0'
+gem 'rails-html-sanitizer', '~> 1.0.3'
+gem 'loofah', '~> 2.0.3'
 gem 'zipruby', '0.3.6'
 gem 'mime-types', '~> 3.1.0'
 gem 'shared-mime-info', '~> 0.2.5'

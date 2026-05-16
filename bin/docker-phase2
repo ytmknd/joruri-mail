@@ -1,0 +1,50 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+usage() {
+  cat <<'USAGE'
+Usage:
+  bin/docker-phase2 build
+  bin/docker-phase2 check
+  bin/docker-phase2 up
+  bin/docker-phase2 bundle-update-rails50
+  bin/docker-phase2 all
+
+Commands:
+  build                 Build the Ubuntu 18.04 / Ruby 2.3 app image for Rails 5 migration.
+  check                 Print Ruby version and verify Rails boots.
+  up                    Start the phase 2 Rails app on http://localhost:3001/.
+  bundle-update-rails50 Update Rails to the latest allowed Rails 5.0.x patch in Gemfile.lock.
+  all                   Run build, check, then up.
+USAGE
+}
+
+cmd="${1:-}"
+
+case "$cmd" in
+  build)
+    docker compose build app-phase2
+    ;;
+  check)
+    docker compose run --rm app-phase2 ruby -v
+    docker compose run --rm app-phase2 bundle exec rails runner 'puts "Rails #{Rails.version} booted"'
+    ;;
+  up)
+    docker compose up app-phase2
+    ;;
+  bundle-update-rails50)
+    docker compose run --rm app-phase2 bundle update rails --conservative
+    ;;
+  all)
+    "$0" build
+    "$0" check
+    "$0" up
+    ;;
+  ""|-h|--help|help)
+    usage
+    ;;
+  *)
+    usage >&2
+    exit 2
+    ;;
+esac

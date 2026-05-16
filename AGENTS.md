@@ -135,6 +135,15 @@ Use `bin/docker-phase1` as the project-local command wrapper for the phase 0/1 D
 - `bin/docker-phase1 up`: runs `docker compose up app`.
 - `bin/docker-phase1 all`: runs build, check, then starts the app.
 
+Use `bin/docker-phase2` for Rails 5 upgrade work. It targets the `app-phase2` Compose service, keeps Ruby 2.3.8 for the first Rails 5.0 patch update, keeps separate bundle/log/tmp/assets volumes from phase 0/1, and exposes the Rails server on `http://localhost:3001/`.
+
+- `bin/docker-phase2 build`: runs `docker compose build app-phase2`.
+- `bin/docker-phase2 check`: runs Ruby version and Rails boot checks in `app-phase2`.
+- `bin/docker-phase2 up`: runs `docker compose up app-phase2`.
+- `bin/docker-phase2 bundle-update-rails50`: runs a conservative Rails lockfile update in `app-phase2`.
+
+Use the `app-ruby25` Compose service, behind the `ruby-upgrade` profile, only after the Rails 5.0 patch update is stable and `therubyracer` has been removed or replaced.
+
 The current project root directory on the host should be mounted into the container at `/var/share/jorurimail`. The source tree should remain editable from the host with Codex. Avoid writing large generated trees into the host checkout.
 
 Gems, logs, temporary files, compiled assets, uploads, and similar generated folders should live on the container side as Docker named volumes. Do not let those paths create many files in the host-shared source tree.
