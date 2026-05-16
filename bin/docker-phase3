@@ -1,0 +1,45 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+usage() {
+  cat <<'USAGE'
+Usage:
+  bin/docker-phase3 ubuntu20-build
+  bin/docker-phase3 ubuntu20-check
+  bin/docker-phase3 ubuntu20-up
+  bin/docker-phase3 all
+
+Commands:
+  ubuntu20-build  Build the Ubuntu 20.04 / Ruby 2.7 app image.
+  ubuntu20-check  Print Ruby version and verify Rails boots on Ubuntu 20.04.
+  ubuntu20-up     Start the Ubuntu 20.04 / Ruby 2.7 Rails app on http://localhost:3004/.
+  all             Run ubuntu20-build, ubuntu20-check, then ubuntu20-up.
+USAGE
+}
+
+cmd="${1:-}"
+
+case "$cmd" in
+  ubuntu20-build)
+    docker compose --profile phase3 build app-ubuntu20-ruby27
+    ;;
+  ubuntu20-check)
+    docker compose --profile phase3 run --rm app-ubuntu20-ruby27 ruby -v
+    docker compose --profile phase3 run --rm app-ubuntu20-ruby27 bundle exec rails runner 'puts "Rails #{Rails.version} booted"'
+    ;;
+  ubuntu20-up)
+    docker compose --profile phase3 up app-ubuntu20-ruby27
+    ;;
+  all)
+    "$0" ubuntu20-build
+    "$0" ubuntu20-check
+    "$0" ubuntu20-up
+    ;;
+  ""|-h|--help|help)
+    usage
+    ;;
+  *)
+    usage >&2
+    exit 2
+    ;;
+esac
