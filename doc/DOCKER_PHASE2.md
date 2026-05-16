@@ -13,7 +13,7 @@ This keeps the phase 0/1 `app` service intact and adds `app-phase2`:
 
 The initial Rails upgrade target is the latest Rails 5.0.x patch while keeping Ruby 2.3.8. After that, move to Ruby 2.4/2.5, then Rails 5.1 and Rails 5.2 in separate code commits.
 
-The `app-ruby25` service and `docker/ubuntu18-ruby25/Dockerfile` are provided for the later Ruby 2.5 verification step. That service is behind the `ruby-upgrade` Compose profile and is expected to require removing/replacing `therubyracer`.
+The `app-ruby25` service and `docker/ubuntu18-ruby25/Dockerfile` are provided for the later Ruby 2.5 verification step. That service is behind the `ruby-upgrade` Compose profile. ExecJS uses Node.js from the Docker image; `therubyracer` and `libv8` are no longer part of the bundle.
 
 ## Commands
 
@@ -62,4 +62,4 @@ docker compose run --rm app-phase2 bundle exec rake db:seed:demo
 
 Use `app` for the frozen phase 0/1 baseline and `app-phase2` for Rails/Ruby migration work. Do not share bundle volumes between them.
 
-Use `app-ruby25` only after the Rails 5.0 patch update is stable and the JavaScript runtime dependency has been moved away from `therubyracer`.
+Use `app-ruby25` only after the Rails 5.0 patch update is stable and the Node.js ExecJS runtime has passed `assets:precompile`.
