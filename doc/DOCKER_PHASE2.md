@@ -111,6 +111,31 @@ docker compose --profile ruby-upgrade run --rm app-ruby25 bundle exec rake db:se
 
 Rails 5.1 is stricter about named connection pools. Optional named connections such as `joruri_manage`, `dev_jgw_core`, and `session` should only call `establish_connection` when the matching database configuration exists.
 
+## Rails 5.2 Update
+
+After Rails 5.1 is stable, update Rails and the Rails 5.2 dependency blockers with:
+
+```sh
+bin/docker-phase2 bundle-update-rails52
+```
+
+The Rails 5.2 update raises:
+
+- `rails` to `5.2.8.1`
+- `coffee-rails` to `4.2.2`
+
+Then run the Ruby 2.5 gate checks again:
+
+```sh
+bin/docker-phase2 ruby25-check
+docker compose --profile ruby-upgrade run --rm app-ruby25 bundle exec rake assets:precompile
+docker compose --profile ruby-upgrade run --rm app-ruby25 bundle exec rake db:schema:load
+docker compose --profile ruby-upgrade run --rm app-ruby25 bundle exec rake db:seed
+docker compose --profile ruby-upgrade run --rm app-ruby25 bundle exec rake db:seed:demo
+```
+
+Rails 5.2 removes `ActiveSupport.halt_callback_chains_on_return_false=` and rejects string callback/validation conditions. Keep the legacy default initializer guarded and use symbol, proc, lambda, or block conditions.
+
 ## Notes
 
 Use `app` for the frozen phase 0/1 baseline and `app-phase2` for Rails/Ruby migration work. Do not share bundle volumes between them.

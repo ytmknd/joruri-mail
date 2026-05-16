@@ -12,6 +12,7 @@ Usage:
   bin/docker-phase2 ruby25-up
   bin/docker-phase2 bundle-update-rails50
   bin/docker-phase2 bundle-update-rails51
+  bin/docker-phase2 bundle-update-rails52
   bin/docker-phase2 all
 
 Commands:
@@ -23,6 +24,7 @@ Commands:
   ruby25-up             Start the Ruby 2.5 Rails app on http://localhost:3002/.
   bundle-update-rails50 Update Rails to the latest allowed Rails 5.0.x patch in Gemfile.lock.
   bundle-update-rails51 Update Rails and known Rails 5.1 blockers in the Ruby 2.5 service.
+  bundle-update-rails52 Update Rails and known Rails 5.2 blockers in the Ruby 2.5 service.
   all                   Run build, check, then up.
 USAGE
 }
@@ -55,6 +57,9 @@ case "$cmd" in
     ;;
   bundle-update-rails51)
     docker compose --profile ruby-upgrade run --rm --user 1000:1000 --entrypoint bundle app-ruby25 _1.17.3_ update rails activerecord-session_store jbuilder
+    ;;
+  bundle-update-rails52)
+    docker compose --profile ruby-upgrade run --rm --user 1000:1000 --entrypoint bundle app-ruby25 _1.17.3_ update rails coffee-rails
     ;;
   all)
     "$0" build

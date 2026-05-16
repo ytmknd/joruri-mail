@@ -12,13 +12,13 @@ class Webmail::Mailbox < ApplicationRecord
 
   after_initialize :set_defaults
 
-  with_options if: "name.present? && name_changed?" do
+  with_options if: -> { name.present? && name_changed? } do
     before_update :update_filters
     before_update :update_mail_nodes
     before_update :update_children
   end
 
-  with_options if: "name.present?" do
+  with_options if: -> { name.present? } do
     before_destroy :disable_filters
     before_destroy :destroy_mail_nodes
     before_destroy :destroy_children

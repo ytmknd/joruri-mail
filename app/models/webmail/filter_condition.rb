@@ -5,7 +5,7 @@ class Webmail::FilterCondition < ApplicationRecord
   belongs_to :filter, foreign_key: :filter_id, class_name: 'Webmail::Filter'
 
   validates :user_id, :column, :inclusion, :value, presence: true
-  validates :value, regexp: true, if: "inclusion == '=~'"
+  validates :value, regexp: true, if: ->(record) { record.inclusion == '=~' }
 
   enumerize :column, in: [:subject, :from, :to]
   enumerize :inclusion, in: ['<', '!<', '==', '=~']

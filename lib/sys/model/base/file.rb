@@ -2,7 +2,7 @@ module Sys::Model::Base::File
   extend ActiveSupport::Concern
 
   included do
-    validates :file, presence: true, if: "@_skip_upload != true"
+    validates :file, presence: true, if: ->(record) { record.instance_variable_get(:@_skip_upload) != true }
     validates :name, :title, presence: true
     validate :validate_file_name
     validate :validate_upload_file

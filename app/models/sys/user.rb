@@ -37,7 +37,7 @@ class Sys::User < Sys::ManageDatabase
   attr_accessor :_in_group_id
   #attr_accessor :group, :group_id, :in_group_id
 
-  after_save :save_group, if: %Q(@_in_group_id_changed)
+  after_save :save_group, if: ->(record) { record.instance_variable_get(:@_in_group_id_changed) }
 
   validates :state, :account, :name, :ldap, presence: true
   validates :mobile_password, length: { minimum: 4, if: lambda { |u| u.mobile_password && u.mobile_password.length != 0 } }
