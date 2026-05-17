@@ -24,6 +24,10 @@ module Joruri
     # -- all .rb files in that directory are automatically loaded.
     require "#{Rails.root}/lib/joruri"
 
+    if ENV['SECRET_KEY_BASE'].to_s != ''
+      config.secret_key_base = ENV['SECRET_KEY_BASE']
+    end
+
     config.autoloader = :zeitwerk
     Rails.autoloaders.main.ignore(Rails.root.join('lib/plugins'))
 

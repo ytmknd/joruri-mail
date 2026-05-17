@@ -250,6 +250,7 @@ services:
       EXECJS_RUNTIME: Node
       LANG: ja_JP.UTF-8
       LC_ALL: ja_JP.UTF-8
+      SECRET_KEY_BASE: 3f7dfde7386a3b01cf9a334a6273f64af7773ba3d5f6fdd8beee4dc927e3686fcb4c551c3a7e2ad4e12d5874fd8840bfbf3678f0f1d62f057f6f04e711ba43c90
     ports:
       - "3004:3000"
     depends_on:
