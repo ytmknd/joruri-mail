@@ -7,7 +7,7 @@ gem 'concurrent-ruby', '1.3.4'
 # Use mysql as the database for Active Record
 gem 'mysql2', '~> 0.5.7'
 # Use Puma as the app server
-#gem 'puma', '~> 3.0'
+gem 'puma', '~> 5.6'
 # Use SCSS for stylesheets
 gem 'sass-rails', '~> 6.0'
 # Use Uglifier as compressor for JavaScript assets

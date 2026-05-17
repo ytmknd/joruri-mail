@@ -57,3 +57,16 @@ secrets.
   `SECRET_KEY_BASE` for Phase 3/4 verification.
 - `config/secrets.yml` remains mounted for legacy compatibility in this step,
   but it is no longer the preferred source for the Phase 4 container runtime.
+
+## Puma App Server Baseline
+
+Puma is enabled for the Rails 6.1 Phase 4 runtime so the container no longer
+depends on WEBrick before the later Ruby 3 migration.
+
+- `puma` is locked to the 5.6 series for Ruby 2.7 and Rails 6.1 compatibility.
+- The existing `config/puma.rb` remains the server configuration used by
+  `rails server`.
+- The Compose command still runs `bundle exec rails server`, but Rails now boots
+  Puma because the gem is present.
+- Reverse proxy setup and separate process supervision remain later Phase 4/5
+  work.
