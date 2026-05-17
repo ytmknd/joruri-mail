@@ -2,7 +2,7 @@ source 'https://rubygems.org'
 
 
 # Bundle edge Rails instead: gem 'rails', github: 'rails/rails'
-gem 'rails', '~> 6.0.0'
+gem 'rails', '~> 6.1.0'
 gem 'concurrent-ruby', '1.3.4'
 # Use mysql as the database for Active Record
 gem 'mysql2', '~> 0.5.7'
@@ -30,7 +30,7 @@ gem 'jbuilder', '~> 2.7'
 # Use Capistrano for deployment
 # gem 'capistrano-rails', group: :development
 
-gem 'activerecord-import', '~> 0.15.0'
+gem 'activerecord-import', '~> 1.4'
 gem 'activerecord-session_store', '~> 1.1.3'
 gem 'active_hash', '~> 1.4.1'
 gem 'enumerize', '~> 2.0.0'

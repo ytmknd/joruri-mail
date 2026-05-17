@@ -1,5 +1,13 @@
 if Rails.gem_version >= Gem::Version.new('6.0') && defined?(Jpmobile::Resolver)
   class Jpmobile::Resolver
+    if Rails.gem_version >= Gem::Version.new('6.1')
+      def initialize(path, pattern = nil)
+        raise ArgumentError, 'path already is a Resolver class' if path.is_a?(Jpmobile::Resolver)
+        super(path)
+        @pattern = pattern || DEFAULT_PATTERN
+      end
+    end
+
     private
 
     def query(path, details, formats, locals = [], cache: false)

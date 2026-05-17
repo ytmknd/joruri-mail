@@ -64,3 +64,17 @@ fixed while updating Rails and direct compatibility dependencies.
 - Sprockets 4 requires `app/assets/config/manifest.js`.
 - Local Mail gem extensions are reopened against Mail 2.8 classes rather than
   redefining their old superclass/module shapes.
+
+## Rails 6.1 On Ubuntu 20.04
+
+Rails 6.1 keeps the same Ubuntu 20.04 / Ruby 2.7 runtime and moves only the
+Rails minor version and direct compatibility dependencies.
+
+- Rails is updated to the latest 6.1 patch available to the bundle.
+- `activerecord-import` is updated to a Rails 6.1 compatible release because
+  older 0.x releases call removed Active Record connection pool APIs.
+- Active Job is kept on `delayed_job`, but Rails 6.1's bundled adapter is loaded
+  explicitly because the `delayed_job` gem ships an older adapter on an earlier
+  Bundler load path.
+- The local jpmobile resolver patch also handles the Rails 6.1
+  `ActionView::FileSystemResolver` initializer signature.

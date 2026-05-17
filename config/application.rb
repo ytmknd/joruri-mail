@@ -35,6 +35,10 @@ module Joruri
       %Q|<span class="field_with_errors">#{html_tag}</span>|.html_safe
     }
 
+    if ActiveJob::QueueAdapters.autoload?(:DelayedJobAdapter)
+      ActiveJob::QueueAdapters.send(:remove_const, :DelayedJobAdapter)
+      load File.join(Gem::Specification.find_by_name('activejob').full_gem_path, 'lib/active_job/queue_adapters/delayed_job_adapter.rb')
+    end
     config.active_job.queue_adapter = :delayed_job
   end
 end
