@@ -24,6 +24,9 @@ module Joruri
     # -- all .rb files in that directory are automatically loaded.
     require "#{Rails.root}/lib/joruri"
 
+    config.autoloader = :zeitwerk
+    Rails.autoloaders.main.ignore(Rails.root.join('lib/plugins'))
+
     # Custom directories with classes and modules you want to be autoloadable.
     config.eager_load_paths += %W(#{config.root}/lib)
 
