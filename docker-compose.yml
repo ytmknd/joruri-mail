@@ -236,7 +236,7 @@ services:
       dockerfile: docker/ubuntu20-ruby27/Dockerfile
       args:
         RUBY_VERSION: "2.7.8"
-        BUNDLER_VERSION: "1.17.3"
+        BUNDLER_VERSION: "2.2.3"
     image: joruri-mail:phase3-ubuntu20-ruby27
     platform: linux/amd64
     working_dir: /var/share/jorurimail
@@ -245,7 +245,7 @@ services:
       BUNDLE_APP_CONFIG: /var/share/jorurimail/.bundle
       BUNDLE_BIN: /var/share/jorurimail/vendor/bundle/bin
       BUNDLE_PATH: /var/share/jorurimail/vendor/bundle
-      BUNDLER_VERSION: "1.17.3"
+      BUNDLER_VERSION: "2.2.3"
       CHOWN_SOURCE_TREE: "1"
       EXECJS_RUNTIME: Node
       LANG: ja_JP.UTF-8

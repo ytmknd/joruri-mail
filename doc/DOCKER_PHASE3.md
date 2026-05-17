@@ -1,8 +1,8 @@
 # Docker Phase 3
 
-Phase 3 starts by changing only the operating system base image. Ruby, Rails,
-Bundler, database, and mail services stay aligned with the verified Phase 2
-Ruby 2.7 baseline.
+Phase 3 starts by changing only the operating system base image. The initial
+Ubuntu 20.04 step keeps Ruby, Rails, Bundler, database, and mail services
+aligned with the verified Phase 2 Ruby 2.7 baseline.
 
 ## Ubuntu 20.04 / Ruby 2.7 Verification
 
@@ -48,3 +48,19 @@ Keep Ruby at 2.7 and Ubuntu at 20.04 while removing Rails 6.0 blockers.
   `update`.
 - Keep the first Rails 6.0 upgrade on the classic autoloader unless Zeitwerk has
   been audited separately.
+
+## Rails 6.0 On Ubuntu 20.04
+
+Rails 6.0 runs in the same `app-ubuntu20-ruby27` service. Keep the OS and Ruby
+fixed while updating Rails and direct compatibility dependencies.
+
+- Rails is updated to the latest 6.0 patch available to the bundle.
+- Bundler is updated to 2.2.3 for this phase because Bundler 1.17.3 fails while
+  resolving the Rails 6 dependency graph on Ruby 2.7.
+- `mail` is pinned to 2.8.1 and `mail-iso-2022-jp` is updated to 2.1.x so
+  Rails 6 `actionmailbox` can satisfy `mail >= 2.7.1`.
+- `concurrent-ruby` is pinned to 1.3.4 because Rails 6.0 expects `Logger` to be
+  available during Active Support boot.
+- Sprockets 4 requires `app/assets/config/manifest.js`.
+- Local Mail gem extensions are reopened against Mail 2.8 classes rather than
+  redefining their old superclass/module shapes.

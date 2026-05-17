@@ -14,7 +14,7 @@ module Mail
       end
     end
   end
-  class ContentDispositionField < StructuredField
+  class ContentDispositionField
     prepend ContentDispositionFieldFix
   end
 end

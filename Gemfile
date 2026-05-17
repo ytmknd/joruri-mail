@@ -2,7 +2,8 @@ source 'https://rubygems.org'
 
 
 # Bundle edge Rails instead: gem 'rails', github: 'rails/rails'
-gem 'rails', '~> 5.2.8'
+gem 'rails', '~> 6.0.0'
+gem 'concurrent-ruby', '1.3.4'
 # Use mysql as the database for Active Record
 gem 'mysql2', '~> 0.5.7'
 # Use Puma as the app server
@@ -48,8 +49,8 @@ gem 'loofah', '~> 2.19.1'
 gem 'zipruby', '0.3.6'
 gem 'mime-types', '~> 3.1.0'
 gem 'shared-mime-info', '~> 0.2.5'
-gem 'mail', '2.6.4'
-gem 'mail-iso-2022-jp', '2.0.5'
+gem 'mail', '2.8.1'
+gem 'mail-iso-2022-jp', '~> 2.1.0'
 gem 'charlock_holmes', '~> 0.7.9'
 gem 'delayed_job_active_record', '~> 4.1.1'
 gem 'daemons', '~> 1.2.4'

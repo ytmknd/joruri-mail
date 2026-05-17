@@ -1,5 +1,5 @@
 module Mail
-  class BccField < StructuredField
+  class BccField
     include FieldWithIso2022JpEncoding
   end
 end

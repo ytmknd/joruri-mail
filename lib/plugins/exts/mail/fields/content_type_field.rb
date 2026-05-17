@@ -6,7 +6,7 @@ module Mail
       @parameters
     end
   end
-  class ContentTypeField < StructuredField
+  class ContentTypeField
     prepend ContentTypeFieldFix
   end
 end

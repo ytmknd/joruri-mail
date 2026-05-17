@@ -1,26 +1,9 @@
 module Mail
-  class DispositionNotificationToField < Mail::StructuredField
-    include Mail::CommonAddress
-
+  class DispositionNotificationToField < Mail::CommonAddressField
+    NAME = 'Disposition-Notification-To'
     FIELD_NAME = 'disposition-notification-to'
-    CAPITALIZED_FIELD = 'Disposition-Notification-To'
+    CAPITALIZED_FIELD = NAME
 
-    def initialize(value = nil, charset = 'utf-8')
-      self.charset = charset
-      super(CAPITALIZED_FIELD, strip_field(FIELD_NAME, value), charset)
-      self.parse
-      self
-    end
-
-    def encoded
-      do_encode(CAPITALIZED_FIELD)
-    end
-
-    def decoded
-      do_decode
-    end
-  end
-  class DispositionNotificationToField < Mail::StructuredField
     include FieldWithIso2022JpEncoding
   end
 end
