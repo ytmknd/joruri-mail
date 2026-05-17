@@ -1,6 +1,17 @@
 require_relative 'boot'
 
+# Keep Ruby 2.7 stdlib net/protocol loaded before bundled net-* gems. Otherwise
+# css_parser's net/https load reopens the stdlib file after net-protocol.
+require 'net/https'
+
 require 'rails/all'
+
+# mime-types 3.1 uses parameter names that Ruby 2.7 warns about. Load that file
+# once with verbose warnings disabled until the MIME dependency set is replaced.
+original_verbose = $VERBOSE
+$VERBOSE = nil
+require 'mime/types/logger'
+$VERBOSE = original_verbose
 
 # Require the gems listed in Gemfile, including any gems
 # you've limited to :test, :development, or :production.
