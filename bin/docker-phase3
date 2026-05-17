@@ -7,6 +7,7 @@ Usage:
   bin/docker-phase3 ubuntu20-build
   bin/docker-phase3 ubuntu20-check
   bin/docker-phase3 ubuntu20-up
+  bin/docker-phase3 ubuntu20-proxy-up
   bin/docker-phase3 ubuntu20-worker-up
   bin/docker-phase3 ubuntu20-scheduler-up
   bin/docker-phase3 ubuntu20-smoke
@@ -16,6 +17,8 @@ Commands:
   ubuntu20-build  Build the Ubuntu 20.04 / Ruby 2.7 app image.
   ubuntu20-check  Print Ruby version and verify Rails boots on Ubuntu 20.04.
   ubuntu20-up     Start the Ubuntu 20.04 / Ruby 2.7 Rails app on http://localhost:3004/.
+  ubuntu20-proxy-up
+                  Start the Phase 4 Nginx reverse proxy on http://localhost:3005/.
   ubuntu20-worker-up
                   Start delayed_job as a separate Phase 4 worker process.
   ubuntu20-scheduler-up
@@ -37,6 +40,9 @@ case "$cmd" in
     ;;
   ubuntu20-up)
     docker compose --profile phase3 up app-ubuntu20-ruby27
+    ;;
+  ubuntu20-proxy-up)
+    docker compose --profile phase3 up app-ubuntu20-ruby27-proxy
     ;;
   ubuntu20-worker-up)
     docker compose --profile phase3 up app-ubuntu20-ruby27-worker

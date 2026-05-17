@@ -279,6 +279,18 @@ services:
     stdin_open: true
     tty: true
 
+  app-ubuntu20-ruby27-proxy:
+    profiles:
+      - phase3
+    image: nginx:1.26-alpine
+    platform: linux/amd64
+    ports:
+      - "3005:80"
+    depends_on:
+      - app-ubuntu20-ruby27
+    volumes:
+      - ./docker/nginx/phase4.conf:/etc/nginx/conf.d/default.conf:ro
+
   app-ubuntu20-ruby27-worker:
     profiles:
       - phase3

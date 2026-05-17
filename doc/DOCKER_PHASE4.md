@@ -68,8 +68,20 @@ depends on WEBrick before the later Ruby 3 migration.
   `rails server`.
 - The Compose command still runs `bundle exec rails server`, but Rails now boots
   Puma because the gem is present.
-- Reverse proxy setup and separate process supervision remain later Phase 4/5
-  work.
+
+## Reverse Proxy Baseline
+
+Phase 4 adds an Nginx reverse proxy in front of Puma while keeping direct Puma
+access available for comparison.
+
+- `app-ubuntu20-ruby27-proxy` exposes Nginx on `http://localhost:3005/`.
+- `docker/nginx/phase4.conf` proxies requests to `app-ubuntu20-ruby27:3000`.
+- The proxy forwards the original `Host` header including the external port so
+  Rails redirects stay on `localhost:3005`.
+- The existing direct Puma port remains available on `http://localhost:3004/`
+  during migration.
+- `bin/docker-phase3 ubuntu20-proxy-up` starts the proxy service for manual
+  checks.
 
 ## Delayed Job Worker Process
 
