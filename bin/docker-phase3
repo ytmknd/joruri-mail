@@ -13,6 +13,11 @@ Usage:
   bin/docker-phase3 ubuntu20-stack-up
   bin/docker-phase3 ubuntu20-stack-check
   bin/docker-phase3 ubuntu20-smoke
+  bin/docker-phase3 ubuntu22-build
+  bin/docker-phase3 ubuntu22-check
+  bin/docker-phase3 ubuntu22-up
+  bin/docker-phase3 ubuntu22-stack-up
+  bin/docker-phase3 ubuntu22-stack-check
   bin/docker-phase3 all
 
 Commands:
@@ -30,6 +35,13 @@ Commands:
   ubuntu20-stack-check
                   Verify the Phase 4 proxy endpoint responds.
   ubuntu20-smoke  Run non-destructive Phase 3 smoke checks against a running app.
+  ubuntu22-build  Build the Ubuntu 22.04 / Ruby 3.1 app image.
+  ubuntu22-check  Print Ruby version and verify Rails boots on Ubuntu 22.04.
+  ubuntu22-up     Start the Ubuntu 22.04 / Ruby 3.1 Rails app on http://localhost:3006/.
+  ubuntu22-stack-up
+                  Start the Ubuntu 22.04 web, proxy, worker, and scheduler stack.
+  ubuntu22-stack-check
+                  Verify the Ubuntu 22.04 proxy endpoint responds on http://localhost:3007/.
   all             Run ubuntu20-build, ubuntu20-check, then ubuntu20-up.
 USAGE
 }
@@ -116,6 +128,22 @@ imap.logout
 
 puts "smtp_imap_iso2022jp_ok #{id}"
 RUBY
+    ;;
+  ubuntu22-build)
+    docker compose --profile phase3 build app-ubuntu22-ruby31
+    ;;
+  ubuntu22-check)
+    docker compose --profile phase3 run --rm app-ubuntu22-ruby31 ruby -v
+    docker compose --profile phase3 run --rm app-ubuntu22-ruby31 bundle exec rails runner 'puts "Rails #{Rails.version} booted"'
+    ;;
+  ubuntu22-up)
+    docker compose --profile phase3 up app-ubuntu22-ruby31
+    ;;
+  ubuntu22-stack-up)
+    docker compose --profile phase3 up app-ubuntu22-ruby31 app-ubuntu22-ruby31-proxy app-ubuntu22-ruby31-worker app-ubuntu22-ruby31-scheduler
+    ;;
+  ubuntu22-stack-check)
+    curl -fsSI http://localhost:3007/_admin/login
     ;;
   all)
     "$0" ubuntu20-build

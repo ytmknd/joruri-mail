@@ -173,3 +173,32 @@ bin/docker-phase3 ubuntu20-stack-check
 bin/docker-phase3 ubuntu20-smoke
 docker compose --profile phase3 exec app-ubuntu20-ruby27 bundle exec rails runner 'puts Delayed::Job.where(queue: "phase3-smoke").count'
 ```
+
+## Ubuntu 22.04 / Ruby 3.1 Preparation
+
+Rails 7.2 requires Ruby 3.1 or newer, so Phase 4 now has a preparation
+runtime on Ubuntu 22.04 with Ruby 3.1 while Rails stays on 7.1.
+
+- `app-ubuntu22-ruby31` builds Ruby 3.1.7 on Ubuntu 22.04.
+- The stack exposes Rails directly on `http://localhost:3006/` and through the
+  Nginx proxy on `http://localhost:3007/`.
+- `mime-types` is updated from 3.1 to 3.7 for Ruby 3 parser compatibility.
+- `rexml` is explicit because Ruby 3 no longer makes it safe to rely on an
+  implicit standard-library load path for `shared-mime-info`.
+- `will_paginate` is updated to 4.0 for Ruby 3.1 compatibility.
+- `active_hash` is updated to 3.3 for Rails 7 association API compatibility.
+- `minitest` and `securerandom` are pinned to versions that still support both
+  the existing Ruby 2.7 runtime and the new Ruby 3.1 preparation runtime.
+
+Verification:
+
+```sh
+bin/docker-phase3 ubuntu22-build
+docker compose --profile phase3 run --rm -e RUBYOPT=-W0 app-ubuntu22-ruby31 ruby -v
+docker compose --profile phase3 run --rm -e RUBYOPT=-W0 app-ubuntu22-ruby31 bundle exec rails runner 'puts "Ruby #{RUBY_VERSION} Rails #{Rails.version} booted"'
+docker compose --profile phase3 run --rm -e RUBYOPT=-W0 app-ubuntu22-ruby31 bundle exec rails zeitwerk:check
+docker compose --profile phase3 run --rm -e RUBYOPT=-W0 app-ubuntu22-ruby31 bundle exec rake assets:precompile
+docker compose --profile phase3 run --rm -e RUBYOPT=-W0 app-ubuntu20-ruby27 bundle exec rails runner 'puts "Ruby #{RUBY_VERSION} Rails #{Rails.version} booted"'
+docker compose --profile phase3 up -d --force-recreate app-ubuntu22-ruby31 app-ubuntu22-ruby31-proxy app-ubuntu22-ruby31-worker app-ubuntu22-ruby31-scheduler
+bin/docker-phase3 ubuntu22-stack-check
+```
