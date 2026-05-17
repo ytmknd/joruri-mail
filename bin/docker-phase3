@@ -8,6 +8,7 @@ Usage:
   bin/docker-phase3 ubuntu20-check
   bin/docker-phase3 ubuntu20-up
   bin/docker-phase3 ubuntu20-worker-up
+  bin/docker-phase3 ubuntu20-scheduler-up
   bin/docker-phase3 ubuntu20-smoke
   bin/docker-phase3 all
 
@@ -17,6 +18,8 @@ Commands:
   ubuntu20-up     Start the Ubuntu 20.04 / Ruby 2.7 Rails app on http://localhost:3004/.
   ubuntu20-worker-up
                   Start delayed_job as a separate Phase 4 worker process.
+  ubuntu20-scheduler-up
+                  Start scheduled cleanup as a separate Phase 4 process.
   ubuntu20-smoke  Run non-destructive Phase 3 smoke checks against a running app.
   all             Run ubuntu20-build, ubuntu20-check, then ubuntu20-up.
 USAGE
@@ -37,6 +40,9 @@ case "$cmd" in
     ;;
   ubuntu20-worker-up)
     docker compose --profile phase3 up app-ubuntu20-ruby27-worker
+    ;;
+  ubuntu20-scheduler-up)
+    docker compose --profile phase3 up app-ubuntu20-ruby27-scheduler
     ;;
   ubuntu20-smoke)
     docker compose --profile phase3 exec app-ubuntu20-ruby27 bundle exec rails runner 'p Webmail::Lib::Server.check_status'

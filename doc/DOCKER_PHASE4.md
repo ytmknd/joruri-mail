@@ -84,3 +84,15 @@ jobs no longer have to run inside the web server container.
   checks.
 - `bin/docker-phase3 ubuntu20-smoke` drains the smoke-test queue through the
   worker service instead of running `jobs:workoff` inside the web container.
+
+## Scheduler Process
+
+Phase 4 also starts moving scheduled work out of in-container cron.
+
+- `app-ubuntu20-ruby27-scheduler` runs `webmail:cleanup` in a foreground loop.
+- `SCHEDULER_INTERVAL_SECONDS` controls the loop interval and defaults to one
+  day for the Docker development runtime.
+- `bin/docker-phase3 ubuntu20-scheduler-up` starts the scheduler service for
+  manual checks.
+- `delayed_job:monitor` is intentionally not carried into the scheduler service
+  because `delayed_job` now has its own worker container.
