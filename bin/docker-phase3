@@ -10,6 +10,8 @@ Usage:
   bin/docker-phase3 ubuntu20-proxy-up
   bin/docker-phase3 ubuntu20-worker-up
   bin/docker-phase3 ubuntu20-scheduler-up
+  bin/docker-phase3 ubuntu20-stack-up
+  bin/docker-phase3 ubuntu20-stack-check
   bin/docker-phase3 ubuntu20-smoke
   bin/docker-phase3 all
 
@@ -23,6 +25,10 @@ Commands:
                   Start delayed_job as a separate Phase 4 worker process.
   ubuntu20-scheduler-up
                   Start scheduled cleanup as a separate Phase 4 process.
+  ubuntu20-stack-up
+                  Start the Phase 4 web, proxy, worker, and scheduler stack.
+  ubuntu20-stack-check
+                  Verify the Phase 4 proxy endpoint responds.
   ubuntu20-smoke  Run non-destructive Phase 3 smoke checks against a running app.
   all             Run ubuntu20-build, ubuntu20-check, then ubuntu20-up.
 USAGE
@@ -49,6 +55,12 @@ case "$cmd" in
     ;;
   ubuntu20-scheduler-up)
     docker compose --profile phase3 up app-ubuntu20-ruby27-scheduler
+    ;;
+  ubuntu20-stack-up)
+    docker compose --profile phase3 up app-ubuntu20-ruby27 app-ubuntu20-ruby27-proxy app-ubuntu20-ruby27-worker app-ubuntu20-ruby27-scheduler
+    ;;
+  ubuntu20-stack-check)
+    curl -fsSI http://localhost:3005/_admin/login
     ;;
   ubuntu20-smoke)
     docker compose --profile phase3 exec app-ubuntu20-ruby27 bundle exec rails runner 'p Webmail::Lib::Server.check_status'

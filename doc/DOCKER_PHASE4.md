@@ -27,6 +27,13 @@ docker compose --profile phase3 run --rm app-ubuntu20-ruby27 bundle exec rake as
 bin/docker-phase3 ubuntu20-smoke
 ```
 
+For the full Phase 4 process layout, use:
+
+```sh
+bin/docker-phase3 ubuntu20-stack-up
+bin/docker-phase3 ubuntu20-stack-check
+```
+
 `rails app:update` has been audited in a temporary copy for Rails 6.1. The
 remaining generated files, such as Active Storage migrations and new policy
 initializers, are intentionally not applied in this baseline.
@@ -82,6 +89,7 @@ access available for comparison.
   during migration.
 - `bin/docker-phase3 ubuntu20-proxy-up` starts the proxy service for manual
   checks.
+- `bin/docker-phase3 ubuntu20-stack-check` verifies the proxy login endpoint.
 
 ## Delayed Job Worker Process
 
