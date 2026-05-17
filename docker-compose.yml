@@ -279,6 +279,53 @@ services:
     stdin_open: true
     tty: true
 
+  app-ubuntu20-ruby27-worker:
+    profiles:
+      - phase3
+    build:
+      context: .
+      dockerfile: docker/ubuntu20-ruby27/Dockerfile
+      args:
+        RUBY_VERSION: "2.7.8"
+        BUNDLER_VERSION: "2.2.3"
+    image: joruri-mail:phase3-ubuntu20-ruby27
+    platform: linux/amd64
+    working_dir: /var/share/jorurimail
+    environment:
+      RAILS_ENV: development
+      BUNDLE_APP_CONFIG: /var/share/jorurimail/.bundle
+      BUNDLE_BIN: /var/share/jorurimail/vendor/bundle/bin
+      BUNDLE_PATH: /var/share/jorurimail/vendor/bundle
+      BUNDLER_VERSION: "2.2.3"
+      CHOWN_SOURCE_TREE: "0"
+      EXECJS_RUNTIME: Node
+      LANG: ja_JP.UTF-8
+      LC_ALL: ja_JP.UTF-8
+      SECRET_KEY_BASE: 3f7dfde7386a3b01cf9a334a6273f64af7773ba3d5f6fdd8beee4dc927e3686fcb4c551c3a7e2ad4e12d5874fd8840bfbf3678f0f1d62f057f6f04e711ba43c90
+    depends_on:
+      db:
+        condition: service_healthy
+      imap:
+        condition: service_started
+    volumes:
+      - .:/var/share/jorurimail:cached
+      - bundle_ubuntu20_ruby27:/var/share/jorurimail/vendor/bundle
+      - bundle_config_ubuntu20_ruby27:/var/share/jorurimail/.bundle
+      - bower_components_ubuntu20_ruby27:/var/share/jorurimail/vendor/assets/bower_components
+      - log_ubuntu20_ruby27:/var/share/jorurimail/log
+      - public_assets_ubuntu20_ruby27:/var/share/jorurimail/public/assets
+      - tmp_ubuntu20_ruby27:/var/share/jorurimail/tmp
+      - upload_ubuntu20_ruby27:/var/share/jorurimail/upload
+      - ./docker/phase1/config/application.yml:/var/share/jorurimail/config/application.yml:ro
+      - ./docker/phase1/config/core.yml:/var/share/jorurimail/config/core.yml:ro
+      - ./docker/phase1/config/database.yml:/var/share/jorurimail/config/database.yml:ro
+      - ./docker/phase1/config/imap.yml:/var/share/jorurimail/config/imap.yml:ro
+      - ./docker/phase1/config/ldap.yml:/var/share/jorurimail/config/ldap.yml:ro
+      - ./docker/phase1/config/secrets.yml:/var/share/jorurimail/config/secrets.yml:ro
+      - ./docker/phase1/config/smtp.yml:/var/share/jorurimail/config/smtp.yml:ro
+      - ./docker/phase1/config/sso.yml:/var/share/jorurimail/config/sso.yml:ro
+    command: ["bundle", "exec", "rake", "jobs:work"]
+
 volumes:
   mysql_data:
   bundle:

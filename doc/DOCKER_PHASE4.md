@@ -70,3 +70,17 @@ depends on WEBrick before the later Ruby 3 migration.
   Puma because the gem is present.
 - Reverse proxy setup and separate process supervision remain later Phase 4/5
   work.
+
+## Delayed Job Worker Process
+
+Phase 4 introduces a separate Compose service for `delayed_job` so background
+jobs no longer have to run inside the web server container.
+
+- `app-ubuntu20-ruby27-worker` uses the same Ubuntu 20.04 / Ruby 2.7 / Rails 6.1
+  image and named volumes as the web service.
+- The worker runs `bundle exec rake jobs:work` as its foreground container
+  process.
+- `bin/docker-phase3 ubuntu20-worker-up` starts the worker service for manual
+  checks.
+- `bin/docker-phase3 ubuntu20-smoke` drains the smoke-test queue through the
+  worker service instead of running `jobs:workoff` inside the web container.

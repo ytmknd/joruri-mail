@@ -40,7 +40,9 @@ if [[ "$(id -u)" = "0" ]]; then
   exec gosu joruri "$0" "$@"
 fi
 
-rm -f tmp/pids/server.pid
+if [[ "${1:-}" = "bundle" && "${2:-}" = "exec" && "${3:-}" = "rails" && "${4:-}" = "server" ]]; then
+  rm -f tmp/pids/server.pid
+fi
 
 git config --global url."https://github.com/".insteadOf git://github.com/
 

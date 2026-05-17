@@ -7,6 +7,7 @@ Usage:
   bin/docker-phase3 ubuntu20-build
   bin/docker-phase3 ubuntu20-check
   bin/docker-phase3 ubuntu20-up
+  bin/docker-phase3 ubuntu20-worker-up
   bin/docker-phase3 ubuntu20-smoke
   bin/docker-phase3 all
 
@@ -14,6 +15,8 @@ Commands:
   ubuntu20-build  Build the Ubuntu 20.04 / Ruby 2.7 app image.
   ubuntu20-check  Print Ruby version and verify Rails boots on Ubuntu 20.04.
   ubuntu20-up     Start the Ubuntu 20.04 / Ruby 2.7 Rails app on http://localhost:3004/.
+  ubuntu20-worker-up
+                  Start delayed_job as a separate Phase 4 worker process.
   ubuntu20-smoke  Run non-destructive Phase 3 smoke checks against a running app.
   all             Run ubuntu20-build, ubuntu20-check, then ubuntu20-up.
 USAGE
@@ -32,11 +35,14 @@ case "$cmd" in
   ubuntu20-up)
     docker compose --profile phase3 up app-ubuntu20-ruby27
     ;;
+  ubuntu20-worker-up)
+    docker compose --profile phase3 up app-ubuntu20-ruby27-worker
+    ;;
   ubuntu20-smoke)
     docker compose --profile phase3 exec app-ubuntu20-ruby27 bundle exec rails runner 'p Webmail::Lib::Server.check_status'
     docker compose --profile phase3 exec app-ubuntu20-ruby27 bundle exec rake webmail:cleanup
     docker compose --profile phase3 exec app-ubuntu20-ruby27 bundle exec rails runner 'Delayed::Job.where(queue: "phase3-smoke").delete_all; "phase3-smoke".delay(queue: "phase3-smoke").length; puts "queued=#{Delayed::Job.where(queue: "phase3-smoke").count}"'
-    docker compose --profile phase3 exec app-ubuntu20-ruby27 env QUEUES=phase3-smoke bundle exec rake jobs:workoff
+    docker compose --profile phase3 run --rm -e QUEUES=phase3-smoke app-ubuntu20-ruby27-worker bundle exec rake jobs:workoff
     docker compose --profile phase3 exec -T app-ubuntu20-ruby27 ruby <<'RUBY'
 require 'net/smtp'
 require 'net/imap'
