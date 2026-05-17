@@ -1,4 +1,20 @@
 if Rails.gem_version >= Gem::Version.new('6.0') && defined?(Jpmobile::Resolver)
+  if Rails.gem_version >= Gem::Version.new('7.0') &&
+      defined?(ActionView::LookupContext) &&
+      !ActionView::LookupContext.registered_details.include?(:mobile)
+    ActionView::LookupContext.register_detail(:mobile) { [] }
+
+    module JpmobileRails7DetailsKey
+      def details_cache_key(details)
+        details = details.dup
+        details.delete(:mobile)
+        super(details)
+      end
+    end
+
+    ActionView::LookupContext::DetailsKey.singleton_class.prepend(JpmobileRails7DetailsKey)
+  end
+
   class Jpmobile::Resolver
     if Rails.gem_version >= Gem::Version.new('6.1')
       def initialize(path, pattern = nil)

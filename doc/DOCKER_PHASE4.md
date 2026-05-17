@@ -83,6 +83,8 @@ access available for comparison.
 
 - `app-ubuntu20-ruby27-proxy` exposes Nginx on `http://localhost:3005/`.
 - `docker/nginx/phase4.conf` proxies requests to `app-ubuntu20-ruby27:3000`.
+- The proxy redirects `/` to `/_admin/login` so the public Phase 4 entrypoint
+  does not depend on the legacy root mail-list route.
 - The proxy forwards the original `Host` header including the external port so
   Rails redirects stay on `localhost:3005`.
 - The existing direct Puma port remains available on `http://localhost:3004/`
@@ -116,3 +118,20 @@ Phase 4 also starts moving scheduled work out of in-container cron.
   manual checks.
 - `delayed_job:monitor` is intentionally not carried into the scheduler service
   because `delayed_job` now has its own worker container.
+
+## Rails 7.0 Baseline
+
+Rails is updated to the 7.0 patch series while keeping Ubuntu 20.04 and Ruby
+2.7 for this Phase 4 step.
+
+- `rails` is locked to `~> 7.0.0`, currently resolving to Rails 7.0.10.
+- `config/initializers/new_framework_defaults_7_0.rb` is added with generated
+  defaults commented out for later one-by-one migration.
+- `config.load_defaults` is not advanced in this step.
+- `rails app:update` was run and reviewed. Generated Active Storage migrations
+  were not kept because this application has not introduced Active Storage
+  tables.
+- The jpmobile resolver compatibility patch registers and filters the legacy
+  `:mobile` template detail for Rails 7 lookup internals.
+- The Phase 4 Nginx proxy redirects `/` to `/_admin/login`; the legacy Rails
+  root route still points at the mail list and should be revisited separately.

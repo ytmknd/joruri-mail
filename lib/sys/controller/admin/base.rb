@@ -6,6 +6,7 @@ class Sys::Controller::Admin::Base < ApplicationController
 
   def initialize_application
     return false unless super
+    return true if request.env['PATH_INFO'] =~ /^\/_admin\/login/
 
     @@current_user = false
     if authenticate
@@ -29,9 +30,10 @@ class Sys::Controller::Admin::Base < ApplicationController
     uri  = request.env['PATH_INFO']
     uri += "?#{request.env['QUERY_STRING']}" if request.env['QUERY_STRING'].present?
     cookies[:sys_login_referrer] = uri
-    respond_to do |format|
-      format.html { redirect_to('/_admin/login') }
-      format.xml  { http_error 500, 'This is a secure page.' }
+    if request.format.xml?
+      http_error 500, 'This is a secure page.'
+    else
+      redirect_to('/_admin/login')
     end
     return false
   end
