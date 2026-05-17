@@ -28,6 +28,14 @@ Then start the app on port `3004`:
 bin/docker-phase3 ubuntu20-up
 ```
 
+After the app is running, run the repeatable smoke checks for connection status,
+`webmail:cleanup`, delayed job execution, SMTP send, IMAP search/copy/delete, and
+ISO-2022-JP message handling:
+
+```sh
+bin/docker-phase3 ubuntu20-smoke
+```
+
 Keep this step scoped to Ubuntu 20.04. Do not raise Ruby or Rails in the same
 diff.
 
