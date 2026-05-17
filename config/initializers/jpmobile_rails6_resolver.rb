@@ -1,4 +1,15 @@
 if Rails.gem_version >= Gem::Version.new('6.0') && defined?(Jpmobile::Resolver)
+  if Rails.gem_version >= Gem::Version.new('7.1') &&
+      defined?(ActionView::PathSet) &&
+      !ActionView::PathSet.method_defined?(:unshift)
+    class ActionView::PathSet
+      def unshift(*paths)
+        @paths = (self.class.new(paths).paths + @paths).freeze
+        self
+      end
+    end
+  end
+
   if Rails.gem_version >= Gem::Version.new('7.0') &&
       defined?(ActionView::LookupContext) &&
       !ActionView::LookupContext.registered_details.include?(:mobile)

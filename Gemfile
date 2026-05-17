@@ -2,12 +2,12 @@ source 'https://rubygems.org'
 
 
 # Bundle edge Rails instead: gem 'rails', github: 'rails/rails'
-gem 'rails', '~> 7.0.0'
+gem 'rails', '~> 7.1.0'
 gem 'concurrent-ruby', '1.3.4'
 # Use mysql as the database for Active Record
 gem 'mysql2', '~> 0.5.7'
 # Use Puma as the app server
-gem 'puma', '~> 5.6'
+gem 'puma', '~> 6.4'
 # Use SCSS for stylesheets
 gem 'sass-rails', '~> 6.0'
 # Use Uglifier as compressor for JavaScript assets
@@ -31,7 +31,7 @@ gem 'jbuilder', '~> 2.7'
 # gem 'capistrano-rails', group: :development
 
 gem 'activerecord-import', '~> 1.4'
-gem 'activerecord-session_store', '~> 1.1.3'
+gem 'activerecord-session_store', '~> 2.0'
 gem 'active_hash', '~> 1.4.1'
 gem 'enumerize', '~> 2.0.0'
 gem 'ruby-ldap', '~> 0.9.11'
@@ -39,13 +39,13 @@ gem 'will_paginate', '~> 3.1.5'
 gem 'jpmobile', '~> 5.1.0'
 gem 'scanf', '~> 1.0.0'
 gem 'rmagick', '~> 2.16.0'
-gem 'nokogiri', '~> 1.11.7'
+gem 'nokogiri', '~> 1.14'
 gem 'nokogumbo', '~> 2.0.5'
 gem 'hpricot', '~> 0.8.6'
 gem 'premailer', '~> 1.8.7'
 gem 'sanitize', '~> 5.2.3'
-gem 'rails-html-sanitizer', '~> 1.4.4'
-gem 'loofah', '~> 2.19.1'
+gem 'rails-html-sanitizer', '~> 1.6'
+gem 'loofah', '~> 2.21'
 gem 'zipruby', '0.3.6'
 gem 'mime-types', '~> 3.1.0'
 gem 'shared-mime-info', '~> 0.2.5'

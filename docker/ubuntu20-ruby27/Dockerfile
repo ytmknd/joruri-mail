@@ -41,6 +41,7 @@ RUN apt-get update && \
       libssl-dev \
       libxml2-dev \
       libxslt1-dev \
+      libyaml-dev \
       libzip-dev \
       locales \
       nodejs \

@@ -135,3 +135,41 @@ Rails is updated to the 7.0 patch series while keeping Ubuntu 20.04 and Ruby
   `:mobile` template detail for Rails 7 lookup internals.
 - The Phase 4 Nginx proxy redirects `/` to `/_admin/login`; the legacy Rails
   root route still points at the mail list and should be revisited separately.
+
+## Rails 7.1 Baseline
+
+Rails is updated to the 7.1 patch series while still keeping Ubuntu 20.04 and
+Ruby 2.7 for this Phase 4 step.
+
+- `rails` is locked to `~> 7.1.0`, currently resolving to Rails 7.1.6.
+- `config/initializers/new_framework_defaults_7_1.rb` is added with generated
+  defaults commented out. `config.load_defaults` is not advanced in this step.
+- `rails app:update` was run and reviewed. Generated Active Storage migrations
+  were not kept because this application has not introduced Active Storage
+  tables.
+- `nokogiri`, `rails-html-sanitizer`, and `loofah` are widened together for the
+  Rails 7.1 sanitizer dependency chain.
+- `libyaml-dev` is installed in the Ubuntu 20.04 image so the newer `psych`
+  native extension can build.
+- `web-console` is updated to 4.2 for Rails 7.1 development middleware
+  compatibility.
+- `activerecord-session_store` is updated to 2.2 so Active Record sessions use
+  the current Rack session API.
+- Rack is now 3.x, so Puma is updated to the 6.x series.
+- The jpmobile compatibility initializer restores the `ActionView::PathSet`
+  `unshift` API that jpmobile 5.1 expects.
+- `Core.now` uses `Time#to_fs(:db)` instead of the removed
+  `Time#to_s(:db)` format call.
+
+Verification:
+
+```sh
+bin/docker-phase3 ubuntu20-build
+bin/docker-phase3 ubuntu20-check
+docker compose --profile phase3 run --rm app-ubuntu20-ruby27 bundle exec rails zeitwerk:check
+docker compose --profile phase3 run --rm -u joruri app-ubuntu20-ruby27 bundle exec rake assets:precompile
+docker compose --profile phase3 up -d --force-recreate app-ubuntu20-ruby27 app-ubuntu20-ruby27-proxy app-ubuntu20-ruby27-worker app-ubuntu20-ruby27-scheduler
+bin/docker-phase3 ubuntu20-stack-check
+bin/docker-phase3 ubuntu20-smoke
+docker compose --profile phase3 exec app-ubuntu20-ruby27 bundle exec rails runner 'puts Delayed::Job.where(queue: "phase3-smoke").count'
+```

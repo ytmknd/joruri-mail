@@ -17,7 +17,7 @@ class Core
 
   ## Initializes.
   def self.initialize(env = {})
-    @@now          = Time.now.to_s(:db)
+    @@now          = Time.now.to_fs(:db)
     @@config       = Util::Config.load(:core)
     @@title        = @@config['title'] || 'Joruri'
     @@map_key      = @@config['map_key']
@@ -39,7 +39,7 @@ class Core
   ## Now.
   def self.now
     return @@now if @@now
-    return @@now = Time.now.to_s(:db)
+    return @@now = Time.now.to_fs(:db)
   end
 
   ## Absolute path.
