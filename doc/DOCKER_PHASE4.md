@@ -265,3 +265,11 @@ docker compose --profile phase3 run --rm app-ubuntu22-ruby31 bundle exec rake as
 docker compose --profile phase3 up -d --force-recreate app-ubuntu22-ruby31 app-ubuntu22-ruby31-proxy app-ubuntu22-ruby31-worker app-ubuntu22-ruby31-scheduler
 bin/docker-phase3 ubuntu22-stack-check
 ```
+
+## Rails 7.x Framework Defaults Opt-ins
+
+Phase 4 continues enabling low-risk framework defaults individually instead of
+switching `config.load_defaults` in one large step.
+
+- `active_support.precompile_filter_parameters` is enabled from the Rails 7.1
+  defaults so configured parameter filters are compiled during initialization.
