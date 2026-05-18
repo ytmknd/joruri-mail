@@ -343,15 +343,20 @@ Open redirect hardening:
   are normalized to local paths before redirecting, while configured SSO
   redirects explicitly pass `allow_other_host: true` because they intentionally
   target another configured Joruri service.
+- JSON parameter wrapping is enabled via the Rails 7.0 default in addition to
+  the existing generated initializer. Active Record transaction callback order
+  defaults are enabled after confirming the app does not define transaction
+  callbacks. The `commit_transaction_on_non_local_return` opt-in remains disabled
+  because Rails 7.2 marks that compatibility switch as deprecated for Rails 8.
 
 Remaining gated defaults:
 
 - Cookie, CSRF, key-generator, cookie serializer, and message serializer defaults
   must be paired with manual login, remember-me cookie, SSO, and mobile session
   checks because this app uses Active Record sessions plus plain legacy cookies.
-- Active Record association, partial insert, connection handling, and transaction
-  callback defaults need model-level checks against the legacy multi-database
-  setup and mail cache tables.
+- Active Record association, partial insert, and connection handling defaults
+  need model-level checks against the legacy multi-database setup and mail cache
+  tables.
 - Rails 7.2 YJIT remains disabled until Phase 5 introduces a Ruby 3.3+ runtime.
 - Rails 7.1 `allow_deprecated_parameters_hash_equality` and
   `active_job.use_big_decimal_serializer` remain disabled because Rails 7.2
