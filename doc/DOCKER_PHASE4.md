@@ -244,6 +244,15 @@ runtime introduced in the previous step.
 - `active_record.validate_migration_timestamps` is enabled as the first Rails
   7.2 framework default opt-in. Runtime defaults are still advanced one by one;
   `config.load_defaults` is not switched to 7.2 yet.
+- `active_job.enqueue_after_transaction_commit` is set to `:default` so Active
+  Job uses the queue adapter's Rails 7.2 transaction enqueue behavior while the
+  app continues to run jobs through `delayed_job`.
+- Active Storage WebP image content types and PostgreSQL date decoding are
+  enabled to match Rails 7.2 defaults. The current Docker runtime uses MySQL and
+  does not introduce Active Storage tables, so these are compatibility opt-ins
+  without changing the mail workflow.
+- The Rails 7.2 YJIT default remains disabled until Phase 5 introduces a Ruby
+  3.3+ runtime where the setting becomes meaningful.
 
 Verification:
 
