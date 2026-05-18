@@ -336,3 +336,18 @@ switching `config.load_defaults` in one large step.
   Rails 6.1 defaults. Searches found no direct calls to
   `ActiveSupport::TimeZone#utc_to_local`; the app keeps its existing Tokyo local
   time configuration.
+
+Remaining gated defaults:
+
+- Cookie, CSRF, key-generator, cookie serializer, and message serializer defaults
+  must be paired with manual login, remember-me cookie, SSO, and mobile session
+  checks because this app uses Active Record sessions plus plain legacy cookies.
+- Open redirect protection must be handled with care because login redirects
+  through `params[:uri]`, `session[:return_to]`, and the SSO controller.
+- Active Record association, partial insert, connection handling, and transaction
+  callback defaults need model-level checks against the legacy multi-database
+  setup and mail cache tables.
+- Rails 7.2 YJIT remains disabled until Phase 5 introduces a Ruby 3.3+ runtime.
+- Rails 7.1 `allow_deprecated_parameters_hash_equality` and
+  `active_job.use_big_decimal_serializer` remain disabled because Rails 7.2
+  marks those compatibility switches as deprecated for Rails 8.
