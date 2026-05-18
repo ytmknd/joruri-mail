@@ -361,6 +361,9 @@ Open redirect hardening:
   defaults are loaded into new model attributes; a model test covers the
   `webmail_mailboxes` counter defaults, which are the app-specific nullable
   defaults most likely to be affected.
+- Active Support deprecated `to_s` conversions are disabled in
+  `config/application.rb`. Searches found explicit `strftime` / `to_fs(:db)`
+  formatting for date and time values used by the app.
 - Cookie SameSite protection is set to `:lax`. Integration tests cover the
   unauthenticated login-referrer cookie. The Rails 6.1
   `urlsafe_csrf_tokens` opt-in remains disabled because Rails 7.2 no longer
