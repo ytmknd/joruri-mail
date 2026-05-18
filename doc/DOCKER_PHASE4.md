@@ -348,15 +348,20 @@ Open redirect hardening:
   defaults are enabled after confirming the app does not define transaction
   callbacks. The `commit_transaction_on_non_local_return` opt-in remains disabled
   because Rails 7.2 marks that compatibility switch as deprecated for Rails 8.
+- Active Record association inverse defaults are enabled:
+  `has_many_inversing` and `automatic_scope_inversing`. The legacy models mostly
+  declare `foreign_key`, `class_name`, and `primary_key` explicitly, and model
+  eager loading is part of the verification for this step. The Rails 7.1
+  `allow_deprecated_singular_associations_name` opt-in remains disabled because
+  Rails 7.2 marks that compatibility switch as deprecated for Rails 8.
 
 Remaining gated defaults:
 
 - Cookie, CSRF, key-generator, cookie serializer, and message serializer defaults
   must be paired with manual login, remember-me cookie, SSO, and mobile session
   checks because this app uses Active Record sessions plus plain legacy cookies.
-- Active Record association, partial insert, and connection handling defaults
-  need model-level checks against the legacy multi-database setup and mail cache
-  tables.
+- Active Record partial insert and connection handling defaults need model-level
+  checks against the legacy multi-database setup and mail cache tables.
 - Rails 7.2 YJIT remains disabled until Phase 5 introduces a Ruby 3.3+ runtime.
 - Rails 7.1 `allow_deprecated_parameters_hash_equality` and
   `active_job.use_big_decimal_serializer` remain disabled because Rails 7.2
