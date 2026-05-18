@@ -12,6 +12,7 @@ gem 'mysql2', '~> 0.5.7'
 gem 'puma', '~> 6.4'
 # Use SCSS for stylesheets
 gem 'sass-rails', '~> 6.0'
+gem 'ffi', '~> 1.17'
 # Use Uglifier as compressor for JavaScript assets
 gem 'uglifier', '>= 1.3.0'
 # Use CoffeeScript for .coffee assets and views
@@ -43,12 +44,11 @@ gem 'scanf', '~> 1.0.0'
 gem 'rmagick', '~> 2.16.0'
 gem 'nokogiri', '~> 1.14'
 gem 'nokogumbo', '~> 2.0.5'
-gem 'hpricot', '~> 0.8.6'
 gem 'premailer', '~> 1.8.7'
 gem 'sanitize', '~> 5.2.3'
 gem 'rails-html-sanitizer', '~> 1.6'
 gem 'loofah', '~> 2.21'
-gem 'zipruby', '0.3.6'
+gem 'rubyzip', '~> 2.3', require: 'zip'
 gem 'mime-types', '~> 3.5'
 gem 'rexml', '~> 3.2'
 gem 'shared-mime-info', '~> 0.2.5'
@@ -70,10 +70,6 @@ end
 group :development do
   # Access an IRB console on exception pages or by using <%= console %> anywhere in the code.
   gem 'web-console'
-  gem 'listen', '~> 3.0.5'
-  # Spring speeds up development by keeping your application running in the background. Read more: https://github.com/rails/spring
-  gem 'spring'
-  gem 'spring-watcher-listen', '~> 2.0.0'
 end
 
 # Windows does not include zoneinfo files, so bundle the tzinfo-data gem

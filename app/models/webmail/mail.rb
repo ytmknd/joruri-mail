@@ -344,17 +344,13 @@ class Webmail::Mail
     end
     filenames = Util::File.unique_filenames(filenames)
 
-    data = ""
-    Zip::Archive.open_buffer(data, Zip::CREATE, Zip::NO_COMPRESSION) do |ar|
+    stream = Zip::OutputStream.write_buffer do |zip|
       attachments.each_with_index do |at, i|
-        begin
-          ar.add_buffer(filenames[i], at.body)
-        rescue Zip::Error => e
-          # e
-        end
+        zip.put_next_entry(filenames[i], nil, nil, Zip::Entry::STORED)
+        zip.write(at.body)
       end
     end
-    data
+    stream.string
   end
 
   def append_mobile_notice_to_body
@@ -398,7 +394,7 @@ class Webmail::Mail
       %Q(<meta http-equiv="content-type" content="text/html; charset=UTF-8">) +
       %Q(<link rel="stylesheet" media="all" href="file://#{Rails.root.join('public/_common/js/tiny_mce_config/content_html_mail.css')}" />) +
       %Q(</head><body>#{html}</body></html>)
-    pm = Premailer.new(html, with_html_string: true, input_encoding: 'utf-8', adapter: :hpricot)
+    pm = Premailer.new(html, with_html_string: true, input_encoding: 'utf-8', adapter: :nokogiri)
     pm.to_inline_css.sub(/charset=UTF-8/i, "charset=#{charset}")
   end
 

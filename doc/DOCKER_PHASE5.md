@@ -19,13 +19,15 @@ Current build status:
 
 - `docker compose build app-ubuntu26-ruby33` reaches Ruby 3.3.11 and Bundler
   2.5.23 successfully.
-- The build currently stops during `bundle install` on legacy native gems:
-  `ffi 1.9.14`, `hpricot 0.8.6`, `nokogumbo 2.0.5`, `rmagick 2.16.0`,
-  `ruby-ldap 0.9.19`, and `zipruby 0.3.6`.
-- `byebug 9.0.5` was removed from the development/test bundle because the app
-  does not use it directly and it does not build against Ruby 3.3.
-- The next Phase 5 step is to replace or upgrade those gems before treating
-  Ubuntu 26.04 as a runnable app baseline.
+- `byebug 9.0.5`, `hpricot 0.8.6`, `zipruby 0.3.6`, and the legacy
+  development watcher stack were removed or replaced; the Phase 4 test suite
+  still passes with the replacement dependencies.
+- `ffi` was raised to `1.17.x` so native gems can build on the Ruby 3.3
+  candidate image.
+- The build currently stops during `bundle install` on the remaining legacy
+  native gems: `nokogumbo 2.0.5`, `rmagick 2.16.0`, and `ruby-ldap 0.9.19`.
+- The next Phase 5 step is to replace or upgrade those remaining gems before
+  treating Ubuntu 26.04 as a runnable app baseline.
 
 Verification:
 

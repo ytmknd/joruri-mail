@@ -27,7 +27,7 @@ class ApplicationController < ActionController::Base
           with_html_string: true,
           preserve_styles: true,
           input_encoding: 'utf-8',
-          adapter: :hpricot,
+          adapter: :nokogiri,
           css: css_files
         )
         response.body = pm.to_inline_css.sub(/charset=UTF-8/i, "charset=#{request.mobile.default_charset}")
