@@ -1,8 +1,8 @@
 class Sys::Lib::Ldap::Entry
   def initialize(connection, attributes = {})
-    attributes.each do |key, val|
-      val.each_with_index do |v, k|
-        attributes[key][k] = v.force_encoding("utf-8")
+    attributes = attributes.each_with_object({}) do |(key, val), hash|
+      hash[key.to_s] = Array(val).map do |v|
+        v.to_s.force_encoding("utf-8")
       end
     end
 
@@ -31,10 +31,11 @@ class Sys::Lib::Ldap::Entry
   
   def get(name, position = 0)
     name = name.to_s
+    values = @attributes[name] || @attributes[name.downcase]
     if position == :all
-      return @attributes[name] ? @attributes[name] : []
-    elsif @attributes[name]
-      return @attributes[name][position]
+      return values ? values : []
+    elsif values
+      return values[position]
     else
       return nil
     end

@@ -71,7 +71,7 @@ class Sys::Lib::Ldap::Group < Sys::Lib::Ldap::Entry
     filter  = nil
     options = {
       :base  => dn,
-      :scope => LDAP::LDAP_SCOPE_ONELEVEL
+      :scope => Sys::Lib::Ldap::SCOPE_ONELEVEL
     }
     return search(filter, options)
   end
@@ -81,7 +81,7 @@ class Sys::Lib::Ldap::Group < Sys::Lib::Ldap::Entry
     filter  = nil
     options = {
       :base  => dn,
-      :scope => LDAP::LDAP_SCOPE_ONELEVEL
+      :scope => Sys::Lib::Ldap::SCOPE_ONELEVEL
     }
     return @connection.user.search(filter, options)
   end
@@ -91,7 +91,7 @@ class Sys::Lib::Ldap::Group < Sys::Lib::Ldap::Entry
     filter  = "(cn=#{name})"
     options = {
       :base  => dn,
-      :scope => LDAP::LDAP_SCOPE_ONELEVEL
+      :scope => Sys::Lib::Ldap::SCOPE_ONELEVEL
     }
     return @connection.user.search(filter, options)[0]
   end

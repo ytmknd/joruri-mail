@@ -84,7 +84,8 @@ GEM
       minitest (>= 5.1, < 6)
       securerandom (>= 0.3)
       tzinfo (~> 2.0, >= 2.0.5)
-    addressable (2.4.0)
+    addressable (2.9.0)
+      public_suffix (>= 2.0.2, < 8.0)
     base64 (0.3.0)
     benchmark (0.5.0)
     bigdecimal (4.1.2)
@@ -104,7 +105,7 @@ GEM
     concurrent-ruby (1.3.4)
     connection_pool (2.5.5)
     crass (1.0.6)
-    css_parser (1.4.5)
+    css_parser (1.22.0)
       addressable
     daemons (1.2.4)
     date (3.5.1)
@@ -126,7 +127,7 @@ GEM
     ffi (1.17.4)
     globalid (1.3.0)
       activesupport (>= 6.1)
-    htmlentities (4.3.4)
+    htmlentities (4.4.2)
     i18n (1.14.8)
       concurrent-ruby (~> 1.0)
     io-console (0.8.2)
@@ -163,6 +164,9 @@ GEM
     net-imap (0.5.14)
       date
       net-protocol
+    net-ldap (0.20.0)
+      base64
+      ostruct
     net-pop (0.1.2)
       net-protocol
     net-protocol (0.2.2)
@@ -174,17 +178,20 @@ GEM
       mini_portile2 (~> 2.8.2)
       racc (~> 1.4)
     observer (0.1.2)
+    ostruct (0.6.3)
     pkg-config (1.6.5)
     pp (0.6.3)
       prettyprint
-    premailer (1.8.7)
-      css_parser (>= 1.4.5)
+    premailer (1.27.0)
+      addressable
+      css_parser (>= 1.19.0)
       htmlentities (>= 4.0.0)
     prettyprint (0.2.0)
     prism (1.9.0)
     psych (5.3.1)
       date
       stringio
+    public_suffix (6.0.2)
     puma (6.6.1)
       nio4r (~> 2.0)
     racc (1.8.1)
@@ -240,7 +247,6 @@ GEM
     rmagick (6.3.0)
       observer (~> 0.1)
       pkg-config (~> 1.4)
-    ruby-ldap (0.9.19)
     rubyzip (2.4.1)
     sanitize (6.1.3)
       crass (~> 1.0.2)
@@ -314,15 +320,15 @@ DEPENDENCIES
   mime-types (~> 3.5)
   minitest (= 5.26.1)
   mysql2 (~> 0.5.7)
+  net-ldap (~> 0.20)
   nokogiri (~> 1.14)
-  premailer (~> 1.8.7)
+  premailer (~> 1.27.0)
   puma (~> 6.4)
   rails (~> 7.2.0)
   rails-html-sanitizer (~> 1.6)
   rails_autolink (~> 1.1.6)
   rexml (~> 3.2)
   rmagick (~> 6.3)
-  ruby-ldap (~> 0.9.11)
   rubyzip (~> 2.3)
   sanitize (~> 6.1)
   sass-rails (~> 6.0)

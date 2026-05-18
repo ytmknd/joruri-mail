@@ -1,5 +1,51 @@
-require 'ldap'
+require 'net/ldap'
+
 class Sys::Lib::Ldap
+  SCOPE_SUBTREE = Net::LDAP::SearchScope_WholeSubtree
+  SCOPE_ONELEVEL = Net::LDAP::SearchScope_SingleLevel
+
+  class Connection
+    attr_reader :config
+
+    def initialize(config)
+      @config = config
+      @bound = false
+      reset_client
+      ldap.open { true }
+    end
+
+    def bind(dn, pass)
+      ldap.auth(dn, pass)
+      @bound = ldap.bind
+    rescue Net::LDAP::Error
+      @bound = false
+    end
+
+    def bound?
+      @bound
+    end
+
+    def unbind
+      @bound = false
+      reset_client
+      true
+    end
+
+    def search(base:, scope:, filter:)
+      ldap.search(base: base, scope: scope, filter: filter) do |entry|
+        yield entry
+      end
+    end
+
+    private
+
+    attr_reader :ldap
+
+    def reset_client
+      @ldap = Net::LDAP.new(host: config[:host], port: config[:port].to_i)
+    end
+  end
+
   attr_accessor :config
 
   ## Initializer.
@@ -23,9 +69,7 @@ class Sys::Lib::Ldap
   def self.connect(config)
     begin
       Timeout.timeout(2) do
-        conn = LDAP::Conn.new(config[:host], config[:port])
-        conn.set_option(LDAP::LDAP_OPT_PROTOCOL_VERSION, 3)
-        return conn
+        return Connection.new(config)
       end
     rescue Timeout::Error => e
       raise "LDAP: 接続に失敗 (#{e})"
@@ -40,7 +84,7 @@ class Sys::Lib::Ldap
       dn = NKF.nkf('-s -W', dn)
     end
     return connection.bind(dn, pass)
-  rescue LDAP::ResultError
+  rescue Net::LDAP::Error
     return nil
   end
 
@@ -61,15 +105,21 @@ class Sys::Lib::Ldap
   ## Search.
   def search(filter, options = {})
     filter = "(#{filter.join(')(')})" if filter.class == Array
-    filter = "(&#{filter})"
+    filter = filter.to_s.empty? ? "(objectClass=*)" : "(&#{filter})"
     
     cname = options[:class] || Sys::Lib::Ldap::Entry
-    scope = options[:scope] || LDAP::LDAP_SCOPE_SUBTREE || LDAP::LDAP_SCOPE_ONELEVEL
+    scope = options[:scope] || SCOPE_SUBTREE
     base  = options[:base]  || config[:base]
     entries = []
-    connection.search2(base, scope, filter) do |entry|
-      entry.each{|k,vs| entry[k] = vs.map{|v| NKF::nkf('-w', v.to_s)}} if config[:charset] != 'utf-8'
-      entries << cname.new(self, entry)
+    connection.search(base: base, scope: scope, filter: Net::LDAP::Filter.construct(filter)) do |entry|
+      attributes = { 'dn' => [entry.dn] }
+      entry.each do |key, values|
+        attributes[key.to_s] = Array(values).map do |value|
+          value = value.to_s
+          config[:charset] == 'utf-8' ? value : NKF.nkf('-w', value)
+        end
+      end
+      entries << cname.new(self, attributes)
     end
     
     return entries

@@ -28,10 +28,12 @@ Current build status:
   native extension from the bundle.
 - `rmagick` was raised to `6.3.x`, which builds against the Ubuntu 26.04
   ImageMagick headers.
-- The build currently stops during `bundle install` on the remaining legacy
-  native gem: `ruby-ldap 0.9.19`.
-- The next Phase 5 step is to replace or upgrade those remaining gems before
-  treating Ubuntu 26.04 as a runnable app baseline.
+- `ruby-ldap 0.9.19` was replaced with `net-ldap 0.20.x` so the LDAP wrapper
+  no longer depends on the removed Ruby C API.
+- `premailer` was raised to `1.27.x`, pulling in a Ruby 3.3-compatible
+  `css_parser`.
+- The direct Ubuntu 26.04 / Ruby 3.3 runtime now builds, boots Rails, runs the
+  test suite, and precompiles assets.
 
 Verification:
 
@@ -42,8 +44,7 @@ bin/docker-phase5 ubuntu26-test
 bin/docker-phase5 ubuntu26-assets
 ```
 
-The `ubuntu26-check`, `ubuntu26-test`, and `ubuntu26-assets` gates are blocked
-until the native gem compatibility work above is complete.
+As of this phase checkpoint all four direct app runtime gates pass.
 
 After the direct app runtime is healthy, add the Phase 5 proxy, worker, and
 scheduler services to match the Phase 4 process layout.
