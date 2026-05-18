@@ -284,3 +284,10 @@ switching `config.load_defaults` in one large step.
   `action_view.apply_stylesheet_media_default` are enabled from the Rails 7.0
   defaults. The app does not currently use `button_to`, and existing stylesheet
   helpers already pass `media:` explicitly.
+- `active_support.remove_deprecated_time_with_zone_name`,
+  `active_record.query_log_tags_format`, `action_dispatch.debug_exception_log_level`,
+  and `dom_testing_default_html_version` are enabled from the Rails 7.0/7.1
+  defaults. These align framework internals, logging, and test helper parsing
+  without changing stored data or session serialization.
+- The legacy `ActionDispatch::PerformanceTest` smoke test is converted to an
+  integration test because Rails 7 no longer ships `rails/performance_test_help`.

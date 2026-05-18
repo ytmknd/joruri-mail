@@ -108,7 +108,7 @@ Rails.application.config.active_support.raise_on_invalid_cache_expiration_time =
 # (https://open-telemetry.github.io/opentelemetry-sqlcommenter/), or using the legacy format.
 # Options are `:legacy` and `:sqlcommenter`.
 #++
-# Rails.application.config.active_record.query_log_tags_format = :sqlcommenter
+Rails.application.config.active_record.query_log_tags_format = :sqlcommenter
 
 ###
 # Specify the default serializer used by `MessageEncryptor` and `MessageVerifier`
@@ -267,7 +267,7 @@ Rails.application.config.precompile_filter_parameters = true
 # Configure the log level used by the DebugExceptions middleware when logging
 # uncaught exceptions during requests.
 #++
-# Rails.application.config.action_dispatch.debug_exception_log_level = :error
+Rails.application.config.action_dispatch.debug_exception_log_level = :error
 
 ###
 # Configure the test helpers in Action View, Action Dispatch, and rails-dom-testing to use HTML5
@@ -277,4 +277,4 @@ Rails.application.config.precompile_filter_parameters = true
 #
 # In previous versions of Rails, these test helpers always used an HTML4 parser.
 #++
-# Rails.application.config.dom_testing_default_html_version = :html5
+Rails.application.config.dom_testing_default_html_version = :html5
