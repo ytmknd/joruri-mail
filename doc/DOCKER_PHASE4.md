@@ -291,3 +291,9 @@ switching `config.load_defaults` in one large step.
   without changing stored data or session serialization.
 - The legacy `ActionDispatch::PerformanceTest` smoke test is converted to an
   integration test because Rails 7 no longer ships `rails/performance_test_help`.
+- Rails 6.1 Active Job queue behavior defaults are enabled:
+  `active_job.retry_jitter`, `active_job.skip_after_callbacks_if_terminated`,
+  Active Storage queue names, Action Mailbox queue names, and the Action Mailer
+  `deliver_later` queue name now use the newer defaults. The app does not use
+  Active Storage, Action Mailbox, or `deliver_later` in the mail workflow, so
+  these are compatibility opt-ins for framework initialization.
