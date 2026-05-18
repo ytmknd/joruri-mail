@@ -324,3 +324,7 @@ switching `config.load_defaults` in one large step.
   the existing `Sanitize` gem configuration. The Rails 7.1
   `allow_deprecated_parameters_hash_equality` opt-in remains disabled because
   Rails 7.2 marks that compatibility switch as deprecated for Rails 8.
+- `active_support.hash_digest_class` now uses SHA-256 for Rails cache and ETag
+  digest generation, and `ssl_default_redirect_status` is set to 308. The app
+  does not currently use Rails cache/ETag helpers directly, and `force_ssl`
+  remains disabled in the Docker runtime.
