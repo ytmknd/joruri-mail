@@ -377,9 +377,11 @@ Remaining gated defaults:
 - Key-generator defaults must be paired with manual login, remember-me cookie,
   SSO, and mobile session checks because changing them can invalidate existing
   signed/encrypted data.
-- Active Record connection handling defaults need model-level checks against the
-  legacy multi-database setup and mail cache tables.
 - Rails 7.2 YJIT remains disabled until Phase 5 introduces a Ruby 3.3+ runtime.
+- Rails 6.1 `legacy_connection_handling` remains disabled because Rails 7.2
+  rejects the removed setter. Optional `session`, `joruri_manage`, and
+  `dev_jgw_core` connections remain guarded by presence checks under the current
+  connection API.
 - Rails 7.1 `allow_deprecated_parameters_hash_equality` and
   `active_job.use_big_decimal_serializer` remain disabled because Rails 7.2
   marks those compatibility switches as deprecated for Rails 8.
