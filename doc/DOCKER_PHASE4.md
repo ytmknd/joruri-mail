@@ -319,3 +319,8 @@ switching `config.load_defaults` in one large step.
   variant processor are also enabled to match Rails 7.0 defaults; the current
   mail workflow still uses the legacy RMagick attachment code and does not use
   Active Storage attachments.
+- Rails HTML5 sanitizer vendors are enabled. Searches found no Rails `sanitize`
+  helper usage in the mail rendering path; HTML mail display continues to use
+  the existing `Sanitize` gem configuration. The Rails 7.1
+  `allow_deprecated_parameters_hash_equality` opt-in remains disabled because
+  Rails 7.2 marks that compatibility switch as deprecated for Rails 8.
