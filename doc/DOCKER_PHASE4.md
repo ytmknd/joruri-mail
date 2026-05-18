@@ -309,3 +309,8 @@ switching `config.load_defaults` in one large step.
   current app usage of the affected helper APIs or SQLite adapter. The Rails 7.1
   Active Job BigDecimal serializer opt-in remains disabled because Rails 7.2
   marks that compatibility switch as deprecated for Rails 8.
+- The Rails 7.1 default response headers are enabled, removing the legacy
+  Internet Explorer `X-Download-Options` header, and the Rails 7.0
+  `ActionDispatch::Request#content_type` return-value default is enabled. The
+  application sets a mobile response `Content-Type` header directly but does not
+  inspect `request.content_type`.
