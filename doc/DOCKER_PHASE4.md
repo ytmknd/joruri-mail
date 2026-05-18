@@ -337,13 +337,18 @@ switching `config.load_defaults` in one large step.
   `ActiveSupport::TimeZone#utc_to_local`; the app keeps its existing Tokyo local
   time configuration.
 
+Open redirect hardening:
+
+- Rails open redirect protection is enabled. Login and Air login return paths
+  are normalized to local paths before redirecting, while configured SSO
+  redirects explicitly pass `allow_other_host: true` because they intentionally
+  target another configured Joruri service.
+
 Remaining gated defaults:
 
 - Cookie, CSRF, key-generator, cookie serializer, and message serializer defaults
   must be paired with manual login, remember-me cookie, SSO, and mobile session
   checks because this app uses Active Record sessions plus plain legacy cookies.
-- Open redirect protection must be handled with care because login redirects
-  through `params[:uri]`, `session[:return_to]`, and the SSO controller.
 - Active Record association, partial insert, connection handling, and transaction
   callback defaults need model-level checks against the legacy multi-database
   setup and mail cache tables.

@@ -10,9 +10,7 @@ class Sys::Admin::AccountController < Sys::Controller::Admin::Base
       return redirect_to admin_uri
     end
 
-    @uri = params[:uri] || cookies[:sys_login_referrer] || admin_uri
-    @uri = @uri.gsub(/^http:\/\/[^\/]+/, '')
-    @uri = NKF::nkf('-w', @uri)
+    @uri = local_redirect_path(params[:uri] || cookies[:sys_login_referrer], admin_uri)
     return unless request.post?
 
     if params[:password].to_s == 'p' + params[:account].to_s
@@ -97,7 +95,7 @@ class Sys::Admin::AccountController < Sys::Controller::Admin::Base
       @token = response.body =~ /^OK/i ? response.body.gsub(/^OK /i, '') : nil
     end
 
-    return redirect_to @uri.to_s unless @token
+    return redirect_to @uri.to_s, allow_other_host: true unless @token
 
     @uri.path = config[:path]
     if request.get?
@@ -106,7 +104,7 @@ class Sys::Admin::AccountController < Sys::Controller::Admin::Base
         h[:token] = @token
         h[:path] = params[:path] if params[:path].present?
       }.to_query
-      return redirect_to @uri.to_s
+      return redirect_to @uri.to_s, allow_other_host: true
     end
   end
 

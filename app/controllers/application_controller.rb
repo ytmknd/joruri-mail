@@ -73,6 +73,22 @@ class ApplicationController < ActionController::Base
 
   private
 
+  def local_redirect_path(value, default)
+    value = NKF.nkf('-w', value.to_s)
+    return default if value.blank? || value.start_with?('//') || value.match?(/[\r\n]/)
+
+    uri = URI.parse(value)
+    return default if uri.scheme.present? || uri.host.present?
+
+    path = uri.path.presence || default
+    return default unless path.start_with?('/')
+
+    query = uri.query.present? ? "?#{uri.query}" : ''
+    "#{path}#{query}"
+  rescue URI::InvalidURIError
+    default
+  end
+
   def http_error(status, message = nil)
     if status != 404
       error_log("#{status} #{request.fullpath} #{message.to_s.gsub(/\n/, ' ')}")
