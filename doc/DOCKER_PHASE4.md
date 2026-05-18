@@ -297,3 +297,7 @@ switching `config.load_defaults` in one large step.
   `deliver_later` queue name now use the newer defaults. The app does not use
   Active Storage, Action Mailbox, or `deliver_later` in the mail workflow, so
   these are compatibility opt-ins for framework initialization.
+- The old Rails 5 `ActiveSupport.to_time_preserves_timezone = false` setting is
+  switched to `true` because Rails 7.2 warns that the pre-Ruby 2.4 behavior will
+  be removed in Rails 8. The application does not currently call `to_time`
+  directly.
