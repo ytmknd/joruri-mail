@@ -6,11 +6,11 @@ require 'net/https'
 
 require 'rails/all'
 
-# mime-types 3.1 uses parameter names that Ruby 2.7 warns about. Load that file
-# once with verbose warnings disabled until the MIME dependency set is replaced.
+# shared-mime-info 0.2.5 is the last release and still calls a deprecated
+# mime-types constructor while loading the freedesktop MIME database.
 original_verbose = $VERBOSE
 $VERBOSE = nil
-require 'mime/types/logger'
+require 'shared-mime-info'
 $VERBOSE = original_verbose
 
 # Require the gems listed in Gemfile, including any gems

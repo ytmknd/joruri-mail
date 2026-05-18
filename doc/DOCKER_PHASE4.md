@@ -202,3 +202,33 @@ docker compose --profile phase3 run --rm -e RUBYOPT=-W0 app-ubuntu20-ruby27 bund
 docker compose --profile phase3 up -d --force-recreate app-ubuntu22-ruby31 app-ubuntu22-ruby31-proxy app-ubuntu22-ruby31-worker app-ubuntu22-ruby31-scheduler
 bin/docker-phase3 ubuntu22-stack-check
 ```
+
+## Rails 7.2 Baseline
+
+Rails is updated to the 7.2 patch series on the Ubuntu 22.04 / Ruby 3.1
+runtime introduced in the previous step.
+
+- `rails` is locked to `~> 7.2.0`, currently resolving to Rails 7.2.3.1.
+- `config/initializers/new_framework_defaults_7_2.rb` is added with generated
+  defaults commented out. `config.load_defaults` is not advanced in this step.
+- `rails app:update` was run and reviewed. Generated Active Storage migrations
+  and generic public icon/error assets were not kept because this application
+  has not introduced those Rails defaults yet.
+- The `mime-types 3.1` warning workaround is removed. `shared-mime-info` is
+  required once with verbose warnings disabled because 0.2.5 is the final
+  release and still calls a deprecated `mime-types` constructor while loading
+  the system MIME database.
+- Rails 7.2 no longer supports Ruby 2.7, so verification for this step targets
+  `app-ubuntu22-ruby31`.
+
+Verification:
+
+```sh
+bin/docker-phase3 ubuntu22-build
+docker compose --profile phase3 run --rm app-ubuntu22-ruby31 ruby -v
+docker compose --profile phase3 run --rm app-ubuntu22-ruby31 bundle exec rails runner 'puts "Ruby #{RUBY_VERSION} Rails #{Rails.version} booted"'
+docker compose --profile phase3 run --rm app-ubuntu22-ruby31 bundle exec rails zeitwerk:check
+docker compose --profile phase3 run --rm app-ubuntu22-ruby31 bundle exec rake assets:precompile
+docker compose --profile phase3 up -d --force-recreate app-ubuntu22-ruby31 app-ubuntu22-ruby31-proxy app-ubuntu22-ruby31-worker app-ubuntu22-ruby31-scheduler
+bin/docker-phase3 ubuntu22-stack-check
+```
