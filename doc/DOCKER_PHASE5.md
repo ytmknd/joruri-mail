@@ -24,8 +24,10 @@ Current build status:
   still passes with the replacement dependencies.
 - `ffi` was raised to `1.17.x` so native gems can build on the Ruby 3.3
   candidate image.
+- `sanitize` was raised to `6.1.x`, which removes the `nokogumbo 2.0.5`
+  native extension from the bundle.
 - The build currently stops during `bundle install` on the remaining legacy
-  native gems: `nokogumbo 2.0.5`, `rmagick 2.16.0`, and `ruby-ldap 0.9.19`.
+  native gems: `rmagick 2.16.0` and `ruby-ldap 0.9.19`.
 - The next Phase 5 step is to replace or upgrade those remaining gems before
   treating Ubuntu 26.04 as a runnable app baseline.
 
