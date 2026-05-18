@@ -280,3 +280,7 @@ switching `config.load_defaults` in one large step.
   defaults. The application does not currently call `Digest::UUID.uuid_v3` or
   `uuid_v5`, so this aligns the runtime with the newer default without changing
   stored application data.
+- `action_view.button_to_generates_button_tag` and
+  `action_view.apply_stylesheet_media_default` are enabled from the Rails 7.0
+  defaults. The app does not currently use `button_to`, and existing stylesheet
+  helpers already pass `media:` explicitly.
