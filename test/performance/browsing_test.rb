@@ -10,7 +10,9 @@ class BrowsingTest < ActionDispatch::IntegrationTest
     get '/webmail/INBOX/mails'
 
     assert_response :redirect
-    assert_match(/sys_login_referrer=.*samesite=lax/i, Array(@response.headers['Set-Cookie']).join("\n"))
+    cookies = Array(@response.headers['Set-Cookie']).join("\n")
+    assert_match(/sys_login_referrer=.*samesite=lax/i, cookies)
+    assert_match(/_session_id=.*httponly/i, cookies)
   end
 
   def test_login_rejects_external_return_uri
@@ -27,5 +29,4 @@ class BrowsingTest < ActionDispatch::IntegrationTest
     assert_response :success
     assert_includes @response.body, 'value="/webmail/INBOX/mails?page=1"'
   end
-
 end

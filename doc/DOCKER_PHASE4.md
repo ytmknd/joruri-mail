@@ -358,12 +358,18 @@ Open redirect hardening:
   unauthenticated login-referrer cookie. The Rails 6.1
   `urlsafe_csrf_tokens` opt-in remains disabled because Rails 7.2 no longer
   accepts that compatibility setting.
+- Cookie serialization is explicitly aligned with the generated JSON cookie
+  serializer initializer. Rails 7.1 message serialization is set to
+  `:json_allow_marshal` with metadata serialization enabled so new messages use
+  the newer format while retaining Marshal read compatibility. Integration tests
+  cover Active Record session-cookie issuance on unauthenticated protected-page
+  redirects.
 
 Remaining gated defaults:
 
-- Key-generator, cookie serializer, and message serializer defaults must be
-  paired with manual login, remember-me cookie, SSO, and mobile session checks
-  because this app uses Active Record sessions plus plain legacy cookies.
+- Key-generator defaults must be paired with manual login, remember-me cookie,
+  SSO, and mobile session checks because changing them can invalidate existing
+  signed/encrypted data.
 - Active Record partial insert and connection handling defaults need model-level
   checks against the legacy multi-database setup and mail cache tables.
 - Rails 7.2 YJIT remains disabled until Phase 5 introduces a Ruby 3.3+ runtime.
