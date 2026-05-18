@@ -328,3 +328,7 @@ switching `config.load_defaults` in one large step.
   digest generation, and `ssl_default_redirect_status` is set to 308. The app
   does not currently use Rails cache/ETag helpers directly, and `force_ssl`
   remains disabled in the Docker runtime.
+- Active Record Encryption SHA1 compatibility, the default column serializer,
+  and Active Record marshalling format are moved to Rails 7.1 defaults. Searches
+  found no `encrypts`, `serialize`, `store`, or `store_accessor` usage in the
+  current models.

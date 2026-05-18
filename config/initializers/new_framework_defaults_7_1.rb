@@ -56,7 +56,7 @@ Rails.application.config.action_dispatch.default_headers = {
 # 3. If you don't currently have data encrypted with Active Record encryption, you can disable this setting to
 # configure the default behavior starting 7.1+:
 #++
-# Rails.application.config.active_record.encryption.support_sha1_for_non_deterministic_encryption = false
+Rails.application.config.active_record.encryption.support_sha1_for_non_deterministic_encryption = false
 
 ###
 # No longer run after_commit callbacks on the first of multiple Active Record
@@ -196,7 +196,7 @@ Rails.application.config.precompile_filter_parameters = true
 # recommended to explicitly define the serialization method for each column
 # rather than to rely on a global default.
 #++
-# Rails.application.config.active_record.default_column_serializer = nil
+Rails.application.config.active_record.default_column_serializer = nil
 
 ###
 # Enable a performance optimization that serializes Active Record models
@@ -207,7 +207,7 @@ Rails.application.config.precompile_filter_parameters = true
 # leave this optimization off on the first deploy, then enable it on a
 # subsequent deploy.
 #++
-# Rails.application.config.active_record.marshalling_format_version = 7.1
+Rails.application.config.active_record.marshalling_format_version = 7.1
 
 ###
 # Run `after_commit` and `after_*_commit` callbacks in the order they are defined in a model.
