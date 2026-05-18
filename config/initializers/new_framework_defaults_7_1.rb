@@ -76,7 +76,7 @@
 # For example, it is possible to create an index for a non existing column.
 # See https://www.sqlite.org/quirks.html#double_quoted_string_literals_are_accepted for more details.
 #++
-# Rails.application.config.active_record.sqlite3_adapter_strict_strings_by_default = true
+Rails.application.config.active_record.sqlite3_adapter_strict_strings_by_default = true
 
 ###
 # Disable deprecated singular associations names.
@@ -168,7 +168,7 @@ Rails.application.config.active_record.query_log_tags_format = :sqlcommenter
 # behavior would allow assignment but silently not persist changes to the
 # database.
 #++
-# Rails.application.config.active_record.raise_on_assign_to_attr_readonly = true
+Rails.application.config.active_record.raise_on_assign_to_attr_readonly = true
 
 ###
 # Enable validating only parent-related columns for presence when the parent is mandatory.
@@ -224,7 +224,7 @@ Rails.application.config.precompile_filter_parameters = true
 ###
 # Controls when to generate a value for <tt>has_secure_token</tt> declarations.
 #++
-# Rails.application.config.active_record.generate_secure_token_on = :initialize
+Rails.application.config.active_record.generate_secure_token_on = :initialize
 
 ###
 # ** Please read carefully, this must be configured in config/application.rb **

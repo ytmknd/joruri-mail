@@ -301,3 +301,11 @@ switching `config.load_defaults` in one large step.
   switched to `true` because Rails 7.2 warns that the pre-Ruby 2.4 behavior will
   be removed in Rails 8. The application does not currently call `to_time`
   directly.
+- Additional test-only and currently unused feature defaults are enabled:
+  `active_support.executor_around_test_case`, fixture foreign-key verification,
+  SQLite strict strings, `attr_readonly` assignment raising, `has_secure_token`
+  initialization timing, `form_with` non-remote rendering, preload link headers,
+  and Active Storage multiple file hidden-field behavior. Searches found no
+  current app usage of the affected helper APIs or SQLite adapter. The Rails 7.1
+  Active Job BigDecimal serializer opt-in remains disabled because Rails 7.2
+  marks that compatibility switch as deprecated for Rails 8.
