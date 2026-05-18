@@ -276,3 +276,7 @@ switching `config.load_defaults` in one large step.
 - `active_support.raise_on_invalid_cache_expiration_time` is enabled from the
   Rails 7.1 defaults. The application does not currently call `Rails.cache`
   directly, so this is a guardrail for future cache usage.
+- `active_support.use_rfc4122_namespaced_uuids` is enabled from the Rails 7.0
+  defaults. The application does not currently call `Digest::UUID.uuid_v3` or
+  `uuid_v5`, so this aligns the runtime with the newer default without changing
+  stored application data.
