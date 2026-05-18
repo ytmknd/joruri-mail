@@ -352,6 +352,9 @@ Open redirect hardening:
   `has_many_inversing` and `automatic_scope_inversing`. The legacy models mostly
   declare `foreign_key`, `class_name`, and `primary_key` explicitly, and model
   eager loading is part of the verification for this step. The Rails 7.1
+  mandatory `belongs_to` validation optimization is also enabled; the app still
+  keeps `belongs_to_required_by_default = false`, so this only changes
+  associations that are explicitly mandatory. The
   `allow_deprecated_singular_associations_name` opt-in remains disabled because
   Rails 7.2 marks that compatibility switch as deprecated for Rails 8.
 - Cookie SameSite protection is set to `:lax`. Integration tests cover the
