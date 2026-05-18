@@ -10,9 +10,9 @@
 // Read Sprockets README (https://github.com/rails/sprockets#sprockets-directives) for details
 // about supported directives.
 //
-//= require jquery
-//= require jquery-ujs
-//= require jquery-cookie
+//= require jquery/dist/jquery
+//= require jquery-ujs/src/rails
+//= require jquery-cookie/jquery.cookie
 //= require jquery-ui/ui/minified/core.min
 //= require jquery-ui/ui/minified/datepicker.min
 //= require jquery-ui/ui/minified/widget.min
@@ -24,7 +24,7 @@
 //= require jqueryui-timepicker-addon/dist/i18n/jquery-ui-timepicker-ja
 //= require simple-color-picker/jquery.simple-color-picker
 //= require jsviews/jsviews.min
-//= require jquery-file-upload
+//= require jquery-file-upload/js/jquery.fileupload
 //= require jquery-file-upload/js/jquery.fileupload-process
 //= require jquery-file-upload/js/jquery.fileupload-validate
 //= require jquery-file-upload/js/jquery.iframe-transport

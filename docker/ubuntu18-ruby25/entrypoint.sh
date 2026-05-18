@@ -12,7 +12,6 @@ mkdir -p \
   tmp/pids \
   tmp/sockets \
   upload \
-  vendor/assets/bower_components \
   vendor/bundle
 
 for source in docker/phase1/config/*.yml; do
@@ -34,7 +33,6 @@ if [[ "$(id -u)" = "0" ]]; then
       public/assets \
       tmp \
       upload \
-      vendor/assets/bower_components \
       vendor/bundle
   fi
   exec gosu joruri "$0" "$@"

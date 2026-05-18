@@ -64,9 +64,6 @@ RUN git clone --depth 1 https://github.com/rbenv/rbenv.git "${RBENV_ROOT}" && \
     rbenv rehash && \
     gem update --system 3.2.3 --no-document && \
     gem install bundler -v "${BUNDLER_VERSION}" --no-document --force && \
-    mkdir -p /usr/local/lib/node_modules/bower && \
-    curl -fsSL "https://registry.npmjs.org/bower/-/bower-1.7.9.tgz" | tar -xz --strip-components=1 -C /usr/local/lib/node_modules/bower && \
-    ln -s /usr/local/lib/node_modules/bower/bin/bower /usr/local/bin/bower && \
     rbenv rehash
 
 WORKDIR /var/share/jorurimail

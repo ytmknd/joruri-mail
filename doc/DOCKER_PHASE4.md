@@ -204,6 +204,26 @@ docker compose --profile phase3 up -d --force-recreate app-ubuntu22-ruby31 app-u
 bin/docker-phase3 ubuntu22-stack-check
 ```
 
+## Static Vendor Assets
+
+Phase 4 no longer runs Bower for the current Ubuntu 20.04 / Ubuntu 22.04
+runtimes.
+
+- The JavaScript and CSS files used by `application.js` and `application.css`
+  are committed under `vendor/assets`.
+- `bower-rails`, `Bowerfile`, and the Bower Rails initializer are removed.
+- The Ubuntu 20.04 and Ubuntu 22.04 Docker images no longer install the Bower
+  CLI.
+- The Phase 4 Compose services no longer mount
+  `vendor/assets/bower_components`; older Phase 0-2 services keep their legacy
+  Bower volumes for historical reproduction notes.
+
+Verification:
+
+```sh
+docker compose --profile phase3 run --rm app-ubuntu22-ruby31 bundle exec rake assets:precompile
+```
+
 ## Rails 7.2 Baseline
 
 Rails is updated to the 7.2 patch series on the Ubuntu 22.04 / Ruby 3.1

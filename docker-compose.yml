@@ -262,7 +262,6 @@ services:
       - .:/var/share/jorurimail:cached
       - bundle_ubuntu20_ruby27:/var/share/jorurimail/vendor/bundle
       - bundle_config_ubuntu20_ruby27:/var/share/jorurimail/.bundle
-      - bower_components_ubuntu20_ruby27:/var/share/jorurimail/vendor/assets/bower_components
       - log_ubuntu20_ruby27:/var/share/jorurimail/log
       - public_assets_ubuntu20_ruby27:/var/share/jorurimail/public/assets
       - tmp_ubuntu20_ruby27:/var/share/jorurimail/tmp
@@ -322,7 +321,6 @@ services:
       - .:/var/share/jorurimail:cached
       - bundle_ubuntu20_ruby27:/var/share/jorurimail/vendor/bundle
       - bundle_config_ubuntu20_ruby27:/var/share/jorurimail/.bundle
-      - bower_components_ubuntu20_ruby27:/var/share/jorurimail/vendor/assets/bower_components
       - log_ubuntu20_ruby27:/var/share/jorurimail/log
       - public_assets_ubuntu20_ruby27:/var/share/jorurimail/public/assets
       - tmp_ubuntu20_ruby27:/var/share/jorurimail/tmp
@@ -369,7 +367,6 @@ services:
       - .:/var/share/jorurimail:cached
       - bundle_ubuntu20_ruby27:/var/share/jorurimail/vendor/bundle
       - bundle_config_ubuntu20_ruby27:/var/share/jorurimail/.bundle
-      - bower_components_ubuntu20_ruby27:/var/share/jorurimail/vendor/assets/bower_components
       - log_ubuntu20_ruby27:/var/share/jorurimail/log
       - public_assets_ubuntu20_ruby27:/var/share/jorurimail/public/assets
       - tmp_ubuntu20_ruby27:/var/share/jorurimail/tmp
@@ -420,7 +417,6 @@ services:
       - .:/var/share/jorurimail:cached
       - bundle_ubuntu22_ruby31:/var/share/jorurimail/vendor/bundle
       - bundle_config_ubuntu22_ruby31:/var/share/jorurimail/.bundle
-      - bower_components_ubuntu22_ruby31:/var/share/jorurimail/vendor/assets/bower_components
       - log_ubuntu22_ruby31:/var/share/jorurimail/log
       - public_assets_ubuntu22_ruby31:/var/share/jorurimail/public/assets
       - tmp_ubuntu22_ruby31:/var/share/jorurimail/tmp
@@ -480,7 +476,6 @@ services:
       - .:/var/share/jorurimail:cached
       - bundle_ubuntu22_ruby31:/var/share/jorurimail/vendor/bundle
       - bundle_config_ubuntu22_ruby31:/var/share/jorurimail/.bundle
-      - bower_components_ubuntu22_ruby31:/var/share/jorurimail/vendor/assets/bower_components
       - log_ubuntu22_ruby31:/var/share/jorurimail/log
       - public_assets_ubuntu22_ruby31:/var/share/jorurimail/public/assets
       - tmp_ubuntu22_ruby31:/var/share/jorurimail/tmp
@@ -527,7 +522,6 @@ services:
       - .:/var/share/jorurimail:cached
       - bundle_ubuntu22_ruby31:/var/share/jorurimail/vendor/bundle
       - bundle_config_ubuntu22_ruby31:/var/share/jorurimail/.bundle
-      - bower_components_ubuntu22_ruby31:/var/share/jorurimail/vendor/assets/bower_components
       - log_ubuntu22_ruby31:/var/share/jorurimail/log
       - public_assets_ubuntu22_ruby31:/var/share/jorurimail/public/assets
       - tmp_ubuntu22_ruby31:/var/share/jorurimail/tmp
@@ -576,14 +570,12 @@ volumes:
   upload_ruby27:
   bundle_ubuntu20_ruby27:
   bundle_config_ubuntu20_ruby27:
-  bower_components_ubuntu20_ruby27:
   log_ubuntu20_ruby27:
   public_assets_ubuntu20_ruby27:
   tmp_ubuntu20_ruby27:
   upload_ubuntu20_ruby27:
   bundle_ubuntu22_ruby31:
   bundle_config_ubuntu22_ruby31:
-  bower_components_ubuntu22_ruby31:
   log_ubuntu22_ruby31:
   public_assets_ubuntu22_ruby31:
   tmp_ubuntu22_ruby31:

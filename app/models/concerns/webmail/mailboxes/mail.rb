@@ -1,18 +1,18 @@
 module Webmail::Mailboxes::Mail
   def paginate_mails(options)
-    Webmail::Mail.paginate(options.merge(select: name))
+    Webmail::Mail.paginate(**options.merge(select: name))
   end
 
   def paginate_mail_by_uid(uid, options)
-    Webmail::Mail.paginate_by_uid(uid, options.merge(select: name))
+    Webmail::Mail.paginate_by_uid(uid, **options.merge(select: name))
   end
 
   def find_mails(options)
-    Webmail::Mail.find(options.merge(select: name))
+    Webmail::Mail.find(**options.merge(select: name))
   end
 
   def find_mail_by_uid(uid, options)
-    Webmail::Mail.find_by_uid(uid, options.merge(select: name))
+    Webmail::Mail.find_by_uid(uid, **options.merge(select: name))
   end
 
   def move_mails(dest_name, uids)
