@@ -272,7 +272,6 @@ services:
       - ./docker/phase1/config/database.yml:/var/share/jorurimail/config/database.yml:ro
       - ./docker/phase1/config/imap.yml:/var/share/jorurimail/config/imap.yml:ro
       - ./docker/phase1/config/ldap.yml:/var/share/jorurimail/config/ldap.yml:ro
-      - ./docker/phase1/config/secrets.yml:/var/share/jorurimail/config/secrets.yml:ro
       - ./docker/phase1/config/smtp.yml:/var/share/jorurimail/config/smtp.yml:ro
       - ./docker/phase1/config/sso.yml:/var/share/jorurimail/config/sso.yml:ro
     command: ["bundle", "exec", "rails", "server", "-b", "0.0.0.0", "-p", "3000"]
@@ -333,7 +332,6 @@ services:
       - ./docker/phase1/config/database.yml:/var/share/jorurimail/config/database.yml:ro
       - ./docker/phase1/config/imap.yml:/var/share/jorurimail/config/imap.yml:ro
       - ./docker/phase1/config/ldap.yml:/var/share/jorurimail/config/ldap.yml:ro
-      - ./docker/phase1/config/secrets.yml:/var/share/jorurimail/config/secrets.yml:ro
       - ./docker/phase1/config/smtp.yml:/var/share/jorurimail/config/smtp.yml:ro
       - ./docker/phase1/config/sso.yml:/var/share/jorurimail/config/sso.yml:ro
     command: ["bundle", "exec", "rake", "jobs:work"]
@@ -381,7 +379,6 @@ services:
       - ./docker/phase1/config/database.yml:/var/share/jorurimail/config/database.yml:ro
       - ./docker/phase1/config/imap.yml:/var/share/jorurimail/config/imap.yml:ro
       - ./docker/phase1/config/ldap.yml:/var/share/jorurimail/config/ldap.yml:ro
-      - ./docker/phase1/config/secrets.yml:/var/share/jorurimail/config/secrets.yml:ro
       - ./docker/phase1/config/smtp.yml:/var/share/jorurimail/config/smtp.yml:ro
       - ./docker/phase1/config/sso.yml:/var/share/jorurimail/config/sso.yml:ro
     command:
@@ -433,7 +430,6 @@ services:
       - ./docker/phase1/config/database.yml:/var/share/jorurimail/config/database.yml:ro
       - ./docker/phase1/config/imap.yml:/var/share/jorurimail/config/imap.yml:ro
       - ./docker/phase1/config/ldap.yml:/var/share/jorurimail/config/ldap.yml:ro
-      - ./docker/phase1/config/secrets.yml:/var/share/jorurimail/config/secrets.yml:ro
       - ./docker/phase1/config/smtp.yml:/var/share/jorurimail/config/smtp.yml:ro
       - ./docker/phase1/config/sso.yml:/var/share/jorurimail/config/sso.yml:ro
     command: ["bundle", "exec", "rails", "server", "-b", "0.0.0.0", "-p", "3000"]
@@ -494,7 +490,6 @@ services:
       - ./docker/phase1/config/database.yml:/var/share/jorurimail/config/database.yml:ro
       - ./docker/phase1/config/imap.yml:/var/share/jorurimail/config/imap.yml:ro
       - ./docker/phase1/config/ldap.yml:/var/share/jorurimail/config/ldap.yml:ro
-      - ./docker/phase1/config/secrets.yml:/var/share/jorurimail/config/secrets.yml:ro
       - ./docker/phase1/config/smtp.yml:/var/share/jorurimail/config/smtp.yml:ro
       - ./docker/phase1/config/sso.yml:/var/share/jorurimail/config/sso.yml:ro
     command: ["bundle", "exec", "rake", "jobs:work"]
@@ -542,7 +537,6 @@ services:
       - ./docker/phase1/config/database.yml:/var/share/jorurimail/config/database.yml:ro
       - ./docker/phase1/config/imap.yml:/var/share/jorurimail/config/imap.yml:ro
       - ./docker/phase1/config/ldap.yml:/var/share/jorurimail/config/ldap.yml:ro
-      - ./docker/phase1/config/secrets.yml:/var/share/jorurimail/config/secrets.yml:ro
       - ./docker/phase1/config/smtp.yml:/var/share/jorurimail/config/smtp.yml:ro
       - ./docker/phase1/config/sso.yml:/var/share/jorurimail/config/sso.yml:ro
     command:

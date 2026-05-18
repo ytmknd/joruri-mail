@@ -62,8 +62,9 @@ secrets.
 - `config/application.rb` uses `ENV['SECRET_KEY_BASE']` when present.
 - The `app-ubuntu20-ruby27` Docker service sets a deterministic development
   `SECRET_KEY_BASE` for Phase 3/4 verification.
-- `config/secrets.yml` remains mounted for legacy compatibility in this step,
-  but it is no longer the preferred source for the Phase 4 container runtime.
+- Phase 4 app, worker, and scheduler services no longer mount
+  `config/secrets.yml`; the earlier Phase 0-2 services keep the legacy mount
+  for reproduction compatibility.
 
 ## Puma App Server Baseline
 
