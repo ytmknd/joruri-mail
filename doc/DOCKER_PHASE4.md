@@ -354,12 +354,16 @@ Open redirect hardening:
   eager loading is part of the verification for this step. The Rails 7.1
   `allow_deprecated_singular_associations_name` opt-in remains disabled because
   Rails 7.2 marks that compatibility switch as deprecated for Rails 8.
+- Cookie SameSite protection is set to `:lax`. Integration tests cover the
+  unauthenticated login-referrer cookie. The Rails 6.1
+  `urlsafe_csrf_tokens` opt-in remains disabled because Rails 7.2 no longer
+  accepts that compatibility setting.
 
 Remaining gated defaults:
 
-- Cookie, CSRF, key-generator, cookie serializer, and message serializer defaults
-  must be paired with manual login, remember-me cookie, SSO, and mobile session
-  checks because this app uses Active Record sessions plus plain legacy cookies.
+- Key-generator, cookie serializer, and message serializer defaults must be
+  paired with manual login, remember-me cookie, SSO, and mobile session checks
+  because this app uses Active Record sessions plus plain legacy cookies.
 - Active Record partial insert and connection handling defaults need model-level
   checks against the legacy multi-database setup and mail cache tables.
 - Rails 7.2 YJIT remains disabled until Phase 5 introduces a Ruby 3.3+ runtime.
