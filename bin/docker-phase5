@@ -1,0 +1,48 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+usage() {
+  cat <<'USAGE'
+Usage:
+  bin/docker-phase5 ubuntu26-build
+  bin/docker-phase5 ubuntu26-check
+  bin/docker-phase5 ubuntu26-test
+  bin/docker-phase5 ubuntu26-assets
+  bin/docker-phase5 ubuntu26-up
+
+Commands:
+  ubuntu26-build   Build the Ubuntu 26.04 / Ruby 3.3 app image.
+  ubuntu26-check   Print Ruby version and verify Rails boots on Ubuntu 26.04.
+  ubuntu26-test    Run the Rails test suite on Ubuntu 26.04.
+  ubuntu26-assets  Precompile assets on Ubuntu 26.04.
+  ubuntu26-up      Start the Ubuntu 26.04 / Ruby 3.3 Rails app on http://localhost:3008/.
+USAGE
+}
+
+cmd="${1:-}"
+
+case "$cmd" in
+  ubuntu26-build)
+    docker compose build app-ubuntu26-ruby33
+    ;;
+  ubuntu26-check)
+    docker compose run --rm app-ubuntu26-ruby33 ruby -v
+    docker compose run --rm app-ubuntu26-ruby33 bundle exec rails runner 'puts "Ruby #{RUBY_VERSION} Rails #{Rails.version} booted"'
+    ;;
+  ubuntu26-test)
+    docker compose run --rm app-ubuntu26-ruby33 bundle exec rails test
+    ;;
+  ubuntu26-assets)
+    docker compose run --rm -u joruri app-ubuntu26-ruby33 bundle exec rake assets:precompile
+    ;;
+  ubuntu26-up)
+    docker compose up app-ubuntu26-ruby33
+    ;;
+  ""|-h|--help|help)
+    usage
+    ;;
+  *)
+    usage >&2
+    exit 2
+    ;;
+esac
