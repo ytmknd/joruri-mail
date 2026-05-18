@@ -332,3 +332,7 @@ switching `config.load_defaults` in one large step.
   and Active Record marshalling format are moved to Rails 7.1 defaults. Searches
   found no `encrypts`, `serialize`, `store`, or `store_accessor` usage in the
   current models.
+- `ActiveSupport.utc_to_local_returns_utc_offset_times` is enabled from the
+  Rails 6.1 defaults. Searches found no direct calls to
+  `ActiveSupport::TimeZone#utc_to_local`; the app keeps its existing Tokyo local
+  time configuration.
