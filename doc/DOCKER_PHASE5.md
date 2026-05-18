@@ -26,8 +26,10 @@ Current build status:
   candidate image.
 - `sanitize` was raised to `6.1.x`, which removes the `nokogumbo 2.0.5`
   native extension from the bundle.
+- `rmagick` was raised to `6.3.x`, which builds against the Ubuntu 26.04
+  ImageMagick headers.
 - The build currently stops during `bundle install` on the remaining legacy
-  native gems: `rmagick 2.16.0` and `ruby-ldap 0.9.19`.
+  native gem: `ruby-ldap 0.9.19`.
 - The next Phase 5 step is to replace or upgrade those remaining gems before
   treating Ubuntu 26.04 as a runnable app baseline.
 
