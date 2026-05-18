@@ -314,3 +314,8 @@ switching `config.load_defaults` in one large step.
   `ActionDispatch::Request#content_type` return-value default is enabled. The
   application sets a mobile response `Content-Type` header directly but does not
   inspect `request.content_type`.
+- `action_mailer.smtp_timeout` is enabled so SMTP delivery uses explicit open
+  and read timeouts. Active Storage video preview arguments and the `:vips`
+  variant processor are also enabled to match Rails 7.0 defaults; the current
+  mail workflow still uses the legacy RMagick attachment code and does not use
+  Active Storage attachments.
