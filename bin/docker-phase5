@@ -9,6 +9,7 @@ Usage:
   bin/docker-phase5 ubuntu26-test
   bin/docker-phase5 ubuntu26-assets
   bin/docker-phase5 ubuntu26-up
+  bin/docker-phase5 ubuntu26-stack
 
 Commands:
   ubuntu26-build   Build the Ubuntu 26.04 / Ruby 3.3 app image.
@@ -16,6 +17,7 @@ Commands:
   ubuntu26-test    Run the Rails test suite on Ubuntu 26.04.
   ubuntu26-assets  Precompile assets on Ubuntu 26.04.
   ubuntu26-up      Start the Ubuntu 26.04 / Ruby 3.3 Rails app on http://localhost:3008/.
+  ubuntu26-stack   Start the Phase 5 app, proxy, worker, and scheduler services.
 USAGE
 }
 
@@ -37,6 +39,9 @@ case "$cmd" in
     ;;
   ubuntu26-up)
     docker compose up app-ubuntu26-ruby33
+    ;;
+  ubuntu26-stack)
+    docker compose --profile phase5 up app-ubuntu26-ruby33-proxy app-ubuntu26-ruby33-worker app-ubuntu26-ruby33-scheduler
     ;;
   ""|-h|--help|help)
     usage

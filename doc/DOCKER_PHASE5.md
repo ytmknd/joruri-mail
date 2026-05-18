@@ -9,6 +9,7 @@ The conservative candidate is Ubuntu 26.04, Ruby 3.3, and Rails 7.2.x.
 - Bundler is raised to 2.5.23 for the Ruby 3.3 candidate image.
 - The app still uses Rails 7.2.x and the Phase 4 MySQL / Greenmail services.
 - The direct Rails endpoint is `http://localhost:3008/`.
+- The Phase 5 Nginx proxy endpoint is `http://localhost:3009/`.
 - The Phase 5 service has separate bundle, log, asset, tmp, and upload volumes
   so it can be tested without disturbing the Phase 4 Ubuntu 22.04 runtime.
 - Ubuntu 26.04 already includes a UID/GID 1000 user/group in the base image, so
@@ -42,9 +43,12 @@ bin/docker-phase5 ubuntu26-build
 bin/docker-phase5 ubuntu26-check
 bin/docker-phase5 ubuntu26-test
 bin/docker-phase5 ubuntu26-assets
+bin/docker-phase5 ubuntu26-up
+bin/docker-phase5 ubuntu26-stack
 ```
 
 As of this phase checkpoint all four direct app runtime gates pass.
 
-After the direct app runtime is healthy, add the Phase 5 proxy, worker, and
-scheduler services to match the Phase 4 process layout.
+The Phase 5 profile includes app, proxy, worker, and scheduler services to
+match the Phase 4 process layout. Use `ubuntu26-stack` to boot that full set
+with the proxy on `http://localhost:3009/`.
