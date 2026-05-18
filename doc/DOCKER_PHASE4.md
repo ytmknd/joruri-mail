@@ -273,3 +273,6 @@ switching `config.load_defaults` in one large step.
 
 - `active_support.precompile_filter_parameters` is enabled from the Rails 7.1
   defaults so configured parameter filters are compiled during initialization.
+- `active_support.raise_on_invalid_cache_expiration_time` is enabled from the
+  Rails 7.1 defaults. The application does not currently call `Rails.cache`
+  directly, so this is a guardrail for future cache usage.
