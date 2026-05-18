@@ -357,6 +357,10 @@ Open redirect hardening:
   associations that are explicitly mandatory. The
   `allow_deprecated_singular_associations_name` opt-in remains disabled because
   Rails 7.2 marks that compatibility switch as deprecated for Rails 8.
+- Active Record full inserts (`partial_inserts = false`) are enabled. Schema
+  defaults are loaded into new model attributes; a model test covers the
+  `webmail_mailboxes` counter defaults, which are the app-specific nullable
+  defaults most likely to be affected.
 - Cookie SameSite protection is set to `:lax`. Integration tests cover the
   unauthenticated login-referrer cookie. The Rails 6.1
   `urlsafe_csrf_tokens` opt-in remains disabled because Rails 7.2 no longer
@@ -373,8 +377,8 @@ Remaining gated defaults:
 - Key-generator defaults must be paired with manual login, remember-me cookie,
   SSO, and mobile session checks because changing them can invalidate existing
   signed/encrypted data.
-- Active Record partial insert and connection handling defaults need model-level
-  checks against the legacy multi-database setup and mail cache tables.
+- Active Record connection handling defaults need model-level checks against the
+  legacy multi-database setup and mail cache tables.
 - Rails 7.2 YJIT remains disabled until Phase 5 introduces a Ruby 3.3+ runtime.
 - Rails 7.1 `allow_deprecated_parameters_hash_equality` and
   `active_job.use_big_decimal_serializer` remain disabled because Rails 7.2
