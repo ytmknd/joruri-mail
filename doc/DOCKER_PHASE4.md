@@ -241,6 +241,9 @@ runtime introduced in the previous step.
   the system MIME database.
 - Rails 7.2 no longer supports Ruby 2.7, so verification for this step targets
   `app-ubuntu22-ruby31`.
+- `active_record.validate_migration_timestamps` is enabled as the first Rails
+  7.2 framework default opt-in. Runtime defaults are still advanced one by one;
+  `config.load_defaults` is not switched to 7.2 yet.
 
 Verification:
 
