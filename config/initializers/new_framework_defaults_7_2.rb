@@ -67,4 +67,6 @@ Rails.application.config.active_record.postgresql_adapter_decode_dates = true
 # Enables YJIT as of Ruby 3.3, to bring sizeable performance improvements. If you are
 # deploying to a memory constrained environment you may want to set this to `false`.
 #++
-# Rails.application.config.yjit = true
+if RUBY_VERSION >= "3.3" && defined?(RubyVM::YJIT)
+  Rails.application.config.yjit = true
+end

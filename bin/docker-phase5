@@ -6,18 +6,22 @@ usage() {
 Usage:
   bin/docker-phase5 ubuntu26-build
   bin/docker-phase5 ubuntu26-check
+  bin/docker-phase5 ubuntu26-yjit-check
   bin/docker-phase5 ubuntu26-test
   bin/docker-phase5 ubuntu26-assets
   bin/docker-phase5 ubuntu26-up
   bin/docker-phase5 ubuntu26-stack
+  bin/docker-phase5 ubuntu26-security
 
 Commands:
-  ubuntu26-build   Build the Ubuntu 26.04 / Ruby 3.3 app image.
-  ubuntu26-check   Print Ruby version and verify Rails boots on Ubuntu 26.04.
-  ubuntu26-test    Run the Rails test suite on Ubuntu 26.04.
-  ubuntu26-assets  Precompile assets on Ubuntu 26.04.
-  ubuntu26-up      Start the Ubuntu 26.04 / Ruby 3.3 Rails app on http://localhost:3008/.
-  ubuntu26-stack   Start the Phase 5 app, proxy, worker, and scheduler services.
+  ubuntu26-build      Build the Ubuntu 26.04 / Ruby 3.3 app image.
+  ubuntu26-check      Print Ruby version and verify Rails boots on Ubuntu 26.04.
+  ubuntu26-yjit-check Confirm YJIT is compiled in and enabled by Rails on Ubuntu 26.04.
+  ubuntu26-test       Run the Rails test suite on Ubuntu 26.04.
+  ubuntu26-assets     Precompile assets on Ubuntu 26.04.
+  ubuntu26-up         Start the Ubuntu 26.04 / Ruby 3.3 Rails app on http://localhost:3008/.
+  ubuntu26-stack      Start the Phase 5 app, proxy, worker, and scheduler services.
+  ubuntu26-security   Run Brakeman and bundler-audit security checks on Ubuntu 26.04.
 USAGE
 }
 
@@ -29,7 +33,11 @@ case "$cmd" in
     ;;
   ubuntu26-check)
     docker compose run --rm app-ubuntu26-ruby33 ruby -v
-    docker compose run --rm app-ubuntu26-ruby33 bundle exec rails runner 'puts "Ruby #{RUBY_VERSION} Rails #{Rails.version} booted"'
+    docker compose run --rm app-ubuntu26-ruby33 bundle exec rails runner 'abort "YJIT is not enabled" unless defined?(RubyVM::YJIT) && RubyVM::YJIT.enabled?; puts "Ruby #{RUBY_VERSION} Rails #{Rails.version} booted with YJIT"'
+    ;;
+  ubuntu26-yjit-check)
+    docker compose run --rm --no-deps app-ubuntu26-ruby33 bundle exec rails runner \
+      'puts "YJIT enabled: #{RubyVM::YJIT.enabled?}"'
     ;;
   ubuntu26-test)
     docker compose run --rm app-ubuntu26-ruby33 bundle exec rails test
@@ -42,6 +50,10 @@ case "$cmd" in
     ;;
   ubuntu26-stack)
     docker compose --profile phase5 up app-ubuntu26-ruby33-proxy app-ubuntu26-ruby33-worker app-ubuntu26-ruby33-scheduler
+    ;;
+  ubuntu26-security)
+    docker compose run --rm --no-deps app-ubuntu26-ruby33 bundle exec brakeman -q --no-exit-on-warn
+    docker compose run --rm --no-deps app-ubuntu26-ruby33 bundle exec bundler-audit check --update
     ;;
   ""|-h|--help|help)
     usage

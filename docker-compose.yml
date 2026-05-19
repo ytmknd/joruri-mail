@@ -556,7 +556,7 @@ services:
       BUNDLE_BIN: /var/share/jorurimail/vendor/bundle/bin
       BUNDLE_PATH: /var/share/jorurimail/vendor/bundle
       BUNDLER_VERSION: "2.5.23"
-      CHOWN_SOURCE_TREE: "1"
+      CHOWN_SOURCE_TREE: "0"
       EXECJS_RUNTIME: Node
       LANG: ja_JP.UTF-8
       LC_ALL: ja_JP.UTF-8
@@ -570,6 +570,7 @@ services:
         condition: service_started
     volumes:
       - .:/var/share/jorurimail:cached
+      - ./Gemfile.phase5.lock:/var/share/jorurimail/Gemfile.lock
       - bundle_ubuntu26_ruby33:/var/share/jorurimail/vendor/bundle
       - bundle_config_ubuntu26_ruby33:/var/share/jorurimail/.bundle
       - log_ubuntu26_ruby33:/var/share/jorurimail/log
@@ -629,6 +630,7 @@ services:
         condition: service_started
     volumes:
       - .:/var/share/jorurimail:cached
+      - ./Gemfile.phase5.lock:/var/share/jorurimail/Gemfile.lock
       - bundle_ubuntu26_ruby33:/var/share/jorurimail/vendor/bundle
       - bundle_config_ubuntu26_ruby33:/var/share/jorurimail/.bundle
       - log_ubuntu26_ruby33:/var/share/jorurimail/log
@@ -675,6 +677,7 @@ services:
         condition: service_started
     volumes:
       - .:/var/share/jorurimail:cached
+      - ./Gemfile.phase5.lock:/var/share/jorurimail/Gemfile.lock
       - bundle_ubuntu26_ruby33:/var/share/jorurimail/vendor/bundle
       - bundle_config_ubuntu26_ruby33:/var/share/jorurimail/.bundle
       - log_ubuntu26_ruby33:/var/share/jorurimail/log

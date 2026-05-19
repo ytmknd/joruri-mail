@@ -43,7 +43,11 @@ gem 'jpmobile', '~> 5.1.0'
 gem 'scanf', '~> 1.0.0'
 gem 'nkf', '~> 0.2.0'
 gem 'rmagick', '~> 6.3'
-gem 'nokogiri', '~> 1.14'
+if RUBY_VERSION >= '3.2'
+  gem 'nokogiri', '~> 1.19', '>= 1.19.3'
+else
+  gem 'nokogiri', '~> 1.18', '>= 1.18.10'
+end
 gem 'premailer', '~> 1.27.0'
 gem 'sanitize', '~> 6.1'
 gem 'rails-html-sanitizer', '~> 1.6'
@@ -64,7 +68,12 @@ gem 'rails_autolink', '~> 1.1.6'
 gem 'whenever', '~> 0.9.7', require: false
 
 group :development, :test do
-  gem 'brakeman', require: false
+  if RUBY_VERSION >= '3.2'
+    gem 'brakeman', '~> 8.0', require: false
+  else
+    gem 'brakeman', '>= 6.2', '< 8', require: false
+  end
+  gem 'bundler-audit', require: false
 end
 
 group :development do

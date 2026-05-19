@@ -8,7 +8,7 @@ ENV DEBIAN_FRONTEND=noninteractive \
     PATH=/usr/local/rbenv/bin:/usr/local/rbenv/shims:/var/share/jorurimail/vendor/bundle/bin:$PATH \
     LANG=ja_JP.UTF-8 \
     LC_ALL=ja_JP.UTF-8 \
-    RUBY_CONFIGURE_OPTS=--with-openssl-dir=/usr \
+    RUBY_CONFIGURE_OPTS="--with-openssl-dir=/usr --enable-yjit" \
     BUNDLER_VERSION=${BUNDLER_VERSION}
 
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
@@ -20,6 +20,7 @@ RUN apt-get update && \
       build-essential \
       bzip2 \
       ca-certificates \
+      cargo \
       curl \
       default-mysql-client \
       git \
@@ -79,8 +80,9 @@ RUN git clone --depth 1 https://github.com/rbenv/rbenv.git "${RBENV_ROOT}" && \
 
 WORKDIR /var/share/jorurimail
 
-COPY Gemfile Gemfile.lock ./
-RUN bundle _${BUNDLER_VERSION}_ install --path vendor/bundle && \
+COPY Gemfile Gemfile.phase5.lock ./
+RUN cp Gemfile.phase5.lock Gemfile.lock && \
+    bundle _${BUNDLER_VERSION}_ install --path vendor/bundle && \
     chown -R joruri:joruri /var/share/jorurimail
 
 COPY docker/ubuntu18-ruby25/entrypoint.sh /usr/local/bin/joruri-entrypoint
