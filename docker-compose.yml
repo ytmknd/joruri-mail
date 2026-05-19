@@ -538,16 +538,16 @@ services:
       - -lc
       - while true; do bundle exec rake webmail:cleanup; sleep "$${SCHEDULER_INTERVAL_SECONDS:-86400}"; done
 
-  app-ubuntu26-ruby33:
+  app-ubuntu26-ruby4:
     profiles:
       - phase5
     build:
       context: .
-      dockerfile: docker/ubuntu26-ruby33/Dockerfile
+      dockerfile: docker/ubuntu26-ruby4/Dockerfile
       args:
-        RUBY_VERSION: "3.3.11"
+        RUBY_VERSION: "4.0.4"
         BUNDLER_VERSION: "2.5.23"
-    image: joruri-mail:phase5-ubuntu26-ruby33
+    image: joruri-mail:phase5-ubuntu26-ruby4
     platform: linux/amd64
     working_dir: /var/share/jorurimail
     environment:
@@ -571,12 +571,12 @@ services:
     volumes:
       - .:/var/share/jorurimail:cached
       - ./Gemfile.phase5.lock:/var/share/jorurimail/Gemfile.lock
-      - bundle_ubuntu26_ruby33:/var/share/jorurimail/vendor/bundle
-      - bundle_config_ubuntu26_ruby33:/var/share/jorurimail/.bundle
-      - log_ubuntu26_ruby33:/var/share/jorurimail/log
-      - public_assets_ubuntu26_ruby33:/var/share/jorurimail/public/assets
-      - tmp_ubuntu26_ruby33:/var/share/jorurimail/tmp
-      - upload_ubuntu26_ruby33:/var/share/jorurimail/upload
+      - bundle_ubuntu26_ruby4:/var/share/jorurimail/vendor/bundle
+      - bundle_config_ubuntu26_ruby4:/var/share/jorurimail/.bundle
+      - log_ubuntu26_ruby4:/var/share/jorurimail/log
+      - public_assets_ubuntu26_ruby4:/var/share/jorurimail/public/assets
+      - tmp_ubuntu26_ruby4:/var/share/jorurimail/tmp
+      - upload_ubuntu26_ruby4:/var/share/jorurimail/upload
       - ./docker/phase1/config/application.yml:/var/share/jorurimail/config/application.yml:ro
       - ./docker/phase1/config/core.yml:/var/share/jorurimail/config/core.yml:ro
       - ./docker/phase1/config/database.yml:/var/share/jorurimail/config/database.yml:ro
@@ -588,7 +588,7 @@ services:
     stdin_open: true
     tty: true
 
-  app-ubuntu26-ruby33-proxy:
+  app-ubuntu26-ruby4-proxy:
     profiles:
       - phase5
     image: nginx:1.26-alpine
@@ -596,20 +596,20 @@ services:
     ports:
       - "3009:80"
     depends_on:
-      - app-ubuntu26-ruby33
+      - app-ubuntu26-ruby4
     volumes:
       - ./docker/nginx/phase5-ubuntu26.conf:/etc/nginx/conf.d/default.conf:ro
 
-  app-ubuntu26-ruby33-worker:
+  app-ubuntu26-ruby4-worker:
     profiles:
       - phase5
     build:
       context: .
-      dockerfile: docker/ubuntu26-ruby33/Dockerfile
+      dockerfile: docker/ubuntu26-ruby4/Dockerfile
       args:
-        RUBY_VERSION: "3.3.11"
+        RUBY_VERSION: "4.0.4"
         BUNDLER_VERSION: "2.5.23"
-    image: joruri-mail:phase5-ubuntu26-ruby33
+    image: joruri-mail:phase5-ubuntu26-ruby4
     platform: linux/amd64
     working_dir: /var/share/jorurimail
     environment:
@@ -631,12 +631,12 @@ services:
     volumes:
       - .:/var/share/jorurimail:cached
       - ./Gemfile.phase5.lock:/var/share/jorurimail/Gemfile.lock
-      - bundle_ubuntu26_ruby33:/var/share/jorurimail/vendor/bundle
-      - bundle_config_ubuntu26_ruby33:/var/share/jorurimail/.bundle
-      - log_ubuntu26_ruby33:/var/share/jorurimail/log
-      - public_assets_ubuntu26_ruby33:/var/share/jorurimail/public/assets
-      - tmp_ubuntu26_ruby33:/var/share/jorurimail/tmp
-      - upload_ubuntu26_ruby33:/var/share/jorurimail/upload
+      - bundle_ubuntu26_ruby4:/var/share/jorurimail/vendor/bundle
+      - bundle_config_ubuntu26_ruby4:/var/share/jorurimail/.bundle
+      - log_ubuntu26_ruby4:/var/share/jorurimail/log
+      - public_assets_ubuntu26_ruby4:/var/share/jorurimail/public/assets
+      - tmp_ubuntu26_ruby4:/var/share/jorurimail/tmp
+      - upload_ubuntu26_ruby4:/var/share/jorurimail/upload
       - ./docker/phase1/config/application.yml:/var/share/jorurimail/config/application.yml:ro
       - ./docker/phase1/config/core.yml:/var/share/jorurimail/config/core.yml:ro
       - ./docker/phase1/config/database.yml:/var/share/jorurimail/config/database.yml:ro
@@ -646,16 +646,16 @@ services:
       - ./docker/phase1/config/sso.yml:/var/share/jorurimail/config/sso.yml:ro
     command: ["bundle", "exec", "rake", "jobs:work"]
 
-  app-ubuntu26-ruby33-scheduler:
+  app-ubuntu26-ruby4-scheduler:
     profiles:
       - phase5
     build:
       context: .
-      dockerfile: docker/ubuntu26-ruby33/Dockerfile
+      dockerfile: docker/ubuntu26-ruby4/Dockerfile
       args:
-        RUBY_VERSION: "3.3.11"
+        RUBY_VERSION: "4.0.4"
         BUNDLER_VERSION: "2.5.23"
-    image: joruri-mail:phase5-ubuntu26-ruby33
+    image: joruri-mail:phase5-ubuntu26-ruby4
     platform: linux/amd64
     working_dir: /var/share/jorurimail
     environment:
@@ -678,12 +678,12 @@ services:
     volumes:
       - .:/var/share/jorurimail:cached
       - ./Gemfile.phase5.lock:/var/share/jorurimail/Gemfile.lock
-      - bundle_ubuntu26_ruby33:/var/share/jorurimail/vendor/bundle
-      - bundle_config_ubuntu26_ruby33:/var/share/jorurimail/.bundle
-      - log_ubuntu26_ruby33:/var/share/jorurimail/log
-      - public_assets_ubuntu26_ruby33:/var/share/jorurimail/public/assets
-      - tmp_ubuntu26_ruby33:/var/share/jorurimail/tmp
-      - upload_ubuntu26_ruby33:/var/share/jorurimail/upload
+      - bundle_ubuntu26_ruby4:/var/share/jorurimail/vendor/bundle
+      - bundle_config_ubuntu26_ruby4:/var/share/jorurimail/.bundle
+      - log_ubuntu26_ruby4:/var/share/jorurimail/log
+      - public_assets_ubuntu26_ruby4:/var/share/jorurimail/public/assets
+      - tmp_ubuntu26_ruby4:/var/share/jorurimail/tmp
+      - upload_ubuntu26_ruby4:/var/share/jorurimail/upload
       - ./docker/phase1/config/application.yml:/var/share/jorurimail/config/application.yml:ro
       - ./docker/phase1/config/core.yml:/var/share/jorurimail/config/core.yml:ro
       - ./docker/phase1/config/database.yml:/var/share/jorurimail/config/database.yml:ro
@@ -738,9 +738,9 @@ volumes:
   public_assets_ubuntu22_ruby31:
   tmp_ubuntu22_ruby31:
   upload_ubuntu22_ruby31:
-  bundle_ubuntu26_ruby33:
-  bundle_config_ubuntu26_ruby33:
-  log_ubuntu26_ruby33:
-  public_assets_ubuntu26_ruby33:
-  tmp_ubuntu26_ruby33:
-  upload_ubuntu26_ruby33:
+  bundle_ubuntu26_ruby4:
+  bundle_config_ubuntu26_ruby4:
+  log_ubuntu26_ruby4:
+  public_assets_ubuntu26_ruby4:
+  tmp_ubuntu26_ruby4:
+  upload_ubuntu26_ruby4:
