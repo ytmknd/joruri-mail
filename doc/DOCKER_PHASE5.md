@@ -33,6 +33,8 @@ Current build status:
   no longer depends on the removed Ruby C API.
 - `premailer` was raised to `1.27.x`, pulling in a Ruby 3.3-compatible
   `css_parser`.
+- `nkf` is now an explicit bundle dependency so the mail and CSV encoding
+  paths do not rely on Ruby's stdlib-default copy.
 - The direct Ubuntu 26.04 / Ruby 3.3 runtime now builds, boots Rails, runs the
   test suite, and precompiles assets.
 
