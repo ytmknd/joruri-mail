@@ -6,12 +6,28 @@ Joruri::Application.routes.draw do
       resources :siteinfo, only: :index
       resources :mails, path: '*mailbox/mails' do
         collection do
-          get :empty, :close, :reset_address_history, :star, :label
-          post :move, :delete, :seen, :unseen, :junk, :mobile_manage
+          get :empty
+          get :close
+          get :reset_address_history
+          get :star
+          get :label
+          post :move
+          post :delete
+          post :seen
+          post :unseen
+          post :junk
+          post :mobile_manage
         end
         member do
-          get :edit, :download, :answer, :forward
-          post :edit, :answer, :forward, :send_mdn, :mobile_send
+          get :edit
+          get :download
+          get :answer
+          get :forward
+          post :edit
+          post :answer
+          post :forward
+          post :send_mdn
+          post :mobile_send
         end
       end
       post '*mailbox/mails/new' => 'mails#new'
@@ -29,7 +45,9 @@ Joruri::Application.routes.draw do
       end
       resources :sys_addresses do
         member do
-          get :child_groups, :child_users, :create_mail
+          get :child_groups
+          get :child_users
+          get :create_mail
         end
         collection do
           post :mobile_manage
@@ -37,8 +55,11 @@ Joruri::Application.routes.draw do
       end
       resources :addresses do
         collection do
-          get :import, :export
-          post :candidate_import, :exec_import, :export
+          get :import
+          get :export
+          post :candidate_import
+          post :exec_import
+          post :export
         end
         member do
           get :create_mail
@@ -46,7 +67,8 @@ Joruri::Application.routes.draw do
       end
       resources :address_groups do
         collection do
-          post :create_mail, :mobile_manage
+          post :create_mail
+          post :mobile_manage
         end
       end
       resources :filters do

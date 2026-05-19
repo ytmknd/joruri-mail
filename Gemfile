@@ -2,7 +2,11 @@ source 'https://rubygems.org'
 
 
 # Bundle edge Rails instead: gem 'rails', github: 'rails/rails'
-gem 'rails', '~> 7.2.0'
+if RUBY_VERSION >= '3.2'
+  gem 'rails', '~> 8.1.0'
+else
+  gem 'rails', '~> 7.2.0'
+end
 gem 'concurrent-ruby', '1.3.4'
 gem 'minitest', '5.26.1'
 gem 'securerandom', '0.3.2'

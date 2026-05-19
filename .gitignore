@@ -6,6 +6,8 @@
 /.idea
 /.rvmrc
 /.rspec
+/AGENTS.md
+/CLAUDE.md
 
 /config/*.yml
 /config/initializers/debug.rb
