@@ -15,7 +15,7 @@ Bundler.require(*Rails.groups)
 
 module Joruri
   class Application < Rails::Application
-    config.load_defaults 7.2
+    config.load_defaults 8.1
 
     # lib/ is auto-loaded. lib/assets, lib/tasks, and lib/plugins are excluded:
     # plugins contains monkey patches and must not be auto-loaded by Zeitwerk.
