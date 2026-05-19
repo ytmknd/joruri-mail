@@ -251,8 +251,8 @@ runtime introduced in the previous step.
   enabled to match Rails 7.2 defaults. The current Docker runtime uses MySQL and
   does not introduce Active Storage tables, so these are compatibility opt-ins
   without changing the mail workflow.
-- The Rails 7.2 YJIT default remains disabled until Phase 5 introduces a Ruby
-  3.3+ runtime where the setting becomes meaningful.
+- The Rails 7.2 YJIT default remains disabled on this Ruby 3.1 runtime. Phase
+  5 enables it on the Ruby 3.3 runtime where the setting is meaningful.
 
 Verification:
 
@@ -380,7 +380,8 @@ Remaining gated defaults:
 - Key-generator defaults must be paired with manual login, remember-me cookie,
   SSO, and mobile session checks because changing them can invalidate existing
   signed/encrypted data.
-- Rails 7.2 YJIT remains disabled until Phase 5 introduces a Ruby 3.3+ runtime.
+- Rails 7.2 YJIT remains disabled on this Ruby 3.1 runtime; the Ruby 3.3 Phase
+  5 runtime enables and verifies it separately.
 - Rails 6.1 `legacy_connection_handling` remains disabled because Rails 7.2
   rejects the removed setter. Optional `session`, `joruri_manage`, and
   `dev_jgw_core` connections remain guarded by presence checks under the current
