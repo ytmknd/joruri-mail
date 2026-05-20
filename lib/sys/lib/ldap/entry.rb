@@ -2,7 +2,7 @@ class Sys::Lib::Ldap::Entry
   def initialize(connection, attributes = {})
     attributes = attributes.each_with_object({}) do |(key, val), hash|
       hash[key.to_s] = Array(val).map do |v|
-        v.to_s.force_encoding("utf-8")
+        v.to_s.force_encoding(Encoding::UTF_8)
       end
     end
 
