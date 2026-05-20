@@ -1,0 +1,4 @@
+admin@localhost.localdomain.jp:{PLAIN}admin:5000:5000::/var/mail/vhosts/localhost.localdomain.jp/admin::
+user1@localhost.localdomain.jp:{PLAIN}user1:5000:5000::/var/mail/vhosts/localhost.localdomain.jp/user1::
+user2@localhost.localdomain.jp:{PLAIN}user2:5000:5000::/var/mail/vhosts/localhost.localdomain.jp/user2::
+user3@localhost.localdomain.jp:{PLAIN}user3:5000:5000::/var/mail/vhosts/localhost.localdomain.jp/user3::

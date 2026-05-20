@@ -1,17 +1,18 @@
 services:
   imap:
-    image: greenmail/standalone:2.1.8
-    platform: linux/amd64
-    environment:
-      GREENMAIL_OPTS: >-
-        -Dgreenmail.setup.test.all
-        -Dgreenmail.hostname=0.0.0.0
-        -Dgreenmail.users=admin:admin,user1:user1,user2:user2,user3:user3
-      JAVA_OPTS: -Djava.net.preferIPv4Stack=true
+    build:
+      context: .
+      dockerfile: docker/mail/Dockerfile
+    hostname: imap
     ports:
       - "3025:3025"
       - "3143:3143"
-      - "8081:8080"
+    healthcheck:
+      test: ["CMD", "nc", "-z", "localhost", "3143"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 20s
 
   db:
     image: mysql:5.7

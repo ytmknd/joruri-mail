@@ -1,0 +1,44 @@
+smtpd_banner = $myhostname ESMTP Postfix (test)
+biff = no
+append_dot_mydomain = no
+
+myhostname = mail.localhost.localdomain.jp
+mydomain = localhost.localdomain.jp
+myorigin = $mydomain
+
+# Accept mail addressed to this domain only
+mydestination =
+virtual_mailbox_domains = localhost.localdomain.jp
+
+# Deliver via Dovecot LMTP
+virtual_transport = lmtp:unix:private/dovecot-lmtp
+
+virtual_mailbox_base = /var/mail/vhosts
+virtual_mailbox_maps = hash:/etc/postfix/virtual_mailbox_maps
+virtual_alias_maps   = hash:/etc/postfix/virtual_alias_maps
+
+# UID/GID for virtual mailboxes (vmail user created in entrypoint)
+virtual_minimum_uid = 100
+virtual_uid_maps    = static:5000
+virtual_gid_maps    = static:5000
+
+# Accept from any host (test environment – no relay restrictions)
+mynetworks = 0.0.0.0/0
+inet_interfaces = all
+inet_protocols = ipv4
+
+# Relay policy: permit_mynetworks covers the Docker network (all containers)
+smtpd_relay_restrictions = permit_mynetworks, defer_unauth_destination
+smtpd_recipient_restrictions = permit_mynetworks
+
+compatibility_level = 3.6
+
+# No TLS in test environment
+smtpd_tls_security_level = none
+smtp_tls_security_level  = none
+
+# No auth required (test environment)
+smtpd_sasl_auth_enable = no
+
+mailbox_size_limit = 0
+recipient_delimiter = +
