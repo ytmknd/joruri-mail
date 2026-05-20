@@ -1,6 +1,6 @@
 development:
   address: imap
-  port: 3025
+  port: 587
   domain: localhost.localdomain.jp
   user_name:
   password:
@@ -8,7 +8,7 @@ development:
 
 test:
   address: imap
-  port: 3025
+  port: 587
   domain: localhost.localdomain.jp
   user_name:
   password:
@@ -16,7 +16,7 @@ test:
 
 production:
   address: imap
-  port: 3025
+  port: 587
   domain: localhost.localdomain.jp
   user_name:
   password:

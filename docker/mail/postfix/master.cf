@@ -1,6 +1,6 @@
-# Postfix master.cf — listen on port 3025 for SMTP (test environment)
+# Postfix master.cf — listen on port 587 for SMTP (test environment)
 # service  type  private unpriv  chroot  wakeup  maxproc command + args
-3025       inet  n       -       y       -       -       smtpd
+587       inet  n       -       y       -       -       smtpd
 pickup     unix  n       -       y       60      1       pickup
 cleanup    unix  n       -       y       -       0       cleanup
 qmgr       unix  n       -       n       300     1       qmgr

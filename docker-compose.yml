@@ -5,10 +5,10 @@ services:
       dockerfile: docker/mail/Dockerfile
     hostname: imap
     ports:
-      - "3025:3025"
-      - "3143:3143"
+      - "587:587"
+      - "143:143"
     healthcheck:
-      test: ["CMD", "nc", "-z", "localhost", "3143"]
+      test: ["CMD", "nc", "-z", "localhost", "143"]
       interval: 10s
       timeout: 5s
       retries: 10
