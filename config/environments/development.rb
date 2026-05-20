@@ -69,4 +69,11 @@ Rails.application.configure do
 
   # Raise error when a before_action's only/except options reference missing actions.
   config.action_controller.raise_on_missing_callback_actions = true
+
+  # Allow extra hostnames for system tests running inside Docker (e.g. Selenium
+  # container accesses the app via its service name). Pass as a comma-separated
+  # list in SYSTEM_TEST_HOSTS.
+  ENV.fetch("SYSTEM_TEST_HOSTS", "").split(",").each do |h|
+    config.hosts << h.strip unless h.strip.empty?
+  end
 end

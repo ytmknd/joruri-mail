@@ -12,16 +12,18 @@ Usage:
   bin/docker-phase5 ubuntu26-up
   bin/docker-phase5 ubuntu26-stack
   bin/docker-phase5 ubuntu26-security
+  bin/docker-phase5 ubuntu26-system-test
 
 Commands:
-  ubuntu26-build      Build the Ubuntu 26.04 / Ruby 4.0 app image.
-  ubuntu26-check      Print Ruby version and verify Rails boots on Ubuntu 26.04.
-  ubuntu26-yjit-check Confirm YJIT is compiled in and enabled by Rails on Ubuntu 26.04.
-  ubuntu26-test       Run the Rails test suite on Ubuntu 26.04.
-  ubuntu26-assets     Precompile assets on Ubuntu 26.04.
-  ubuntu26-up         Start the Ubuntu 26.04 / Ruby 4.0 Rails app on http://localhost:3008/.
-  ubuntu26-stack      Start the Phase 5 app, proxy, worker, and scheduler services.
-  ubuntu26-security   Run Brakeman and bundler-audit security checks on Ubuntu 26.04.
+  ubuntu26-build       Build the Ubuntu 26.04 / Ruby 4.0 app image.
+  ubuntu26-check       Print Ruby version and verify Rails boots on Ubuntu 26.04.
+  ubuntu26-yjit-check  Confirm YJIT is compiled in and enabled by Rails on Ubuntu 26.04.
+  ubuntu26-test        Run the Rails test suite on Ubuntu 26.04.
+  ubuntu26-assets      Precompile assets on Ubuntu 26.04.
+  ubuntu26-up          Start the Ubuntu 26.04 / Ruby 4.0 Rails app on http://localhost:3008/.
+  ubuntu26-stack       Start the Phase 5 app, proxy, worker, and scheduler services.
+  ubuntu26-security    Run Brakeman and bundler-audit security checks on Ubuntu 26.04.
+  ubuntu26-system-test Drive the running Phase 5 dev stack with headless Chromium via Selenium.
 USAGE
 }
 
@@ -54,6 +56,16 @@ case "$cmd" in
   ubuntu26-security)
     docker compose run --rm --no-deps app-ubuntu26-ruby4 bundle exec brakeman -q --no-exit-on-warn
     docker compose run --rm --no-deps app-ubuntu26-ruby4 bundle exec bundler-audit check --update
+    ;;
+  ubuntu26-system-test)
+    docker compose --profile phase5 up -d app-ubuntu26-ruby4 app-ubuntu26-ruby4-selenium
+    docker compose run --rm \
+      -e RAILS_ENV=development \
+      -e CAPYBARA_APP_HOST=http://app-ubuntu26-ruby4:3000 \
+      -e SELENIUM_REMOTE_URL=http://app-ubuntu26-ruby4-selenium:4444/wd/hub \
+      -e SYSTEM_TEST_HOSTS=app-ubuntu26-ruby4 \
+      app-ubuntu26-ruby4 \
+      bundle exec rails test test/system
     ;;
   ""|-h|--help|help)
     usage

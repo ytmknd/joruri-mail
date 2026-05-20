@@ -80,6 +80,11 @@ group :development, :test do
   gem 'bundler-audit', require: false
 end
 
+group :test do
+  gem 'capybara', '~> 3.40'
+  gem 'selenium-webdriver', '~> 4.20'
+end
+
 group :development do
   # Access an IRB console on exception pages or by using <%= console %> anywhere in the code.
   gem 'web-console'
