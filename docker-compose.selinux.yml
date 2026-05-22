@@ -1,0 +1,32 @@
+# SELinux override for Podman on SELinux-enabled hosts (Fedora, RHEL, CentOS Stream).
+#
+# Usage:
+#   podman compose -f docker-compose.yml -f docker-compose.selinux.yml [command]
+#
+# Or set the environment variable once:
+#   export COMPOSE_FILE=docker-compose.yml:docker-compose.selinux.yml
+#
+# This file adds "security_opt: label=disable" to every service that has
+# bind mounts from the host, disabling SELinux label enforcement so that
+# host files are accessible without relabeling.
+
+services:
+  db:
+    security_opt:
+      - label=disable
+
+  app-ubuntu26-ruby4:
+    security_opt:
+      - label=disable
+
+  app-ubuntu26-ruby4-proxy:
+    security_opt:
+      - label=disable
+
+  app-ubuntu26-ruby4-worker:
+    security_opt:
+      - label=disable
+
+  app-ubuntu26-ruby4-scheduler:
+    security_opt:
+      - label=disable

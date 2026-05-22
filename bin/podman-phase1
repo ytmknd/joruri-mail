@@ -1,0 +1,70 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+usage() {
+  cat <<'USAGE'
+Usage:
+  bin/podman-phase1 build
+  bin/podman-phase1 check
+  bin/podman-phase1 up
+  bin/podman-phase1 all
+
+Commands:
+  build  Build the Ubuntu 18.04 / Ruby 2 app image.
+  check  Print Ruby version and verify Rails boots.
+  up     Start the Rails app with podman compose.
+  all    Run build, check, then up.
+USAGE
+}
+
+check_podman() {
+  if ! command -v podman > /dev/null 2>&1; then
+    echo "ERROR: podman not found. Install podman >= 4.4." >&2
+    exit 1
+  fi
+  if ! podman compose version > /dev/null 2>&1; then
+    echo "ERROR: 'podman compose' not available. Install podman >= 4.4 or podman-compose." >&2
+    exit 1
+  fi
+}
+
+# Use podman-compose over docker-compose when both are available.
+# docker-compose V2 re-tags images during 'run' in a way that breaks Podman's
+# Docker compat API. podman-compose talks to Podman natively and avoids this.
+if command -v podman-compose > /dev/null 2>&1; then
+  export PODMAN_COMPOSE_PROVIDER
+  PODMAN_COMPOSE_PROVIDER="$(command -v podman-compose)"
+fi
+
+cmd="${1:-}"
+
+case "$cmd" in
+  ""|-h|--help|help)
+    usage
+    exit 0
+    ;;
+esac
+
+check_podman
+
+case "$cmd" in
+  build)
+    podman compose build app
+    ;;
+  check)
+    podman compose run --rm app ruby -v
+    podman compose run --rm app bundle exec rails runner 'puts "Rails #{Rails.version} booted"'
+    ;;
+  up)
+    podman compose up app
+    ;;
+  all)
+    "$0" build
+    "$0" check
+    "$0" up
+    ;;
+  *)
+    usage >&2
+    exit 2
+    ;;
+esac

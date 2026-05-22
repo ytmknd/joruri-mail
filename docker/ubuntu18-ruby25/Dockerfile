@@ -72,7 +72,9 @@ RUN git clone --depth 1 https://github.com/rbenv/rbenv.git "${RBENV_ROOT}" && \
 WORKDIR /var/share/jorurimail
 
 COPY Gemfile Gemfile.lock ./
-RUN bundle _${BUNDLER_VERSION}_ install --path vendor/bundle && \
+RUN grep -v "^BUNDLED WITH" Gemfile.lock | grep -v "^   [0-9]" > /tmp/Gemfile.lock.clean && \
+    mv /tmp/Gemfile.lock.clean Gemfile.lock && \
+    bundle _${BUNDLER_VERSION}_ install --path vendor/bundle && \
     chown -R joruri:joruri /var/share/jorurimail
 
 COPY docker/ubuntu18-ruby25/entrypoint.sh /usr/local/bin/joruri-entrypoint

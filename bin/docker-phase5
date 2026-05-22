@@ -31,7 +31,11 @@ cmd="${1:-}"
 
 case "$cmd" in
   ubuntu26-build)
-    docker compose build app-ubuntu26-ruby4
+    docker build \
+      --platform linux/amd64 \
+      -t joruri-mail:phase5-ubuntu26-ruby4 \
+      -f docker/ubuntu26-ruby4/Dockerfile \
+      .
     ;;
   ubuntu26-check)
     docker compose run --rm app-ubuntu26-ruby4 ruby -v
@@ -51,14 +55,14 @@ case "$cmd" in
     docker compose up app-ubuntu26-ruby4
     ;;
   ubuntu26-stack)
-    docker compose --profile phase5 up app-ubuntu26-ruby4-proxy app-ubuntu26-ruby4-worker app-ubuntu26-ruby4-scheduler
+    docker compose up app-ubuntu26-ruby4-proxy app-ubuntu26-ruby4-worker app-ubuntu26-ruby4-scheduler
     ;;
   ubuntu26-security)
     docker compose run --rm --no-deps app-ubuntu26-ruby4 bundle exec brakeman -q --no-exit-on-warn
     docker compose run --rm --no-deps app-ubuntu26-ruby4 bundle exec bundler-audit check --update
     ;;
   ubuntu26-system-test)
-    docker compose --profile phase5 up -d app-ubuntu26-ruby4 app-ubuntu26-ruby4-selenium
+    docker compose up -d app-ubuntu26-ruby4 app-ubuntu26-ruby4-selenium
     docker compose run --rm \
       -e RAILS_ENV=development \
       -e CAPYBARA_APP_HOST=http://app-ubuntu26-ruby4:3000 \

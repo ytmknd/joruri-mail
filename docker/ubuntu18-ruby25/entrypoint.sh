@@ -35,7 +35,13 @@ if [[ "$(id -u)" = "0" ]]; then
       upload \
       vendor/bundle
   fi
-  exec gosu joruri "$0" "$@"
+  # gosu is a Go binary that crashes under QEMU x86_64 emulation (tagged pointer
+  # issue). runuser is a C binary from util-linux that does the same job.
+  if command -v runuser > /dev/null 2>&1; then
+    exec runuser -u joruri -- "$0" "$@"
+  else
+    exec gosu joruri "$0" "$@"
+  fi
 fi
 
 if [[ "${1:-}" = "bundle" && "${2:-}" = "exec" && "${3:-}" = "rails" && "${4:-}" = "server" ]]; then
