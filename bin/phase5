@@ -9,7 +9,7 @@ Usage:
   PHASE5_RUNTIME=docker bin/phase5 <command>   (force Docker)
   PHASE5_RUNTIME=podman bin/phase5 <command>   (force Podman)
 
-Commands:
+Commands (Ubuntu 26.04 base — default for macOS / Docker):
   ubuntu26-build       Build the Ubuntu 26.04 / Ruby 4.0 app image.
   ubuntu26-check       Print Ruby version and verify Rails boots on Ubuntu 26.04.
   ubuntu26-yjit-check  Confirm YJIT is compiled in and enabled by Rails on Ubuntu 26.04.
@@ -17,9 +17,20 @@ Commands:
   ubuntu26-db-setup    Load schema and seed the database (first-time setup).
   ubuntu26-assets      Precompile assets on Ubuntu 26.04.
   ubuntu26-up          Start the Ubuntu 26.04 / Ruby 4.0 Rails app on http://localhost:3008/.
-  ubuntu26-stack       Start the Phase 5 app, proxy, worker, and scheduler services.
+  ubuntu26-stack       Start the Ubuntu 26.04 app, proxy, worker, and scheduler services.
   ubuntu26-security    Run Brakeman and bundler-audit security checks on Ubuntu 26.04.
-  ubuntu26-system-test Drive the running Phase 5 dev stack with headless Chromium via Selenium.
+  ubuntu26-system-test Drive the Ubuntu 26.04 dev stack with headless Chromium via Selenium.
+
+Commands (AlmaLinux 9 base — for AlmaLinux 9 / Podman deployments):
+  alma-build           Build the AlmaLinux 9 / Ruby 4.0 app image.
+  alma-check           Print Ruby version and verify Rails boots on AlmaLinux 9.
+  alma-yjit-check      Confirm YJIT is compiled in and enabled by Rails on AlmaLinux 9.
+  alma-test            Run the Rails test suite on AlmaLinux 9.
+  alma-db-setup        Load schema and seed the database (first-time setup).
+  alma-assets          Precompile assets on AlmaLinux 9.
+  alma-up              Start the AlmaLinux 9 / Ruby 4.0 Rails app on http://localhost:3010/.
+  alma-stack           Start the AlmaLinux 9 app, proxy, worker, and scheduler services.
+  alma-security        Run Brakeman and bundler-audit security checks on AlmaLinux 9.
 
 Runtime auto-detection order: PHASE5_RUNTIME env, --runtime flag, podman, docker.
 On SELinux-enforcing hosts (AlmaLinux 9, RHEL), docker-compose.selinux.yml is
@@ -159,6 +170,55 @@ case "$cmd" in
       app-ubuntu26-ruby4 \
       bundle exec rails test test/system
     ;;
+
+  # --- AlmaLinux 9 commands ---
+
+  alma-build)
+    if [[ "$RUNTIME" = "podman" ]]; then
+      podman build \
+        --platform linux/amd64 \
+        --format docker \
+        -t joruri-mail:almalinux9-ruby4 \
+        -f docker/almalinux9-ruby4/Dockerfile \
+        .
+    else
+      docker build \
+        --platform linux/amd64 \
+        -t joruri-mail:almalinux9-ruby4 \
+        -f docker/almalinux9-ruby4/Dockerfile \
+        .
+    fi
+    ;;
+  alma-check)
+    $COMPOSE --profile alma9 run --rm app-almalinux9-ruby4 ruby -v
+    $COMPOSE --profile alma9 run --rm app-almalinux9-ruby4 bundle exec rails runner \
+      'abort "YJIT is not enabled" unless defined?(RubyVM::YJIT) && RubyVM::YJIT.enabled?; puts "Ruby #{RUBY_VERSION} Rails #{Rails.version} booted with YJIT"'
+    ;;
+  alma-yjit-check)
+    $COMPOSE --profile alma9 run --rm --no-deps app-almalinux9-ruby4 bundle exec rails runner \
+      'puts "YJIT enabled: #{RubyVM::YJIT.enabled?}"'
+    ;;
+  alma-test)
+    $COMPOSE --profile alma9 run --rm app-almalinux9-ruby4 bundle exec rails test
+    ;;
+  alma-db-setup)
+    $COMPOSE --profile alma9 run --rm app-almalinux9-ruby4 bundle exec rails db:schema:load
+    $COMPOSE --profile alma9 run --rm app-almalinux9-ruby4 bundle exec rails db:seed
+    ;;
+  alma-assets)
+    $COMPOSE --profile alma9 run --rm -u joruri app-almalinux9-ruby4 bundle exec rake assets:precompile
+    ;;
+  alma-up)
+    $COMPOSE --profile alma9 up app-almalinux9-ruby4
+    ;;
+  alma-stack)
+    $COMPOSE --profile alma9 up app-almalinux9-ruby4-proxy app-almalinux9-ruby4-worker app-almalinux9-ruby4-scheduler
+    ;;
+  alma-security)
+    $COMPOSE --profile alma9 run --rm --no-deps app-almalinux9-ruby4 bundle exec brakeman -q --no-exit-on-warn
+    $COMPOSE --profile alma9 run --rm --no-deps app-almalinux9-ruby4 bundle exec bundler-audit check --update
+    ;;
+
   *)
     usage >&2
     exit 2

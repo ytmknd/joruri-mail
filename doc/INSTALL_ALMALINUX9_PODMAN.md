@@ -169,12 +169,13 @@ production:
 ## 7. イメージのビルド
 
 ```sh
-bin/phase5 ubuntu26-build
+bin/phase5 alma-build
 ```
 
 > **Podman ビルドの技術的補足**
 > `bin/phase5` は Podman 使用時に自動で `--format docker --platform linux/amd64` を付与します。
 > AlmaLinux 9 は x86_64 ネイティブなので QEMU エミュレーションは不要です。
+> AlmaLinux 9 ベースのイメージを使用するため Ubuntu 26.04 への依存はありません。
 
 ---
 
@@ -198,15 +199,8 @@ podman compose up -d db imap
 # DB が起動するまで待機（通常 30 秒程度）
 podman compose ps   # db が healthy になるまで繰り返す
 
-# スキーマの作成
-bin/phase5 ubuntu26-db-setup
-```
-
-`ubuntu26-db-setup` コマンドがない場合は直接実行:
-
-```sh
-podman compose run --rm app-ubuntu26-ruby4 bundle exec rails db:schema:load
-podman compose run --rm app-ubuntu26-ruby4 bundle exec rails db:seed
+# スキーマ作成と初期データ投入
+bin/phase5 alma-db-setup
 ```
 
 ---
@@ -214,7 +208,7 @@ podman compose run --rm app-ubuntu26-ruby4 bundle exec rails db:seed
 ## 10. アセットのプリコンパイル
 
 ```sh
-bin/phase5 ubuntu26-assets
+bin/phase5 alma-assets
 ```
 
 ---
@@ -224,16 +218,16 @@ bin/phase5 ubuntu26-assets
 ### 動作確認（単体起動）
 
 ```sh
-bin/phase5 ubuntu26-up
-# → http://サーバーIP:3008/ でアクセス可能
+bin/phase5 alma-up
+# → http://サーバーIP:3010/ でアクセス可能
 ```
 
 ### 本番環境（フルスタック起動）
 
 ```sh
-podman compose up -d app-ubuntu26-ruby4
-podman compose up -d app-ubuntu26-ruby4-proxy app-ubuntu26-ruby4-worker app-ubuntu26-ruby4-scheduler
-# → http://サーバーIP:3009/ (Nginx 経由)
+podman compose --profile alma9 up -d app-almalinux9-ruby4
+podman compose --profile alma9 up -d app-almalinux9-ruby4-proxy app-almalinux9-ruby4-worker app-almalinux9-ruby4-scheduler
+# → http://サーバーIP:3011/ (Nginx 経由)
 ```
 
 ---
@@ -242,16 +236,16 @@ podman compose up -d app-ubuntu26-ruby4-proxy app-ubuntu26-ruby4-worker app-ubun
 
 ```sh
 # Ruby + Rails + YJIT の確認
-bin/phase5 ubuntu26-check
+bin/phase5 alma-check
 
 # テストスイートの実行
-bin/phase5 ubuntu26-test
+bin/phase5 alma-test
 
 # セキュリティチェック
-bin/phase5 ubuntu26-security
+bin/phase5 alma-security
 ```
 
-管理画面: `http://サーバーIP:3009/_admin/login`
+管理画面: `http://サーバーIP:3011/_admin/login`
 
 ---
 
@@ -322,10 +316,10 @@ systemctl --user status joruri-mail
 ## 15. ログの確認
 
 ```sh
-podman compose logs -f app-ubuntu26-ruby4          # アプリログ
-podman compose logs -f app-ubuntu26-ruby4-worker   # ジョブワーカーログ
-podman compose logs -f db                          # MySQL ログ
-podman compose logs -f imap                        # メールサーバーログ
+podman compose --profile alma9 logs -f app-almalinux9-ruby4          # アプリログ
+podman compose --profile alma9 logs -f app-almalinux9-ruby4-worker   # ジョブワーカーログ
+podman compose logs -f db                                             # MySQL ログ
+podman compose logs -f imap                                           # メールサーバーログ
 ```
 
 ---
@@ -335,9 +329,9 @@ podman compose logs -f imap                        # メールサーバーログ
 ```sh
 cd ~/joruri-mail
 git pull
-bin/phase5 ubuntu26-build
-podman compose run --rm app-ubuntu26-ruby4 bundle exec rails db:migrate
-podman compose restart app-ubuntu26-ruby4 app-ubuntu26-ruby4-worker app-ubuntu26-ruby4-scheduler
+bin/phase5 alma-build
+podman compose --profile alma9 run --rm app-almalinux9-ruby4 bundle exec rails db:migrate
+podman compose --profile alma9 restart app-almalinux9-ruby4 app-almalinux9-ruby4-worker app-almalinux9-ruby4-scheduler
 ```
 
 ---

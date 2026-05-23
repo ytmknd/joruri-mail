@@ -30,3 +30,19 @@ services:
   app-ubuntu26-ruby4-scheduler:
     security_opt:
       - label=disable
+
+  app-almalinux9-ruby4:
+    security_opt:
+      - label=disable
+
+  app-almalinux9-ruby4-proxy:
+    security_opt:
+      - label=disable
+
+  app-almalinux9-ruby4-worker:
+    security_opt:
+      - label=disable
+
+  app-almalinux9-ruby4-scheduler:
+    security_opt:
+      - label=disable
