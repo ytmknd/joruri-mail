@@ -14,6 +14,7 @@ Commands:
   ubuntu26-check       Print Ruby version and verify Rails boots on Ubuntu 26.04.
   ubuntu26-yjit-check  Confirm YJIT is compiled in and enabled by Rails on Ubuntu 26.04.
   ubuntu26-test        Run the Rails test suite on Ubuntu 26.04.
+  ubuntu26-db-setup    Load schema and seed the database (first-time setup).
   ubuntu26-assets      Precompile assets on Ubuntu 26.04.
   ubuntu26-up          Start the Ubuntu 26.04 / Ruby 4.0 Rails app on http://localhost:3008/.
   ubuntu26-stack       Start the Phase 5 app, proxy, worker, and scheduler services.
@@ -130,6 +131,10 @@ case "$cmd" in
     ;;
   ubuntu26-test)
     $COMPOSE run --rm app-ubuntu26-ruby4 bundle exec rails test
+    ;;
+  ubuntu26-db-setup)
+    $COMPOSE run --rm app-ubuntu26-ruby4 bundle exec rails db:schema:load
+    $COMPOSE run --rm app-ubuntu26-ruby4 bundle exec rails db:seed
     ;;
   ubuntu26-assets)
     $COMPOSE run --rm -u joruri app-ubuntu26-ruby4 bundle exec rake assets:precompile
