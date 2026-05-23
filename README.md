@@ -14,38 +14,48 @@ Joruri Mail is a browser-based IMAP client software.
 * Optimized UI for feature phone and smartphone
 * Cooperation with [Joruri Gw](https://github.com/joruri/joruri-gw) (single sign-on, schedule registration)
 
-## Demo
+## System requirements
 
-[http://joruri.org/demo/jorurimail/](http://joruri.org/demo/jorurimail/)
-
-## System dependencies
-
-* CentOS 7.2 x86_64 (recommended), CentOS 6.8 x86_64
-* Apache 2.4 (recommended), Apache 2.2
-* MySQL 5.6
-* Ruby 2.3
-* Rails 5.0
+* Ubuntu 26.04
+* Ruby 4.0
+* Rails 8.1
+* MySQL 5.7
 * SMTP, IMAP4
 
-## Installation
+Container-based development and deployment is the recommended approach.
+See [doc/PODMAN.md](doc/PODMAN.md) for Podman setup (AlmaLinux 9 / macOS).
 
-Installation maunal assumes:
+## Quick start (Docker / Podman)
 
-* CentOS is installed with minimal configuration
-* SELinux is disabled
-* Firewall is disabled
+```sh
+# Build the application image (linux/amd64)
+bin/phase5 ubuntu26-build
 
-Make sure your environment is secure.
+# Verify Ruby + Rails + YJIT boot correctly
+bin/phase5 ubuntu26-check
 
-### Quick install
+# Start the Rails server at http://localhost:3008/
+bin/phase5 ubuntu26-up
 
-Execute script below as root user:
+# Run the test suite
+bin/phase5 ubuntu26-test
+```
 
-    export LANG=ja_JP.UTF-8; curl -L https://raw.githubusercontent.com/joruri/joruri-mail/master/doc/install_scripts/prepare.sh | bash
+`bin/phase5` auto-detects Podman or Docker and applies the correct flags for
+each runtime. On SELinux-enforcing hosts (AlmaLinux 9), the SELinux override is
+applied automatically.
 
-### Manual install
+Force a specific runtime:
 
-[doc/INSTALL.txt](doc/INSTALL.txt)
+```sh
+PHASE5_RUNTIME=podman bin/phase5 ubuntu26-check
+PHASE5_RUNTIME=docker bin/phase5 ubuntu26-check
+# or via the wrapper scripts:
+bin/podman-phase5 ubuntu26-check
+bin/docker-phase5 ubuntu26-check
+```
+
+For manual installation instructions see [doc/INSTALL.txt](doc/INSTALL.txt).
 
 ## IMAP capabilities
 

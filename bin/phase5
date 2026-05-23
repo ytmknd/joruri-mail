@@ -1,0 +1,161 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+usage() {
+  cat <<USAGE
+Usage:
+  bin/phase5 [--runtime docker|podman] <command>
+
+  PHASE5_RUNTIME=docker bin/phase5 <command>   (force Docker)
+  PHASE5_RUNTIME=podman bin/phase5 <command>   (force Podman)
+
+Commands:
+  ubuntu26-build       Build the Ubuntu 26.04 / Ruby 4.0 app image.
+  ubuntu26-check       Print Ruby version and verify Rails boots on Ubuntu 26.04.
+  ubuntu26-yjit-check  Confirm YJIT is compiled in and enabled by Rails on Ubuntu 26.04.
+  ubuntu26-test        Run the Rails test suite on Ubuntu 26.04.
+  ubuntu26-assets      Precompile assets on Ubuntu 26.04.
+  ubuntu26-up          Start the Ubuntu 26.04 / Ruby 4.0 Rails app on http://localhost:3008/.
+  ubuntu26-stack       Start the Phase 5 app, proxy, worker, and scheduler services.
+  ubuntu26-security    Run Brakeman and bundler-audit security checks on Ubuntu 26.04.
+  ubuntu26-system-test Drive the running Phase 5 dev stack with headless Chromium via Selenium.
+
+Runtime auto-detection order: PHASE5_RUNTIME env, --runtime flag, podman, docker.
+On SELinux-enforcing hosts (AlmaLinux 9, RHEL), docker-compose.selinux.yml is
+applied automatically when the Podman runtime is selected.
+USAGE
+}
+
+# --- runtime selection ---
+
+RUNTIME="${PHASE5_RUNTIME:-}"
+
+if [[ "${1:-}" = "--runtime" ]]; then
+  RUNTIME="${2:-}"
+  shift 2
+fi
+
+if [[ -z "$RUNTIME" ]]; then
+  if command -v podman > /dev/null 2>&1; then
+    RUNTIME=podman
+  elif command -v docker > /dev/null 2>&1; then
+    RUNTIME=docker
+  else
+    echo "ERROR: neither podman nor docker found in PATH." >&2
+    exit 1
+  fi
+fi
+
+# --- runtime setup ---
+
+case "$RUNTIME" in
+  podman)
+    if ! command -v podman > /dev/null 2>&1; then
+      echo "ERROR: podman not found. Install podman >= 4.4." >&2
+      exit 1
+    fi
+    if ! podman compose version > /dev/null 2>&1; then
+      echo "ERROR: 'podman compose' not available. Install podman-compose." >&2
+      echo "  macOS:      brew install podman-compose" >&2
+      echo "  AlmaLinux:  sudo dnf install -y epel-release && sudo dnf install -y python3-podman-compose" >&2
+      echo "  Other:      pip3 install podman-compose" >&2
+      exit 1
+    fi
+    # Prefer podman-compose over docker-compose: docker-compose V2 re-tags images
+    # during 'run' in a way that breaks Podman's Docker compat API.
+    if command -v podman-compose > /dev/null 2>&1; then
+      export PODMAN_COMPOSE_PROVIDER
+      PODMAN_COMPOSE_PROVIDER="$(command -v podman-compose)"
+    fi
+    # On SELinux-enforcing hosts (AlmaLinux 9, RHEL), automatically apply the
+    # selinux override so bind mounts are accessible without manual relabeling.
+    if command -v getenforce > /dev/null 2>&1 && [[ "$(getenforce)" = "Enforcing" ]]; then
+      COMPOSE_FILE="${COMPOSE_FILE:-docker-compose.yml}:docker-compose.selinux.yml"
+      export COMPOSE_FILE
+    fi
+    COMPOSE="podman compose"
+    ;;
+  docker)
+    if ! command -v docker > /dev/null 2>&1; then
+      echo "ERROR: docker not found." >&2
+      exit 1
+    fi
+    COMPOSE="docker compose"
+    ;;
+  *)
+    echo "ERROR: unknown runtime '${RUNTIME}'. Use 'docker' or 'podman'." >&2
+    exit 1
+    ;;
+esac
+
+# --- command dispatch ---
+
+cmd="${1:-}"
+
+case "$cmd" in
+  ""|-h|--help|help)
+    usage
+    exit 0
+    ;;
+esac
+
+case "$cmd" in
+  ubuntu26-build)
+    if [[ "$RUNTIME" = "podman" ]]; then
+      # --format docker: Podman's default OCI format silently ignores the SHELL
+      # instruction. Docker format honors it, which is required by the Dockerfile.
+      # ARM64 OCI cached layers have different cache keys so --no-cache is not needed.
+      podman build \
+        --platform linux/amd64 \
+        --format docker \
+        -t joruri-mail:phase5-ubuntu26-ruby4 \
+        -f docker/ubuntu26-ruby4/Dockerfile \
+        .
+    else
+      docker build \
+        --platform linux/amd64 \
+        -t joruri-mail:phase5-ubuntu26-ruby4 \
+        -f docker/ubuntu26-ruby4/Dockerfile \
+        .
+    fi
+    ;;
+  ubuntu26-check)
+    $COMPOSE run --rm app-ubuntu26-ruby4 ruby -v
+    $COMPOSE run --rm app-ubuntu26-ruby4 bundle exec rails runner \
+      'abort "YJIT is not enabled" unless defined?(RubyVM::YJIT) && RubyVM::YJIT.enabled?; puts "Ruby #{RUBY_VERSION} Rails #{Rails.version} booted with YJIT"'
+    ;;
+  ubuntu26-yjit-check)
+    $COMPOSE run --rm --no-deps app-ubuntu26-ruby4 bundle exec rails runner \
+      'puts "YJIT enabled: #{RubyVM::YJIT.enabled?}"'
+    ;;
+  ubuntu26-test)
+    $COMPOSE run --rm app-ubuntu26-ruby4 bundle exec rails test
+    ;;
+  ubuntu26-assets)
+    $COMPOSE run --rm -u joruri app-ubuntu26-ruby4 bundle exec rake assets:precompile
+    ;;
+  ubuntu26-up)
+    $COMPOSE up app-ubuntu26-ruby4
+    ;;
+  ubuntu26-stack)
+    $COMPOSE up app-ubuntu26-ruby4-proxy app-ubuntu26-ruby4-worker app-ubuntu26-ruby4-scheduler
+    ;;
+  ubuntu26-security)
+    $COMPOSE run --rm --no-deps app-ubuntu26-ruby4 bundle exec brakeman -q --no-exit-on-warn
+    $COMPOSE run --rm --no-deps app-ubuntu26-ruby4 bundle exec bundler-audit check --update
+    ;;
+  ubuntu26-system-test)
+    $COMPOSE up -d app-ubuntu26-ruby4 app-ubuntu26-ruby4-selenium
+    $COMPOSE run --rm \
+      -e RAILS_ENV=development \
+      -e CAPYBARA_APP_HOST=http://app-ubuntu26-ruby4:3000 \
+      -e SELENIUM_REMOTE_URL=http://app-ubuntu26-ruby4-selenium:4444/wd/hub \
+      -e SYSTEM_TEST_HOSTS=app-ubuntu26-ruby4 \
+      app-ubuntu26-ruby4 \
+      bundle exec rails test test/system
+    ;;
+  *)
+    usage >&2
+    exit 2
+    ;;
+esac
